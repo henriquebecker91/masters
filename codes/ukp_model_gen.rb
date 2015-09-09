@@ -50,8 +50,12 @@ s.t. cap_con: sum{i in 1..n} w[i]*x[i] <= c;
 solve;
 
 for {i in 1..n} {
-  printf 'Obj nº %d p %d w %d: %d\\n', i, p[i], w[i], x[i];
+  # Ridiculous but necessary workaround: https://en.wikibooks.org/wiki/GLPK/GMPL_Workarounds
+  for {{0}:  x[i] > 0}{ # IF condition THEN
+    printf 'Obj nº %d p %d w %d: %d\\n', i, p[i], w[i], x[i];
+  }                     # ENDIF
 }
+
 printf "Max Profit: %d\\n", sum {i in 1..n} p[i]*x[i];
 
 data;

@@ -8,37 +8,34 @@ def ukp2(ukpi)
 
   # step one
   g = Array.new(c+1, 0)
-  d = Array.new(c+1, n)
+  d = Array.new(c+1, n-1)
   items = items.sort_by { | i | i[:p]/i[:w] }
-  y = 1
-  j = 0
+
+  gy_col = Array.new(c+1) { [] }
+  dy_col = Array.new(c+1) { [] }
 
   # step two to six
-  loop do
-    print "\n#{g[y]} "
-    loop do
-      #step two
-      if y - items[j][:w] >= 0 && j <= d[y - items[j][:w]] then
-        #step three
-        v = g[y - items[j][:w]] + items[j][:p]
+  (c+1).times do | y |
+    gy_col[y] << g[y]
+    dy_col[y] << d[y]
+    items.each_with_index do | item, j |
+      if y - item[:w] >= 0 && j <= d[y - item[:w]] then
+        v = g[y - item[:w]] + item[:p]
         if v > g[y] then
           g[y] = v
-          print "#{g[y]} "
           d[y] = j
+          gy_col[y] << g[y]
+          dy_col[y] << d[y]
         end
       end
-      #step four
-      break unless j < n-1 
-      j += 1
-    end
-    #step five
-    if y == c then
-      break
-    else
-      j = 0
-      y += 1
     end
   end
+
+  table = "y\tg(y)\t\td(y)\n"
+  (c+1).times do | y |
+    table << "#{y}\t#{gy_col[y].join(' ')}\t\t#{dy_col[y].join(' ')}\n"
+  end
+  table
 end
 
 def ukp(ukpi)

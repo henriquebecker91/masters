@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 # based on p. 221, Integer Programming, Robert S. Garfinkel
-def ukp2(ukpi)
+def ukp2(ukpi, ret_table = true)
   n = ukpi[:n]
   c = ukpi[:c]
   items = ukpi[:items]
@@ -11,31 +11,46 @@ def ukp2(ukpi)
   d = Array.new(c+1, n-1)
   items = items.sort_by { | i | i[:p]/i[:w] }
 
-  gy_col = Array.new(c+1) { [] }
-  dy_col = Array.new(c+1) { [] }
+  gy_col = nil
+  dy_col = nil
+  if ret_table then
+    gy_col = Array.new(c+1) { [] }
+    dy_col = Array.new(c+1) { [] }
+  end
 
   # step two to six
   (c+1).times do | y |
-    gy_col[y] << g[y]
-    dy_col[y] << d[y]
+    if ret_table then
+      gy_col[y] << g[y]
+      dy_col[y] << d[y]
+    end
     items.each_with_index do | item, j |
       if y - item[:w] >= 0 && j <= d[y - item[:w]] then
         v = g[y - item[:w]] + item[:p]
         if v > g[y] then
           g[y] = v
           d[y] = j
-          gy_col[y] << g[y]
-          dy_col[y] << d[y]
+          if ret_table then
+            gy_col[y] << g[y]
+            dy_col[y] << d[y]
+          end
         end
       end
     end
   end
 
   table = "y\tg(y)\t\td(y)\n"
-  (c+1).times do | y |
-    table << "#{y}\t#{gy_col[y].join(' ')}\t\t#{dy_col[y].join(' ')}\n"
+  if ret_table then
+    (c+1).times do | y |
+      table << "#{y}\t#{gy_col[y].join(' ')}\t\t#{dy_col[y].join(' ')}\n"
+    end
   end
-  table
+  
+  if ret_table then
+    table
+  else
+    g
+  end
 end
 
 def ukp(ukpi)
@@ -82,7 +97,7 @@ def read_ukp_instance(f)
 end
 
 def garfinkel_instance
-  ukpi = {
+  {
     n: 4,
     c: 25,
     items: [
@@ -90,6 +105,18 @@ def garfinkel_instance
       { p: 7, w: 4},
       { p: 5, w: 3},
       { p: 1, w: 1}
+    ]
+  }
+end
+
+def my_instance
+  {
+    n: 3,
+    c: 11,
+    items: [
+      { p: 21, w: 10},
+      { p: 14, w: 7},
+      { p: 8, w: 4},
     ]
   }
 end
@@ -102,5 +129,6 @@ end
 
 #puts ARGV[0]
 #puts teste2(ARGV[0])
-puts ukp2(garfinkel_instance)
+#puts ukp2(garfinkel_instance)
+puts ukp2(my_instance, false)
 

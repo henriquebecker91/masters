@@ -84,10 +84,10 @@ def read_ukp_instance(f)
 
   i = 2
   size = all_words.length
-  while i <= size do
+  while i+1 <= size do
     item = { 
-      p: all_words[i].to_i,
-      w: all_words[i+1].to_i
+      w: all_words[i].to_i,
+      p: all_words[i+1].to_i
     }
     ukpi[:items] << item
     i += 2
@@ -123,12 +123,12 @@ end
 
 def read_instance(filename)
   File.open(filename) do | f |
-    ukpi = read_ukp_instance(f)
+    read_ukp_instance(f)
   end
 end
 
-#puts ARGV[0]
-#puts teste2(ARGV[0])
+puts ARGV[0]
+puts ukp2(read_instance(ARGV[0])).last
 #puts ukp2(garfinkel_instance)
-puts ukp2(my_instance, false)
+#puts ukp2(my_instance, false)
 

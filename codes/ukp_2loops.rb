@@ -237,16 +237,25 @@ def y_star(items, already_sorted = false)
   (Rational(c1)/(Rational(c1, a1) - Rational(c2, a2))).ceil
 end
 
-#puts ARGV[0]
-#puts ukp2(read_instance(ARGV[0])).last
+=begin
+puts ARGV[0]
+puts ukp2(read_instance(ARGV[0])).last
+=end
 =begin
 instance = read_instance(ARGV[0])
 puts y_star(instance[:items])
 puts instance[:c]
 puts Rational(instance[:c],y_star(instance[:items]))
 =end
+
+instance = read_instance(ARGV[0])
+puts instance[:items].length
+instance[:items] = remove_simple_dominance(instance[:items])
+puts instance[:items].length
+puts ukp3(instance, false).last
+
 #puts remove_simple_dominance(my_instance[:items])
-#puts ukp2(my_instance, false)
+#puts ukp2(my_instance, false).last
 #puts sort_items_by_profitability!(garfinkel_instance[:items].clone)
 #puts y_star(garfinkel_instance[:items])
 

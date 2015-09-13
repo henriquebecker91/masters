@@ -24,12 +24,54 @@ def remove_simple_dominance(items)
         break
       elsif i[:p] >= u[:p] && i[:w] <= u[:w] then
         true
+      else
+        false
       end
     end
     undominated << i unless dominated
   end
 
   undominated
+end
+
+# Based on one crazy ideia I had. Probably is equivalent to the method of
+# garfinkel. The ideia is: If you know the item with the best profitability,
+# you know that every capacity y that is a perfect divisible by w_1 have
+# the best filling using x_1 items where x_1 = y/w_1. That is indiscutible.
+# After that, we know that every capacity y, that is perfect divisible by w_2,
+# have the best filling using x_2 + x_1 where x_1 is the biggest possible
+# value and x_2*a_2 + x_1*a_1 = y (not less or equal, but equal). And so on.
+# NOTE: This don't solve the UKP for c, its solves the ukp for an arbitrary
+# group of capacities that are easy to calculate (are perfect divisible for
+# some item weight).
+def ukp4(ukpi)
+  n = ukpi[:n]
+  c = ukpi[:c]
+  items = ukpi[:items].clone
+
+  g = Array.new(c+1, 0)
+  sort_items_by_profitability!(items)
+
+  items.each do | item |
+    pi = item[:p]
+    wi = item[:w]
+    max_xi = Rational(c, wi).floor
+    z = pi
+    y = wi
+    max_xi.times do
+      if g[y] == 0 then
+        g[y] = z
+      else
+        z = g[y]
+      end
+      z += pi
+      y += wi
+    end
+
+    break if g[c] != 0
+  end
+
+  g
 end
 
 # based on p. 221, Integer Programming, Robert S. Garfinkel
@@ -222,6 +264,17 @@ def my_instance
   }
 end
 
+def my_instance2
+  {
+    n: 2,
+    c: 10,
+    items: [
+      { p: 9, w: 3 },
+      { p: 20, w: 7 },
+    ]
+  }
+end
+
 def read_instance(filename)
   File.open(filename) do | f |
     read_ukp_instance(f)
@@ -248,14 +301,19 @@ puts instance[:c]
 puts Rational(instance[:c],y_star(instance[:items]))
 =end
 
+=begin
 instance = read_instance(ARGV[0])
 puts instance[:items].length
 instance[:items] = remove_simple_dominance(instance[:items])
 puts instance[:items].length
 puts ukp3(instance, false).last
+=end
 
 #puts remove_simple_dominance(my_instance[:items])
 #puts ukp2(my_instance, false).last
+puts ukp4(my_instance)
+puts "---"
+puts ukp3(my_instance)
 #puts sort_items_by_profitability!(garfinkel_instance[:items].clone)
 #puts y_star(garfinkel_instance[:items])
 

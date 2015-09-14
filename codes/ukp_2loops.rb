@@ -4,6 +4,53 @@ def sort_items_by_profitability!(items)
   items.sort_by! { | i | Rational(i[:w],i[:p]) }
 end
 
+# Another crazy ideia I had. This one is like the recursive implementation of
+# the garfinkel method, but without the recursion. Maybe it's what the
+# pyasukp creators call sparsity. 
+# The ideia is: Instead of doing the recursity and beggining from the y
+# to the lesser values of y, we begin at 0 and generate lower bounds for
+# many values of y by using the items. 
+def ukp5(ukpi)
+  n = ukpi[:n]
+  c = ukpi[:c]
+  items = ukpi[:items].clone
+
+  max_w = items.max_by { | i | i[:w] }[:w]
+  g = Array.new(c+max_w+1, 0)
+  d = Array.new(c+max_w+1, n-1)
+  sort_items_by_profitability!(items)
+
+  items.each_with_index do | it, ix |
+    wi = it[:w]
+    pi = it[:p]
+    if g[wi] < pi then
+      g[wi] = pi
+      d[wi] = ix
+    end
+  end
+
+  (1..(c-1)).each do | y |
+    next if g[y] == 0
+    gy = g[y]
+    dy = d[y]
+    (0..dy).each do | ix |
+      it = items[ix]
+      pi = it[:p]
+      wi = it[:w]
+      ny = y + wi
+      ogny = g[ny]
+      ngny = gy + pi
+      if ogny == 0 || ogny < ngny then
+        g[ny] = ngny
+        d[ny] = ix
+      end
+    end
+  end
+
+  g.slice!(c+1, max_w)
+  g
+end
+
 def remove_simple_dominance(items)
 #def remove_simple_dominance!(items, already_sorted = false)
 #  items = sort_items_by_profitability!(items) unless already_sorted
@@ -32,6 +79,65 @@ def remove_simple_dominance(items)
   end
 
   undominated
+end
+
+def ukp_rec2(ukpi)
+  n = ukpi[:n]
+  c = ukpi[:c]
+  items = ukpi[:items].clone
+
+  g = Array.new(c+1, nil)
+  d = Array.new(c+1, n-1)
+  sort_items_by_profitability!(items)
+
+  ukp_aux2(items, c, g, d)
+
+  g
+end
+
+def ukp_aux2(items, y, g, d)
+  return g[y] if g[y]
+
+  items.each_with_index do | item, j |
+    wi = item[:w]
+    pi = item[:p]
+    if y - wi >= 0 && j <= d[y - wi] then
+      v = (ukp_aux2(items, y - wi, g, d) or 0)
+      v += pi
+      if g[y].nil? || v > g[y] then
+        g[y] = v
+        d[y] = j
+      end
+    end
+  end
+
+  g[y]
+end
+
+def ukp_rec(ukpi)
+  c = ukpi[:c]
+  items = ukpi[:items]
+
+  memo = Array.new(c+1, nil)
+  items = items.sort_by { | i | i[:w] }
+
+  ukp_aux(items, c, memo)
+
+  memo
+end
+
+def ukp_aux(items, y, memo)
+  return memo[y] if memo[y]
+
+  opt = 0
+  items.each do | i |
+    break if i[:w] > y
+
+    x = i[:p] + ukp_aux(items, y - i[:w], memo)
+    opt = x if opt < x
+  end
+
+  memo[y] = opt
 end
 
 # Based on one crazy ideia I had. Probably is equivalent to the method of
@@ -118,7 +224,7 @@ def ukp3(ukpi, ret_table = true)
 
   if min_necessary_steps != c+1 then
     extra_capacity = c - ys
-    c1, a1 = items[0][:p], items[1][:w]
+    c1, a1 = items[0][:p], items[0][:w]
     qt_best_item_used = Rational(extra_capacity, a1).ceil
     space_used_by_best_item = qt_best_item_used*a1
     profit_generated_by_best_item = qt_best_item_used*c1
@@ -311,9 +417,47 @@ puts ukp3(instance, false).last
 
 #puts remove_simple_dominance(my_instance[:items])
 #puts ukp2(my_instance, false).last
-puts ukp4(my_instance)
+instance = read_instance(ARGV[0])
+=begin
+puts 'ukp'
+t = Time.now
+v = ukp(instance).last
+puts Time.now - t
+puts v
 puts "---"
-puts ukp3(my_instance)
+puts 'ukp2'
+t = Time.now
+v = ukp2(instance, false).last
+puts Time.now - t
+puts v
+puts "---"
+t = Time.now
+puts 'ukp3'
+v = ukp3(instance, false).last
+puts Time.now - t
+puts v
+puts "---"
+=end
+=begin The recursive functions are overflowing the stack
+t = Time.now
+puts 'ukp_rec'
+v = ukp_rec(instance).last
+puts Time.now - t
+puts v
+puts "---"
+t = Time.now
+puts 'ukp_rec2'
+v = ukp_rec2(instance).last
+puts Time.now - t
+puts v
+puts "---"
+=end
+puts 'ukp5'
+t = Time.now
+v = ukp5(instance).last
+puts Time.now - t
+puts v
+
 #puts sort_items_by_profitability!(garfinkel_instance[:items].clone)
 #puts y_star(garfinkel_instance[:items])
 

@@ -4,13 +4,42 @@ def sort_items_by_profitability!(items)
   items.sort_by! { | i | Rational(i[:w],i[:p]) }
 end
 
+def get_used_items(c, items, g, d)
+  used_items = {}
+  y = c
+  dy = d[y]
+  i = items[dy]
+  wi = i[:w]
+  while y - wi >= 0 do
+    if used_items.has_key?(dy) then
+      used_items[dy] += 1
+    else
+      used_items[dy] = 1
+    end
+    y -= wi
+    dy = d[y]
+    i = items[dy]
+    wi = i[:w]
+  end
+
+  better_view = {}
+  opt = 0
+  used_items.each do | ix, qt |
+    better_view[ix] = { qt: qt, p: items[ix][:p], w: items[ix][:w] }
+    opt += items[ix][:p] * qt
+  end
+
+  better_view[:opt] = opt
+  better_view
+end
+
 # Another crazy ideia I had. This one is like the recursive implementation of
 # the garfinkel method, but without the recursion. Maybe it's what the
 # pyasukp creators call sparsity. 
 # The ideia is: Instead of doing the recursity and beggining from the y
 # to the lesser values of y, we begin at 0 and generate lower bounds for
 # many values of y by using the items. 
-def ukp5(ukpi)
+def ukp5(ukpi, return_used_items = false)
   n = ukpi[:n]
   c = ukpi[:c]
   items = ukpi[:items].clone
@@ -48,7 +77,12 @@ def ukp5(ukpi)
   end
 
   g.slice!(c+1, max_w)
-  g
+  if return_used_items then
+    d.slice!(c+1, max_w)
+    get_used_items(c, items, g, d)
+  else
+    g
+  end
 end
 
 def remove_simple_dominance(items)
@@ -454,7 +488,7 @@ puts "---"
 =end
 puts 'ukp5'
 t = Time.now
-v = ukp5(instance).last
+v = ukp5(instance, true)
 puts Time.now - t
 puts v
 

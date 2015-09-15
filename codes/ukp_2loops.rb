@@ -4,9 +4,8 @@ def sort_items_by_profitability!(items)
   items.sort_by! { | i | Rational(i[:w],i[:p]) }
 end
 
-def get_used_items(c, items, g, d)
+def get_used_items_for_y(y, items, g, d)
   used_items = {}
-  y = c
   dy = d[y]
   i = items[dy]
   wi = i[:w]
@@ -31,6 +30,22 @@ def get_used_items(c, items, g, d)
 
   better_view[:opt] = opt
   better_view
+end
+
+def get_opt_y(c, items, g, d)
+  w_min = items.min_by { | x | x[:w] }[:w]
+  ix = c-w_min
+
+  opt = g[ix]
+  opt_y = ix
+  ((ix+1)..c).each do | y |
+    if g[y] > opt then
+      opt = g[y]
+      opt_y = y
+    end
+  end
+
+  opt_y
 end
 
 # Another crazy ideia I had. This one is like the recursive implementation of
@@ -58,8 +73,20 @@ def ukp5(ukpi, return_used_items = false)
     end
   end
 
+#  opt = 0
   (1..(c-1)).each do | y |
     next if g[y] == 0
+=begin
+    if g[y] == 0 then
+      g[y] = opt
+      next
+    elsif g[y] > opt
+      g[y] = opt
+    else
+      opt = g[y]
+    end
+=end
+
     gy = g[y]
     dy = d[y]
     (0..dy).each do | ix |
@@ -76,10 +103,11 @@ def ukp5(ukpi, return_used_items = false)
     end
   end
 
-  g.slice!(c+1, max_w)
+  g.slice!(c, max_w)
   if return_used_items then
-    d.slice!(c+1, max_w)
-    get_used_items(c, items, g, d)
+    d.slice!(c, max_w)
+    opt_y = get_opt_y(c, items, g, d)
+    get_used_items_for_y(opt_y, items, g, d)
   else
     g
   end

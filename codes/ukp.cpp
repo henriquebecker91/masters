@@ -14,15 +14,33 @@ struct ukp_instance_t {
 	vector<item_t> items;
 };
 
-void read_ukp_instance(istream in, ukp_instance_t &ukp_i) {
-	while(true) {
+struct ukp_solution_t {
+	vector<int> g;
+	vector<int> d;
+};
+
+void ukp5(ukp_instance_t &ukpi, ) {
+}
+
+void read_sukp_instance(istream in, ukp_instance_t &ukpi) {
+	int n << in;
+	ukpi.c << in;
+	ukpi.items.reserve(n)
+
+	for (int i = 0; i < n; ++n) {
+		item_t tmp;
+		tmp.w << in;
+		tmp.p << in;
+		ukpi.items.pushback(tmp);
 	}
+
 	return;
 }
 
+/*
 void write_ukp_instance(ukp_instance_t &ukp_i, ostream out) {
 	return;
-}
+}*/
 
 int main (void) {
 

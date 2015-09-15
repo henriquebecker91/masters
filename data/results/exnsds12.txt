@@ -1,0 +1,11 @@
+time ./ukp_2loops.rb ../data/exnsds12_modified.ukp 
+3793952
+
+real	93m56.623s
+user	91m40.299s
+sys	0m0.017s
+
+ukp5
+2.74000891
+3793952
+

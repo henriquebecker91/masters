@@ -1,5 +1,3 @@
-#!/usr/bin/ruby
-
 # Sort items on non-ascending order by profitability first and
 # by non-descending weight after.
 def sort_items_by_profitability!(items)
@@ -9,6 +7,52 @@ def sort_items_by_profitability!(items)
   end
 end
 
+# based on p. 223, Integer Programming, Robert S. Garfinkel
+def y_star(items, already_sorted = false)
+  items = sort_items_by_profitability!(items.clone) unless already_sorted
+  i1, i2 = items[0], items[1]
+  c1, c2, a1, a2 = i1[:p], i2[:p], i1[:w], i2[:w]
+  
+  (Rational(c1)/(Rational(c1, a1) - Rational(c2, a2))).ceil
+end
+
+# In truth, this removes simple and multiple dominance. It doesn't
+# remove collective and threshold dominance.
+def remove_simple_dominance(items, already_sorted = false)
+  # the vector HAS TO BE sorted by non-increasing profitability first AND
+  # non-decreasing weight after to this code work
+  items = sort_items_by_profitability!(items.clone) unless already_sorted
+  
+  # If an item i dominate an item j, then pi/wi >= pj/wj. Note that NOT every
+  # case we have an item i and item j and pi/wi >= pj/wj i dominates j
+  # (if this was the case every UKP problem could be reduced to the best item).
+  # This only means that, if i is the index of the item when the items are
+  # ordered by pi/wi, then it can't be simple or multiple dominated by any
+  # item of index j where j > i.
+  undominated = [items[0]]
+  # if this was C++ would be interesting to already reserve the n capacity
+  # on the vector above
+  items.each do | i |
+    dominated = false
+    wi = i[:w]
+    pi = i[:p]
+    undominated.each do | u |
+      wu = u[:w]
+      pu = u[:p]
+      if Rational(wi,wu).floor * pu >= pi then
+        dominated = true
+        break
+      end
+    end
+    undominated << i unless dominated
+  end
+
+  undominated
+end
+
+# Get the items used for the solution at capacity y when the g and d arrays
+# that are used on the Garfinkel method are provided, in conjunction with the
+# items sorted by the same order that was used by the method.
 def get_used_items_for_y(y, items, g, d)
   used_items = {}
   dy = d[y]
@@ -37,6 +81,9 @@ def get_used_items_for_y(y, items, g, d)
   better_view
 end
 
+# Code to recover what capacity has the optimal solution when
+# using the ukp5 method (the solution in g[y] of ukp5 can be a
+# subotimal solution
 def get_opt_y(c, items, g, d)
   w_min = items.min_by { | x | x[:w] }[:w]
   ix = c-w_min
@@ -101,57 +148,25 @@ def ukp5(ukpi, return_used_items = false)
       ny = y + wi
       ogny = g[ny]
       ngny = gy + pi
-      if ogny == 0 || ogny < ngny then
+      if ogny < ngny then
         g[ny] = ngny
         d[ny] = ix
       end
     end
   end
 
-  g.slice!(c, max_w)
+  g.slice!(c+1, max_w)
   if return_used_items then
-    d.slice!(c, max_w)
+    d.slice!(c+1, max_w)
     opt_y = get_opt_y(c, items, g, d)
     get_used_items_for_y(opt_y, items, g, d)
   else
-    g
+    g[get_opt_y(c, items, g, d)]
   end
 end
 
-# In truth, this removes simple and multiple dominance. It doesn't
-# remove collective and threshold dominance.
-def remove_simple_dominance(items, already_sorted = false)
-  # the vector HAS TO BE sorted by non-increasing profitability first AND
-  # non-decreasing weight after to this code work
-  items = sort_items_by_profitability!(items.clone) unless already_sorted
-  
-  # If an item i dominate an item j, then pi/wi >= pj/wj. Note that NOT every
-  # case we have an item i and item j and pi/wi >= pj/wj i dominates j
-  # (if this was the case every UKP problem could be reduced to the best item).
-  # This only means that, if i is the index of the item when the items are
-  # ordered by pi/wi, then it can't be simple or multiple dominated by any
-  # item of index j where j > i.
-  undominated = [items[0]]
-  # if this was C++ would be interesting to already reserve the n capacity
-  # on the vector above
-  items.each do | i |
-    dominated = false
-    wi = i[:w]
-    pi = i[:p]
-    undominated.each do | u |
-      wu = u[:w]
-      pu = u[:p]
-      if Rational(wi,wu).floor * pu >= pi then
-        dominated = true
-        break
-      end
-    end
-    undominated << i unless dominated
-  end
-
-  undominated
-end
-
+# Code based on p. 221, Integer Programming, Robert S. Garfinkel
+# but using recursion
 def ukp_rec2(ukpi)
   n = ukpi[:n]
   c = ukpi[:c]
@@ -185,6 +200,7 @@ def ukp_aux2(items, y, g, d)
   g[y]
 end
 
+# Code for classical DP version using recursion
 def ukp_rec(ukpi)
   c = ukpi[:c]
   items = ukpi[:items]
@@ -251,7 +267,7 @@ def ukp4(ukpi)
   g
 end
 
-# based on p. 221, Integer Programming, Robert S. Garfinkel
+# Code based on p. 221, Integer Programming, Robert S. Garfinkel
 # adding the use of y* introduced on page 223
 def ukp3(ukpi, ret_table = true)
   n = ukpi[:n]
@@ -316,7 +332,7 @@ def ukp3(ukpi, ret_table = true)
   end
 end
 
-# based on p. 221, Integer Programming, Robert S. Garfinkel
+# Code based on p. 221, Integer Programming, Robert S. Garfinkel
 def ukp2(ukpi, ret_table = true)
   n = ukpi[:n]
   c = ukpi[:c]
@@ -369,6 +385,7 @@ def ukp2(ukpi, ret_table = true)
   end
 end
 
+# Classical DP solution
 def ukp(ukpi)
   c = ukpi[:c]
   items = ukpi[:items]
@@ -389,6 +406,8 @@ def ukp(ukpi)
   opt
 end
 
+# Code to read simplified UKP format (.sukp)
+# Read the ukp instance from the file
 def read_ukp_instance(f)
   all_words = f.read.scan(/\w+/)
   ukpi = {
@@ -412,6 +431,14 @@ def read_ukp_instance(f)
   ukpi
 end
 
+# Read the ukp instance from the filename
+def read_instance(filename)
+  File.open(filename) do | f |
+    read_ukp_instance(f)
+  end
+end
+
+# Some toy instances
 def garfinkel_instance
   {
     n: 4,
@@ -459,89 +486,4 @@ def my_instance2
     ]
   }
 end
-
-def read_instance(filename)
-  File.open(filename) do | f |
-    read_ukp_instance(f)
-  end
-end
-
-# based on p. 223, Integer Programming, Robert S. Garfinkel
-def y_star(items, already_sorted = false)
-  items = sort_items_by_profitability!(items.clone) unless already_sorted
-  i1, i2 = items[0], items[1]
-  c1, c2, a1, a2 = i1[:p], i2[:p], i1[:w], i2[:w]
-  
-  (Rational(c1)/(Rational(c1, a1) - Rational(c2, a2))).ceil
-end
-
-=begin
-puts ARGV[0]
-puts ukp2(read_instance(ARGV[0])).last
-=end
-=begin
-instance = read_instance(ARGV[0])
-puts y_star(instance[:items])
-puts instance[:c]
-puts Rational(instance[:c],y_star(instance[:items]))
-=end
-
-=begin
-instance = read_instance(ARGV[0])
-puts instance[:items].length
-instance[:items] = remove_simple_dominance(instance[:items])
-puts instance[:items].length
-puts ukp3(instance, false).last
-=end
-
-instance = my_instance #read_instance(ARGV[0])
-puts instance[:items].length
-u = remove_simple_dominance(instance[:items])
-puts u.length
-
-#puts ukp2(my_instance, false).last
-=begin
-puts 'ukp'
-t = Time.now
-v = ukp(instance).last
-puts Time.now - t
-puts v
-puts "---"
-puts 'ukp2'
-t = Time.now
-v = ukp2(instance, false).last
-puts Time.now - t
-puts v
-puts "---"
-t = Time.now
-puts 'ukp3'
-v = ukp3(instance, false).last
-puts Time.now - t
-puts v
-puts "---"
-=end
-=begin The recursive functions are overflowing the stack
-t = Time.now
-puts 'ukp_rec'
-v = ukp_rec(instance).last
-puts Time.now - t
-puts v
-puts "---"
-t = Time.now
-puts 'ukp_rec2'
-v = ukp_rec2(instance).last
-puts Time.now - t
-puts v
-puts "---"
-=end
-=begin
-puts 'ukp5'
-t = Time.now
-v = ukp5(instance, true)
-puts Time.now - t
-puts v
-=end
-
-#puts sort_items_by_profitability!(garfinkel_instance[:items].clone)
-#puts y_star(garfinkel_instance[:items])
 

@@ -1,7 +1,12 @@
 #!/usr/bin/ruby
 
+# Sort items on non-ascending order by profitability first and
+# by non-descending weight after.
 def sort_items_by_profitability!(items)
-  items.sort_by! { | i | Rational(i[:w],i[:p]) }
+  items.sort_by! do | i |
+    wi = i[:w]
+    [Rational(wi,i[:p]), wi]
+  end
 end
 
 def get_used_items_for_y(y, items, g, d)
@@ -113,28 +118,32 @@ def ukp5(ukpi, return_used_items = false)
   end
 end
 
-def remove_simple_dominance(items)
-#def remove_simple_dominance!(items, already_sorted = false)
-#  items = sort_items_by_profitability!(items) unless already_sorted
+# In truth, this removes simple and multiple dominance. It doesn't
+# remove collective and threshold dominance.
+def remove_simple_dominance(items, already_sorted = false)
+  # the vector HAS TO BE sorted by non-increasing profitability first AND
+  # non-decreasing weight after to this code work
+  items = sort_items_by_profitability!(items.clone) unless already_sorted
   
-  # adiciona um item arbitrário ao array de não dominados
-  # a partir dai, para qualquer item do array original
-  #   * verifica se não existe um elemento que domina ele já no array
-  #     Se sim para aqui, senão continua
-  #   * verifica se ele não domina algum elemento do array
-  #     Se sim remove estes elementos do array
-  #     Adiciona o elemento no array
+  # If an item i dominate an item j, then pi/wi >= pj/wj. Note that NOT every
+  # case we have an item i and item j and pi/wi >= pj/wj i dominates j
+  # (if this was the case every UKP problem could be reduced to the best item).
+  # This only means that, if i is the index of the item when the items are
+  # ordered by pi/wi, then it can't be simple or multiple dominated by any
+  # item of index j where j > i.
   undominated = [items[0]]
+  # if this was C++ would be interesting to already reserve the n capacity
+  # on the vector above
   items.each do | i |
     dominated = false
-    undominated.delete_if do | u |
-      if i[:p] <= u[:p] && i[:w] >= u[:w] then
+    wi = i[:w]
+    pi = i[:p]
+    undominated.each do | u |
+      wu = u[:w]
+      pu = u[:p]
+      if Rational(wi,wu).floor * pu >= pi then
         dominated = true
         break
-      elsif i[:p] >= u[:p] && i[:w] <= u[:w] then
-        true
-      else
-        false
       end
     end
     undominated << i unless dominated
@@ -421,13 +430,21 @@ def my_instance
     n: 3,
     c: 11,
     items: [
-      { p: 21, w: 10},
       { p: 14, w: 7},
       { p: 8, w: 4},
       # the following are simple dominated by the above
       { p: 8, w: 4},
       { p: 7, w: 4},
       { p: 7, w: 5},
+      # the following item is multiple dominated by the item
+      # on the second line
+      { p: 15, w: 8},
+      # the following item is collective dominated by the items
+      # on the first and second line
+      { p: 21, w: 11},
+      # the following item is threshold dominated by the items on
+      # the first and second line
+      { p: 5, w: 3 }
     ]
   }
 end
@@ -477,9 +494,12 @@ puts instance[:items].length
 puts ukp3(instance, false).last
 =end
 
-#puts remove_simple_dominance(my_instance[:items])
+instance = my_instance #read_instance(ARGV[0])
+puts instance[:items].length
+u = remove_simple_dominance(instance[:items])
+puts u.length
+
 #puts ukp2(my_instance, false).last
-instance = read_instance(ARGV[0])
 =begin
 puts 'ukp'
 t = Time.now
@@ -514,11 +534,13 @@ puts Time.now - t
 puts v
 puts "---"
 =end
+=begin
 puts 'ukp5'
 t = Time.now
 v = ukp5(instance, true)
 puts Time.now - t
 puts v
+=end
 
 #puts sort_items_by_profitability!(garfinkel_instance[:items].clone)
 #puts y_star(garfinkel_instance[:items])

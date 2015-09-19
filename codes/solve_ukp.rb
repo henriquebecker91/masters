@@ -116,30 +116,56 @@ def ukp5(ukpi, return_used_items = false)
   d = Array.new(c+max_w+1, n-1)
   sort_items_by_profitability!(items)
 
+  last_y_where_nonbest_item_was_used = 0
   items.each_with_index do | it, ix |
     wi = it[:w]
     pi = it[:p]
     if g[wi] < pi then
       g[wi] = pi
       d[wi] = ix
+      last_y_where_nonbest_item_was_used = wi if wi > last_y_where_nonbest_item_was_used && ix != 0
     end
   end
 
-#  opt = 0
+  # This opt variable, and the "|| g[y] < opt" implements all the dominances,
+  # the proof is simple:
+  # (1) All the dominances (simple, multiple, collective and threshold) needs
+  #     the existence of an item with better profitability than the dominated
+  #     item.
+  # (2) If opt > g[y] then there's a y' < y where g[y'] > g[y].
+  # (3) The items are ordered by profitability.
+  # (4) If g[y] is different from zero, then the d[y] is always the item of
+  #     best profitability that was used on the solution of the knapsack with
+  #     capacity y.
+  # (5) All the dominances are special cases of a multiset of knapsack items
+  #     being lighter and more profitable than another (i.e. better).
+  #     The simple, multiple,
+  #     and collective dominances are a multiset (respectively: of one, many of
+  #     the same, and some differente items) being "better" than one single
+  #     element. The threshold is the special case of some different items being
+  #     better than a set of many of the same item.
+  # (6) If we skip a y where g[y] != 0 then no capacity after y will
+  #     use a multiset of items that include the multiset of items used
+  #     to obtain g[y]. This happens because the solutions are build from
+  #     inserting one more item on the current multiset. If we skip y
+  #     no solution will be created from that multiset. Also, no multiset
+  #     that is a subset of the multiset of y will follow a insertion route
+  #     that allow it to become a superset of the multiset of y. Lets 
+  #     suppose that the last item used to make the multiset of y was
+  #     j, if instead of j we used i (to after use j) then the profitability
+  #     of the whole multiset would be lower than the multiset of y, this is
+  #     because of (3), ...
+  # (X) When opt > g[y] there's a multiset of items that is better than
+  #     another (2), what is a case that supersedes all dominances (5),
+  #     by skipping that multiset we are skipping any solution that would
+  #     have that multiset, 
+  #     
+  opt = 0
   (1..(c-1)).each do | y |
-    next if g[y] == 0
-=begin
-    if g[y] == 0 then
-      g[y] = opt
-      next
-    elsif g[y] > opt
-      g[y] = opt
-    else
-      opt = g[y]
-    end
-=end
+    next if g[y] == 0 || g[y] < opt
+    break if last_y_where_nonbest_item_was_used < y
 
-    gy = g[y]
+    opt = gy = g[y]
     dy = d[y]
     (0..dy).each do | ix |
       it = items[ix]
@@ -151,17 +177,37 @@ def ukp5(ukpi, return_used_items = false)
       if ogny < ngny then
         g[ny] = ngny
         d[ny] = ix
+        last_y_where_nonbest_item_was_used = ny if ny > last_y_where_nonbest_item_was_used && ix != 0
       end
     end
   end
 
-  g.slice!(c+1, max_w)
+if last_y_where_nonbest_item_was_used < c-1 then
+    y_ = last_y_where_nonbest_item_was_used
+    while d[y_] != 0 do
+      y_ += 1
+    end
+    puts "Periodicity used - c: #{c}; last_y: #{y_}"
+
+    extra_capacity = c - y_
+    c1, a1 = items[0][:p], items[0][:w]
+    qt_best_item_used = Rational(extra_capacity, a1).ceil
+    space_used_by_best_item = qt_best_item_used*a1
+    profit_generated_by_best_item = qt_best_item_used*c1
+
+    opt_y = get_opt_y(c-space_used_by_best_item, items, g, d)
+    g[c] = g[opt_y] + profit_generated_by_best_item
+  end
+
+  opt = g[c] if opt < g[c]
+
   if return_used_items then
+    g.slice!(c+1, max_w)
     d.slice!(c+1, max_w)
     opt_y = get_opt_y(c, items, g, d)
     get_used_items_for_y(opt_y, items, g, d)
   else
-    g[get_opt_y(c, items, g, d)]
+    opt
   end
 end
 

@@ -9,7 +9,6 @@ instances_data = [
   { name: 'exnsds12', opt: 3793952 },
   { name: 'teste2', opt: 225092 },
   { name: 'teste', opt: 135000 },
-
 ]
 
 everything_ok = true
@@ -22,6 +21,7 @@ instances_data.each do | id |
   t = Time.now
   v = ukp5(instance)
   puts "Obtained value: #{v}"
+#  puts "y*: #{y_star(instance[:items])}"
   puts "Time used (in seconds): #{Time.now - t}"
   puts
   everything_ok = everything_ok && v == opt

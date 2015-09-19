@@ -1,0 +1,52 @@
+With periodicity but not OPT: REV f0b94b0
+Path: ../data/sukp/exnsd16.sukp
+Time used (in seconds): 0.167646328
+Time used (in seconds): 0.166899722
+Time used (in seconds): 0.166727676
+Time used (in seconds): 0.16697462
+Time used (in seconds): 0.166334978
+Time used (in seconds): 0.169663247
+Time used (in seconds): 0.16638708
+Time used (in seconds): 0.166206844
+Time used (in seconds): 0.165391271
+Time used (in seconds): 0.165241565
+
+Path: ../data/sukp/exnsds12.sukp
+Time used (in seconds): 1.972680974
+Time used (in seconds): 2.011637185
+Time used (in seconds): 2.038946538
+Time used (in seconds): 1.977749217
+Time used (in seconds): 2.023831401
+Time used (in seconds): 2.002400584
+Time used (in seconds): 2.005892663
+Time used (in seconds): 2.017465729
+Time used (in seconds): 2.068130907
+Time used (in seconds): 2.171912363
+
+Path: ../data/sukp/teste2.sukp
+Time used (in seconds): 0.314046229
+Time used (in seconds): 0.310449994
+Time used (in seconds): 0.30889158
+Time used (in seconds): 0.312816672
+Time used (in seconds): 0.310981494
+Time used (in seconds): 0.311121752
+Time used (in seconds): 0.31216727
+Time used (in seconds): 0.315020889
+Time used (in seconds): 0.309895356
+Time used (in seconds): 0.317695703
+
+Path: ../data/sukp/teste.sukp
+Time used (in seconds): 0.000449666
+Time used (in seconds): 0.000426949
+Time used (in seconds): 0.000413797
+Time used (in seconds): 0.00041431
+Time used (in seconds): 0.000448489
+Time used (in seconds): 0.00041651
+Time used (in seconds): 0.000414325
+Time used (in seconds): 0.000416315
+Time used (in seconds): 0.000438736
+Time used (in seconds): 0.000416602
+
+Path: ../data/sukp/corepb.sukp
+Time used (in seconds): 73.748438109
+

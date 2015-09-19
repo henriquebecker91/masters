@@ -16,15 +16,18 @@ instances_data.each do | id |
   opt = id[:opt]
   path = "../data/sukp/#{id[:name]}.sukp"
   puts "Path: #{path}"
-  puts "Expected value: #{opt}"
+#  puts "Expected value: #{opt}"
   instance = read_instance(path)
-  t = Time.now
-  v = ukp5(instance)
-  puts "Obtained value: #{v}"
-#  puts "y*: #{y_star(instance[:items])}"
-  puts "Time used (in seconds): #{Time.now - t}"
+
+  10.times do
+    t = Time.now
+    v = ukp5(instance)
+  #  puts "Obtained value: #{v}"
+  #  puts "y*: #{y_star(instance[:items])}"
+    puts "Time used (in seconds): #{Time.now - t}"
+  end
   puts
-  everything_ok = everything_ok && v == opt
+#  everything_ok = everything_ok && v == opt
 end
 
 if everything_ok then

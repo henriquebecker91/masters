@@ -167,7 +167,20 @@ def ukp5(ukpi, return_used_items = false)
 
     opt = gy = g[y]
     dy = d[y]
-    (0..dy).each do | ix |
+
+    # this block is a copy-past of the loop bellow only for the best item
+    bi = items[0]
+    pb = bi[:p]
+    wb = bi[:w]
+    next_y = y + wb
+    old_gny = g[next_y]
+    new_gny = gy + pb
+    if old_gny < new_gny then
+      g[next_y] = new_gny
+      d[next_y] = 0
+    end
+
+    (1..dy).each do | ix |
       it = items[ix]
       pi = it[:p]
       wi = it[:w]
@@ -177,7 +190,7 @@ def ukp5(ukpi, return_used_items = false)
       if ogny < ngny then
         g[ny] = ngny
         d[ny] = ix
-        last_y_where_nonbest_item_was_used = ny if ny > last_y_where_nonbest_item_was_used && ix != 0
+        last_y_where_nonbest_item_was_used = ny if ny > last_y_where_nonbest_item_was_used
       end
     end
   end
@@ -187,7 +200,7 @@ if last_y_where_nonbest_item_was_used < c-1 then
     while d[y_] != 0 do
       y_ += 1
     end
-    puts "Periodicity used - c: #{c}; last_y: #{y_}"
+#    puts "Periodicity used - c: #{c}; last_y: #{y_}"
 
     extra_capacity = c - y_
     c1, a1 = items[0][:p], items[0][:w]

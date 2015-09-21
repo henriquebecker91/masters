@@ -1,32 +1,10 @@
-#include <cstdlib>
-#include <cinttypes>
-#include <vector>
-#include <istream>
-#include <iostream>
-#include <fstream>
 #include <algorithm>
-#include <chrono>
 #include <boost/rational.hpp>
 
+#include "ukp.hpp"
+
 using namespace std;
-using namespace std::chrono;
 using namespace boost;
-
-struct item_t {
-	size_t p;
-	size_t w;
-};
-
-struct ukp_instance_t {
-	size_t c;
-	vector<item_t> items;
-};
-
-struct ukp_solution_t {
-	vector<size_t> g;
-	vector<size_t> d;
-  size_t opt;
-};
 
 pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   size_t min, max;
@@ -49,6 +27,8 @@ bool item_order(const item_t& i, const item_t& j) {
 
 void sort_items_by_profitability(vector<item_t> &items) {
   sort(items.begin(), items.end(), item_order);
+
+  return;
 }
 
 size_t get_opt_y(size_t c, const vector<item_t> &items, const vector<size_t> &g, const vector<size_t> &d, size_t w_min) {
@@ -70,7 +50,7 @@ size_t get_opt_y(size_t c, const vector<item_t> &items, const vector<size_t> &g,
 /* This function reorders the ukpi.items vector, if you don't want this pass a copy of
  * the instance or pass it already ordered and true for the parameter already_sorted.
  */
-void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false) {
+void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
   size_t n = ukpi.items.size();
   size_t c = ukpi.c;
   vector<item_t> &items(ukpi.items);
@@ -89,7 +69,6 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false
   
   size_t last_y_where_nonbest_item_was_used = 0;
 
-//  cout << "0" << endl;
   for (size_t i = 0; i < n; ++i) {
     size_t pi = items[i].p;
     size_t wi = items[i].w;
@@ -101,13 +80,10 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false
       }
     }
   }
-//  cout << "1" << endl;
 
   for (size_t y = 0; y < c; ++y) {
     if (g[y] == 0 || g[y] < opt) continue;
-//    cout << "2.5" << endl;
     if (last_y_where_nonbest_item_was_used < y) break;
-//    cout << "2.7" << endl;
 
     size_t gy, dy;
     opt = gy = g[y];
@@ -125,7 +101,6 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false
       d[next_y] = 0;
     }
 
-//    cout << "3" << endl;
     for (size_t ix = 0; ix <= dy; ++ix) {
       item_t it = items[ix];
       size_t pi = it.p;
@@ -139,14 +114,11 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false
         if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
       }
     } 
-//    cout << "4" << endl;
   }
-//  cout << "5" << endl;
 
   if (last_y_where_nonbest_item_was_used < c-1) {
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) y_ += 1;
-/*  cout << ("Periodicity used - c: " +  c + " last_y: " + y_);*/
 
     size_t extra_capacity = c - y_;
     size_t c1, a1;
@@ -169,61 +141,30 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false
 
 void read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
   size_t n;
-	in >> n;
-	in >> ukpi.c;
-	ukpi.items.reserve(n);
+  in >> n;
+  in >> ukpi.c;
+  ukpi.items.reserve(n);
 
-	for (size_t i = 0; i < n; ++i) {
-		item_t tmp;
-		in >> tmp.w;
-		in >> tmp.p;
-		ukpi.items.push_back(tmp);
-	}
+  for (size_t i = 0; i < n; ++i) {
+    item_t tmp;
+    in >> tmp.w;
+    in >> tmp.p;
+    ukpi.items.push_back(tmp);
+  }
 
-	return;
+  return;
 }
 
 void write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
   size_t n = ukpi.items.size();
-	out << n << endl;
-	out << ukpi.c << endl;
+  out << n << endl;
+  out << ukpi.c << endl;
 
-	for (size_t i = 0; i < n; ++i) {
-		item_t tmp = ukpi.items[i];
-    cout << tmp.w << "\t" << tmp.p << endl;
-	}
-
-	return;
-}
-
-int main(int argc, char** argv) {
-
-  if (argc != 2) {
-    cout << "usage: a.out data.sukp" << endl;
-    return EXIT_FAILURE;
+  for (size_t i = 0; i < n; ++i) {
+    item_t tmp = ukpi.items[i];
+                out << tmp.w << "\t" << tmp.p << endl;
   }
 
-  ifstream f(argv[1]);
-  if (f.is_open())
-  {
-    ukp_instance_t ukpi;
-    ukp_solution_t ukps;
-
-    read_sukp_instance(f, ukpi);
-
-    steady_clock::time_point t1 = steady_clock::now();
-    ukp5(ukpi, ukps);
-    steady_clock::time_point t2 = steady_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-
-    cout << ukps.opt << endl;
-    cout << time_span.count() << "s" << endl;
-    cout << endl;
-  } else {
-    cout << "Couldn't open file" << endl;
-    return EXIT_FAILURE;
-  }
-
-	return EXIT_SUCCESS;
+  return;
 }
 

@@ -1,0 +1,143 @@
+Log started (V12.5.0.0) Mon Sep 21 17:53:29 2015
+
+New value for default parallel thread count: 1
+New value for mixed integer optimality gap tolerance: 0
+
+Problem 'lp/corepb.lp' read.
+Read time = 0.11 sec. (0.93 ticks)
+
+MIP - Integer optimal solution:  Objective =  1.0077782000e+07
+Solution time =   14.08 sec.  Iterations = 49398  Nodes = 46492
+Deterministic time = 15051.80 ticks  (1069.03 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(1548)                       1.000000
+x(8558)                       2.000000
+x(14995)                      1.000000
+All other variables in the range 1-22077 are 0.
+
+
+
+
+
+Problem 'lp/exnsd16.lp' read.
+Read time = 0.11 sec. (0.08 ticks)
+
+MIP - Integer optimal solution:  Objective =  1.0296800000e+06
+Solution time =    0.17 sec.  Iterations = 1215  Nodes = 1308
+Deterministic time = 146.30 ticks  (848.10 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(288)                      156.000000
+x(987)                        1.000000
+All other variables in the range 1-2000 are 0.
+
+Problem 'lp/exnsd18.lp' read.
+Read time = 0.00 sec. (0.08 ticks)
+
+MIP - Integer optimal solution:  Objective =  1.1121310000e+06
+Solution time =    0.13 sec.  Iterations = 1693  Nodes = 1959
+Deterministic time = 111.17 ticks  (849.91 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(353)                        0.000000
+x(505)                       -0.000000
+x(1089)                       0.000000
+x(1423)                     902.000000
+x(1445)                      -0.000000
+x(1531)                       1.000000
+All other variables in the range 1-2000 are 0.
+
+
+
+
+
+Problem 'lp/exnsd20.lp' read.
+Read time = 0.00 sec. (0.08 ticks)
+
+MIP - Integer optimal solution:  Objective =  1.0260860000e+06
+Solution time =    0.03 sec.  Iterations = 158  Nodes = 241
+Deterministic time = 43.99 ticks  (1311.71 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(478)                      209.000000
+x(555)                        1.000000
+x(1890)                       1.000000
+All other variables in the range 1-2000 are 0.
+
+
+
+
+
+Problem 'lp/exnsd26.lp' read.
+Read time = 0.00 sec. (0.08 ticks)
+
+MIP - Integer optimal solution:  Objective =  1.0275640000e+06
+Solution time =    0.07 sec.  Iterations = 1067  Nodes = 1241
+Deterministic time = 76.05 ticks  (1139.50 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(698)                        1.000000
+x(989)                        2.000000
+x(1341)                     107.000000
+All other variables in the range 1-2000 are 0.
+
+
+
+
+
+Problem 'lp/exnsdbis10.lp' read.
+Read time = 0.00 sec. (0.08 ticks)
+
+MIP - Integer optimal solution:  Objective =  1.0280350000e+06
+Solution time =    0.04 sec.  Iterations = 229  Nodes = 293
+Deterministic time = 48.96 ticks  (1146.14 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(804)                        1.000000
+x(1129)                      88.000000
+x(1504)                      46.000000
+All other variables in the range 1-2000 are 0.
+
+
+
+
+
+Problem 'lp/exnsdbis18.lp' read.
+Read time = 0.00 sec. (0.08 ticks)
+
+MIP - Integer optimal solution:  Objective =  1.0371560000e+06
+Solution time =    0.03 sec.  Iterations = 54  Nodes = 40
+Deterministic time = 46.72 ticks  (1418.45 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(123)                        6.000000
+x(171)                        1.000000
+x(1424)                     125.000000
+x(1981)                       6.000000
+All other variables in the range 1-2000 are 0.
+
+
+
+
+
+Problem 'lp/exnsds12.lp' read.
+Read time = 0.13 sec. (0.84 ticks)
+
+MIP - Integer optimal solution:  Objective =  3.7939520000e+06
+Solution time =    0.27 sec.  Iterations = 1274  Nodes = 1377
+Deterministic time = 249.03 ticks  (928.22 ticks/sec)
+
+Incumbent solution
+Variable Name           Solution Value
+x(10333)                     76.000000
+x(13713)                    552.000000
+All other variables in the range 1-20000 are 0.
+

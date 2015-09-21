@@ -1,9 +1,25 @@
 set threads 1
 set mip tolerance mipgap 0
+
 read lp/corepb.lp
 optimize
 display solution variables -
 read lp/exnsd16.lp
+optimize
+display solution variables -
+read lp/exnsd18.lp
+optimize
+display solution variables -
+read lp/exnsd20.lp
+optimize
+display solution variables -
+read lp/exnsd26.lp
+optimize
+display solution variables -
+read lp/exnsdbis10.lp
+optimize
+display solution variables -
+read lp/exnsdbis18.lp
 optimize
 display solution variables -
 read lp/exnsds12.lp
@@ -15,3 +31,4 @@ display solution variables -
 read lp/teste.lp
 optimize
 display solution variables -
+

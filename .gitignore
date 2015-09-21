@@ -5,3 +5,6 @@
 # c++
 *.out
 
+# material with copyrights
+papers/
+

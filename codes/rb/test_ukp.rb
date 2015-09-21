@@ -14,7 +14,7 @@ instances_data = [
 everything_ok = true
 instances_data.each do | id |
   opt = id[:opt]
-  path = "../data/sukp/#{id[:name]}.sukp"
+  path = "../../data/sukp/#{id[:name]}.sukp"
   puts "Path: #{path}"
   puts "Expected value: #{opt}"
   instance = read_instance(path)

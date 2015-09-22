@@ -64,12 +64,25 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   size_t &opt = sol.opt;
   opt = 0;
 
+  /* After the block bellow we can safely assume that there are at least two
+   * items, and one of them is smaller than c*/
+  switch (n) {
+    case 0: return;
+    case 1: opt = (c % items[0].w)* items[0].p; return;
+  }
+  if (c < min_w) return;
+
   g.assign(c+max_w+1, 0);
   d.assign(c+max_w+1, n-1);
   
   size_t last_y_where_nonbest_item_was_used = 0;
 
-  for (size_t i = 0; i < n; ++i) {
+  /* this block is a copy-past of the loop bellow only for the best item */
+  size_t wb = items[0].w;
+  g[wb] = items[0].p;;
+  d[wb] = 0;
+
+  for (size_t i = 1; i < n; ++i) {
     size_t pi = items[i].p;
     size_t wi = items[i].w;
     if (g[wi] < pi) {
@@ -81,8 +94,9 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
     }
   }
 
-  for (size_t y = 0; y < c; ++y) {
-    if (g[y] == 0 || g[y] < opt) continue;
+  opt = g[min_w];
+  for (size_t y = min_w; y < c; ++y) {
+    if (g[y] < opt) continue;
     if (last_y_where_nonbest_item_was_used < y) break;
 
     size_t gy, dy;
@@ -118,7 +132,7 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
 
   if (last_y_where_nonbest_item_was_used < c-1) {
     size_t y_ = last_y_where_nonbest_item_was_used;
-    while (d[y_] != 0) y_ += 1;
+    while (d[y_] != 0) ++y_;
 
     size_t extra_capacity = c - y_;
     size_t c1, a1;

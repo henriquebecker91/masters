@@ -116,8 +116,29 @@ int main_take_path(int argc, char** argv) {
   }
 }
 
+/*void no_item_instance(ukp_instance_t &ukpi) {
+  ukpi.c = 10;
+  ukpi.items.clear();
+}
+
+void one_item_instance(ukp_instance_t &ukpi) {
+  ukpi.c = 10;
+  ukpi.items.clear();
+  ukpi.items.push_back({4, 3});
+}
+
+void only_ws_bigger_than_c(ukp_instance_t &ukpi) {
+  ukpi.c = 10;
+  ukpi.items.clear();
+  ukpi.items.push_back({100, 100});
+  ukpi.items.push_back({110, 105});
+  ukpi.items.push_back({12, 11});
+}*/
+
 int main(int argc, char** argv) {
 //  return main_take_path(argc, argv);
+
+  
   return benchmark_pyasukp();
 }
 

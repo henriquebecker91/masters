@@ -101,7 +101,7 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
       d[next_y] = 0;
     }
 
-    for (size_t ix = 0; ix <= dy; ++ix) {
+    for (size_t ix = 1; ix <= dy; ++ix) {
       item_t it = items[ix];
       size_t pi = it.p;
       size_t wi = it.w;

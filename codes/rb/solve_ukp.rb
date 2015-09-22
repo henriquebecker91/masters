@@ -195,7 +195,7 @@ def ukp5(ukpi, return_used_items = false)
     end
   end
 
-if last_y_where_nonbest_item_was_used < c-1 then
+  if last_y_where_nonbest_item_was_used < c-1 then
     y_ = last_y_where_nonbest_item_was_used
     while d[y_] != 0 do
       y_ += 1

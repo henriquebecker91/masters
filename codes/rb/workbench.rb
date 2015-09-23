@@ -7,12 +7,13 @@ require_relative 'solve_ukp.rb'
 puts ARGV[0]
 puts ukp2(read_instance(ARGV[0])).last
 =end
-=begin
 instance = read_instance(ARGV[0])
-puts y_star(instance[:items])
-puts instance[:c]
-puts Rational(instance[:c],y_star(instance[:items]))
-=end
+y_bound = y_star(instance[:items])
+puts 'c : ' + instance[:c].to_s
+puts 'y*: ' + y_bound.to_s
+puts 'c0: ' + kellerer(instance[:items]).to_s
+puts 'my: ' + my_bound(instance[:items]).to_s
+puts 'ht: ' + huangtang(instance[:items]).to_s
 
 =begin
 instance = read_instance(ARGV[0])

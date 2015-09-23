@@ -7,6 +7,62 @@ def sort_items_by_profitability!(items)
   end
 end
 
+# Taken from "A constructive periodicity bound for the unbounded knapsack
+# problem". Different from the others, this bound needs O(n^2) time. It
+# would need to have a fantatisc result to be viable (others bounds are
+# O(n log n), O(n) and O(1)). This doesn't seem to be the case. On all the
+# tests it was much bigger than y* from garfinkel book. The bound as bigger
+# and the computation slower even than my_bound.
+def huangtang(items, already_sorted = false)
+  items = sort_items_by_profitability!(items.clone) unless already_sorted
+  
+  n = items.length-1
+  h0 = 0
+  (1..n).each do | j |
+    min = items[0][:w].lcm(items[j][:w]) - items[j][:w]
+    (1..(j-1)).each do | i |
+      x = items[i][:w].lcm(items[j][:w]) - items[j][:w] 
+      min = x if x < min
+    end
+    h0 += min
+  end
+
+  h0 + 1
+end
+
+def my_bound(items, already_sorted = false)
+  items = sort_items_by_profitability!(items.clone) unless already_sorted
+  
+  c0 = 0
+  ws = items[0][:w]
+  ps = items[0][:p]
+
+  items.each do | i |
+    wi = i[:w]
+    pi = i[:p]
+    qt = 1
+    while qt*ps < Rational(qt*ws, wi).ceil*pi do
+      qt += 1;
+    end
+    c0 += qt*ws
+  end
+
+  c0 - ws
+end
+
+def kellerer(items, already_sorted = false)
+  items = sort_items_by_profitability!(items.clone) unless already_sorted
+  
+  c0 = 0
+  ws = items[0][:w]
+
+  items.each do | i |
+    c0 += ws.lcm(i[:w])
+  end
+
+  c0 - ws
+end
+
 # based on p. 223, Integer Programming, Robert S. Garfinkel
 def y_star(items, already_sorted = false)
   items = sort_items_by_profitability!(items.clone) unless already_sorted
@@ -133,7 +189,9 @@ def ukp5(ukpi, return_used_items = false)
   #     the existence of an item with better profitability than the dominated
   #     item.
   # (2) If opt > g[y] then there's a y' < y where g[y'] > g[y].
-  # (3) The items are ordered by profitability.
+  # (3) The items are ordered by non-decreasing efficiency and non-increasing
+  #     weight (if the efficiency of i an j differ, then only it is used to
+  #     define the order, if the efficiences are equal then the weight is used).
   # (4) If g[y] is different from zero, then the d[y] is always the item of
   #     best profitability that was used on the solution of the knapsack with
   #     capacity y.
@@ -160,6 +218,43 @@ def ukp5(ukpi, return_used_items = false)
   #     by skipping that multiset we are skipping any solution that would
   #     have that multiset, 
   #     
+  # Simple dominance: Simple dominance is a special case of multiple
+  #   dominance where floor(w_i/w_j) == 1. See bellow.
+  # If there's one item i that is dominated by an item j,
+  #   then p_i < p_j and there's two possibilities: w_i < w_j or
+  #   w_i == w_j. Both possibilities already imply that i have a lower
+  #   profitability than j. If is the first possibility, then opt will be greater than
+  #   g[w_i] when the capacity w_i is reached, and will be skipped. As (3) is true
+  #   then any next d[y] greater or equal than i will be skipped, and items
+  #   that have a equal or lower profitability than i will not be used anymore.
+  #   If w_i == w_j then, after the inner for have ended, g[w_i] == p_j
+  #   and d[w_i] == j. As j < i (because (3)) again no d[w_i] bigger than will
+  #   exist after w_i.
+  # Simple/Multiple dominance: One item j is dominated by an item i if
+  #   p_j <= floor(w_j/w_i)*p_i. In another words, if putting one or
+  #   more items i on the knapsack weights the same or less than putting one
+  #   item j and gives the same or more profit than one item j, then i
+  #   dominates j. 
+  #   If i dominates j then the efficiency of i is greater or equal to the
+  #   efficiency of j. If it's equal we will assume, without loss of 
+  #   generality, that i < j and w_i <= w_j (see 3). If it's greater then i < j
+  #   because of (3).
+  #   If 
+  #
+  # Collective dominance:
+  # Threshold dominance: One item j is dominated by a solution I if
+  #   exists a positive integer n that satisfies the following equation  n*p_j <= floor(n*w_j/w_i)*p_i. In another words, if putting one or
+  #   more items i on the knapsack weights the same or less than putting one
+  #   item j and gives the same or more profit than one item j, then i
+  #   dominates j. 
+  #   If i dominates j then the efficiency of i is greater or equal to the
+  #   efficiency of j. If it's equal we will assume, without loss of 
+  #   generality, that i < j and w_i <= w_j (see 3). If it's greater then i < j
+  #   because of (3).
+  # Multiset dominance: One item j is dominated by a solution I at capacity
+  #   y if y is the smallest capacity where the 
+  #   
+
   opt = 0
   (1..(c-1)).each do | y |
     next if g[y] == 0 || g[y] < opt

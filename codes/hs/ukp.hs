@@ -28,13 +28,13 @@ weight_non_decreasing (a1, b1) (a2, b2)
 
 s :: Int -> [(Int, Int)] -> Int -> [(Int, Int)]
 s 0 _ _ = []
-s k ys' c = filter_d (merge (s (k-1) ys c) (addtest (ys !! (k-1)) ((0,0):(s k ys c)) c)) 0
-	where ys = sortBy weight_non_decreasing ys'
+s k ys c = filter_d (merge (s (k-1) ys c) (addtest (ys !! (k-1)) ((0,0):(s k ys c)) c)) 0
 
-s' str = (show $ s n ys c) ++ "\n"
+s' str = (show $ s n ys' c) ++ "\n"
 	where	ls = lines str 
 		(n, c) = (read $ ls !! 0, read $ ls !! 1)
 		ys = map (\(w:p:[]) -> (read w, read p)) $ map words $ drop 2 ls
+		ys' = sortBy weight_non_decreasing ys
 
 main = interact s'
 

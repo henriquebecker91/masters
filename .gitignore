@@ -4,6 +4,10 @@
 
 # c++
 *.out
+*.o
+
+# haskell
+*.hi
 
 # material with copyrights
 papers/

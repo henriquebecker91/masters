@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <boost/rational.hpp>
 
-#include "ukp.hpp"
+#include "ukp5.hpp"
 
 using namespace std;
 using namespace boost;
@@ -17,16 +17,16 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   return make_pair(min,max);
 }
 
-/* Profitability nonascending first weight nondescending after */
-bool item_order(const item_t& i, const item_t& j) {
+/* Efficiency nonascending first weight nondescending after */
+bool efficiency_order(const item_t& i, const item_t& j) {
   rational<size_t> ri(i.w, i.p);
   rational<size_t> rj(j.w, j.p);
 
   return ri == rj ? i.w < j.w : ri < rj;
 }
 
-void sort_items_by_profitability(vector<item_t> &items) {
-  sort(items.begin(), items.end(), item_order);
+void sort_by_efficiency(vector<item_t> &items) {
+  sort(items.begin(), items.end(), efficiency_order);
 
   return;
 }
@@ -47,14 +47,15 @@ size_t get_opt_y(size_t c, const vector<item_t> &items, const vector<size_t> &g,
   return opt_y;
 }
 
-/* This function reorders the ukpi.items vector, if you don't want this pass a copy of
- * the instance or pass it already ordered and true for the parameter already_sorted.
+/* This function reorders the ukpi.items vector, if you don't want this pass a
+ * copy of the instance or pass it already ordered BY EFFICIENCY and true for
+ * the parameter already_sorted.
  */
 void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
   size_t n = ukpi.items.size();
   size_t c = ukpi.c;
   vector<item_t> &items(ukpi.items);
-  if (!already_sorted) sort_items_by_profitability(ukpi.items);
+  if (!already_sorted) sort_by_efficiency(ukpi.items);
 
   auto minmax_w = minmax_item_weight(items);
   size_t min_w = minmax_w.first, max_w = minmax_w.second;
@@ -149,35 +150,6 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   }
 
   if (opt < g[c]) opt = g[c];
-
-  return;
-}
-
-void read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
-  size_t n;
-  in >> n;
-  in >> ukpi.c;
-  ukpi.items.reserve(n);
-
-  for (size_t i = 0; i < n; ++i) {
-    item_t tmp;
-    in >> tmp.w;
-    in >> tmp.p;
-    ukpi.items.push_back(tmp);
-  }
-
-  return;
-}
-
-void write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
-  size_t n = ukpi.items.size();
-  out << n << endl;
-  out << ukpi.c << endl;
-
-  for (size_t i = 0; i < n; ++i) {
-    item_t tmp = ukpi.items[i];
-                out << tmp.w << "\t" << tmp.p << endl;
-  }
 
   return;
 }

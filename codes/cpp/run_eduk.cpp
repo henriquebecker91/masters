@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
     ukpi.items.push_back({6, 9});
     ukpi.items.push_back({10, 24});
 
-    cout << "Testing Lazyfy + Consume" << endl;
+/*    cout << "Testing Lazyfy + Consume" << endl;
     auto l_items = Lazyfy(ukpi.items);
     vector<item_t> res;
     consume(&l_items, res);
@@ -42,17 +42,17 @@ int main(int argc, char** argv) {
     items3.push_back({6, 9});
     items3.push_back({6, 9});
     items3.push_back({6, 6});
-    items3.push_back({6, 10});
-    items3.push_back({6, 9});
     items3.push_back({6, 11});
+    items3.push_back({6, 10});
+    items3.push_back({6, 12});
     l_items = Lazyfy(items3);
     res.clear();
     items2.clear();
 
     auto filter = Filter(&l_items);
     items2.push_back({6, 9});
-    items2.push_back({6, 10});
     items2.push_back({6, 11});
+    items2.push_back({6, 12});
 
     consume(&filter, res);
 
@@ -66,26 +66,26 @@ int main(int argc, char** argv) {
     vector<item_t> items4;
     res.clear();
 
-    items4.push_back({10, 24});
-    items4.push_back({6, 9});
-    items4.push_back({5, 7});
     items4.push_back({4, 8});
+    items4.push_back({5, 7});
+    items4.push_back({6, 9});
+    items4.push_back({10, 24});
 
-    items3.push_back({12, 10});
-    items3.push_back({5, 9});
     items3.push_back({3, 5});
+    items3.push_back({5, 9});
+    items3.push_back({12, 10});
 
     l_items = Lazyfy(items4);
     auto l2_items = Lazyfy(items3);
 
     auto merge = Merge(&l_items, &l2_items);
     
-    items2.push_back({12, 10});
-    items2.push_back({10, 24});
-    items2.push_back({6, 9});
-    items2.push_back({5, 9});
-    items2.push_back({4, 8});
     items2.push_back({3, 5});
+    items2.push_back({4, 8});
+    items2.push_back({5, 9});
+    items2.push_back({6, 9});
+    items2.push_back({10, 24});
+    items2.push_back({12, 10});
 
     consume(&merge, res);
 
@@ -118,8 +118,7 @@ int main(int argc, char** argv) {
 
     if (res == items2) cout << "AddHead working" << endl;
     else cout << "Something wrong" << endl;
-    cout << endl;
-
+    cout << endl;*/
 
     ukp_solution_t sol;
     eduk(ukpi, sol, false);

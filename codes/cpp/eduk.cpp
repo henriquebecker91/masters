@@ -1,5 +1,7 @@
 #include "eduk.hpp"
 #include <algorithm>
+#include <memory>
+#include <iostream>
 
 using namespace std;
 
@@ -14,9 +16,7 @@ void sort_by_weigth(vector<item_t> &items) {
 }
 
 struct LazyList {
-    virtual bool get_next(item_t& x) {
-      return false;
-    };
+    virtual bool get_next(item_t& x) = 0;
 };
 
 void consume(LazyList * const l, vector<item_t> &res) {
@@ -34,6 +34,9 @@ struct Lazyfy : LazyList {
   vector<item_t>::const_iterator begin;
   vector<item_t>::const_iterator end;
   
+  Lazyfy(void) {
+  }
+
   Lazyfy(const vector<item_t> &v) {
     begin = v.cbegin();
     end = v.cend();
@@ -52,13 +55,21 @@ struct Lazyfy : LazyList {
 
 struct AddTest : LazyList {
   item_t g;
-  LazyList * const l;
+  LazyList * l;
   size_t c;
 
   bool has_head;
   item_t head;
 
-  AddTest(item_t g, LazyList * const l, size_t c) : g(g), l(l), c(c) {
+  AddTest(void) {
+    g = {0, 0};
+    l = NULL;
+    c = 0;
+    has_head = false;
+    head = {0, 0};
+  }
+
+  AddTest(item_t g, LazyList * l, size_t c) : g(g), l(l), c(c) {
     has_head = l->get_next(head);
     head.w += g.w;
     head.p += g.p;
@@ -83,12 +94,19 @@ struct AddTest : LazyList {
 
 struct Filter : LazyList {
   size_t limit;
-  LazyList * const l;
+  LazyList * l;
 
   bool has_head;
   item_t head;
 
-  Filter(LazyList * const l) : l(l) {
+  Filter(void) {
+    limit = 0;
+    l = NULL;
+    has_head = false;
+    head = {0, 0};
+  }
+
+  Filter(LazyList * l) : l(l) {
     has_head = l->get_next(head);
     if (has_head) limit = head.p;
   }
@@ -110,21 +128,27 @@ struct Filter : LazyList {
 };
 
 struct Merge : LazyList {
-  LazyList * const l1, * const l2;
+  LazyList * l1, * l2;
   item_t h1, h2;
   bool has_h1, has_h2;
 
-  Merge(LazyList * const l1, LazyList * const l2) : l1(l1), l2(l2) {
+  Merge(void) {
+    has_h1 = has_h2 = false;
+    l1 = l2 = NULL;
+    h1 = h2 = {0, 0};
+  }
+
+  Merge(LazyList * l1, LazyList * l2) : l1(l1), l2(l2) {
     has_h1 = l1->get_next(h1);
     has_h2 = l2->get_next(h2);
   }
 
   bool get_next(item_t& i) {
     if (has_h1 && has_h2) {
-      if (h1.w > h2.w) {
+      if (h1.w < h2.w) {
         i = h1;
         has_h1 = l1->get_next(h1);
-      } else if (h1.w < h2.w) {
+      } else if (h1.w > h2.w) {
         i = h2;
         has_h2 = l2->get_next(h2);
       } else {
@@ -147,12 +171,18 @@ struct Merge : LazyList {
 };
 
 struct AddHead : LazyList {
-  const item_t original_head;
-  LazyList * const l;
+  item_t original_head;
+  LazyList * l;
 
   bool has_original_head;
 
-  AddHead(const item_t &head, LazyList * const l) : original_head(head), l(l) {
+  AddHead(void) {
+    l = NULL;
+    has_original_head = false;
+    original_head = {0, 0};
+  }
+
+  AddHead(const item_t &head, LazyList * l) : original_head(head), l(l) {
     has_original_head = true;
   }
 
@@ -167,22 +197,52 @@ struct AddHead : LazyList {
   }
 };
 
-struct S : LazyList {
-  LazyList s_pred_k, l_items, addhead, addtest, merge, filter;
+struct S;
+struct S {
+  unique_ptr<S> s_pred_k;
+  Lazyfy l_items;
+  AddHead addhead;
+  AddTest addtest;
+  Merge merge;
+  Filter filter;
 
   bool has_head;
   item_t head;
 
+  vector<item_t> computed;
+
+  struct iterator : LazyList {
+    S * s;
+    size_t ix;
+
+    iterator(S * s) : s(s) {
+      ix = 0;
+    }
+
+    bool get_next(item_t &i) {
+      if (ix < s->computed.size() || s->has_next()) {
+        i = s->computed[ix];
+        ++ix;
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
+  /* Only to avoid allocating dynamic memory by hand */
+  vector<S::iterator> its;
+
   S(size_t k, size_t c, const vector<item_t> &items) {
     if (k > 0) { 
-      s_pred_k = S(k-1, c, items);
+      s_pred_k = unique_ptr<S>(new S(k-1, c, items));
       l_items = Lazyfy(items);
       item_t zero;
       zero.w = 0;
       zero.p = 0;
-      addhead = AddHead(zero, this);
+      addhead = AddHead(zero, this->begin());
       addtest = AddTest(items[k-1], &addhead, c);
-      merge = Merge(&s_pred_k, &addtest);
+      merge = Merge(s_pred_k->begin(), &addtest);
       filter = Filter(&merge);
 
       has_head = filter.get_next(head);
@@ -191,25 +251,32 @@ struct S : LazyList {
     }
   }
 
-  bool get_next(item_t &i) {
-    if (has_head) i = head;
-    else return false;
+  bool has_next(void) {
+    if (!has_head) return false;
+
+    computed.push_back(head);
 
     has_head = filter.get_next(head);
 
     return true;
   }
+
+  iterator * begin(void) {
+    iterator tmp(this);
+    its.push_back(tmp);
+    return &its.back();
+  }
 };
 
 void eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted) {
-    vector<item_t> &res = sol.res;
     size_t n = ukpi.items.size();
     size_t c = ukpi.c;
     vector<item_t> &items(ukpi.items);
     if (!already_sorted) sort_by_weigth(ukpi.items);
 
     S s = S(n, c, items);
-    consume(&s, res);
+    auto it = s.begin();
+    consume(it, sol.res);
 
     //sol.opt = res[res.size() - 1].p;
 }

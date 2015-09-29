@@ -11,7 +11,10 @@ int main(int argc, char** argv) {
     ukpi.items.push_back({6, 9});
     ukpi.items.push_back({10, 24});
 
-/*    cout << "Testing Lazyfy + Consume" << endl;
+    item_t * it = &ukpi.items.back();
+    cout << it->w << " " << it->p << endl;
+
+    cout << "Testing Lazyfy + Consume" << endl;
     auto l_items = Lazyfy(ukpi.items);
     vector<item_t> res;
     consume(&l_items, res);
@@ -49,7 +52,7 @@ int main(int argc, char** argv) {
     res.clear();
     items2.clear();
 
-    auto filter = Filter(&l_items);
+    auto filter = Filter(&l_items, 0);
     items2.push_back({6, 9});
     items2.push_back({6, 11});
     items2.push_back({6, 12});
@@ -118,7 +121,7 @@ int main(int argc, char** argv) {
 
     if (res == items2) cout << "AddHead working" << endl;
     else cout << "Something wrong" << endl;
-    cout << endl;*/
+    cout << endl;
 
     ukp_solution_t sol;
     eduk(ukpi, sol, false);

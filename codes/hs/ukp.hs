@@ -28,7 +28,8 @@ filter_d (i@(w, p):xss) max =
 
 s :: Int -> [(Int, Int)] -> Int -> [(Int, Int)]
 s 0 _ _ = []
-s k ys c = filter_d (merge (s (k-1) ys c) (addtest (ys !! (k-1)) ((0,0):(s k ys c)) c)) 0
+s k ys c = x
+	where x = filter_d (merge (s (k-1) ys c) (addtest (ys !! (k-1)) ((0,0):x) c)) 0
 
 s' str = (show $ last $ s n ys' c) ++ "\n"
 	where	ls = lines str 

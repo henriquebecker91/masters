@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <memory>
 #include <forward_list>
+#include <list>
+
+#define MAX_MEMORY_WASTED_BY_S 10
 
 using namespace std;
 
@@ -182,7 +185,7 @@ struct S {
   Merge merge;
   Filter filter;
 
-  bool empty, exist_next;
+  bool empty;
 
   vector<item_t> computed;
 
@@ -190,9 +193,13 @@ struct S {
     S * s;
     size_t ix;
 
-    iterator(S * s) : s(s), ix(0) { }
+    iterator(S * s) : s(s) {
+      ix = 0;
+    }
 
     bool get_next(item_t &i) {
+      // Using the handmade garbage_collect was not paying off
+      //s->garbage_collect();
       if (ix < s->computed.size() || s->has_next()) {
         i = s->computed[ix];
         ++ix;
@@ -214,6 +221,7 @@ struct S {
   S(size_t k, size_t c, const vector<item_t> &items) {
     if (k > 0) { 
       empty = false;
+
       s_pred_k = unique_ptr<S>(new S(k-1, c, items));
       l_items = Lazyfy(items);
       item_t zero;
@@ -223,26 +231,45 @@ struct S {
       addtest = AddTest(items[k-1], &addhead, c);
       merge = Merge(s_pred_k->begin(), &addtest);
       filter = Filter(&merge, 0);
-      exist_next = true;
     } else {
       empty = true;
     }
   }
 
   bool has_next(void) {
-    if (empty || !exist_next) return false;
+    if (empty) return false;
 
     item_t next;
-    exist_next = filter.get_next(next);
-    if (exist_next) computed.push_back(next);
+    empty = !filter.get_next(next);
+    if (!empty) computed.push_back(next);
 
-    return exist_next;
+    return !empty;
   }
 
   iterator * begin(void) {
     iterator tmp(this);
     its.push_front(tmp);
     return &its.front();
+  }
+
+  void garbage_collect(void) {
+    auto it = its.cbegin();
+    size_t m = it->ix;
+    ++it;
+
+    for (; it != its.cend(); ++it) {
+      m = min(m, it->ix);
+    }
+
+    /* Another possibility is to verify if (m > computed.size()/MAGIC_CONST) */
+    if (m > MAX_MEMORY_WASTED_BY_S) {
+      vector<item_t> new_v(computed.cbegin()+m, computed.cend());
+      computed.swap(new_v);
+
+      for (auto it = its.begin(); it != its.end(); ++it) {
+        it->ix = it->ix - m;
+      }
+    }
   }
 };
 

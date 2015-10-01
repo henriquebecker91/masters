@@ -76,29 +76,29 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   g.assign(c+max_w+1, 0);
   d.assign(c+max_w+1, n-1);
   
-  size_t last_y_where_nonbest_item_was_used = 0;
+//  size_t last_y_where_nonbest_item_was_used = 0;
 
   /* this block is a copy-past of the loop bellow only for the best item */
   size_t wb = items[0].w;
   g[wb] = items[0].p;;
   d[wb] = 0;
 
-  for (size_t i = 1; i < n; ++i) {
+  for (size_t i = n-1; i > 0; --i) {
     size_t pi = items[i].p;
     size_t wi = items[i].w;
-    if (g[wi] < pi) {
+//    if (g[wi] < pi) {
       g[wi] = pi;
       d[wi] = i;
-      if (wi > last_y_where_nonbest_item_was_used && i != 0) {
+/*      if (wi > last_y_where_nonbest_item_was_used) {
         last_y_where_nonbest_item_was_used = wi;
-      }
-    }
+      }*/
+//    }
   }
 
-  opt = g[min_w];
+  opt = 0;
   for (size_t y = min_w; y < c; ++y) {
-    if (g[y] < opt) continue;
-    if (last_y_where_nonbest_item_was_used < y) break;
+    if (g[y] <= opt) continue;
+//    if (last_y_where_nonbest_item_was_used < y) break;
 
     size_t gy, dy;
     opt = gy = g[y];
@@ -126,12 +126,12 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
       if (ogny < ngny) {
         g[ny] = ngny;
         d[ny] = ix;
-        if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
+//        if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
       }
     } 
   }
 
-  if (last_y_where_nonbest_item_was_used < c-1) {
+/*  if (last_y_where_nonbest_item_was_used < c-1) {
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
 
@@ -147,7 +147,7 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
 
     size_t opt_y = get_opt_y(c-space_used_by_best_item, items, g, d, min_w);
     g[c] = g[opt_y] + profit_generated_by_best_item;
-  }
+  }*/
 
   if (opt < g[c]) opt = g[c];
 

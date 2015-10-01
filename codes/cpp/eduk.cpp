@@ -242,6 +242,10 @@ struct S {
     item_t next;
     empty = !filter.get_next(next);
     if (!empty) computed.push_back(next);
+    else { // Is this correct?
+      computed.clear();
+      computed.shrink_to_fit();
+    }
 
     return !empty;
   }

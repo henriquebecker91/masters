@@ -1,0 +1,112 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+
+\usepackage{graphicx,url}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumerate}
+
+\usepackage[brazil]{babel}   
+\usepackage[utf8]{inputenc}  
+ 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\sloppy
+
+\title{The UKP5 Method}
+
+\author{Henrique Becker\inst{1}}
+
+%\address{Instituto de Ciências Exatas e Geociências -- Universidade Passo Fundo (UPF)\\
+%  Caixa Postal 611 -- CEP 99001-970 -- Passo Fundo -- RS -- Brasil
+\address{Instituto de Informática -- Universidade Federal do Rio Grande do Sul (UFRGS) \\
+  Caixa Postal 15064 -- CEP 91501-970 -- Porto Alegre -- RS -- Brasil
+  \email{henriquebecker91@gmail.com}
+}
+
+\begin{document} 
+
+\maketitle
+
+\section{Introduction}
+
+The objective of this work is to present an algorithm that solves the Unbounded Knapsack Problem (UKP), and to prove its correctness. We name this algorithm UKP5.
+
+\subsection{Definition of the Problem and Chosen Notation}
+
+In this subsection we use the chosen notation to define the UKP. We will use this notation for the rest of the article.
+
+The UKP can be defined as follows: we are given a capacity \(c\), and a list of \(n\) items. Each item \(i \in {1, \ldots, n}\) has a weight value, denoted by \(w_i\), and a profit value, denoted by \(p_i\); we want to know how many of each item \(x_i\) we should select to get the biggest possible summed profit without the sum of the weight of the items becoming bigger than the capacity. The problem can be defined using the linear programming notation as follows:
+
+\begin{align}
+  maximize: &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
+subject~to: &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
+            &x_i \in \mathbb{N_0}\label{eq:x_integer}
+\end{align}
+
+The capacity \(c\), the quantity \(n\) and the weights of the items \(w_i~(\forall i.~1 \geq i \geq n)\) are all positive integers. The quantities \(x_i~(\forall i.~1 \geq i \geq n)\) are restricted to the non-negative integers, as shown in \eqref{eq:x_integer}. The profit of the items \(p_i~(\forall i.~1 \geq i \geq n)\) are all positive reals.
+
+The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\). The UKP5 works based on the assumption that the items are ordered by non-decreasing efficiency (i.e. \(i < j\) iff \(\frac{p_i}{w_i} < \frac{p_j}{w_j}\)). If this is not true, it sorts the items first to make this assumption true.
+
+We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight and the biggest item weight, respectively.
+
+\section{The \textit{UKP5} algorithm}
+
+The UKP5 algorithm consists on two phases. The first phase find the optimal solution value \(opt\) for the capacity \(c\) by writing values on the arrays \(g\) and \(d\). The second phase makes use of the \(opt\) value and the arrays \(g\) and \(d\) to create a array \(x\) that represents an optimal solution \(x[i] \equiv x_i\).
+
+The values written in the position \(g[y]\) \emph{aren't the optimal solution value for a knapsack of capacity \(y\)}. Instead they are the optimal solution value if we couldn't leave any free capacity (i.e. if in \eqref{eq:capcons} we had an \(=\) instead of an \(<\)).
+
+\begin{algorithm}
+\caption{Critical Points Computation -- Write Phase}\label{alg:ukp6_write_phase}
+\begin{algorithmic}[1]
+\Procedure{UKP5}{n, c, w, p}
+  \State \(g \gets\) array of \(c + w_{max} + 1\) positions each one initialized with \(0\)
+  \State \(d \gets\) array of \(c + w_{max} + 1\) positions each one initialized with \(n\)
+  
+  \For{\(i \gets 1, n\)}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \(d[w_i] \gets i\)
+    \EndIf
+  \EndFor
+
+  \State \(opt \gets 0\)
+
+  \For{\(y \gets w_{min}, c-1\)}
+    \If{\(g[y] \leq opt\)}
+    	\State continue
+    \EndIf
+    
+    \State \(opt \gets g[y]\)
+    
+    \For{\(i=1,d[y]\)}
+      \If{\(g[w_i] < p_i\)}
+        \State \(g[w_i] \gets p_i\)
+        \State \(d[w_i] \gets i\)
+      \EndIf
+
+      \State \(next\_y \gets y + w_i\)
+      \State \(old\_g\_next\_y \gets g[next\_y]\)
+      \State \(new\_g\_next\_y \gets g[y] + p_i\)
+      \If{\(old\_g\_next\_y < new\_g\_next\_y\)}
+        \State \(g[next\_y] \gets new\_g\_next\_y\)
+        \State \(d[next\_y] \gets i\)
+      \EndIf
+    \EndFor
+  \EndFor
+
+  \If{\(opt < g[c]\)}
+    \State \(opt \gets g[c]\)
+  \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{document} 
+
+\bibliographystyle{sbc}
+\bibliography{sbc-template}
+
+\end{document}
+

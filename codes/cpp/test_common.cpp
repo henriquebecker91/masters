@@ -17,12 +17,17 @@ int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const s
 
     read_sukp_instance(f, ukpi);
 
+    // The function ukp_solver can change the argument, so we have to change it back
+    // after each function call
+    ukp_instance_t ukpi2 = ukpi;
+    
     for (size_t i = 0; i < num_times; ++i) {
       steady_clock::time_point t1 = steady_clock::now();
-      (*ukp_solver)(ukpi, ukps, false);
+      (*ukp_solver)(ukpi2, ukps, false);
       steady_clock::time_point t2 = steady_clock::now();
       duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
       run.times.push_back(time_span);
+      ukpi2 = ukpi;
     }
   } else {
     cout << "Couldn't open file" << path << endl;

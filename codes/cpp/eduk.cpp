@@ -224,9 +224,7 @@ struct S {
 
       s_pred_k = unique_ptr<S>(new S(k-1, c, items));
       l_items = Lazyfy(items);
-      item_t zero;
-      zero.w = 0;
-      zero.p = 0;
+      item_t zero(0, 0);
       addhead = AddHead(zero, this->begin());
       addtest = AddTest(items[k-1], &addhead, c);
       merge = Merge(s_pred_k->begin(), &addtest);

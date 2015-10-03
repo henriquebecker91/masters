@@ -12,3 +12,6 @@
 # material with copyrights
 papers/
 
+# instances that are too big for the repository
+data/sukp/big_instances/
+

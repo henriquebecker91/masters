@@ -17,20 +17,6 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   return make_pair(min,max);
 }
 
-/* Efficiency nonascending first weight nondescending after */
-bool efficiency_order(const item_t& i, const item_t& j) {
-  rational<size_t> ri(i.w, i.p);
-  rational<size_t> rj(j.w, j.p);
-
-  return ri == rj ? i.w < j.w : ri < rj;
-}
-
-void sort_by_efficiency(vector<item_t> &items) {
-  sort(items.begin(), items.end(), efficiency_order);
-
-  return;
-}
-
 size_t get_opt_y(size_t c, const vector<item_t> &items, const vector<size_t> &g, const vector<size_t> &d, size_t w_min) {
   size_t ix = c - w_min;
 
@@ -76,7 +62,7 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   g.assign(c+max_w+1, 0);
   d.assign(c+max_w+1, n-1);
   
-//  size_t last_y_where_nonbest_item_was_used = 0;
+  //size_t last_y_where_nonbest_item_was_used = 0;
 
   /* this block is a copy-past of the loop bellow only for the best item */
   size_t wb = items[0].w;
@@ -86,19 +72,19 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   for (size_t i = n-1; i > 0; --i) {
     size_t pi = items[i].p;
     size_t wi = items[i].w;
-//    if (g[wi] < pi) {
+    if (g[wi] < pi) {
       g[wi] = pi;
       d[wi] = i;
-/*      if (wi > last_y_where_nonbest_item_was_used) {
+      /*if (wi > last_y_where_nonbest_item_was_used) {
         last_y_where_nonbest_item_was_used = wi;
       }*/
-//    }
+    }
   }
 
   opt = 0;
-  for (size_t y = min_w; y < c; ++y) {
+  for (size_t y = min_w; y <= c-min_w; ++y) {
     if (g[y] <= opt) continue;
-//    if (last_y_where_nonbest_item_was_used < y) break;
+    //if (last_y_where_nonbest_item_was_used < y) break;
 
     size_t gy, dy;
     opt = gy = g[y];
@@ -126,12 +112,12 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
       if (ogny < ngny) {
         g[ny] = ngny;
         d[ny] = ix;
-//        if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
+        //if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
       }
     } 
   }
 
-/*  if (last_y_where_nonbest_item_was_used < c-1) {
+  /*if (last_y_where_nonbest_item_was_used < c-1) {
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
 
@@ -149,7 +135,15 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
     g[c] = g[opt_y] + profit_generated_by_best_item;
   }*/
 
-  if (opt < g[c]) opt = g[c];
+  //size_t y_opt = c-min_w;
+  for (size_t y = c-min_w+1; y <= c; ++y) {
+    if (opt < g[y]) {
+      opt = g[y];
+      //y_opt = y;
+    }
+  }
+
+  //if (g[y_opt] != opt) opt = 0;
 
   return;
 }

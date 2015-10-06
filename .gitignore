@@ -15,3 +15,9 @@ papers/
 # instances that are too big for the repository
 data/sukp/big_instances/
 
+# latex
+*.aux
+*.bbl
+*.log
+*.blg
+

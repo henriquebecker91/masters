@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <memory>
 #include <forward_list>
-#include <list>
 
 #define MAX_MEMORY_WASTED_BY_S 10
 
@@ -275,7 +274,7 @@ struct S {
   }
 };
 
-void eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted) {
+void eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
   size_t n = ukpi.items.size();
   size_t c = ukpi.c;
   vector<item_t> &items(ukpi.items);

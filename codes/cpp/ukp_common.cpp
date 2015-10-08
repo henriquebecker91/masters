@@ -1,10 +1,12 @@
+#ifdef INT_EFF
+#include <boost/sort/spreadsort/spreadsort.hpp>
+#else
 #include <algorithm>
-#include <boost/rational.hpp>
+#endif
 
 #include "ukp_common.hpp"
 
 using namespace std;
-using namespace boost;
 
 void read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
   size_t n;
@@ -35,19 +37,12 @@ void write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
   return;
 }
 
-/* Efficiency nonascending first weight nondescending after */
-/*bool efficiency_order(const item_t& i, const item_t& j) {
-  rational<size_t> ri(i.w, i.p);
-  rational<size_t> rj(j.w, j.p);
-
-  return ri == rj ? i.w < j.w : ri < rj;
-}*/
-
-//#include <boost/sort/spreadsort/spreadsort.hpp>
-
 void sort_by_efficiency(vector<item_t> &items) {
-  sort(items.begin(), items.end());
-  //sort::spreadsort::spreadsort(items.begin(), items.end());
+  #ifdef INT_EFF
+  boost::sort::spreadsort::integer_sort(items.begin(), items.end());
+  #else
+  std::sort(items.begin(), items.end());
+  #endif
   return;
 }
 

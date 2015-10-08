@@ -1,10 +1,10 @@
-#include <algorithm>
-#include <boost/rational.hpp>
-
 #include "ukp5.hpp"
 
+#if defined(CHECK_PERIODICITY) && (defined(INT_EFF) || defined(FP_EFF))
+  #error CHECK PERIODICITY ONLY MAKE SENSE IF THE ORDER IS NOT AN APPROXIMATION
+#endif
+
 using namespace std;
-using namespace boost;
 
 pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   size_t min, max;
@@ -34,8 +34,8 @@ size_t get_opt_y(size_t c, const vector<item_t> &items, const vector<size_t> &g,
 }
 
 /* This function reorders the ukpi.items vector, if you don't want this pass a
- * copy of the instance or pass it already ordered BY EFFICIENCY and true for
- * the parameter already_sorted.
+ * copy of the instance or pass it already ordered by non-decreasing efficiency
+ * and true for the parameter already_sorted.
  */
 void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
   size_t n = ukpi.items.size();
@@ -59,32 +59,38 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   }
   if (c < min_w) return;
 
-  g.assign(c+max_w+1, 0);
-  d.assign(c+max_w+1, n-1);
+  g.assign(c+1+(max_w-min_w), 0);
+  d.assign(c+1+(max_w-min_w), n-1);
   
-  //size_t last_y_where_nonbest_item_was_used = 0;
+  #ifdef CHECK_PERIODICITY
+  size_t last_y_where_nonbest_item_was_used = 0;
+  #endif
 
   /* this block is a copy-past of the loop bellow only for the best item */
   size_t wb = items[0].w;
   g[wb] = items[0].p;;
   d[wb] = 0;
 
-  for (size_t i = n-1; i > 0; --i) {
+  for (size_t i = 0; i < n; ++i) {
     size_t pi = items[i].p;
     size_t wi = items[i].w;
     if (g[wi] < pi) {
       g[wi] = pi;
       d[wi] = i;
-      /*if (wi > last_y_where_nonbest_item_was_used) {
+      #ifdef CHECK_PERIODICITY
+      if (wi > last_y_where_nonbest_item_was_used) {
         last_y_where_nonbest_item_was_used = wi;
-      }*/
+      }
+      #endif
     }
   }
 
   opt = 0;
   for (size_t y = min_w; y <= c-min_w; ++y) {
     if (g[y] <= opt) continue;
-    //if (last_y_where_nonbest_item_was_used < y) break;
+    #ifdef CHECK_PERIODICITY
+    if (last_y_where_nonbest_item_was_used < y) break;
+    #endif
 
     size_t gy, dy;
     opt = gy = g[y];
@@ -112,12 +118,15 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
       if (ogny < ngny) {
         g[ny] = ngny;
         d[ny] = ix;
-        //if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
+        #ifdef CHECK_PERIODICITY
+        if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
+        #endif
       }
     } 
   }
 
-  /*if (last_y_where_nonbest_item_was_used < c-1) {
+  #ifdef CHECK_PERIODICITY
+  if (last_y_where_nonbest_item_was_used < c-min_w) {
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
 
@@ -133,17 +142,16 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
 
     size_t opt_y = get_opt_y(c-space_used_by_best_item, items, g, d, min_w);
     g[c] = g[opt_y] + profit_generated_by_best_item;
-  }*/
+  }
+  #endif
 
-  //size_t y_opt = c-min_w;
+  size_t y_opt;
   for (size_t y = c-min_w+1; y <= c; ++y) {
     if (opt < g[y]) {
       opt = g[y];
-      //y_opt = y;
+      y_opt = y;
     }
   }
-
-  //if (g[y_opt] != opt) opt = 0;
 
   return;
 }

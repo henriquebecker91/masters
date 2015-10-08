@@ -127,20 +127,180 @@ After this explanation is easier to see that the first loop (lines~\ref{begin_tr
 The final loop retrieves the \(opt\) and the \(y_{opt}\) values for the optimal solution for capacity \(c\) (lines~\ref{get_y_opt_loop_begin}~\ref{get_y_opt_loop_end}). As we already saw, the outer loop ends with \(y = c-w_{min}\). We have the guarantee that \(opt\) isn't the optimal value for \(c\) yet because \(c-w_{min} \not\in \{c-w_{min}+1, \ldots, c\}\). We don't need to initialize \(y_{opt}\) as it's only written, not read, and we are sure that the last loop inner if will execute at least one time.
 
 \begin{algorithm}
-\caption{Second Phase -- Construction of \(x\) array}\label{alg:ukp6_second_phase}
+\caption{Second Phase -- Construction of \(x\) array}\label{alg:ukp5_second_phase}
 \begin{algorithmic}[1]
-\Procedure{UKP5\_ASSEMBLE\_X}{$n, w, g, y_{opt}$}
+\Procedure{UKP5\_ASSEMBLE\_X}{$n, w, d, y_{opt}$}
   \State \(x \gets\) array of \(n\) positions each one initialized with \(0\)\label{create_x}
   
-  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}
-    \If{\(g[w_i] < p_i\)}
-      \State \(g[w_i] \gets p_i\)
-      \State \(d[w_i] \gets i\)
-    \EndIf
-  \EndFor\label{end_trivial_bounds}
+  \While{\(y_{opt} \neq 0\)}
+    \State \(i \gets d[y_{opt}]\)
+    \State Increment \(x[i]\) value by one
+    \State \(y_{opt} \gets y_{opt} - w_i\)
+  \EndWhile
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+About the second phase, we can see that, as the found optimal solution is guaranteed to have exactly \(y_{opt}\) weight, we can subtract the solution items weights from \(y_{opt}\) with the guarantee that \(y_opt\) will become exactly zero after all solution items are retrieved. As the \(i = d[y_{opt}]\) value is the index of the most efficient item used in the solution, \(d[y_{opt} - w_i]\) will evaluate for the index of the most efficient item used in the rest of the solution, this logic can be applied successive times until all the items that compose the solution are discovered.
+
+\section{An example}
+
+Here we execute the UKP5 first phase algorithm step-by-step with the toy instance presented in \cite{garfinkel}. The instance consists in the following values: \(~c = 25,~w_1 = 6,~w_2 = 4,~w_3 = 3,~w_4 = 1,~p_1 = 11,~p_2 = 7,~p_3 = 5,~p_4 = 1\). The \(w\) and \(p\) order is already the non-decreasing efficiency order. The \(n,~w_{min}\) and \(w_{max}\) values can easily be derived from the instance as \(n = 4,~w_{min} = 1,~w_{max} = 6\). As this article page space is limited, UKP5 first phase never looks back, and only changes values at most \(w_{max}\) positions distant from the current \(y\) value, we will use tables with two times \(w_{max}\) cells.
+
+\begin{table}[h]
+\centering
+\caption{Memory after line \ref{create_d}}
+\label{mem_after_creation}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 0 &1 &2 &3 &4 &5 &6 &7 &8 &9 &10 &11 &12 &\dots\\
+\hline
+g: & 0 &0 &0 &0 &0 &0 &0 &0 &0 &0 &0 &0 &0 &\dots\\
+d: & 4 & 4 & 4 & 4 & 4 & 4 & 4 & 4 & 4 & 4 & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+Trivial, the memory was simply initialized.
+
+\begin{table}[h]
+\centering
+\caption{Memory after line \ref{end_trivial_bounds}}
+\label{mem_after_trivial_bounds}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 0 &\textbf{1} &2 &\textbf{3} &\textbf{4} &5 &\textbf{6} &7 &8 &9 &10 &11 &12 &\dots\\
+\hline
+g: & 0 & \textbf{1} &0 &\textbf{5} &\textbf{7} &0 &\textbf{11} &0 &0 &0 &0 &0 &0 &\dots\\
+d: & 4 & \textbf{4} & 4 & \textbf{3} & \textbf{2} & 4 & \textbf{1} & 4 & 4 & 4 & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+Also rather simple, every \(y = w_i\) for some \(i\) now have \(p_i\) (\(g\) array) or \(i\) (\(d\) array).
+
+\begin{table}[H]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 1)}
+\label{mem_y_1}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 0 & \textbf{1} &2 &3 &4 &5 &6 &7 &8 &9 &10 &11 &12 &\dots\\
+\hline
+g: & 0 & \textbf{1} &\textbf{2} &5 &\textbf{7} &\textbf{8} &11 &\textbf{12} &0 &0 &0 &0 &0 &\dots\\
+d: & 4 & \textbf{4} & \textbf{4} & 3 & \textbf{2} & \textbf{2} & 1 & \textbf{1} & 4 & 4 & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+The first iteration begins with \(y = w_{min} = 1\). Now we will use the following notation: the first all bold column is the one who the capacity \(y\) is equal to the \(y\) variable in the current outer loop; after this first column, the bold \(g\) and \(d\) values are the ones that were updated by the inner loop (a better bound was found in this iteration). Note that the \(d\) value can be updated for the same value it already had (especially when we use the least efficient item where the \(d[y]\) was \(n\)), but we will display it on bold font nonetheless. This iteration the item \(i = 4,~w_i = p_i = 1\) is combined with all items to make bounds for the capacities \(2, 4, 5\) and \(7\).
+
+\begin{table}[h]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 2)}
+\label{mem_y_2}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 0 &1 &\textbf{2} &3 &4 &5 &6 &7 &8 &9 &10 &11 &12 &\dots\\
+\hline
+g: & 0 &1 &\textbf{2} &5 &7 &8 &11 &12 &\textbf{13} &0 &0 &0 &0 &\dots\\
+d: & 4 & 4 &\textbf{4} & 3 & 2 & 2 & 1 & 1 & \textbf{1} & 4 & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+Here we see that combining two of the least efficient item with all items only improves the solution value for the capacity \(y = 8\) (whose previous solution was the trivial empty solution).
+
+\begin{table}[h]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 3)}
+\label{mem_y_3}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 0 &1 &2 & \textbf{3} &4 &5 &6 &7 &8 &9 &10 &11 &12 &\dots\\
+\hline
+g: & 0 &1 &2 & \textbf{5} &7 &8 &11 &12 &13 &\textbf{16} &0 &0 &0 &\dots\\
+d: & 4 & 4 & 4 & \textbf{3} & 2 & 2 & 1 & 1 & 1 & \textbf{1} & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+Combining the item \(3\) with items \(1, 2\) and \(3\) also only yield one improvement (and also from the trivial empty solution). We don't combine with all items in this iteration because \(d[y] = 3\).
+
+\begin{table}[H]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 4)}
+\label{mem_y_4}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 0 &1 &2 &3 &\textbf{4} &5 &6 &7 &\textbf{8} &9 &\textbf{10} &11 &12 &\dots\\
+\hline
+g: & 0 &1 &2 &5 &\textbf{7} &8 &11 &12 &\textbf{14} &16 &\textbf{18} &0 &0 &\dots\\
+d: & 4 & 4 & 4 & 3 & \textbf{2} & 2 & 1 & 1 & \textbf{2} & 1 & \textbf{1} & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+Combining the item \(2\) with the first an the second items yield an improvement on an already existing non-trivial solution bound (\(y = 8\)), and shows that an \(d[y]\) value can increase value again after decreasing (\(d[8]\) changed from \(n\) to \(1\), and now to \(2\) again). We will not comment anymore on the improvements made over the trivial empty solution, since it's already clear that they will happen every iteration, when combining the current solution with the item of the largest weight, who's the first item, and will always be avaliable for combination.
+
+\begin{table}[h]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 5)}
+\label{mem_y_5}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 0 &1 &2 &3 &4 &\textbf{5} &6  &7  &8  &9  &10 &\textbf{11} &12 &\dots\\
+\hline
+g: & 0 &1 &2 &5 &7 &\textbf{8} &11 &12 &14 &16 &18 &\textbf{19} &0 &\dots\\
+d: & 4 & 4 & 4 & 3 & 2 & \textbf{2}& 1 & 1 & 2 & 1 & 1 & \textbf{1} & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+No comments.
+
+\begin{table}[h]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 6)}
+\label{mem_y_6}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & \textbf{6} &7   &8  &9  &10 &11 &\textbf{12} &13 &14 &15 &16 &17 &18 &\dots\\
+\hline
+g: & \textbf{11} &12 &14 &16 &18 &19 &\textbf{22} &0 &0 &0 &0 &0 &0 &\dots\\
+d: & \textbf{1} & 1  & 2 & 1 & 1 & 1 & \textbf{1} & 4& 4 & 4 & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+We shift the memory \(w_{max}\) positions to continue example (now the first \(y\) column is \(6\)). 
+
+\begin{table}[H]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 7)}
+\label{mem_y_7}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 6 &\textbf{7} &8 &9 &10 &11 &12 &\textbf{13} &14 &15 &16 &17 &18 &\dots\\
+\hline
+g: & 11 &\textbf{12} &14 &16 &18 &19 &22 &\textbf{23} &0 &0 &0 &0 &0 &\dots\\
+d: & 1 & \textbf{1} & 2 & 1 & 1 & 1 & 1 & \textbf{1} & 4 & 4 & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+No comment.
+
+\begin{table}[H]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 8)}
+\label{mem_y_8}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 6 &7 &\textbf{8} &9 &10 &11 &12 &13 &\textbf{14} & 15 &16 &17 &18 &\dots\\
+\hline
+g: & 11 &12 &\textbf{14} &16 &18 &19 &22 &23 &\textbf{25} &0 &0 &0 &0 &\dots\\
+d: & 1 & 1 & \textbf{2} & 1 & 1 & 1 & 1 & 1 & \textbf{1} & 4 & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+No comment.
+
+\begin{table}[H]
+\centering
+\caption{Memory at end of the outer loop (line \ref{main_ext_loop_end}) where (y = 9)}
+\label{mem_y_9}
+\begin{tabular}{l|rrrrrrrrrrrrrr}
+y: & 6 &7 &8 &\textbf{9} &10 &11 &12 &13 &14 &\textbf{15} &16 &17 &18 &\dots\\
+\hline
+g: & 11 &12 &14 &\textbf{16} &18 &19 &22 &23 &25 &\textbf{27} &0 &0 &0 &\dots\\
+d: & 1 & 1 & 2 & \textbf{1} & 1 & 1 & 1 & 1 & 1 & \textbf{1} & 4 & 4 & 4 & \dots\\
+\end{tabular}
+\end{table}
+
+Here something important happens. At the end of this outer loop, all the next \(d[y]\) values or are \(1\), or are \(n\) with \(g[y] = 0\). We already discussed this situation before at last section, when we said that the UKP5 implements periodicity implicity. As the inner loop will now only make the first iteration, our processing is reduced to \(\frac{1}{n} = \frac{1}{4}\) of the version without \(d\). If we were storing the position of the last \(d[y'] > 1\) and saw that \(y' < y\) we could interrupt the loop now and calculate the filling for the extra capacity by a simple formula.
+
 \end{document} 
 
 \bibliographystyle{sbc}

@@ -7,11 +7,11 @@
   #error ONLY ONE OF CHECK_PERIODICITY OR CHECK_PERIODICITY_FAST CAN BE DEFINED AT THE SAME TIME
 #endif
 
+#ifdef PROFILE
+#include <chrono>
+using namespace std::chrono;
+#endif
 using namespace std;
-
-struct shared_data_t {
-  vector<size_t> d;
-};
 
 pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   size_t min, max;
@@ -38,8 +38,7 @@ pair<size_t, size_t> get_opts(size_t c, const vector<size_t> &g, size_t w_min) {
   return make_pair(opt, y_opt);
 }
 
-void ukp5_phase2(const vector<item_t> &items, const shared_data_t &sd, ukp_solution_t &sol) {
-  const vector<size_t> &d = sd.d;
+void ukp5_phase2(const vector<item_t> &items, const vector<size_t> &d, ukp_solution_t &sol) {
   size_t n = items.size();
   vector<size_t> qts_its(n, 0);
 
@@ -61,22 +60,16 @@ void ukp5_phase2(const vector<item_t> &items, const shared_data_t &sd, ukp_solut
   return;
 }
 
-void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, bool already_sorted/* = false*/) {
-  size_t n = ukpi.items.size();
-  size_t c = ukpi.c;
-  vector<item_t> &items = ukpi.items;
-  if (!already_sorted) sort_by_efficiency(ukpi.items);
+void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &d, ukp_solution_t &sol, size_t w_min, size_t w_max) {
+  const size_t &c = ukpi.c;
+  const size_t &n = ukpi.items.size();
+  const vector<item_t> &items = ukpi.items;
 
-  auto minmax_w = minmax_item_weight(items);
-  size_t min_w = minmax_w.first, max_w = minmax_w.second;
-
-  vector<size_t> g(c+1+(max_w-min_w), 0);
-  vector<size_t> &d = sd.d;
-  d.assign(c+1+(max_w-min_w), n-1);
   size_t &y_opt = sol.y_opt;
   size_t &opt = sol.opt;
+
   opt = 0;
-  
+
   #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
   size_t last_y_where_nonbest_item_was_used = 0;
   #endif
@@ -86,21 +79,23 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
    * the looser, and the periodicity check doesn't seem to
    * consume much of the algorithm time
    */
-  vector<size_t> max_ws;
-  max_ws.reserve(n);
-  max_ws.push_back(items[0].w);
+  vector<size_t> w_maxs;
+  w_maxs.reserve(n);
+  w_maxs.push_back(items[0].w);
   for (size_t i = 1; i < n; ++i) {
-    max_ws.push_back(max(max_ws[i-1], items[i].w));
+    w_maxs.push_back(max(w_maxs[i-1], items[i].w));
   }
   #endif
 
-  /* this block is a copy-past of the loop bellow only for the best item */
+  /* this block is a copy-past of the loop bellow only for the best item
+   * its utility is to simplify the code when CHECK_PERIODICITY is defined
+   */
   size_t wb = items[0].w;
   g[wb] = items[0].p;;
   d[wb] = 0;
 
   #ifdef CHECK_PERIODICITY_FAST
-  last_y_where_nonbest_item_was_used = max_w;
+  last_y_where_nonbest_item_was_used = w_max;
   #endif
   for (size_t i = 0; i < n; ++i) {
     size_t pi = items[i].p;
@@ -117,7 +112,7 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
   }
 
   opt = 0;
-  for (size_t y = min_w; y <= c-min_w; ++y) {
+  for (size_t y = w_min; y <= c-w_min; ++y) {
     if (g[y] <= opt) continue;
     #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
     if (last_y_where_nonbest_item_was_used < y) break;
@@ -128,10 +123,12 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
     dy = d[y];
 
     #ifdef CHECK_PERIODICITY_FAST
-    if (dy != 0) last_y_where_nonbest_item_was_used = y + max_ws[dy];
+    if (dy != 0) last_y_where_nonbest_item_was_used = y + w_maxs[dy];
     #endif
 
-    /* this block is a copy-past of the loop bellow only for the best item */
+    /* this block is a copy-past of the loop bellow only for the best item
+     * its utility is to simplify the code when CHECK_PERIODICITY is defined
+     */
     item_t bi = items[0];
     size_t pb = bi.p;
     size_t wb = bi.w;
@@ -161,7 +158,7 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
   }
 
   #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
-  if (last_y_where_nonbest_item_was_used < c-min_w) {
+  if (last_y_where_nonbest_item_was_used < c-w_min) {
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
 
@@ -170,20 +167,20 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
     a1 = items[0].w;
     size_t extra_capacity = c - y_;
 
-    size_t qt_best_item_used = extra_capacity / a1;
-    size_t profit_generated_by_best_item = qt_best_item_used*c1;
-    size_t space_used_by_best_item = qt_best_item_used*a1;
+    size_t space_used_by_best_item = extra_capacity - (extra_capacity % a1);
 
-    auto opts = get_opts(c-space_used_by_best_item, g, max_w);
-    opt = opts.first + profit_generated_by_best_item;
-    y_opt = opts.second;
-  } else {
-    auto opts = get_opts(c, g, min_w);
+    auto opts = get_opts(c-space_used_by_best_item, g, w_max);
     opt = opts.first;
     y_opt = opts.second;
+    sol.last_y = last_y_where_nonbest_item_was_used+1;
+  } else {
+    auto opts = get_opts(c, g, w_min);
+    opt = opts.first;
+    y_opt = opts.second;
+    sol.last_y = c-w_min;
   }
   #else
-  auto opts = get_opts(c, g, min_w);
+  auto opts = get_opts(c, g, w_min);
   opt = opts.first;
   y_opt = opts.second;
   #endif
@@ -196,8 +193,64 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
  * and true for the parameter already_sorted.
  */
 void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
-  shared_data_t sd;
-  ukp5_phase1(ukpi, sd, sol, already_sorted);
-  ukp5_phase2(ukpi.items, sd, sol);
+  #ifdef PROFILE
+  steady_clock::time_point all_ukp5_begin = steady_clock::now();
+  steady_clock::time_point begin = steady_clock::now();
+  #endif
+  if (!already_sorted) sort_by_efficiency(ukpi.items);
+  #ifdef PROFILE
+  sol.sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+  #endif
+
+  #ifdef PROFILE
+  begin = steady_clock::now();
+  #endif
+  size_t c = ukpi.c;
+  size_t n = ukpi.items.size();
+  auto minw_max = minmax_item_weight(ukpi.items);
+  size_t w_min = minw_max.first, w_max = minw_max.second;
+  #ifdef PROFILE
+  sol.linear_comp_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+  #endif
+
+  #ifdef PROFILE
+  begin = steady_clock::now();
+  #endif
+  vector<size_t> g(c+1+(w_max-w_min), 0);
+  vector<size_t> d(c+1+(w_max-w_min), n-1);
+  #ifdef PROFILE
+  sol.vector_alloc_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+  #endif
+
+  #ifdef PROFILE
+  begin = steady_clock::now();
+  #endif
+  ukp5_phase1(ukpi, g, d, sol, w_min, w_max);
+  #ifdef PROFILE
+  sol.phase1_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+  begin = steady_clock::now();
+  #endif
+  ukp5_phase2(ukpi.items, d, sol);
+  #ifdef PROFILE
+  sol.phase2_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+  sol.total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
+  #endif
+
+  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+  /* If we use our periodicity check the sol.used_items constructed by
+   * ukp5_phase2 doesn't include the copies of the best item used to
+   * fill all the extra_capacity. This solves it. */
+  size_t qt_best_item_inserted_by_periodicity = (c - sol.y_opt)/ukpi.items[0].w;
+  sol.opt += qt_best_item_inserted_by_periodicity*ukpi.items[0].p;
+  sol.y_opt+= qt_best_item_inserted_by_periodicity*ukpi.items[0].w;
+  /* Our periodicity check will always get a partial solution that have at
+   * least one of the best item. And ukp5_phase2 will populate the
+   * sol.used_items in the same order the sol.items are, this way we
+   * have the guarantee that the first element of sol.used_items
+   * exist and it's the best item. */
+  sol.used_items[0].qt += qt_best_item_inserted_by_periodicity;
+  #endif
+
+  return;
 }
 

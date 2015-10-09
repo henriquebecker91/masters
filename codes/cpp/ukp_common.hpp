@@ -42,6 +42,10 @@
 #include <vector>
 #include <istream>
 
+#if defined(TWO_MULT_COMP) || defined(INT_EFF)
+#include <utility> /* to specialize swap */
+#endif
+
 #ifdef RATIONAL_EFF
 #include <boost/rational.hpp>
 #endif
@@ -100,6 +104,21 @@ struct item_t {
   #endif
 };
 
+#if defined(TWO_MULT_COMP) || defined(INT_EFF)
+#define XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
+namespace std {
+  template <>
+  inline void swap(item_t& a, item_t& b)
+  {
+    XORSWAP(a.w, b.w);
+    XORSWAP(a.p, b.p);
+    #ifdef INT_EFF
+    XORSWAP(a.efficiency, b.efficiency);
+    #endif
+  }
+}
+#endif
+
 struct ukp_instance_t {
   size_t c;
   std::vector<item_t> items;
@@ -117,6 +136,17 @@ struct ukp_solution_t {
   size_t opt;
   size_t y_opt;
   std::vector<ukp_itemqt_t> used_items;
+  #ifdef PROFILE
+  double sort_time;
+  double vector_alloc_time;
+  double linear_comp_time;
+  double phase1_time;
+  double phase2_time;
+  double total_time;
+  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+  size_t last_y;
+  #endif /* PERIODICITY */
+  #endif /* PROFILE */
 };
 
 void read_sukp_instance(std::istream &in, ukp_instance_t &ukpi);

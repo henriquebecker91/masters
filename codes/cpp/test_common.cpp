@@ -1,8 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <array>
+#include <iomanip>
 
 #include "test_common.hpp"
+
+#ifndef PROFILE_PRECISION
+  #define PROFILE_PRECISION 5
+#endif
 
 using namespace std;
 using namespace std::chrono;
@@ -97,14 +102,50 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
   int status = run_ukp(ukp_solver, path, run);
 
   if (status == EXIT_SUCCESS) {
-    cout << run.result.opt << endl;
+    cout << "opt:    " << run.result.opt << endl;
+    cout << "y_opt:  " << run.result.y_opt << endl;
+    #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+    cout << "last_y: " << run.result.last_y << endl;
+    #endif
     for (auto it = run.result.used_items.cbegin(); it != run.result.used_items.cend(); ++it) {
       cout << "qt: " << it->qt << " w: " << it->it.w << " p: " << it->it.p << endl;
     }
-    
+    #ifdef PROFILE
+    double &stime = run.result.sort_time, &vtime = run.result.vector_alloc_time,
+           &lctime = run.result.linear_comp_time, &p1time = run.result.phase1_time,
+           &p2time = run.result.phase2_time, &ttime = run.result.total_time;
+
+    streamsize old_precision = cout.precision(PROFILE_PRECISION);
+    int percent_size = 3+PROFILE_PRECISION;
+    ios_base::fmtflags old_flags = cout.setf(std::ios::fixed, std:: ios::floatfield);
+    char old_fill = cout.fill(' ');
+
+    cout << "Sort time: " << stime << "s (";
+    cout << setw(percent_size) << (stime/ttime)*100;
+    cout << "%)" << endl;
+    cout << "Vect time: " << vtime << "s (";
+    cout << setw(percent_size) << (vtime/ttime)*100;
+    cout << "%)" << endl;
+    cout << "O(n) time: " << lctime << "s (";
+    cout << setw(percent_size) << (lctime/ttime)*100;
+    cout << "%)" << endl;
+    cout << "pha1 time: " << p1time << "s (";
+    cout << setw(percent_size) << (p1time/ttime)*100;
+    cout << "%)" << endl;
+    cout << "pha2 time: " << p2time << "s (";
+    cout << setw(percent_size) << (p2time/ttime)*100;
+    cout << "%)" << endl;
+    cout << "Sum times: " << ttime << "s" << endl;
+
+    cout.fill(old_fill);
+    cout.setf(old_flags);
+    cout.precision(old_precision);
+
+    #else
     for (auto it = run.times.cbegin(); it != run.times.cend(); ++it) {
       cout << it->count() << endl;
     }
+    #endif
     cout << endl;
     return EXIT_SUCCESS;
   } else {

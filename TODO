@@ -1,5 +1,9 @@
-* Create algorithm for the second phase of UKP5 (return a solution with the used items).
-* Improve the periodicity check by precomputing the w_max for each value of \(i\).
 * Add procedure read_ukp_instance (to avoid editing the .ukp files).
 * Add this procedure to ruby too.
-* Test the sort variants using the run_per.out and test_per.out. Results ordering after by weight are a category, resultas that do not make this distinction are another. Remember to remove hypertreading, isolate cpus and execute on distinct cores.
+* Print n and c with the profile info.
+* Test the sort variants using the run_per.out and test_per.out. Remember to remove hypertreading, isolate cpus and execute on distinct cores.
+* Use tha above to Compare performance of XOR swap with generic template swap.
+* Debug CHECK_PERIODICITY_FAST. It's segfaulting with big instances (/data/sukp/big_instances/).
+* Comment the code more. Take one day to comment every tricky bit.
+* Consider the possibility of not initializing all the g and d vectors at first, but only reserve the necessary memory, and resize it as is necessary. The profiling shows that the vector initialization is dominant on some instances when periodicity is activated, and also that sometimes only a fraction of that vector is used.
+

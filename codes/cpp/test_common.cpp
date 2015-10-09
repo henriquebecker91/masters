@@ -98,8 +98,11 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
 
   if (status == EXIT_SUCCESS) {
     cout << run.result.opt << endl;
+    for (auto it = run.result.used_items.cbegin(); it != run.result.used_items.cend(); ++it) {
+      cout << "qt: " << it->qt << " w: " << it->it.w << " p: " << it->it.p << endl;
+    }
     
-    for (auto it = run.times.begin(); it != run.times.end(); ++it) {
+    for (auto it = run.times.cbegin(); it != run.times.cend(); ++it) {
       cout << it->count() << endl;
     }
     cout << endl;

@@ -282,8 +282,10 @@ void eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
 
   S s = S(n, c, items);
   auto it = s.begin();
-  consume(it, sol.res);
 
-  sol.opt = sol.res.back().p;
+  vector<item_t> res;
+  consume(it, res);
+
+  sol.opt = res.back().p;
 }
 

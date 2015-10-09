@@ -6,6 +6,10 @@
 
 using namespace std;
 
+struct shared_data_t {
+  vector<size_t> d;
+};
+
 pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   size_t min, max;
   min = max = items[0].w;
@@ -17,53 +21,71 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   return make_pair(min,max);
 }
 
-size_t get_opt_y(size_t c, const vector<item_t> &items, const vector<size_t> &g, const vector<size_t> &d, size_t w_min) {
-  size_t ix = c - w_min;
+pair<size_t, size_t> get_opts(size_t c, const vector<item_t> &items, const vector<size_t> &g, const vector<size_t> &d, size_t w_min) {
+  size_t opt = 0;
+  size_t y_opt;
 
-  size_t opt = g[ix];
-  size_t opt_y = ix;
-
-  for (size_t y = ix+1; y <= c; ++y) {
-    if (g[y] > opt) {
+  for (size_t y = (c-w_min)+1; y <= c; ++y) {
+    if (opt < g[y]) {
       opt = g[y];
-      opt_y = y;
+      y_opt = y;
     }
   }
 
-  return opt_y;
+  return make_pair(opt, y_opt);
 }
 
-/* This function reorders the ukpi.items vector, if you don't want this pass a
- * copy of the instance or pass it already ordered by non-decreasing efficiency
- * and true for the parameter already_sorted.
- */
-void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
+void ukp5_phase2(const vector<item_t> &items, const shared_data_t &sd, ukp_solution_t &sol) {
+  const vector<size_t> &d = sd.d;
+  size_t n = items.size();
+  vector<size_t> qts_its(n, 0);
+
+  size_t y_opt = sol.y_opt;
+  size_t dy_opt;
+  while (y_opt != 0) {
+    dy_opt = d[y_opt];
+    y_opt -= items[dy_opt].w;
+    ++qts_its[dy_opt];
+  }
+
+  for (size_t i = 0; i < n; ++i) {
+    if (qts_its[i] > 0) {
+      sol.used_items.emplace_back(items[i], qts_its[i]);
+    }
+  }
+  sol.used_items.shrink_to_fit();
+
+  return;
+}
+
+void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, bool already_sorted/* = false*/) {
   size_t n = ukpi.items.size();
   size_t c = ukpi.c;
-  vector<item_t> &items(ukpi.items);
+  vector<item_t> &items = ukpi.items;
   if (!already_sorted) sort_by_efficiency(ukpi.items);
 
   auto minmax_w = minmax_item_weight(items);
   size_t min_w = minmax_w.first, max_w = minmax_w.second;
 
-  vector<size_t> &g = sol.g;
-  vector<size_t> &d = sol.d;
+  vector<size_t> g(c+1+(max_w-min_w), 0);
+  vector<size_t> &d = sd.d;
+  d.assign(c+1+(max_w-min_w), n-1);
+  size_t &y_opt = sol.y_opt;
   size_t &opt = sol.opt;
   opt = 0;
-
-  /* After the block bellow we can safely assume that there are at least two
-   * items, and one of them is smaller than c*/
-  switch (n) {
-    case 0: return;
-    case 1: opt = (c % items[0].w)* items[0].p; return;
-  }
-  if (c < min_w) return;
-
-  g.assign(c+1+(max_w-min_w), 0);
-  d.assign(c+1+(max_w-min_w), n-1);
   
   #ifdef CHECK_PERIODICITY
   size_t last_y_where_nonbest_item_was_used = 0;
+  /* We could pre-compute the maximum weight at each point
+   * to accelerate the periodicity check, but this would make
+   * the looser, and the periodicity check doesn't seem to
+   * consume much of the algorithm time
+  vector<size_t> max_ws;
+  max_ws.reserve(n);
+  max_ws.push_back(items[0].w);
+  for (size_t i = 1; i < n; ++i) {
+    max_ws.push_back(max(max_ws[i-1], items[i].w));
+  }*/
   #endif
 
   /* this block is a copy-past of the loop bellow only for the best item */
@@ -95,6 +117,7 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
     size_t gy, dy;
     opt = gy = g[y];
     dy = d[y];
+    y_opt = y;
 
     /* this block is a copy-past of the loop bellow only for the best item */
     item_t bi = items[0];
@@ -130,29 +153,39 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
 
-    size_t extra_capacity = c - y_;
     size_t c1, a1;
     c1 = items[0].p;
     a1 = items[0].w;
+    size_t extra_capacity = c - y_;
 
     size_t qt_best_item_used = extra_capacity / a1;
-
     size_t profit_generated_by_best_item = qt_best_item_used*c1;
     size_t space_used_by_best_item = qt_best_item_used*a1;
 
-    size_t opt_y = get_opt_y(c-space_used_by_best_item, items, g, d, min_w);
-    g[c] = g[opt_y] + profit_generated_by_best_item;
+    auto opts = get_opts(c-space_used_by_best_item, items, g, d, max_w);
+    opt = opts.first + profit_generated_by_best_item;
+    y_opt = opts.second + space_used_by_best_item;
+  } else {
+    auto opts = get_opts(c, items, g, d, min_w);
+    opt = opts.first;
+    y_opt = opts.second;
   }
+  #else
+  auto opts = get_opts(c, items, g, d, min_w);
+  opt = opts.first;
+  y_opt = opts.second;
   #endif
 
-  size_t y_opt;
-  for (size_t y = c-min_w+1; y <= c; ++y) {
-    if (opt < g[y]) {
-      opt = g[y];
-      y_opt = y;
-    }
-  }
-
   return;
+}
+
+/* This function reorders the ukpi.items vector, if you don't want this pass a
+ * copy of the instance or pass it already ordered by non-decreasing efficiency
+ * and true for the parameter already_sorted.
+ */
+void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
+  shared_data_t sd;
+  ukp5_phase1(ukpi, sd, sol, already_sorted);
+  ukp5_phase2(ukpi.items, sd, sol);
 }
 

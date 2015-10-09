@@ -1,6 +1,5 @@
+* Create algorithm for the second phase of UKP5 (return a solution with the used items).
+* Improve the periodicity check by precomputing the w_max for each value of \(i\).
 * Add procedure read_ukp_instance (to avoid editing the .ukp files).
 * Add this procedure to ruby too.
-* Use macros to select the sort variant?
 * Test the sort variants using the run_per.out and test_per.out. Results ordering after by weight are a category, resultas that do not make this distinction are another. Remember to remove hypertreading, isolate cpus and execute on distinct cores.
-* Create UKP5 version that doesn't not need ordering.
-* Discover how to use spreadsort?

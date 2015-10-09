@@ -105,11 +105,18 @@ struct ukp_instance_t {
   std::vector<item_t> items;
 };
 
+struct ukp_itemqt_t {
+  item_t it;
+  size_t qt;
+
+  inline ukp_itemqt_t(void) {}
+  inline ukp_itemqt_t(const item_t &it, const size_t &qt) : it(it), qt(qt) {}
+};
+
 struct ukp_solution_t {
-  std::vector<size_t> g;
-  std::vector<size_t> d;
-  std::vector<item_t> res;
   size_t opt;
+  size_t y_opt;
+  std::vector<ukp_itemqt_t> used_items;
 };
 
 void read_sukp_instance(std::istream &in, ukp_instance_t &ukpi);

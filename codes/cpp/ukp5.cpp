@@ -1,7 +1,10 @@
 #include "ukp5.hpp"
 
-#if defined(CHECK_PERIODICITY) && (defined(INT_EFF) || defined(FP_EFF))
+#if (defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)) && (defined(INT_EFF) || defined(FP_EFF))
   #error CHECK PERIODICITY ONLY MAKE SENSE IF THE ORDER IS NOT AN APPROXIMATION
+#endif
+#if defined(CHECK_PERIODICITY) && defined(CHECK_PERIODICITY_FAST)
+  #error ONLY ONE OF CHECK_PERIODICITY OR CHECK_PERIODICITY_FAST CAN BE DEFINED AT THE SAME TIME
 #endif
 
 using namespace std;
@@ -21,7 +24,7 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   return make_pair(min,max);
 }
 
-pair<size_t, size_t> get_opts(size_t c, const vector<item_t> &items, const vector<size_t> &g, const vector<size_t> &d, size_t w_min) {
+pair<size_t, size_t> get_opts(size_t c, const vector<size_t> &g, size_t w_min) {
   size_t opt = 0;
   size_t y_opt;
 
@@ -74,18 +77,21 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
   size_t &opt = sol.opt;
   opt = 0;
   
-  #ifdef CHECK_PERIODICITY
+  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
   size_t last_y_where_nonbest_item_was_used = 0;
+  #endif
+  #ifdef CHECK_PERIODICITY_FAST
   /* We could pre-compute the maximum weight at each point
    * to accelerate the periodicity check, but this would make
    * the looser, and the periodicity check doesn't seem to
    * consume much of the algorithm time
+   */
   vector<size_t> max_ws;
   max_ws.reserve(n);
   max_ws.push_back(items[0].w);
   for (size_t i = 1; i < n; ++i) {
     max_ws.push_back(max(max_ws[i-1], items[i].w));
-  }*/
+  }
   #endif
 
   /* this block is a copy-past of the loop bellow only for the best item */
@@ -93,6 +99,9 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
   g[wb] = items[0].p;;
   d[wb] = 0;
 
+  #ifdef CHECK_PERIODICITY_FAST
+  last_y_where_nonbest_item_was_used = max_w;
+  #endif
   for (size_t i = 0; i < n; ++i) {
     size_t pi = items[i].p;
     size_t wi = items[i].w;
@@ -110,14 +119,17 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
   opt = 0;
   for (size_t y = min_w; y <= c-min_w; ++y) {
     if (g[y] <= opt) continue;
-    #ifdef CHECK_PERIODICITY
+    #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
     if (last_y_where_nonbest_item_was_used < y) break;
     #endif
 
     size_t gy, dy;
     opt = gy = g[y];
     dy = d[y];
-    y_opt = y;
+
+    #ifdef CHECK_PERIODICITY_FAST
+    if (dy != 0) last_y_where_nonbest_item_was_used = y + max_ws[dy];
+    #endif
 
     /* this block is a copy-past of the loop bellow only for the best item */
     item_t bi = items[0];
@@ -148,7 +160,7 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
     } 
   }
 
-  #ifdef CHECK_PERIODICITY
+  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
   if (last_y_where_nonbest_item_was_used < c-min_w) {
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
@@ -162,16 +174,16 @@ void ukp5_phase1(ukp_instance_t &ukpi, shared_data_t &sd, ukp_solution_t &sol, b
     size_t profit_generated_by_best_item = qt_best_item_used*c1;
     size_t space_used_by_best_item = qt_best_item_used*a1;
 
-    auto opts = get_opts(c-space_used_by_best_item, items, g, d, max_w);
+    auto opts = get_opts(c-space_used_by_best_item, g, max_w);
     opt = opts.first + profit_generated_by_best_item;
-    y_opt = opts.second + space_used_by_best_item;
+    y_opt = opts.second;
   } else {
-    auto opts = get_opts(c, items, g, d, min_w);
+    auto opts = get_opts(c, g, min_w);
     opt = opts.first;
     y_opt = opts.second;
   }
   #else
-  auto opts = get_opts(c, items, g, d, min_w);
+  auto opts = get_opts(c, g, min_w);
   opt = opts.first;
   y_opt = opts.second;
   #endif

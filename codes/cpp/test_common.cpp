@@ -20,7 +20,7 @@ int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const s
     ukp_instance_t ukpi;
     ukp_solution_t &ukps = run.result;
 
-    read_sukp_instance(f, ukpi);
+    read_ukp_instance(f, ukpi);
 
     // The function ukp_solver can change the argument, so we have to change it back
     // after each function call

@@ -41,6 +41,7 @@
 
 #include <vector>
 #include <istream>
+#include <stdexcept> /* for runtime_error */
 
 #if defined(TWO_MULT_COMP) || defined(INT_EFF)
 #include <utility> /* to specialize swap */
@@ -108,7 +109,7 @@ struct item_t {
 #define XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
 namespace std {
   template <>
-  inline void swap(item_t& a, item_t& b)
+  inline void swap(item_t& a, item_t& b) noexcept
   {
     XORSWAP(a.w, b.w);
     XORSWAP(a.p, b.p);
@@ -149,6 +150,12 @@ struct ukp_solution_t {
   #endif /* PROFILE */
 };
 
+struct ukp_read_error : std::runtime_error {
+  explicit ukp_read_error (const std::string &s) noexcept : std::runtime_error(s) {};
+  explicit ukp_read_error (const char* s) noexcept : runtime_error(s) {};
+};
+
+void read_ukp_instance(std::istream &in, ukp_instance_t &ukpi);
 void read_sukp_instance(std::istream &in, ukp_instance_t &ukpi);
 
 void write_sukp_instance(std::ostream &out, ukp_instance_t &ukpi);

@@ -1,3 +1,4 @@
+* Change C++ makefile to create intermediate object files. The static regex compilation is slowing compilation.
 * Add procedure read_ukp_instance (to avoid editing the .ukp files).
 * Add this procedure to ruby too.
 * Print n and c with the profile info.

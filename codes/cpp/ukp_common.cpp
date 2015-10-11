@@ -1,5 +1,5 @@
-#include <boost/xpressive/xpressive.hpp> /* for sregex::*, regex_match */
-#include <string> /* for stoll */
+#include <regex> /* for regex, regex_match */
+#include <string> /* for stoull */
 #include <iostream> /* for cout */
 
 #ifdef INT_EFF
@@ -11,80 +11,130 @@
 #include "ukp_common.hpp"
 
 using namespace std;
-using namespace boost::xpressive;
+using namespace std::regex_constants;
+
+static const string bs("[[:blank:]]*");
+static const string bp("[[:blank:]]+");
+static const string nb("([1-9][0-9]*)");
+
+static const string comm_s("[[:blank:]]*(#.*)?");
+static const regex  comm  (comm_s, extended | nosubs | optimize);
+
+void warn_about_premature_end(size_t n, size_t i) {
+  cerr << "WARNING: read_ukp_instance: the n value is " << n <<
+          " but 'end data' was found after only " << i << " items"
+          << endl;
+
+  return;
+}
+
+void warn_about_no_end(size_t n) {
+  cerr  << "WARNING: read_ukp_instance: the n value is " << n <<
+        " but no 'end data' was found after this number of items, instead" <<
+        " more items were found, ignoring those (only read the first " <<
+        n << " items)." << endl;
+
+  return;
+}
+
+void io_guard(const istream &in, const string &expected) {
+  if (!in.good()) {
+    throw ukp_read_error("Expected '" + expected + "' but file ended first.");
+  }
+
+  return;
+}
+
+void get_noncomment_line(istream &in, string &line, const string &exp) {
+  do getline(in, line); while (in.good() && regex_match(line, comm));
+  io_guard(in, exp);
+
+  return;
+}
+
+void get_noncomm_line_in_data(istream &in, string &line, const string &exp) {
+    static const string warn_blank_in_data =
+      "WARNING: read_ukp_instance: found a blank line inside data section.";
+
+    getline(in, line);
+    while (in.good() && regex_match(line, comm)) {
+      cout << warn_blank_in_data << endl;
+      getline(in, line);
+    }
+    io_guard(in, exp);
+
+    return;
+}
+
+void try_match(const regex &r, const string &l, const string &exp, smatch &m) {
+  if (!regex_match(l, m, r)) {
+    throw ukp_read_error("Expected '" + exp + "' but found '" + l + "'");
+  }
+  
+  return;
+}
 
 void read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
-  static sregex number     = sregex::compile("[1-9][0-9]*", regex_constants::icase);
-  static sregex comm       = sregex::compile("[:blank:]*(#.*)?", regex_constants::icase);
-  static sregex mline      = sregex::compile("[[:space:]]*n:[[:space:]]*([1-9][0-9]*)", regex_constants::icase);
-  static sregex cline      = "[:blank:]*c:[:blank:]*(\\d+)" >> comm;
-  static sregex begin_data = "[:blank:]*begin[:blank:]+data" >> comm;
-  static sregex item       = "[:blank:]*(\\d+)[:blank:]+(\\d+)" >> comm;
-  static sregex end_data   = "[:blank:]*end[:blank:]+data" >> comm;
+  static const string strange_line =
+    "error: read_ukp_instance: Found a strange line inside data section: ";
 
-  bool end_data_not_reached = true;
+  static const string m_exp     = "n/m: <number>";
+  static const string c_exp     = "c: <number>";
+  static const string begin_exp = "begin data";
+  static const string item_exp  = "<number> <number>";
+  static const string end_exp   = "end data";
+
+  static const string mline_s       = bs + "[mn]:" + bs + nb + comm_s;
+  static const string cline_s       = bs + "c:" + bs + nb + comm_s;
+  static const string begin_data_s  = bs + "begin" + bp + "data" + comm_s;
+  static const string item_s        = bs + nb + bp + nb + comm_s;
+  static const string end_data_s    = bs + "end" + bp + "data" + comm_s;
+
+  static const regex mline      (mline_s, extended | icase );
+  static const regex cline      (cline_s, extended | icase);
+  static const regex begin_data (begin_data_s, extended | icase | nosubs);
+  static const regex item       (item_s, extended | icase | optimize);
+  static const regex end_data   (end_data_s, extended | icase | nosubs);
+
   smatch what;
   string line;
 
-  getline(in, line);
-  if (!in.good()) throw ukp_read_error("Couldn't read the first line");
+  get_noncomment_line(in, line, m_exp);
+  try_match(mline, line, m_exp, what);
 
-  while (in.good() && regex_match(line, comm)) getline(in, line);
-  if (!in.good()) throw ukp_read_error("Last line read before i/o error: " + line);
-  if (!regex_match(line, what, mline)) throw ukp_read_error("First nocomment line isn't 'n: <number>' (" + line + ")");
-
-  size_t n = stoll(what[1]);
+  size_t n = stoull(what[1]);
   ukpi.items.reserve(n);
 
-  while (in.good() && regex_match(line, comm)) getline(in, line);
-  if (!in.good()) throw ukp_read_error("Last line read before i/o error: " + line);
-  if (!regex_match(line, what, cline)) throw ukp_read_error("First nocomment line after 'n: <number>' isn't 'c: <number>' (" + line + ")");
+  get_noncomment_line(in, line, c_exp);
+  try_match(cline, line, c_exp, what);
   
-  ukpi.c = stoll(what[1]);
+  ukpi.c = stoull(what[1]);
   
-  while (in.good() && regex_match(line, comm)) getline(in, line);
-  if (!in.good()) throw ukp_read_error("Last line read before i/o error: " + line);
-  if (!regex_match(line, begin_data)) throw ukp_read_error("First nocomment line after 'c: <number>' isn't 'begin data' (" + line + ")");
+  get_noncomment_line(in, line, begin_exp);
+  try_match(begin_data, line, begin_exp, what);
 
   for (size_t i = 0; i < n; ++i) {
-    getline(in, line);
-    if (!in.good()) throw ukp_read_error("Last line read before i/o error: " + line);
+    get_noncomm_line_in_data(in, line, item_exp);
 
     if (regex_match(line, what, item)) {
-      ukpi.items.emplace_back(stoll(what[1]), stoll(what[2]));
+      ukpi.items.emplace_back(stoull(what[1]), stoull(what[2]));
     } else {
       if (regex_match(line, end_data)) {
-        cout << "WARNING: read_ukp_instance: the n value is " << n <<
-             " but end_data was found after only " << i << " items"
-             << endl;
-        end_data_not_reached = false;
+        warn_about_premature_end(n, i);
         break;
-      } else if (regex_match(line, comm)) {
-        cout << "WARNING: read_ukp_instance: found a blank line inside data section." << endl;
       } else {
-        throw ukp_read_error("Strange line in the middle of data section (" + line + ")");
+        throw ukp_read_error(strange_line + "(" + line + ")");
       }
     }
   }
 
-  while (end_data_not_reached) {
-    getline(in, line);
-    while (in.good() && regex_match(line, comm)) {
-      cout << "WARNING: read_ukp_instance: found a blank line inside data section." << endl;
-      getline(in, line);
-    }
-    if (!in.good()) throw ukp_read_error("Last line read before i/o error: " + line);
-    if (regex_match(line, end_data)) {
-      end_data_not_reached = false;
+  get_noncomm_line_in_data(in, line, end_exp);
+
+  if (!regex_match(line, end_data)) {
+    if (regex_match(line, item)) {
+      warn_about_no_end(n);
     } else {
-      if (regex_match(line, item)) {
-        cout << "WARNING: read_ukp_instance: the n value is " << n <<
-             " but no end_data was found after this number of items, instead " <<
-             " more items were found, ignoring those (only read the first " <<
-             n << " items)." << endl;
-      } else {
-        throw ukp_read_error("Strange line in the middle of data section (" + line + ")");
-      }
+      throw ukp_read_error(strange_line + "(" + line + ")");
     }
   }
 }

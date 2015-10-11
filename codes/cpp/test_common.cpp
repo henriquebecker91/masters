@@ -56,7 +56,7 @@ int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool
 
   bool everything_ok = true;
   for (size_t i = 0; i < instances_data.size(); ++i) {
-    string path = "../../data/sukp/" + instances_data[i].name + ".sukp";
+    string path = "../../data/ukp/" + instances_data[i].name + ".ukp";
     cout << path << endl;
 
     run_t run;

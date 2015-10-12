@@ -9,7 +9,8 @@
   #ifndef FP_EFF
     #ifndef INT_EFF
       #ifndef TWO_MULT_COMP
-        #define TWO_MULT_COMP
+        #error ONE OF: RATIONAL_EFF, FP_EFF, INT_EFF OR TWO_MULT_COMP MUST BE \
+               DEFINED, THE RECOMMENDED IS TWO_MULT_COMP
       #endif
     #else /*INT_EFF*/
       #ifdef TWO_MULT_COMP
@@ -89,9 +90,6 @@ struct item_t {
   inline bool operator<(const item_t &o) const {
     return efficiency > o.efficiency || (efficiency == o.efficiency && w < o.w);
   }
-  #else
-    #error  One of the following macros must be defined: RATIONAL_EFF, FP_EFF,\
-            INT_EFF or TWO_MULT_COMP
   #endif
 
   #ifdef INT_EFF

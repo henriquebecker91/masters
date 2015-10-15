@@ -1,7 +1,7 @@
 all: run_eduk.out run_ukp5.out test_eduk.out test_ukp5.out run_per.out test_per.out
 
 CC=g++
-CFLAGS=-std=c++11 -Wall -Wconversion -O3 
+CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -O3 
 H_DEPS=test_common.hpp ukp_common.hpp
 O_DEPS=test_common.o ukp_common.o
 DEFS=-DTWO_MULT_COMP

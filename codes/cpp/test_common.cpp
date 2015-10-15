@@ -12,7 +12,7 @@
 using namespace std;
 using namespace std::chrono;
 
-int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const string& path, run_t &run, size_t num_times/* = 1*/) {
+int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const string& path, run_t &run) {
   ifstream f(path);
 
   if (f.is_open())
@@ -22,27 +22,19 @@ int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const s
 
     read_ukp_instance(f, ukpi);
 
-    // The function ukp_solver can change the argument, so we have to change it back
-    // after each function call
-    ukp_instance_t ukpi2 = ukpi;
-    
-    for (size_t i = 0; i < num_times; ++i) {
-      steady_clock::time_point t1 = steady_clock::now();
-      (*ukp_solver)(ukpi2, ukps, false);
-      steady_clock::time_point t2 = steady_clock::now();
-      duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-      run.times.push_back(time_span);
-      ukpi2 = ukpi;
-    }
+    steady_clock::time_point t1 = steady_clock::now();
+    (*ukp_solver)(ukpi, ukps, false);
+    steady_clock::time_point t2 = steady_clock::now();
+    run.time = duration_cast<duration<double>>(t2 - t1);
   } else {
-    cout << "Couldn't open file" << path << endl;
+    cout << "Couldn't open file: " << path << endl;
     return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;
 }
 
-int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), size_t num_times/* = 10*/) {
+int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool)) {
   array<instance_data_t, /*sizeof(instance_data_t)**/8> instances_data = {{
     { "corepb", 10077782 },
     { "exnsd16", 1029680 },
@@ -60,7 +52,7 @@ int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool
     cout << path << endl;
 
     run_t run;
-    int status = run_ukp(ukp_solver, path, run, num_times);
+    int status = run_ukp(ukp_solver, path, run);
 
     if (status == EXIT_SUCCESS) {
       size_t expected = instances_data[i].expected_opt;
@@ -69,9 +61,7 @@ int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool
       cout << "Obtained result: " << obtained << endl;
       everything_ok = everything_ok && expected == obtained;
 
-      for (auto it = run.times.begin(); it != run.times.end(); ++it) {
-        cout << it->count() << endl;
-      }
+      cout << "Seconds: " << run.time.count() << endl;
 
       cout << endl;
     } else {
@@ -142,9 +132,7 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
     cout.precision(old_precision);
 
     #else
-    for (auto it = run.times.cbegin(); it != run.times.cend(); ++it) {
-      cout << it->count() << endl;
-    }
+    cout << "Seconds: " << run.time.count() << endl;
     #endif
     cout << endl;
     return EXIT_SUCCESS;

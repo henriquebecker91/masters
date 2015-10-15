@@ -6,7 +6,7 @@
 
 struct run_t {
   ukp_solution_t result;
-  std::vector<std::chrono::duration<double>> times;
+  std::chrono::duration<double> time;
 };
 
 struct instance_data_t {
@@ -14,8 +14,8 @@ struct instance_data_t {
   size_t expected_opt;
 };
 
-int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const std::string& path, run_t &run, size_t num_times = 1);
-int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), size_t num_times = 10);
+int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const std::string& path, run_t &run);
+int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool));
 int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), int argc, char** argv);
 
 #endif //__TEST_COMMON_HPP_ 

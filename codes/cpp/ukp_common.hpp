@@ -103,7 +103,7 @@ struct item_t {
   #endif
 };
 
-#if defined(TWO_MULT_COMP) || defined(INT_EFF)
+#if (defined(TWO_MULT_COMP) || defined(INT_EFF)) && !NO_XOR_SWAP
 #define XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
 namespace std {
   template <>

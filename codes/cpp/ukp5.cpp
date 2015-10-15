@@ -26,7 +26,9 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
 
 pair<size_t, size_t> get_opts(size_t c, const vector<size_t> &g, size_t w_min) {
   size_t opt = 0;
-  size_t y_opt;
+  /* Dont need to be initialized, but initializing to stop compiler
+   * warning messages */
+  size_t y_opt = 0;
 
   for (size_t y = (c-w_min)+1; y <= c; ++y) {
     if (opt < g[y]) {

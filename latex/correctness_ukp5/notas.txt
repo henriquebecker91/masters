@@ -1,0 +1,19 @@
+A solution for an arbitrary UKP instance is a multiset of the items defined by the instance. The weight of a solution is the sum of all the items that compose it. The profit of a solution is analogue. A valid solution for an arbitrary UKP instance is a solution where solution weight is less or equal than the capacity established by the instance. The empty multiset is a trivial valid solution for any UKP instance. An optimal solution of an arbitrary UKP instance is a valid solution for that instance with the biggest profit between all valid solutions of that instance. The optimal solution value of an arbitrary UKP instance is the profit of an optimal solution of that instance. We say that one valid solution is worse than another valid solution (for the same UKP instance) when the first (the worst one) have a bigger weight and a smaller profit than the second (the better one). All the four dominance relations are simply special cases of the 
+
+The initial algorithm:
+	* We prove that it computes all valid solutions (and some more), but if two valid solutions have the same weight and differente profit values it stores only the one with the bigger profit value. We iterate from all the array to retrieve the optimal solution value.
+
+Adding the last for loop:
+	* As we prove that the optimal solution has to be somewhere between ((c-w_min)+1) and c (both limits included), we give a pass by that range and end up with the optimal solution profit value.
+
+The algorithm with the d array change:
+	* We prove that any solution generated the initial algorithm is yet generated, we only eliminated the many distinct ways to reach that solution.
+
+The algorithm with the if change:
+	* We do not generate all solutions anymore. Before this change we were generating solutions worse than others already created. We prove that from a solution that is worse than other cannot be created a solution that is optimal.
+
+The algorithm with the periodic check change:
+	* We prove that if a condition defined by us is met, we can stop the computation and calculate the optimal solution value from a simple formula in O(1) time.
+
+We show how to retrieve the x[i] values after the optimal solution computation value by our algorithm.
+

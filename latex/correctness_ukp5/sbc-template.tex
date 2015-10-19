@@ -61,8 +61,8 @@ The second phase is rather trivial and makes use of the \(y_{opt}\) value and th
 \caption{First Phase -- Computation of $opt$ and $y_{opt}$}\label{alg:ukp6_write_phase}
 \begin{algorithmic}[1]
 \Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
-  \State \(g \gets\) array of \(c + w_{max} + 1\) positions each one initialized with \(0\)\label{create_g}
-  \State \(d \gets\) array of \(c + w_{max} + 1\) positions each one initialized with \(n\)\label{create_d}
+  \State \(g \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(0\)\label{create_g}
+  \State \(d \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(n\)\label{create_d}
   
   \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}
     \If{\(g[w_i] < p_i\)}

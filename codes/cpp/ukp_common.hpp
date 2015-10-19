@@ -136,16 +136,27 @@ struct ukp_solution_t {
   size_t y_opt;
   std::vector<ukp_itemqt_t> used_items;
   #ifdef PROFILE
+  /* Time of each phase */
   double sort_time;
   double vector_alloc_time;
   double linear_comp_time;
   double phase1_time;
   double phase2_time;
   double total_time;
-  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
-  size_t last_y;
-  #endif /* PERIODICITY */
+  /* Some data about instance */
+  size_t c, n, w_min, w_max;
+  /* Some data about structures manipulates by ukp5 */
+  size_t last_dy_non_zero_non_n;
+  size_t qt_non_skipped_ys;
+  size_t qt_gy_zeros;
+  size_t qt_inner_loop_executions;
+  std::vector<size_t> qt_i_in_dy;
+  std::vector<size_t> g;
+  std::vector<size_t> d;
   #endif /* PROFILE */
+  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+  size_t last_y_value_outer_loop;
+  #endif /* PERIODICITY */
 };
 
 struct ukp_read_error : std::runtime_error {

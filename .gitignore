@@ -22,3 +22,7 @@ data/ukp/big_instances/
 *.log
 *.blg
 
+# R workspace
+.RData
+.Rhistory
+

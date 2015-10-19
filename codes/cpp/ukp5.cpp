@@ -24,6 +24,38 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   return make_pair(min,max);
 }
 
+#ifdef PROFILE
+void ukp5_gen_stats(size_t c, size_t n, size_t w_min, size_t w_max, const vector<size_t> &g, const vector<size_t> &d, ukp_solution_t &sol) {
+  sol.g = g;
+  sol.d = d;
+  sol.c = c;
+  sol.n = n;
+  sol.w_min = w_min;
+  sol.w_max = w_max;
+
+  sol.qt_i_in_dy.assign(n, 0);
+  sol.qt_i_in_dy[n-1] = w_min;
+  for (size_t y = w_min; y <= c-w_min; ++y) {
+    ++sol.qt_i_in_dy[d[y]];
+  }
+
+  sol.qt_gy_zeros = w_min;
+  size_t opt = 0;
+  sol.qt_non_skipped_ys = 0;
+  sol.qt_inner_loop_executions = 0;
+  for (size_t y = w_min; y <= c-w_min; ++y) {
+    if (g[y] > opt) {
+      ++sol.qt_non_skipped_ys;
+      sol.qt_inner_loop_executions += d[y];
+      opt = g[y];
+    }
+    if (g[y] == 0) ++sol.qt_gy_zeros;
+    if (d[y] != 0 && d[y] != (n-1)) sol.last_dy_non_zero_non_n = y;
+  }
+  return;
+}
+#endif
+
 pair<size_t, size_t> get_opts(size_t c, const vector<size_t> &g, size_t w_min) {
   size_t opt = 0;
   /* Dont need to be initialized, but initializing to stop compiler
@@ -164,8 +196,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
 
-    size_t c1, a1;
-    c1 = items[0].p;
+    size_t a1;
     a1 = items[0].w;
     size_t extra_capacity = c - y_;
 
@@ -174,12 +205,16 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
     auto opts = get_opts(c-space_used_by_best_item, g, w_max);
     opt = opts.first;
     y_opt = opts.second;
-    sol.last_y = last_y_where_nonbest_item_was_used+1;
+    #ifdef PROFILE
+    sol.last_y_value_outer_loop = last_y_where_nonbest_item_was_used+1;
+    #endif
   } else {
     auto opts = get_opts(c, g, w_min);
     opt = opts.first;
     y_opt = opts.second;
-    sol.last_y = c-w_min;
+    #ifdef PROFILE
+    sol.last_y_value_outer_loop = c-w_min;
+    #endif
   }
   #else
   auto opts = get_opts(c, g, w_min);
@@ -218,8 +253,20 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   #ifdef PROFILE
   begin = steady_clock::now();
   #endif
+
+  #ifdef PROFILE
+  /* Use the ukp_solution_t fields instead of local variables to propagate
+   * the array values. The arrays will be dumped to files, making possible
+   * study them with R or other tool. */
+  vector<size_t> &g = sol.g;
+  vector<size_t> &d = sol.d;
+  g.assign(c+1+(w_max-w_min), 0);
+  d.assign(c+1+(w_max-w_min), n-1);
+  #else
   vector<size_t> g(c+1+(w_max-w_min), 0);
   vector<size_t> d(c+1+(w_max-w_min), n-1);
+  #endif
+
   #ifdef PROFILE
   sol.vector_alloc_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   #endif
@@ -236,6 +283,10 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   #ifdef PROFILE
   sol.phase2_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   sol.total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
+  #endif
+
+  #ifdef PROFILE
+  ukp5_gen_stats(c, n, w_min, w_max, g, d, sol);
   #endif
 
   #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)

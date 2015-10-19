@@ -5,6 +5,10 @@
 
 #include "test_common.hpp"
 
+#ifdef PROFILE
+  #include <boost/filesystem.hpp>
+  using namespace boost::filesystem;
+#endif
 #ifndef PROFILE_PRECISION
   #define PROFILE_PRECISION 5
 #endif
@@ -84,26 +88,67 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
     return EXIT_FAILURE;
   }
 
-  string path(argv[1]);
-  cout << path << endl;
+  string spath(argv[1]);
+  cout << spath << endl;
 
   run_t run;
 
-  int status = run_ukp(ukp_solver, path, run);
+  int status = run_ukp(ukp_solver, spath, run);
 
   if (status == EXIT_SUCCESS) {
-    cout << "opt:    " << run.result.opt << endl;
-    cout << "y_opt:  " << run.result.y_opt << endl;
-    #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
-    cout << "last_y: " << run.result.last_y << endl;
+    const auto &res = run.result;
+
+    #ifdef PROFILE
+    path my_path(spath);
+    path filename = my_path.filename();
+    const string gd_path = "./g_dump_" + filename.native() + ".dat", dd_path = "./d_dump_" + filename.native() + ".dat";
+    ofstream gd(gd_path, ofstream::out|ofstream::trunc);
+    if (gd.is_open())
+    {
+      gd << "y\tgy" << endl;
+      for (size_t y = 0; y < res.g.size(); ++y) {
+        gd << y << "\t" << res.g[y] << endl;
+      }
+    } else {
+      cerr << "Couldn't open file: " << gd_path << endl;
+    }
+    ofstream dd(dd_path, ofstream::out|ofstream::trunc);
+    if (dd.is_open())
+    {
+      dd << "y\tdy" << endl;
+      for (size_t y = 0; y < res.d.size(); ++y) {
+        dd << y << "\t" << res.d[y] << endl;
+      }
+    } else {
+      cerr << "Couldn't open file: " << dd_path << endl;
+    }
     #endif
-    for (auto it = run.result.used_items.cbegin(); it != run.result.used_items.cend(); ++it) {
+
+    cout << "opt:    " << res.opt << endl;
+    cout << "y_opt:  " << res.y_opt << endl;
+    #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+    cout << "last_y_value_outer_loop: " << res.last_y_value_outer_loop << endl;
+    #endif
+    for (auto it = res.used_items.cbegin(); it != res.used_items.cend(); ++it) {
       cout << "qt: " << it->qt << " w: " << it->it.w << " p: " << it->it.p << endl;
     }
     #ifdef PROFILE
-    double &stime = run.result.sort_time, &vtime = run.result.vector_alloc_time,
-           &lctime = run.result.linear_comp_time, &p1time = run.result.phase1_time,
-           &p2time = run.result.phase2_time, &ttime = run.result.total_time;
+    cout << "c: " << res.c << endl;
+    cout << "n: " << res.n << endl;
+    cout << "w_min: " << res.w_min << endl;
+    cout << "w_max: " << res.w_max << endl;
+    cout << "last_dy_non_zero_non_n: " << res.last_dy_non_zero_non_n << endl;
+    cout << "qt_non_skipped_ys: " << res.qt_non_skipped_ys << endl;
+    cout << "qt_gy_zeros: " << res.qt_gy_zeros << endl;
+    cout << "qt_inner_loop_executions: " << res.qt_inner_loop_executions << endl;
+    cout << "qt_inner_loop_executions/qt_non_skipped_ys: " << ((long double) res.qt_inner_loop_executions)/((long double) res.qt_non_skipped_ys) << endl;
+    cout << "qt_inner_loop_executions/c: " << ((long double) res.qt_inner_loop_executions)/((long double) res.c) << endl;
+    cout << "(qt_inner_loop_executions/qt_non_skipped_ys)/n: " << ((long double) res.qt_inner_loop_executions)/((long double) res.qt_non_skipped_ys)/((long double)res.n)  << endl;
+    cout << "(qt_inner_loop_executions/c)/n: " << ((long double) res.qt_inner_loop_executions)/((long double) res.c)/((long double)res.n) << endl;
+
+    const double &stime = res.sort_time, &vtime = res.vector_alloc_time,
+      &lctime = res.linear_comp_time, &p1time = res.phase1_time,
+      &p2time = res.phase2_time, &ttime = res.total_time;
 
     streamsize old_precision = cout.precision(PROFILE_PRECISION);
     int percent_size = 3+PROFILE_PRECISION;
@@ -130,10 +175,8 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
     cout.fill(old_fill);
     cout.setf(old_flags);
     cout.precision(old_precision);
-
-    #else
-    cout << "Seconds: " << run.time.count() << endl;
     #endif
+    cout << "Seconds: " << run.time.count() << endl;
     cout << endl;
     return EXIT_SUCCESS;
   } else {

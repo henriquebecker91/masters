@@ -59,7 +59,7 @@ A solution for an arbitrary UKP instance is a multiset of the items defined by t
 
 If one solution is dominated by other, both can be subsets of optimal solutions\footnote{For example, see the following UKP instance: \(c = 10,~w_1 = 9,~w_2 = 10,~p_1 = p_2 = 10\); the solutions made from one item \(1\) or one item \(2\) are both optimal solutions. Other example: \(c = 12,~w_1 = 9,~w_2 = 10,~w_3 = 2,~p_1 = p_2 = 10, p3 = 1\).}. However, we can can assert that: if a solution \(s\) is dominated by a solution \(t\), and \(s\) is a subset of an optimal solution, then \(t\) is also a subset of an optimal solution.
 
-The proof is simple: lets suppose \(opt\) is an optimal solution, \(s \cup s' = opt\) and \(s\) is dominated by \(t\); lets define \(opt' = t \cup s'\); \(opt'\) will have a no lower profit and a no greater weight than \(opt\); \(opt'\) is a valid solution because its weight is less than or equal to another valid solution (\(opt\)); we have the guarantee that \(p_{opt'} \geq p_{opt}\) but also, as \(opt\) is an optimal solution, we have the guarantee that no valid solution has a greater profit than it, therefore \(p_{opt'} = p_{opt}\); by definition \(opt'\) is an optimal solution (there's no valid solution with greater profit); finally \(t \cup s' = opt' \implies t \subseteq opt')\), this way we prove that in this conditions \(t\) must be a subset of an optimal solution. If \(s' = \varnothing\) then both \(s\) and \(t\) are optimal solutions.
+The proof is simple: lets suppose \(opt\) is an optimal solution, \(s \cup s' = opt\) and \(s\) is dominated by \(t\); lets define \(opt' = t \cup s'\); \(opt'\) will have a no lower profit and a no greater weight than \(opt\); \(opt'\) is a valid solution because its weight is less than or equal to another valid solution (\(opt\)); we have the guarantee that \(p_{opt'} \geq p_{opt}\) but also, as \(opt\) is an optimal solution, we have the guarantee that no valid solution has a greater profit than it, therefore \(p_{opt'} = p_{opt}\); by definition \(opt'\) is an optimal solution (there's no valid solution with greater profit); finally \(t \cup s' = opt' \iff t \subseteq opt'\), this way we prove that in this conditions \(t\) must be a subset of an optimal solution. If \(s' = \varnothing\) then both \(s\) and \(t\) are optimal solutions.
 
 \section{The proof of correctness and explanation of the algorithm}
 
@@ -105,9 +105,9 @@ An UKP5 algorithm correctness proof constructed directly over the algorithm opti
 
 The UKP1 is an algorithm for computing the UKP optimal solution value. By that, we mean that the \(opt\) variable will have the optimal solution value by the end of the algorithm execution. The proof of its correctness is broken in the three theorems bellow.
 
-We will refer to the set of the valid solutions for an arbitrary UKP instance as \(V\), and the set of the items provided by the instance as \(I\). As we never mix items or solutions of two different instances this sintax isn't ambiguous. Also, we define \textit{profit dominance} as the dominance special case where the weight of two solutions is equal, but the profit can be distinct (i.e. \(s\) is profit dominated by \(t\) iff \(w_s = w_t \land p_s \leq p_t\)). For an UKP instance of capacity \(c\) there's a maximum of \(c+1\) non profit dominated instances\footnote{For an example, for any capacity \(c\), an instance that have an element with weight \(1\) will have \(c+1\) non profit dominated solutions (the empty solution and the solutions with \(k\)-times that one element, \(1 \leq k \leq c\)).}). These definitions will help us in the proof bellow.
+We will refer to the set of the valid solutions for an arbitrary UKP instance as \(V\), and the set of the items provided by the instance as \(I\). As we never mix items or solutions of two different instances this sintax isn't ambiguous. Also, we define \textit{profit-dominance} as the dominance special case where the weight of two solutions is equal, but the profit can be distinct (i.e. \(s\) is profit-dominated by \(t\) iff \(w_s = w_t \land p_s \leq p_t\)). For an UKP instance of capacity \(c\) there's a maximum of \(c+1\) non profit-dominated instances\footnote{For an example, for any capacity \(c\), an instance that have an element with weight \(1\) will have \(c+1\) non profit-dominated solutions (the empty solution and the solutions with \(k\)-times that one element, \(1 \leq k \leq c\)).}). These definitions will help us in the proof bellow.
 
-The main point of the proof is that UKP1 stores in \(g\) all valid solutions, except by the ones that are profit dominated by others. As we already saw, in (CITE DOMINANCE THEOREM), if a dominated solution would be part of an optimal solution, the dominator solution would too be part of an optimal solution. This way, we have no reason to store both dominated and dominator, and we can only store dominator solutions. As this excludes only dominated solutions, this cannot exclude all optimal solutions. Therefore the biggest profit value stored in \(g\) is by definition the optimal solution value.
+The main point of the proof is that UKP1 stores in \(g\) all valid solutions, except by the ones that are profit-dominated by others. As we already saw, in (CITE DOMINANCE THEOREM), if a dominated solution would be part of an optimal solution, the dominator solution would too be part of an optimal solution. This way, we have no reason to store both dominated and dominator, and we can only store dominator solutions. As this excludes only dominated solutions, this cannot exclude all optimal solutions. Therefore the biggest profit value stored in \(g\) is by definition the optimal solution value.
 
 \subsection{UKP1 First Theorem: All relevant solutions are generated}
 
@@ -120,29 +120,33 @@ The main point of the proof is that UKP1 stores in \(g\) all valid solutions, ex
 %\forall (y \in [w_{min},c]).~(g[y] = 0) \iff (\nexists (s \in V). (w_s = y))&&
 %\end{flalign}
 
-We define this theorem as: After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, the profit value of every non profit dominated valid solution can be found between positions \(0\) and \(c\) of array \(g\). We prove this theorem by induction.
+We define this theorem as: After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, for every valid non profit-dominated solution \(s\), the profit value of \(s\) is stored in \(g[w_s]\). In mathematical notation: \(\forall s' \in V.~\exists s \in V.~(w_{s'} = w_s) \land (p_{s'} \leq p_s) \land (g[w_s] = p_s)\). We prove this theorem by induction.
 
 \subsubsection{Base case: Empty solution}
 
-The empty solution is present, as \(g[0] = 0\) since line \ref{ukp1:create_g}, and is not modified until \ref{ukp1:main_ext_loop_end}.
+The empty solution is present, as \(g[0] = 0\) since line \ref{ukp1:create_g}, and is not modified after.
 
 \subsubsection{Base case: One single item solution}
 
-The UKP1 first loop (lines~\ref{begin_trivial_bounds}~to~\ref{end_trivial_bounds}) iterates all items and store its profits at \(g[w_i]\). If two or more items have the same weight only the greatest profit is stored. Every non profit dominated solution made up of only one item is therefore present. The second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) can change that, but only by replacing a one item solution by a multiple item solution that profit dominates it. As that one item solution was profit dominated, our theorem stands correct.
+The UKP1 first loop (lines~\ref{begin_trivial_bounds}~to~\ref{end_trivial_bounds}) iterates all items and store its profits at \(g[w_i]\). If two or more items have the same weight only the greatest profit is stored. Every non profit-dominated solution made up of only one item is therefore present. The second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) can change that, but only by replacing a one item solution by a multiple item solution that profit-dominates it. In this case, the one item solution was profit-dominated, so our theorem stands correct.
 
 \subsubsection{Induction Hypothesis: \(s\) solutions}
 
-Assume that, for every valid non profit dominated solution \(s\), the profit value of \(s\) is stored in \(g[w_s]\).
+Assume that for some valid nonempty non profit-dominated solution \(s\), the profit value of \(s\) is stored in \(g[w_s]\).
 
 \subsubsection{Step case: \(s \cup \{i\}\) solutions}
 
-Lets define the \(s'\) solution as \(\forall s \in V.~\forall i \in I.~(|s| > 0) \implies (s' = s \cup \{i\})\). From this definition we can derive that \(w_{s'} > w_s\) (all item weights are positive). So \(g[w_s]\) is found by the UKP1 second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) before \(g[w_s']\). We guarantee that the position \(g[w_s]\) will not be skipped by the if statement at line~\ref{ukp1:if_equal_to_zero} because, for any nonempty solution \(s\), \(p_s > 0\) and \(g[w_s] = p_s\). Then the UKP1 inner loop (lines~\ref{ukp1:main_inner_loop_begin}~to~\ref{ukp1:main_inner_loop_end}) will combine \(s\) with every item making every possible \(s'\) out of it. If there was already a solution with weight \(w_{s'}\), and \(s'\) profit dominates that solution, then \(g[w_s']\) is updated.
+Lets define the \(s'\) solution as \(\forall s \in V.~\forall i \in I.~(|s| > 0) \implies (s' = s \cup \{i\})\). From this definition we can derive that \(w_{s'} > w_s\) (all item weights are positive). So \(g[w_s]\) is found by the UKP1 second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) before \(g[w_s']\). We guarantee that the position \(g[w_s]\) will not be skipped by the if statement at line~\ref{ukp1:if_equal_to_zero} because, for any nonempty solution \(s\), \(p_s > 0\) and \(g[w_s] = p_s\). Then the UKP1 inner loop (lines~\ref{ukp1:main_inner_loop_begin}~to~\ref{ukp1:main_inner_loop_end}) will combine \(s\) with every item making every possible \(s'\) out of it. If there was already a solution with weight \(w_{s'}\), and \(s'\) profit-dominateds that solution, then \(g[w_s']\) is updated.
 
-This way, when the outer loop iteration with \(y = w_{s'}-w_{min}\) ends, UKP1 will have computed all the non profit dominated solutions with weight lesser than or equal to \(w_{s'}\). The final value of \(y\) is \(c-w_{min}\) so, after the last iteration of the outer loop, we will have stored in \(g\) all the non profit dominated solutions with weight lesser than or equal to \(c\) (i.e. all the valid non profit dominated solutions).
+This way, when the outer loop iteration with \(y = w_{s'}-w_{min}\) ends, UKP1 will have computed all the non profit-dominated solutions with weight lesser than or equal to \(w_{s'}\). The final value of \(y\) is \(c-w_{min}\) so, after the last iteration of the outer loop, we will have stored in \(g\) all the non profit-dominated solutions with weight lesser than or equal to \(c\) (i.e. all the valid non profit-dominated solutions).
 
-Observe that \(s'\) can be an invalid solution (\(w_{s'} > c\)). That is not relevant because our theorem is restricted to the \(g\) positions between \(0\) and \(c\).
+Observe that \(s'\) can be an invalid solution (\(w_{s'} > c\)). That is not relevant because our theorem states that all valid solutions are present, it does not says that invalid ones aren't.
 
 \subsection{UKP1 Second Theorem: An optimal solution is present in \(g\)}
+
+We define this theorem as: After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, there's a solution \(s\) that is optimal and \(g[w_s] = p_s\). In mathematical notation: \(\forall s' \in V.~\exists s \in V.~(p_{s'} \leq p_s) \land (g[w_s] = p_s)\).
+
+The first theorem (CITE DOMINANCE THEOREM) is valid for general dominance, therefore is valid for profit-dominance, that is a special case of general dominance. For every valid non profit-dominated solutions \(s\), \(g[w_s] = p_s\) is true. If an optimal solution was profit-dominated, its dominator is in \(g\) and is also optimal. If an optimal solution wasn't profit-dominated, it's already in \(g\). Anyway, \(g\) contains an optimal solution.
 
 \subsection{UKP1 Third Theorem: If there's an optimal solution in \(g\), \(opt\) value is equal to it}
 

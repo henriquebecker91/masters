@@ -1,3 +1,4 @@
+* Add test of profit dominance in the instance loading. Use dirty vector and a list to do this in O(2n).
 * Add read_upk procedure to ruby too.
 * Print n and c with the profile info.
 * Test the sort variants using the run_per.out and test_per.out. Remember to remove hypertreading, isolate cpus and execute on distinct cores.

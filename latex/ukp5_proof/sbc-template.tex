@@ -1,7 +1,9 @@
 \documentclass[12pt]{article}
 
 \usepackage{sbc-template}
-
+\usepackage{hyperref} % for theorem reference
+\usepackage{cleveref} % for theorem reference
+\usepackage{amsthm} % for proof
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{fixltx2e}
@@ -11,6 +13,38 @@
  
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{lemma}
+\newtheorem{corollary}{Corollary}
+\newcommand{\corollaryautorefname}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{claim}{Claim}
+\newtheorem{axiom}{Axiom}
+
+\usepackage{tikz}
+\newcommand{\drawvvector}[6]{
+	\def \origin {(#1,#2)}
+	\def \ymax {#3}
+	\def \rs {(#4,#5)}
+	\def \scale {#6}
+	\foreach \y in {0,...,\ymax}{
+		\draw [shift={\origin}](0,\y) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, \y + 0.5) {\(\y\)};
+	}
+}
+\newcommand{\drawhvector}[6]{
+	\def \origin {(#1,#2)}
+	\def \xmax {#3}
+	\def \rs {(#4,#5)}
+	\def \scale {#6}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin}] (\x,0) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
+	}
+}
+
 
 \sloppy
 
@@ -53,11 +87,11 @@ We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight and the bi
 
 \subsection{Some extra definitions}
 
-A solution for an arbitrary UKP instance is a multiset of the items defined by that instance. The weight of a solution is the solution items weight sum. The profit of a solution is analogue. A valid solution for an arbitrary UKP instance is a solution where the solution weight is less or equal than the capacity established by the instance. The empty multiset is a trivial valid solution for any UKP instance. An optimal solution of an arbitrary UKP instance is a valid solution with the biggest profit between all valid solutions of that instance. The optimal solution value of an arbitrary UKP instance is that instance optimal solution profit. We say that one solution \(s\) dominates another solution \(t\) in a UKP instance iff both are valid for that instance and \(w_s \leq w_t \land p_s \geq p_t\). All the four dominance relations presented in (CITE OTHER ARTICLES) are special cases of one solution being dominated by other (i.e. dominating other).
+A solution for an arbitrary UKP instance is a multiset of the items defined by that instance. The weight of a solution is the solution items weight sum. The profit of a solution is analogue. A valid solution for an arbitrary UKP instance is a solution where the solution weight is less or equal than the capacity established by the instance. The empty multiset is a trivial valid solution for any UKP instance. An optimal solution of an arbitrary UKP instance is a valid solution with the biggest profit between all valid solutions of that instance. The optimal solution value of an arbitrary UKP instance is that instance optimal solution profit. We say that one solution~\(s\) dominates another solution \(t\) in a UKP instance iff both are valid for that instance and \(w_s \leq w_t \land p_s \geq p_t\). All the four dominance relations presented in (CITE OTHER ARTICLES) are special cases of one solution being dominated by other (i.e. dominating other).
 
 \section{First Theorem: Dominance and optimal solutions}
 
-If one solution is dominated by other, both can be subsets of optimal solutions\footnote{For example, see the following UKP instance: \(c = 10,~w_1 = 9,~w_2 = 10,~p_1 = p_2 = 10\); the solutions made from one item \(1\) or one item \(2\) are both optimal solutions. Other example: \(c = 12,~w_1 = 9,~w_2 = 10,~w_3 = 2,~p_1 = p_2 = 10, p3 = 1\).}. However, we can can assert that: if a solution \(s\) is dominated by a solution \(t\), and \(s\) is a subset of an optimal solution, then \(t\) is also a subset of an optimal solution.
+If one solution is dominated by other, both can be subsets of optimal solutions\footnote{For example, see the following UKP instance: \(c = 10,~w_1 = 9,~w_2 = 10,~p_1 = p_2 = 10\); the solutions made from one item \(1\) or one item \(2\) are both optimal solutions. Other example: \(c = 12,~w_1 = 9,~w_2 = 10,~w_3 = 2,~p_1 = p_2 = 10, p3 = 1\).}. However, we can can assert that: if a solution~\(s\) is dominated by a solution \(t\), and \(s\) is a subset of an optimal solution, then \(t\) is also a subset of an optimal solution.
 
 The proof is simple: lets suppose \(opt\) is an optimal solution, \(s \cup s' = opt\) and \(s\) is dominated by \(t\); lets define \(opt' = t \cup s'\); \(opt'\) will have a no lower profit and a no greater weight than \(opt\); \(opt'\) is a valid solution because its weight is less than or equal to another valid solution (\(opt\)); we have the guarantee that \(p_{opt'} \geq p_{opt}\) but also, as \(opt\) is an optimal solution, we have the guarantee that no valid solution has a greater profit than it, therefore \(p_{opt'} = p_{opt}\); by definition \(opt'\) is an optimal solution (there's no valid solution with greater profit); finally \(t \cup s' = opt' \iff t \subseteq opt'\), this way we prove that in this conditions \(t\) must be a subset of an optimal solution. If \(s' = \varnothing\) then both \(s\) and \(t\) are optimal solutions.
 
@@ -94,11 +128,11 @@ An UKP5 algorithm correctness proof constructed directly over the algorithm opti
   \EndFor\label{ukp1:main_ext_loop_end}
   \State % Blank line
   \State \(opt \gets 0\)
-  \For{\(y \gets c-w_{min}+1,~c\)}\label{ukp1:opt_loop_begin}
+  \For{\(y \gets c-w_{min}+1,~c\)}\label{ukp1:get_opt_loop_begin}
     \If{\(g[y] > opt\)}\label{ukp1:opt_loop_if}
       \State \(opt \gets g[y]\)
     \EndIf
-  \EndFor\label{get_y_opt_loop_end}
+  \EndFor\label{ukp1:get_opt_loop_end}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -120,23 +154,28 @@ The main point of the proof is that UKP1 stores in \(g\) all valid solutions, ex
 %\forall (y \in [w_{min},c]).~(g[y] = 0) \iff (\nexists (s \in V). (w_s = y))&&
 %\end{flalign}
 
-We define this theorem as: After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, for every valid non profit-dominated solution \(s\), the profit value of \(s\) is stored in \(g[w_s]\). In mathematical notation: \(\forall s' \in V.~\exists s \in V.~(w_{s'} = w_s) \land (p_{s'} \leq p_s) \land (g[w_s] = p_s)\). We prove this theorem by induction.
+\begin{theorem}\label{theo:ukp1:all_relevant_solutions_present}
+After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, for every valid non profit-dominated solution~\(s^*\), the profit value of \(s^*\) is stored in \(g[w_{s^*}]\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(w_s = w_{s^*}) \land (p_s \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
+\end{theorem}
+%After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, exists at least one optimal solution~\(s^*\) for that \(g[w_{s^*}] = p_{s^*}\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(p_{s} \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
+
+We prove this theorem by structural induction.
 
 \subsubsection{Base case: Empty solution}
 
 The empty solution is present, as \(g[0] = 0\) since line \ref{ukp1:create_g}, and is not modified after.
 
-\subsubsection{Base case: One single item solution}
+\subsubsection{Base case: One single item solutions}
 
 The UKP1 first loop (lines~\ref{begin_trivial_bounds}~to~\ref{end_trivial_bounds}) iterates all items and store its profits at \(g[w_i]\). If two or more items have the same weight only the greatest profit is stored. Every non profit-dominated solution made up of only one item is therefore present. The second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) can change that, but only by replacing a one item solution by a multiple item solution that profit-dominates it. In this case, the one item solution was profit-dominated, so our theorem stands correct.
 
 \subsubsection{Induction Hypothesis: \(s\) solutions}
 
-Assume that for some valid nonempty non profit-dominated solution \(s\), the profit value of \(s\) is stored in \(g[w_s]\).
+Assume that for some valid nonempty non profit-dominated solution~\(s\), the profit value of \(s\) is stored in \(g[w_s]\).
 
 \subsubsection{Step case: \(s \cup \{i\}\) solutions}
 
-Lets define the \(s'\) solution as \(\forall s \in V.~\forall i \in I.~(|s| > 0) \implies (s' = s \cup \{i\})\). From this definition we can derive that \(w_{s'} > w_s\) (all item weights are positive). So \(g[w_s]\) is found by the UKP1 second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) before \(g[w_s']\). We guarantee that the position \(g[w_s]\) will not be skipped by the if statement at line~\ref{ukp1:if_equal_to_zero} because, for any nonempty solution \(s\), \(p_s > 0\) and \(g[w_s] = p_s\). Then the UKP1 inner loop (lines~\ref{ukp1:main_inner_loop_begin}~to~\ref{ukp1:main_inner_loop_end}) will combine \(s\) with every item making every possible \(s'\) out of it. If there was already a solution with weight \(w_{s'}\), and \(s'\) profit-dominateds that solution, then \(g[w_s']\) is updated.
+Lets define the \(s'\) solution as \(\forall s \in V.~\forall i \in I.~(|s| > 0) \implies (s' = s \cup \{i\})\). From this definition we can derive that \(w_{s'} > w_s\) (all item weights are positive). So \(g[w_s]\) is found by the UKP1 second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) before \(g[w_s']\). We guarantee that the position \(g[w_s]\) will not be skipped by the if statement at line~\ref{ukp1:if_equal_to_zero} because, for any nonempty solution~\(s\), \(p_s > 0\) and \(g[w_s] = p_s\). Then the UKP1 inner loop (lines~\ref{ukp1:main_inner_loop_begin}~to~\ref{ukp1:main_inner_loop_end}) will combine \(s\) with every item making every possible \(s'\) out of it. If there was already a solution with weight \(w_{s'}\), and \(s'\) profit-dominates that solution, then \(g[w_s']\) is updated.
 
 This way, when the outer loop iteration with \(y = w_{s'}-w_{min}\) ends, UKP1 will have computed all the non profit-dominated solutions with weight lesser than or equal to \(w_{s'}\). The final value of \(y\) is \(c-w_{min}\) so, after the last iteration of the outer loop, we will have stored in \(g\) all the non profit-dominated solutions with weight lesser than or equal to \(c\) (i.e. all the valid non profit-dominated solutions).
 
@@ -144,19 +183,131 @@ Observe that \(s'\) can be an invalid solution (\(w_{s'} > c\)). That is not rel
 
 \subsection{UKP1 Second Theorem: An optimal solution is present in \(g\)}
 
-We define this theorem as: After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, there's a solution \(s\) that is optimal and \(g[w_s] = p_s\). In mathematical notation: \(\forall s' \in V.~\exists s \in V.~(p_{s'} \leq p_s) \land (g[w_s] = p_s)\).
+\begin{corollary}\label{theo:ukp1:opt_is_present}
+%After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, if \(s\) is an optimal solution, then \(g[w_{s}] = p_{s}\). In mathematical notation: \(\forall s' \in V.~\forall s \in V.~(p_{s'} \leq p_s) \land (g[w_s] = p_s)\).
+After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, exists at least one optimal solution~\(s^*\) for that \(g[w_{s^*}] = p_{s^*}\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(p_{s} \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
+\end{corollary}
 
-The first theorem (CITE DOMINANCE THEOREM) is valid for general dominance, therefore is valid for profit-dominance, that is a special case of general dominance. For every valid non profit-dominated solutions \(s\), \(g[w_s] = p_s\) is true. If an optimal solution was profit-dominated, its dominator is in \(g\) and is also optimal. If an optimal solution wasn't profit-dominated, it's already in \(g\). Anyway, \(g\) contains an optimal solution.
+This corollary is implied by \autoref{theo:ukp1:all_relevant_solutions_present}, that we just proved true. If we look at the mathematical description of both theorems this becomes apparent. The only difference from this corollary and \autoref{theo:ukp1:all_relevant_solutions_present} (\(\forall s \in V.~\exists s^* \in V.~(w_s = w_{s^*}) \land (p_s \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\)) is that this corollary don't state that \((w_s = w_{s*})\). In other words, the theorem states that for every valid solution there's a solution with the same weight and a no lower profit stored in \(g\). The corollary states that for every valid solution there's a solution with a no lower profit stored in \(g\). As, by definition, there's an optimal solution in the set of the valid solutions, and we state that there's a solution with no lower profit stored in \(g\), then we are already stating that there's an optimal solution stored in \(g\).
 
-\subsection{UKP1 Third Theorem: If there's an optimal solution in \(g\), \(opt\) value is equal to it}
+%We could also have proven this using the first theorem (CITE DOMINANCE THEOREM). It is valid for general dominance, therefore is valid for profit-dominance, that is a special case of general dominance. For every valid non profit-dominated solution~\(s\), \(g[w_s] = p_s\) is true (CITE ALL VALID THEOREM). If an optimal solution was profit-dominated, its dominator is in \(g\) and is also optimal. If an optimal solution wasn't profit-dominated, it's already in \(g\). Anyway, \(g\) contains an optimal solution.
 
-\section{UKP2 -- Reducing the optimal solution value search range}
-Adding the last for loop:
-	* As we prove that the optimal solution has to be somewhere between \((c-w_min)+1\) and \(c\) (both limits included), we give a pass by that range and end up with the optimal solution profit value.
+\subsection{UKP1 Third Theorem: \(opt\) value is equal to the optimal solution value}
 
-\section{UKP3 -- Pruning symmetry -- Only one way to reach each solution}
-The algorithm with the d array change:
-	* We prove that any solution generated the initial algorithm is yet generated, we only eliminated the many distinct ways to reach that solution.
+\begin{theorem}\label{theo:ukp1:opt_variable}
+After the execution of UKP1 line~\ref{ukp1:get_opt_loop_end}, the \(opt\) variable value is the optimal solution value. In mathematical notation: \(\exists s \in V.~\forall s' \in V.~(p_s \geq p_{s'}) \land (opt = p_s)\).
+\end{theorem}
+
+To prove this theorem we will first prove another closely related theorem.
+
+\begin{theorem}\label{theo:opt_sol_weight_range}
+If \(s^*\) is an optimal solution, then \(c - w_{min} < w_{s^*} \leq c\). In mathematical notation: \(\forall s^* \in V.~(\nexists s \in V.~p_s > p_{s^*}) \implies ((c - w_{min} < w_{s^*}) \land (w_{s^*} \leq c))\).
+\end{theorem}
+
+Half of the proof is done by unraveling the optimal solution definition, the other half is done using a proof by contradiction.
+
+\begin{proof}
+Any optimal solution \(s^*\) is, by definition, a valid solution, and any valid solution~\(s\) have, by definition, \(w_s \leq c\); therefore any optimal solution \(s^*\) have \(w_{s^*} \leq c\). Now, lets suppose that exists an optimal solution \(s^*\) with \({w_{s^*} \leq c - w_{min}}\); by consequence there exists a valid solution \(s = s^* \cup \{i\}\) where \(w_i = w_{min}\); as all item profits are positive, \(p_s > p_{s^*}\) is guaranteed; if \(s^*\) is an optimal solution then there's no valid solution~\(s\) with \(p_s > p_{s^*}\); it was shown that a solution~\(s\) with this property exists, therefore \(s^*\) can't be an optimal solution; the only thing we assumed was that \(w_{s^*} \leq c - w_{min}\) so we can conclude that a solution can't be optimal and, at the same time, have its weight within this range. As we proved that there are no optimal solutions \(s^*\) with \(w_{s^*} > c\) or \(w_{s^*} \leq (c - w_{min})\), the weight of any optimal solution must be between \((c + w_{min}) + 1\) and \(c\).
+\end{proof}
+
+In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \autoref{theo:ukp1:opt_variable} is rather trivial. We know that at least one optimal solution is stored in \(g\) (\autoref{theo:ukp1:opt_is_present}), that the weight of an optimal solution is in the range \(c - w_{min} < w_{s^*} \leq c\) (\autoref{theo:opt_sol_weight_range}), and that an optimal solution has the biggest profit between all valid solutions (CITE DEFINITION), therefore the UKP1 last loop (lines~\ref{ukp1:get_opt_loop_begin}~to~\ref{ukp1:get_opt_loop_end}) must end with the optimal solution value stored in variable \(opt\).
+
+\section{UKP2 -- Pruning symmetry -- Only one way to reach each solution}
+
+\begin{algorithm}
+\caption{UKP One}\label{alg:ukp1}
+\begin{algorithmic}[1]
+\Procedure{UKP1}{$n, c, w, p, w_{min}, w_{max}$}
+  \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp1:create_g}
+  \State \underline{\(d \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(n\)\label{ukp1:create_d}}
+  \State % Blank line
+  \For{\(i \gets 1,~n\)}\label{begin_trivial_bounds}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \underline{\(d[w_i] \gets i\)}
+    \EndIf
+  \EndFor\label{end_trivial_bounds}
+  \State % Blank line
+  \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp1:main_ext_loop_begin}
+    \If{\(g[y] == 0\)}\label{ukp1:if_equal_to_zero}
+    	\State \textbf{continue}
+    \EndIf\label{ukp1:if_equal_to_zero}
+    \State % Blank line
+    \For{\(i \gets 1,~\underline{d[y]}\)}\label{ukp1:main_inner_loop_begin}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{ukp1:if_better_solution_begin}
+        \State \(g[y + w_i] \gets g[y] + p_i\)
+        \State \(\underline{d[y + w_i] \gets i}\)
+      \EndIf\label{ukp1:if_better_solution_end}
+    \EndFor\label{ukp1:main_inner_loop_end}
+  \EndFor\label{ukp1:main_ext_loop_end}
+  \State % Blank line
+  \State \(opt \gets 0\)
+  \For{\(y \gets c-w_{min}+1,~c\)}\label{ukp1:get_opt_loop_begin}
+    \If{\(g[y] > opt\)}\label{ukp1:opt_loop_if}
+      \State \(opt \gets g[y]\)
+    \EndIf
+  \EndFor\label{ukp1:get_opt_loop_end}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The code above is almost equal to the first one presented. The only lines that change are the ones underlined. The intent behind those lines is to avoid reaching the same solution by many paths, as this wastes computation and is not necessary for reaching an optimal solution. In the linear programming jargon what those lines do is to eliminate solution symmetry. To prove that the code stands correct we will update the proof of \ref{theo:ukp1:all_relevant_solutions_present}. But first we will give some explanation for the reasoning behind those changes.
+
+\begin{figure}
+\def \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\def \origin {(0,0)}
+\drawvvector{0}{0}{7}{1}{1}{0.5}
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
+
+\draw[dashed, thick] ++\origin +(0, 3.5) to [out=135,in=225] +(0, 7.5);
+\draw[dashed, thick] ++\origin +(0, 4.5) to [out=135,in=225] +(0, 7.5);
+
+\def \origin {(3,0)}
+\drawvvector{3}{0}{7}{1}{1}{0.5}
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
+
+\draw[dashed, thick] ++\origin +(0, 4.5) to [out=135,in=225] +(0, 7.5);
+
+\def \origin {(6,7)}
+\drawhvector{6}{6}{15}{1}{1}{0.5}
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(10.5, 0);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(9.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(10.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\def \origin {(6,4)}
+\drawhvector{6}{2}{15}{1}{1}{0.5}
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\end{tikzpicture}
+\caption{The solution \(\{2,1\}\) and \(\{2,1\}\) (with \(w_1 = 3\) and \(w_2 = 4\)) are the same. But it can be constructed by two different ways. The solution \(\{3,2,1\}\) can be also constructed by many ways (with \(w_1 = 4\), \(w_2 = 5\) and \(w_3 = 6\)). }
+\end{figure}
+
 
 \section{UKP4 -- Discarding solutions that can't lead to the optimal solution}
 The algorithm with the if change:

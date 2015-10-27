@@ -8,6 +8,7 @@
 \usepackage{mathtools}
 \usepackage{fixltx2e}
 \usepackage{enumerate}
+\usepackage{ulem} % for sout command (striken text)
 
 \usepackage[utf8]{inputenc}  
  
@@ -22,6 +23,9 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{claim}{Claim}
 \newtheorem{axiom}{Axiom}
+
+\let\subsectionautorefname\sectionautorefname
+\let\subsubsectionautorefname\sectionautorefname
 
 \usepackage{tikz}
 \newcommand{\drawvvector}[5]{
@@ -162,10 +166,12 @@ After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, for every valid n
 We prove this theorem by structural induction.
 
 \subsubsection{Base case: Empty solution}
+\label{ukp1:empty_solution_proof}
 
 The empty solution is present, as \(g[0] = 0\) since line \ref{ukp1:create_g}, and is not modified after.
 
 \subsubsection{Base case: One single item solutions}
+\label{ukp1:single_item_solution_proof}
 
 The UKP1 first loop (lines~\ref{begin_trivial_bounds}~to~\ref{end_trivial_bounds}) iterates all items and store its profits at \(g[w_i]\). If two or more items have the same weight only the greatest profit is stored. Every non profit-dominated solution made up of only one item is therefore present. The second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) can change that, but only by replacing a one item solution by a multiple item solution that profit-dominates it. In this case, the one item solution was profit-dominated, so our theorem stands correct.
 
@@ -174,12 +180,13 @@ The UKP1 first loop (lines~\ref{begin_trivial_bounds}~to~\ref{end_trivial_bounds
 Assume that for some valid nonempty non profit-dominated solution~\(s\), the profit value of \(s\) is stored in \(g[w_s]\).
 
 \subsubsection{Step case: \(s \cup \{i\}\) solutions}
+\label{ukp1:step_case_proof}
 
 Lets define the \(s'\) solution as \(\forall s \in V.~\forall i \in I.~(|s| > 0) \implies (s' = s \cup \{i\})\). From this definition we can derive that \(w_{s'} > w_s\) (all item weights are positive). So \(g[w_s]\) is found by the UKP1 second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) before \(g[w_s']\). We guarantee that the position \(g[w_s]\) will not be skipped by the if statement at line~\ref{ukp1:if_equal_to_zero} because, for any nonempty solution~\(s\), \(p_s > 0\) and \(g[w_s] = p_s\). Then the UKP1 inner loop (lines~\ref{ukp1:main_inner_loop_begin}~to~\ref{ukp1:main_inner_loop_end}) will combine \(s\) with every item making every possible \(s'\) out of it. If there was already a solution with weight \(w_{s'}\), and \(s'\) profit-dominates that solution, then \(g[w_s']\) is updated.
 
 This way, when the outer loop iteration with \(y = w_{s'}-w_{min}\) ends, UKP1 will have computed all the non profit-dominated solutions with weight lesser than or equal to \(w_{s'}\). The final value of \(y\) is \(c-w_{min}\) so, after the last iteration of the outer loop, we will have stored in \(g\) all the non profit-dominated solutions with weight lesser than or equal to \(c\) (i.e. all the valid non profit-dominated solutions).
 
-Observe that \(s'\) can be an invalid solution (\(w_{s'} > c\)). That is not relevant because our theorem states that all valid solutions are present, it does not says that invalid ones aren't.
+Note that \(s'\) can be an invalid solution (\(w_{s'} > c\)). That is not relevant because our theorem states that all valid solutions are present, it does not says that invalid ones aren't.
 
 \subsection{UKP1 Second Theorem: An optimal solution is present in \(g\)}
 
@@ -218,40 +225,40 @@ In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \aut
 \caption{UKP One}\label{alg:ukp1}
 \begin{algorithmic}[1]
 \Procedure{UKP1}{$n, c, w, p, w_{min}, w_{max}$}
-  \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp1:create_g}
-  \State \underline{\(d \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(n\)\label{ukp1:create_d}}
+  \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp2:create_g}
+  \State \underline{\(d \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(n\)\label{ukp2:create_d}}
   \State % Blank line
-  \For{\(i \gets 1,~n\)}\label{begin_trivial_bounds}
+  \For{\(i \gets 1,~n\)}\label{ukp2:begin_trivial_bounds}
     \If{\(g[w_i] < p_i\)}
       \State \(g[w_i] \gets p_i\)
       \State \underline{\(d[w_i] \gets i\)}
     \EndIf
-  \EndFor\label{end_trivial_bounds}
+  \EndFor\label{ukp2:end_trivial_bounds}
   \State % Blank line
-  \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp1:main_ext_loop_begin}
-    \If{\(g[y] == 0\)}\label{ukp1:if_equal_to_zero}
+  \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp2:main_ext_loop_begin}
+    \If{\(g[y] == 0\)}\label{ukp2:if_equal_to_zero}
     	\State \textbf{continue}
-    \EndIf\label{ukp1:if_equal_to_zero}
+    \EndIf\label{ukp2:if_equal_to_zero}
     \State % Blank line
-    \For{\(i \gets 1,~\underline{d[y]}\)}\label{ukp1:main_inner_loop_begin}
-      \If{\(g[y + w_i] < g[y] + p_i\)}\label{ukp1:if_better_solution_begin}
+    \For{\(i \gets 1,~\underline{d[y]}\)}\label{ukp2:main_inner_loop_begin}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{ukp2:if_better_solution_begin}
         \State \(g[y + w_i] \gets g[y] + p_i\)
         \State \(\underline{d[y + w_i] \gets i}\)
-      \EndIf\label{ukp1:if_better_solution_end}
-    \EndFor\label{ukp1:main_inner_loop_end}
-  \EndFor\label{ukp1:main_ext_loop_end}
+      \EndIf\label{ukp2:if_better_solution_end}
+    \EndFor\label{ukp2:main_inner_loop_end}
+  \EndFor\label{ukp2:main_ext_loop_end}
   \State % Blank line
   \State \(opt \gets 0\)
-  \For{\(y \gets c-w_{min}+1,~c\)}\label{ukp1:get_opt_loop_begin}
-    \If{\(g[y] > opt\)}\label{ukp1:opt_loop_if}
+  \For{\(y \gets c-w_{min}+1,~c\)}\label{ukp2:get_opt_loop_begin}
+    \If{\(g[y] > opt\)}\label{ukp2:opt_loop_if}
       \State \(opt \gets g[y]\)
     \EndIf
-  \EndFor\label{ukp1:get_opt_loop_end}
+  \EndFor\label{ukp2:get_opt_loop_end}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-The code above is almost equal to the first one presented. The only lines added or changed are the ones underlined. The intent behind those lines is to avoid reaching the same solution by many paths, as this wastes computation and is not necessary for reaching an optimal solution. In the linear programming jargon what those lines do is to eliminate solution symmetry. To prove that the code stands correct we will update the proof of \ref{theo:ukp1:all_relevant_solutions_present}. But first we will give some explanation for the reasoning behind those changes.
+The code above is almost equal to the first one presented. The only lines added or changed are the ones underlined. The intent behind those lines is to avoid reaching the same solution by many paths, as this wastes computation and is not necessary for reaching an optimal solution. In the linear programming jargon what those lines do is to eliminate solution symmetry. To prove that the code stands correct we will update the proof of \autoref{theo:ukp1:all_relevant_solutions_present}. But first we will give some explanation for the reasoning behind those changes.
 
 \begin{figure}
 \centering
@@ -315,17 +322,86 @@ The code above is almost equal to the first one presented. The only lines added 
 \label{fig:symmetry}
 \end{figure}
 
-The UKP1 already eliminated some symmetry. Of many solutions with the same weight only one is stored. As the same solution (reached from different points) has the same weight it will be stored only one time and used for creating new solutions only \(n\) times. This avoids creating an exponential number of equivalent solutions (all the permutations of an multiset). The problem with UKP1 is that the solution \(s\) will be stored in \(g[w_s]\) only one time, but it will be computed and compared (as in the line \(g[y + w_i] < g[y] + p_i\)) many times, when only one time was sufficient (for each distinct solution). 
+The UKP1 does not store symmetric solutions. Of many solutions with the same weight only one is stored. As the same solution (reached from different paths) has the same weight, it will be stored only one time and used for creating new solutions only \(n\) times. This avoids creating an exponential number of equivalent solutions (all the permutations of an multiset). The problem with UKP1 is that the solution \(s\) will be stored in \(g[w_s]\) only one time, but it will be computed and compared (as in the line \(g[y + w_i] < g[y] + p_i\)) many times, when only one time was sufficient (for each distinct solution). 
 
-The path for reaching a solution can be defined as a list of the items that compose the solution. To say that UKP computed the \([3,2,1]\) path is to say that: at \(y = w_3\) it computed \(g[y + w_2] < g[y] + p_2\), and at \(y = w_3 + w_2\) it computed \(g[y + w_1] < g[y] + p_1\). The UKP1 compute all the possible paths for a solution \(s\). The UKP2 compute only one path for each solution \(s\). This is done by defining an canonical ordering. Any ordering will suffice, the UKP2 specifically define that we will only add an item to an existing solution if its index is lower than the last item added. This is the same that specifying that only the \([3,2,1]\) will be computed (the following paths aren't computed \([3,1,2]\), \([2,3,1]\), \([2,1,3]\), \([1,2,3]\) and \([1,3,2]\)). The \(\autoref{fig:symmetry}\) shows a two item and a three item example of the difference between the paths computed on UKP1 and UKP2.
+The path for reaching a solution can be defined as a list of the items that compose the solution. To say that UKP computed the \([3,2,1]\) path is to say that: at \(y = w_3\) it computed \(g[y + w_2] < g[y] + p_2\), and at \(y = w_3 + w_2\) it computed \(g[y + w_1] < g[y] + p_1\). The UKP1 compute all the possible paths for a solution \(s\). The UKP2 compute only one path for each solution \(s\). This is done by defining a canonical ordering. Any ordering will suffice, the UKP2 specifically define that we will only add an item to an existing solution if its index is lower than or equal to the index of the last item added. This is the same as specifying that only the path \([3,2,1]\) will be computed (and that none of the following paths are computed: \([3,1,2]\), \([2,3,1]\), \([2,1,3]\), \([1,2,3]\) and \([1,3,2]\)). To implement this control we use the \(d\) array. The cell \(d[w_s]\) stores the index of the last item used to make solution \(s\) (\(s\) is the undominated solution of weight \(w_s\)). 
 
-\section{UKP4 -- Discarding solutions that can't lead to the optimal solution}
-The algorithm with the if change:
-	* We do not generate all solutions anymore. Before this change we were generating solutions worse than others already created. We prove that when we discard an solution, if it would lead to an optimal solution, then we already have a solution that will to lead to the optimal solution.
+The \(\autoref{fig:symmetry}\) shows a two item and a three item example of the difference between the paths computed on UKP1 and UKP2. We will discuss only the three item example here. Paths as \(\{4,4,4\}\) or \(\{5,5,4\}\) are also generated by UKP1 and UKP2, but aren't show in the figure to not pollute the example. The only paths shown in the figure are the ones that can lead to \(\{3,2,1\}\) or some equivalent solution (i.e. paths that take only one of each item). The top example show the behavior of UKP1, and the bottom one the behavior of UKP2. While UKP1 generates and test all paths that can lead to \(\{3,2,1\}\), UKP2 generate only \(\{3\}\), \(\{3,1\}\), \(\{3,2\}\) and \(\{3,2,1\}\).
 
-\section{UKP5 -- Knowing when to stop}
+\subsection{Updated theorem and proof}
+
+Our following theorem is the same as \ref{theo:ukp1:all_relevant_solutions_present} except it refers to UKP2.
+
+\begin{theorem}\label{theo:ukp2:all_relevant_solutions_present}
+After the execution of UKP2 line~\ref{ukp2:main_ext_loop_end}, for every valid non profit-dominated solution~\(s^*\), the profit value of \(s^*\) is stored in \(g[w_{s^*}]\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(w_s = w_{s^*}) \land (p_s \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
+\end{theorem}
+
+We prove this theorem by structural induction, as we did for \autoref{theo:ukp1:all_relevant_solutions_present} previously.
+
+\subsubsection{Base case: Empty solution and one single item solutions}
+
+The reasoning is the same presented in \autoref{ukp1:empty_solution_proof} and \autoref{ukp1:single_item_solution_proof}. The only difference is that the \(d[w_i]\) is updated with \(i\) (index of the last added item). The empty solution has \(d[0] = n\), but that is irrelevant because we know that no item is used to make the empty solution.
+
+\subsubsection{Induction Hypothesis: \(s\) solutions}
+
+Assume that for some valid nonempty non profit-dominated solution~\(s\), the profit value of \(s\) is stored in \(g[w_s]\), and the lowest index of an item used to make up \(s\) is stored in \(d[w_s]\). Both statements are true for each one of our nonempty base cases.
+
+\subsubsection{Step case: \(s \cup \{i\}\) solutions}
+
+Lets define the function \(min\_ix(s)\) as a function that maps a solution \(s\) to the index of the item with lowest index that compose \(s\) (i.e. \(min\_ix(s)\) return \(i\) where \(i\) is defined as follows \(\forall i' \in s.~\exists i \in s.~i \leq i'\)).
+
+Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid nonempty non profit-dominated solution with \(w_s \leq c-w_{min}\) and \(i \in I\). Our code only generates \(s'\) if \(i \leq d[w_s]\), but, for any \(s'\), there's a solution \(s\) and an item \(i\) that satisfies that premise. If \(i = min\_ix(s')\), \(s = s' - \{i\}\) and \(y = w_s\), the lines \ref{ukp2:main_ext_loop_begin}~to~\ref{ukp2:main_ext_loop_end} will compute \(s'\). As \(w_s < w_{s'}\) we guarantee that the loop will generate \(s'\) before reaching \(g[w_{s'}]\) (and \(d[w_{s'}]\)).
+
+\section{UKP3 -- Eliminating weight-dominance}
+\begin{algorithm}
+\caption{UKP One}\label{alg:ukp1}
+\begin{algorithmic}[1]
+\Procedure{UKP1}{$n, c, w, p, w_{min}, w_{max}$}
+  \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp3:create_g}
+  \State \(d \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(n\)\label{ukp3:create_d}
+  \State % Blank line
+  \For{\(i \gets 1,~n\)}\label{ukp3:begin_trivial_bounds}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \(d[w_i] \gets i\)
+    \EndIf
+  \EndFor\label{ukp3:end_trivial_bounds}
+  \State % Blank line
+  \State \underline{\(opt \gets 0\)}
+  \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp3:main_ext_loop_begin}
+    \If{\underline{\(g[y] \leq opt\)}}\label{ukp3:if_equal_to_zero}
+    	\State \textbf{continue}
+    \EndIf\label{ukp3:if_equal_to_zero}
+    \State % Blank line
+    \State \underline{\(opt \gets g[y]\)}
+    \State % Blank line
+    \For{\(i \gets 1,~d[y]\)}\label{ukp3:main_inner_loop_begin}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{ukp3:if_better_solution_begin}
+        \State \(g[y + w_i] \gets g[y] + p_i\)
+        \State \(d[y + w_i] \gets i\)
+      \EndIf\label{ukp3:if_better_solution_end}
+    \EndFor\label{ukp3:main_inner_loop_end}
+  \EndFor\label{ukp3:main_ext_loop_end}
+  \State % Blank line
+  \State \sout{\(opt \gets 0\)}
+  \For{\(y \gets c-w_{min}+1,~c\)}\label{ukp3:get_opt_loop_begin}
+    \If{\(g[y] > opt\)}\label{ukp3:opt_loop_if}
+      \State \(opt \gets g[y]\)
+    \EndIf
+  \EndFor\label{ukp3:get_opt_loop_end}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The UKP1 already discarded profit-dominated solutions 
+* We do not generate all solutions anymore. Before this change we were generating solutions worse than others already created. We prove that when we discard an solution, if it would lead to an optimal solution, then we already have a solution that will to lead to the optimal solution.
+
+\section{UKP4 -- Knowing when to stop}
 The algorithm with the periodic check change:
 	* We prove that if a condition defined by us is met, we can stop the computation and calculate the optimal solution value from a simple formula in O(1) time.
+
+\section{UKP5 -- Recovering an optimal solution}
+
 
 \end{document} 
 

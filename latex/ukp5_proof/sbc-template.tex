@@ -24,21 +24,21 @@
 \newtheorem{axiom}{Axiom}
 
 \usepackage{tikz}
-\newcommand{\drawvvector}[6]{
-	\def \origin {(#1,#2)}
-	\def \ymax {#3}
-	\def \rs {(#4,#5)}
-	\def \scale {#6}
+\newcommand{\drawvvector}[5]{
+	\edef \origin {#1}
+	\edef \ymax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
 	\foreach \y in {0,...,\ymax}{
 		\draw [shift={\origin}](0,\y) rectangle +\rs;
 		\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, \y + 0.5) {\(\y\)};
 	}
 }
 \newcommand{\drawhvector}[6]{
-	\def \origin {(#1,#2)}
-	\def \xmax {#3}
-	\def \rs {(#4,#5)}
-	\def \scale {#6}
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
 	\foreach \x in {0,...,\xmax}{
 		\draw [shift={\origin}] (\x,0) rectangle +\rs;
 		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
@@ -251,29 +251,34 @@ In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \aut
 \end{algorithmic}
 \end{algorithm}
 
-The code above is almost equal to the first one presented. The only lines that change are the ones underlined. The intent behind those lines is to avoid reaching the same solution by many paths, as this wastes computation and is not necessary for reaching an optimal solution. In the linear programming jargon what those lines do is to eliminate solution symmetry. To prove that the code stands correct we will update the proof of \ref{theo:ukp1:all_relevant_solutions_present}. But first we will give some explanation for the reasoning behind those changes.
+The code above is almost equal to the first one presented. The only lines added or changed are the ones underlined. The intent behind those lines is to avoid reaching the same solution by many paths, as this wastes computation and is not necessary for reaching an optimal solution. In the linear programming jargon what those lines do is to eliminate solution symmetry. To prove that the code stands correct we will update the proof of \ref{theo:ukp1:all_relevant_solutions_present}. But first we will give some explanation for the reasoning behind those changes.
 
 \begin{figure}
-\def \scale {0.5}
+\centering
+\edef \scale {0.5}
 \begin{tikzpicture}[scale=\scale]
 
-\def \origin {(0,0)}
-\drawvvector{0}{0}{7}{1}{1}{0.5}
+\edef \rx {1}
+\edef \ry {1}
+
+\edef \origin {(0,0)}
+\drawvvector{\origin}{7}{\rx}{\ry}{\scale}
 \draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
 \draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
 
-\draw[dashed, thick] ++\origin +(0, 3.5) to [out=135,in=225] +(0, 7.5);
-\draw[dashed, thick] ++\origin +(0, 4.5) to [out=135,in=225] +(0, 7.5);
+\draw[dashed, thick] ++\origin +(1, 3.5) to [out=45,in=315] +(1, 7.5);
+\draw[dashed, thick] ++\origin +(1, 4.5) to [out=45,in=315] +(1, 7.5);
 
-\def \origin {(3,0)}
-\drawvvector{3}{0}{7}{1}{1}{0.5}
+\edef \origin {(3,0)}
+\drawvvector{\origin}{7}{\rx}{\ry}{\scale}
 \draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
 \draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
 
-\draw[dashed, thick] ++\origin +(0, 4.5) to [out=135,in=225] +(0, 7.5);
+\draw[dashed, thick] ++\origin +(1, 4.5) to [out=45,in=315] +(1, 7.5);
 
-\def \origin {(6,7)}
-\drawhvector{6}{6}{15}{1}{1}{0.5}
+\edef \origin {(6,5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
 \draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
 \draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
 \draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
@@ -291,8 +296,9 @@ The code above is almost equal to the first one presented. The only lines that c
 \draw[dashed] ++\origin +(10.5, 1) to [out=45,in=135] +(15.5, 1);
 \draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
 
-\def \origin {(6,4)}
-\drawhvector{6}{2}{15}{1}{1}{0.5}
+\def \origin {(6,1.5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
 \draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
 \draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
 \draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
@@ -306,8 +312,12 @@ The code above is almost equal to the first one presented. The only lines that c
 
 \end{tikzpicture}
 \caption{The solution \(\{2,1\}\) and \(\{2,1\}\) (with \(w_1 = 3\) and \(w_2 = 4\)) are the same. But it can be constructed by two different ways. The solution \(\{3,2,1\}\) can be also constructed by many ways (with \(w_1 = 4\), \(w_2 = 5\) and \(w_3 = 6\)). }
+\label{fig:symmetry}
 \end{figure}
 
+The UKP1 already eliminated some symmetry. Of many solutions with the same weight only one is stored. As the same solution (reached from different points) has the same weight it will be stored only one time and used for creating new solutions only \(n\) times. This avoids creating an exponential number of equivalent solutions (all the permutations of an multiset). The problem with UKP1 is that the solution \(s\) will be stored in \(g[w_s]\) only one time, but it will be computed and compared (as in the line \(g[y + w_i] < g[y] + p_i\)) many times, when only one time was sufficient (for each distinct solution). 
+
+The path for reaching a solution can be defined as a list of the items that compose the solution. To say that UKP computed the \([3,2,1]\) path is to say that: at \(y = w_3\) it computed \(g[y + w_2] < g[y] + p_2\), and at \(y = w_3 + w_2\) it computed \(g[y + w_1] < g[y] + p_1\). The UKP1 compute all the possible paths for a solution \(s\). The UKP2 compute only one path for each solution \(s\). This is done by defining an canonical ordering. Any ordering will suffice, the UKP2 specifically define that we will only add an item to an existing solution if its index is lower than the last item added. This is the same that specifying that only the \([3,2,1]\) will be computed (the following paths aren't computed \([3,1,2]\), \([2,3,1]\), \([2,1,3]\), \([1,2,3]\) and \([1,3,2]\)). The \(\autoref{fig:symmetry}\) shows a two item and a three item example of the difference between the paths computed on UKP1 and UKP2.
 
 \section{UKP4 -- Discarding solutions that can't lead to the optimal solution}
 The algorithm with the if change:

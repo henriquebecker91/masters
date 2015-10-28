@@ -8,7 +8,7 @@
 \usepackage{mathtools}
 \usepackage{fixltx2e}
 \usepackage{enumerate}
-\usepackage{ulem} % for sout command (striken text)
+\usepackage[normalem]{ulem} % for sout command (striken text)
 
 \usepackage[utf8]{inputenc}  
  
@@ -95,9 +95,15 @@ A solution for an arbitrary UKP instance is a multiset of the items defined by t
 
 \section{First Theorem: Dominance and optimal solutions}
 
-If one solution is dominated by other, both can be subsets of optimal solutions\footnote{For example, see the following UKP instance: \(c = 10,~w_1 = 9,~w_2 = 10,~p_1 = p_2 = 10\); the solutions made from one item \(1\) or one item \(2\) are both optimal solutions. Other example: \(c = 12,~w_1 = 9,~w_2 = 10,~w_3 = 2,~p_1 = p_2 = 10, p3 = 1\).}. However, we can can assert that: if a solution~\(s\) is dominated by a solution \(t\), and \(s\) is a subset of an optimal solution, then \(t\) is also a subset of an optimal solution.
+If one solution is dominated by other, both can be subsets of optimal solutions\footnote{For example, see the following UKP instance: \(c = 10,~w_1 = 9,~w_2 = 10,~p_1 = p_2 = 10\); the solutions made from one item \(1\) or one item \(2\) are both optimal solutions. Other example: \(c = 12,~w_1 = 9,~w_2 = 10,~w_3 = 2,~p_1 = p_2 = 10,~p_3 = 1\).}. However, we can yet assert the following theorem.
+\vspace{0.5cm}
+\begin{theorem}\label{theo:domination} 
+If a solution~\(s\) is dominated by a solution \(t\), and \(s\) is a subset of an optimal solution, then \(t\) is also a subset of an optimal solution.
+\end{theorem}
 
-The proof is simple: lets suppose \(opt\) is an optimal solution, \(s \cup s' = opt\) and \(s\) is dominated by \(t\); lets define \(opt' = t \cup s'\); \(opt'\) will have a no lower profit and a no greater weight than \(opt\); \(opt'\) is a valid solution because its weight is less than or equal to another valid solution (\(opt\)); we have the guarantee that \(p_{opt'} \geq p_{opt}\) but also, as \(opt\) is an optimal solution, we have the guarantee that no valid solution has a greater profit than it, therefore \(p_{opt'} = p_{opt}\); by definition \(opt'\) is an optimal solution (there's no valid solution with greater profit); finally \(t \cup s' = opt' \iff t \subseteq opt'\), this way we prove that in this conditions \(t\) must be a subset of an optimal solution. If \(s' = \varnothing\) then both \(s\) and \(t\) are optimal solutions.
+\begin{proof}
+lets suppose \(opt\) is an optimal solution, \(s \cup s' = opt\) and \(s\) is dominated by \(t\); lets define \(opt' = t \cup s'\); \(opt'\) will have a no lower profit and a no greater weight than \(opt\); \(opt'\) is a valid solution because its weight is less than or equal to another valid solution (\(opt\)); we have the guarantee that \(p_{opt'} \geq p_{opt}\) but also, as \(opt\) is an optimal solution, we have the guarantee that no valid solution has a greater profit than it, therefore \(p_{opt'} = p_{opt}\); by definition \(opt'\) is an optimal solution (there's no valid solution with greater profit); finally \(t \cup s' = opt' \iff t \subset opt'\), this way we prove that in this conditions \(t\) must be a subset of an optimal solution. If \(s' = \varnothing\) then both \(s\) and \(t\) are optimal solutions.
+\end{proof}
 
 \section{The proof of correctness and explanation of the algorithm}
 
@@ -221,7 +227,7 @@ In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \aut
 
 \section{UKP2 -- Pruning symmetry -- Only one way to reach each solution}
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{UKP One}\label{alg:ukp1}
 \begin{algorithmic}[1]
 \Procedure{UKP1}{$n, c, w, p, w_{min}, w_{max}$}
@@ -260,7 +266,7 @@ In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \aut
 
 The code above is almost equal to the first one presented. The only lines added or changed are the ones underlined. The intent behind those lines is to avoid reaching the same solution by many paths, as this wastes computation and is not necessary for reaching an optimal solution. In the linear programming jargon what those lines do is to eliminate solution symmetry. To prove that the code stands correct we will update the proof of \autoref{theo:ukp1:all_relevant_solutions_present}. But first we will give some explanation for the reasoning behind those changes.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \edef \scale {0.5}
 \begin{tikzpicture}[scale=\scale]
@@ -331,11 +337,12 @@ The \(\autoref{fig:symmetry}\) shows a two item and a three item example of the 
 \subsection{Updated theorem and proof}
 
 Our following theorem is the same as \ref{theo:ukp1:all_relevant_solutions_present} except it refers to UKP2.
-
+\vspace{0.3cm}
 \begin{theorem}\label{theo:ukp2:all_relevant_solutions_present}
 After the execution of UKP2 line~\ref{ukp2:main_ext_loop_end}, for every valid non profit-dominated solution~\(s^*\), the profit value of \(s^*\) is stored in \(g[w_{s^*}]\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(w_s = w_{s^*}) \land (p_s \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
 \end{theorem}
 
+\noindent
 We prove this theorem by structural induction, as we did for \autoref{theo:ukp1:all_relevant_solutions_present} previously.
 
 \subsubsection{Base case: Empty solution and one single item solutions}
@@ -352,7 +359,7 @@ Lets define the function \(min\_ix(s)\) as a function that maps a solution \(s\)
 
 Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid nonempty non profit-dominated solution with \(w_s \leq c-w_{min}\) and \(i \in I\). Our code only generates \(s'\) if \(i \leq d[w_s]\), but, for any \(s'\), there's a solution \(s\) and an item \(i\) that satisfies that premise. If \(i = min\_ix(s')\), \(s = s' - \{i\}\) and \(y = w_s\), the lines \ref{ukp2:main_ext_loop_begin}~to~\ref{ukp2:main_ext_loop_end} will compute \(s'\). As \(w_s < w_{s'}\) we guarantee that the loop will generate \(s'\) before reaching \(g[w_{s'}]\) (and \(d[w_{s'}]\)).
 
-\section{UKP3 -- Eliminating weight-dominance}
+\section{UKP3 -- Pruning dominated solutions}
 \begin{algorithm}
 \caption{UKP One}\label{alg:ukp1}
 \begin{algorithmic}[1]
@@ -393,8 +400,9 @@ Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid 
 \end{algorithmic}
 \end{algorithm}
 
-The UKP1 already discarded profit-dominated solutions 
-* We do not generate all solutions anymore. Before this change we were generating solutions worse than others already created. We prove that when we discard an solution, if it would lead to an optimal solution, then we already have a solution that will to lead to the optimal solution.
+The UKP1 and UKP2 computed all valid solutions and stored only the non profit-dominated ones. The UKP3 doesn't computes all valid solutions anymore. If the UKP3 finds that a solution \(s\) that is dominated by a solution \(s'\), it wont create any new solutions from \(s\). As UKP2 Guaranteed that there was only one path for each distinct solution, any solution that is a superset of \(s\) wont be computed (saving time). Solutions that are an superset of \(s\) and are optimal can exist but, if this happens, there will be an optimal solution that is a superset of \(s'\) too. This was already proved on \autoref{theo:domination}. If UKP3 skips a dominated solution \(s\) there's the guarantee that a solution that dominates \(s\) wasn't skipped.
+
+Lets examine the UKP3 outer loop (LINES) first iteration. The \(opt\) variable is zero, any item profit is positive, therefore \(g[w_{min}] > opt\). We can state that the if statement in line (LINE) will eval to false.
 
 \section{UKP4 -- Knowing when to stop}
 The algorithm with the periodic check change:

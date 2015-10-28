@@ -75,7 +75,7 @@ The objective of this work is to present an algorithm that solves the Unbounded 
 
 In this subsection we use the chosen notation to define the UKP. We will use this notation for the rest of the article.
 
-The UKP can be defined as follows: we are given a capacity \(c\), and a list of \(n\) items. Each item \(i \in {1, \ldots, n}\) has a weight value, denoted by \(w_i\), and a profit value, denoted by \(p_i\); we want to know how many of each item (\(x_i\)) we should select to get the biggest possible items profit sum without the items weight sum becoming bigger than the capacity. The problem can be defined using the linear programming notation as follows:
+The UKP can be defined as follows: we are given a capacity \(c\), and a list of \(n\) items. Each item \(i \in \{1, \ldots, n\}\) has a weight value, denoted by \(w_i\), and a profit value, denoted by \(p_i\); we want to know how many of each item \(i\) we should select to get the maximal items profit sum without the items weight sum becoming greater than the capacity. The variable \(x_i\) indicates how many of item \(i\) we selected. The problem can be defined using the linear programming notation as follows:
 
 \begin{align}
   maximize: &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
@@ -85,31 +85,36 @@ subject~to: &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 
 The capacity \(c\), the quantity \(n\) and the weights of the items \(w_i~(\forall i.~1 \geq i \geq n)\) are all positive integers. The quantities \(x_i~(\forall i.~1 \geq i \geq n)\) are restricted to the non-negative integers, as shown in \eqref{eq:x_integer}. The profit of the items \(p_i~(\forall i.~1 \geq i \geq n)\) are all positive real numbers.
 
-The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\). We will refer to the efficiency of an item as \(e_i\). The UKP5 works faster when the items are ordered by non-decreasing efficiency (i.e. \(i < j\) iff \(\frac{p_i}{w_i} < \frac{p_j}{w_j}\), or simply \(i < j\) iff \(e_i < e_j\) (if two or more items have the same efficiency, we order them by non-decreasing weight). If the items aren't ordered the UKP5 order them first.
+%The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\). We will refer to the efficiency of an item as \(e_i\). The UKP5 works faster when the items are ordered by non-decreasing efficiency (i.e. \(i < j\) iff \(\frac{p_i}{w_i} < \frac{p_j}{w_j}\), or simply \(i < j\) iff \(e_i < e_j\) (if two or more items have the same efficiency, we order them by non-decreasing weight). If the items aren't ordered the UKP5 order them first.
 
 We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight and the biggest item weight, respectively.
 
 \subsection{Some extra definitions}
 
-A solution for an arbitrary UKP instance is a multiset of the items defined by that instance. The weight of a solution is the solution items weight sum. The profit of a solution is analogue. A valid solution for an arbitrary UKP instance is a solution where the solution weight is less or equal than the capacity established by the instance. The empty multiset is a trivial valid solution for any UKP instance. An optimal solution of an arbitrary UKP instance is a valid solution with the biggest profit between all valid solutions of that instance. The optimal solution value of an arbitrary UKP instance is that instance optimal solution profit. We say that one solution~\(s\) dominates another solution \(t\) in a UKP instance iff both are valid for that instance and \(w_s \leq w_t \land p_s \geq p_t\). All the four dominance relations presented in (CITE OTHER ARTICLES) are special cases of one solution being dominated by other (i.e. dominating other).
+Except when the contrary is stated, our conclusions are valid for any arbitrary UKP instance. Things that are specific from an instance will always be from the same arbitrary instance on the same context. We never compare items, solutions or capacities from two different UKP instances.
+
+A solution is a multiset\footnote{A multiset is a set that can contain more than one of element of each type.} of the items defined by that instance. The weight of a solution is the solution items weight sum. The profit of a solution is analogue.  We will use the same notation used by items to denote the wieight and profit of solutions (i.e. the weight of a solution \(s\) is \(w_s\), and its profit is \(p_s\)).
+
+A valid solution is a solution with weight less than or equal to the capacity established by the instance (\(w_s \leq c\)). The empty multiset is a trivial valid solution for any UKP instance. We will refer to the set of the valid solutions for an arbitrary UKP instance as \(V\), and the set of the items provided by the instance as \(I\). As we never mix items, solutions or capacities of two different instances this sintax isn't ambiguous.
+
+An optimal solution \(s^*\) is a valid solution with the greatest profit value between all valid solutions of that instance (\(\forall s \in V.~\exists s^* \in V.~p_{s^*} \geq p_s\)). The optimal solution value is the optimal solution profit (\(opt = p_{s^*}\)). We say that one solution~\(s\) dominates another solution~\(t\) iff both are valid and \((w_s <  w_t \land p_s \geq p_t) \lor (w_s \leq w_t \land p_s > p_t)\). In the case that \(w_s = w_t \land p_s = p_t\) we say that both solutions are equivalent. All the four dominance relations presented in (CITE PYASUKP) are special cases of one solution dominating, or being dominated by, other solution.
 
 \section{First Theorem: Dominance and optimal solutions}
 
 If one solution is dominated by other, both can be subsets of optimal solutions\footnote{For example, see the following UKP instance: \(c = 10,~w_1 = 9,~w_2 = 10,~p_1 = p_2 = 10\); the solutions made from one item \(1\) or one item \(2\) are both optimal solutions. Other example: \(c = 12,~w_1 = 9,~w_2 = 10,~w_3 = 2,~p_1 = p_2 = 10,~p_3 = 1\).}. However, we can yet assert the following theorem.
-\vspace{0.5cm}
-\begin{theorem}\label{theo:domination} 
+\vspace{0.3cm}
+\begin{theorem}\label{theo:dominance} 
 If a solution~\(s\) is dominated by a solution \(t\), and \(s\) is a subset of an optimal solution, then \(t\) is also a subset of an optimal solution.
 \end{theorem}
-
 \begin{proof}
-lets suppose \(opt\) is an optimal solution, \(s \cup s' = opt\) and \(s\) is dominated by \(t\); lets define \(opt' = t \cup s'\); \(opt'\) will have a no lower profit and a no greater weight than \(opt\); \(opt'\) is a valid solution because its weight is less than or equal to another valid solution (\(opt\)); we have the guarantee that \(p_{opt'} \geq p_{opt}\) but also, as \(opt\) is an optimal solution, we have the guarantee that no valid solution has a greater profit than it, therefore \(p_{opt'} = p_{opt}\); by definition \(opt'\) is an optimal solution (there's no valid solution with greater profit); finally \(t \cup s' = opt' \iff t \subset opt'\), this way we prove that in this conditions \(t\) must be a subset of an optimal solution. If \(s' = \varnothing\) then both \(s\) and \(t\) are optimal solutions.
+Lets suppose \(opt\) is an optimal solution, \(s \cup s' = opt\) and \(s\) is dominated by \(t\); lets define \(opt' = t \cup s'\); \(opt'\) will have a no lower profit and a no greater weight than \(opt\); \(opt'\) is a valid solution because its weight is less than or equal to another valid solution (\(opt\)); we have the guarantee that \(p_{opt'} \geq p_{opt}\) but also, as \(opt\) is an optimal solution, we have the guarantee that no valid solution has a greater profit than it, therefore \(p_{opt'} = p_{opt}\); by definition \(opt'\) is an optimal solution (there's no valid solution with greater profit); finally \(t \cup s' = opt' \iff t \subset opt'\), this way we prove that in this conditions \(t\) must be a subset of an optimal solution. If \(s' = \varnothing\) then both \(s\) and \(t\) are optimal solutions.
 \end{proof}
 
 \section{The proof of correctness and explanation of the algorithm}
 
-An UKP5 algorithm correctness proof constructed directly over the algorithm optimized final code would be, in our opinion, hard to understand. We chose to follow a different path, and we will instead show a correctness proof for an initial version of the algorithm, and for each of the four subsequent algorithm optimizations we will show proof that despite of the change the code stands correct. We think that is more important that a proof is clear than that it use less pages. This approach also has the beneficial side-effect of providing insight over the big performance difference that one or two lines of the algorithm code account for.
+An UKP5 algorithm correctness proof constructed directly over the algorithm optimized final code would be, in our opinion, hard to understand. We chose to follow a different path, and we will instead show a correctness proof for an initial version of the algorithm, and for each of the four subsequent algorithm optimizations we will show proof that despite of the change the code stands correct. We think that is more important that a proof is clear than that it's concise. This approach also has the beneficial side-effect of providing insight over the big performance difference that one or two lines of the algorithm code account for.
 
-\section{UKP0 -- The classic dynamic programming approach}
+%\section{UKP0 -- The classic dynamic programming approach}
 
 \section{UKP1 -- A quasi-exhaustive approach}
 
@@ -149,9 +154,9 @@ An UKP5 algorithm correctness proof constructed directly over the algorithm opti
 
 The UKP1 is an algorithm for computing the UKP optimal solution value. By that, we mean that the \(opt\) variable will have the optimal solution value by the end of the algorithm execution. The proof of its correctness is broken in the three theorems bellow.
 
-We will refer to the set of the valid solutions for an arbitrary UKP instance as \(V\), and the set of the items provided by the instance as \(I\). As we never mix items or solutions of two different instances this sintax isn't ambiguous. Also, we define \textit{profit-dominance} as the dominance special case where the weight of two solutions is equal, but the profit can be distinct (i.e. \(s\) is profit-dominated by \(t\) iff \(w_s = w_t \land p_s \leq p_t\)). For an UKP instance of capacity \(c\) there's a maximum of \(c+1\) non profit-dominated instances\footnote{For an example, for any capacity \(c\), an instance that have an element with weight \(1\) will have \(c+1\) non profit-dominated solutions (the empty solution and the solutions with \(k\)-times that one element, \(1 \leq k \leq c\)).}). These definitions will help us in the proof bellow.
+We define \textit{profit-dominance} as the dominance special case where the weight of two solutions is equal, but the profit can be distinct (i.e. \(s\) is profit-dominated by \(t\) iff \(w_s = w_t \land p_s \leq p_t\)). For an UKP instance of capacity \(c\) there's a maximum of \(c+1\) non profit-dominated solutions\footnote{For an example, for any capacity \(c\), an instance that have an element with weight \(1\) will have \(c+1\) non profit-dominated solutions (the empty solution and the solutions with \(k\)-times that one element, \(1 \leq k \leq c\)).}). These definitions will help us in the proof bellow.
 
-The main point of the proof is that UKP1 stores in \(g\) all valid solutions, except by the ones that are profit-dominated by others. As we already saw, in (CITE DOMINANCE THEOREM), if a dominated solution would be part of an optimal solution, the dominator solution would too be part of an optimal solution. This way, we have no reason to store both dominated and dominator, and we can only store dominator solutions. As this excludes only dominated solutions, this cannot exclude all optimal solutions. Therefore the biggest profit value stored in \(g\) is by definition the optimal solution value.
+The main point of the proof is that UKP1 stores in \(g\) all valid solutions, except by the ones that are profit-dominated by others. As we already saw, in \autoref{theo:dominance}, if a dominated solution would be part of an optimal solution, the dominator solution would too be part of an optimal solution. This way, we have no reason to store both dominated and dominator, and we can only store dominator solutions. As this excludes only dominated solutions, this cannot exclude all optimal solutions. Therefore the greatest profit value stored in \(g\) is by definition the optimal solution value.
 
 \subsection{UKP1 First Theorem: All relevant solutions are generated}
 
@@ -167,8 +172,9 @@ The main point of the proof is that UKP1 stores in \(g\) all valid solutions, ex
 \begin{theorem}\label{theo:ukp1:all_relevant_solutions_present}
 After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, for every valid non profit-dominated solution~\(s^*\), the profit value of \(s^*\) is stored in \(g[w_{s^*}]\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(w_s = w_{s^*}) \land (p_s \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
 \end{theorem}
-%After the execution of UKP1 line~\ref{ukp1:main_ext_loop_end}, exists at least one optimal solution~\(s^*\) for that \(g[w_{s^*}] = p_{s^*}\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(p_{s} \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
 
+\vspace{0.3cm}
+\noindent
 We prove this theorem by structural induction.
 
 \subsubsection{Base case: Empty solution}
@@ -183,14 +189,14 @@ The UKP1 first loop (lines~\ref{begin_trivial_bounds}~to~\ref{end_trivial_bounds
 
 \subsubsection{Induction Hypothesis: \(s\) solutions}
 
-Assume that for some valid nonempty non profit-dominated solution~\(s\), the profit value of \(s\) is stored in \(g[w_s]\).
+Assume that for some valid nonempty non profit-dominated solution~\(s\), the profit value of \(s\) is stored in \(g[w_s]\). This statement is true for our base cases.
 
 \subsubsection{Step case: \(s \cup \{i\}\) solutions}
 \label{ukp1:step_case_proof}
 
 Lets define the \(s'\) solution as \(\forall s \in V.~\forall i \in I.~(|s| > 0) \implies (s' = s \cup \{i\})\). From this definition we can derive that \(w_{s'} > w_s\) (all item weights are positive). So \(g[w_s]\) is found by the UKP1 second loop (lines~\ref{ukp1:main_ext_loop_begin}~to~\ref{ukp1:main_ext_loop_end}) before \(g[w_s']\). We guarantee that the position \(g[w_s]\) will not be skipped by the if statement at line~\ref{ukp1:if_equal_to_zero} because, for any nonempty solution~\(s\), \(p_s > 0\) and \(g[w_s] = p_s\). Then the UKP1 inner loop (lines~\ref{ukp1:main_inner_loop_begin}~to~\ref{ukp1:main_inner_loop_end}) will combine \(s\) with every item making every possible \(s'\) out of it. If there was already a solution with weight \(w_{s'}\), and \(s'\) profit-dominates that solution, then \(g[w_s']\) is updated.
 
-This way, when the outer loop iteration with \(y = w_{s'}-w_{min}\) ends, UKP1 will have computed all the non profit-dominated solutions with weight lesser than or equal to \(w_{s'}\). The final value of \(y\) is \(c-w_{min}\) so, after the last iteration of the outer loop, we will have stored in \(g\) all the non profit-dominated solutions with weight lesser than or equal to \(c\) (i.e. all the valid non profit-dominated solutions).
+This way, when the outer loop iteration with \(y = w_{s'}-w_{min}\) ends, UKP1 will have computed all the non profit-dominated solutions with weight lesser than or equal to \(w_{s'}\). The final value of \(y\) is \(c-w_{min}\) so, after the last iteration of the outer loop, we will have stored in \(g\) all the non profit-dominated solutions with weight lesser than or equal to~\(c\) (i.e. all the valid non profit-dominated solutions).
 
 Note that \(s'\) can be an invalid solution (\(w_{s'} > c\)). That is not relevant because our theorem states that all valid solutions are present, it does not says that invalid ones aren't.
 
@@ -211,26 +217,32 @@ This corollary is implied by \autoref{theo:ukp1:all_relevant_solutions_present},
 After the execution of UKP1 line~\ref{ukp1:get_opt_loop_end}, the \(opt\) variable value is the optimal solution value. In mathematical notation: \(\exists s \in V.~\forall s' \in V.~(p_s \geq p_{s'}) \land (opt = p_s)\).
 \end{theorem}
 
+\vspace{0.3cm}
+\noindent
 To prove this theorem we will first prove another closely related theorem.
+\vspace{0.2cm}
 
 \begin{theorem}\label{theo:opt_sol_weight_range}
 If \(s^*\) is an optimal solution, then \(c - w_{min} < w_{s^*} \leq c\). In mathematical notation: \(\forall s^* \in V.~(\nexists s \in V.~p_s > p_{s^*}) \implies ((c - w_{min} < w_{s^*}) \land (w_{s^*} \leq c))\).
 \end{theorem}
 
+\vspace{0.3cm}
+\noindent
 Half of the proof is done by unraveling the optimal solution definition, the other half is done using a proof by contradiction.
+\vspace{0.2cm}
 
 \begin{proof}
 Any optimal solution \(s^*\) is, by definition, a valid solution, and any valid solution~\(s\) have, by definition, \(w_s \leq c\); therefore any optimal solution \(s^*\) have \(w_{s^*} \leq c\). Now, lets suppose that exists an optimal solution \(s^*\) with \({w_{s^*} \leq c - w_{min}}\); by consequence there exists a valid solution \(s = s^* \cup \{i\}\) where \(w_i = w_{min}\); as all item profits are positive, \(p_s > p_{s^*}\) is guaranteed; if \(s^*\) is an optimal solution then there's no valid solution~\(s\) with \(p_s > p_{s^*}\); it was shown that a solution~\(s\) with this property exists, therefore \(s^*\) can't be an optimal solution; the only thing we assumed was that \(w_{s^*} \leq c - w_{min}\) so we can conclude that a solution can't be optimal and, at the same time, have its weight within this range. As we proved that there are no optimal solutions \(s^*\) with \(w_{s^*} > c\) or \(w_{s^*} \leq (c - w_{min})\), the weight of any optimal solution must be between \((c + w_{min}) + 1\) and \(c\).
 \end{proof}
 
-In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \autoref{theo:ukp1:opt_variable} is rather trivial. We know that at least one optimal solution is stored in \(g\) (\autoref{theo:ukp1:opt_is_present}), that the weight of an optimal solution is in the range \(c - w_{min} < w_{s^*} \leq c\) (\autoref{theo:opt_sol_weight_range}), and that an optimal solution has the biggest profit between all valid solutions (CITE DEFINITION), therefore the UKP1 last loop (lines~\ref{ukp1:get_opt_loop_begin}~to~\ref{ukp1:get_opt_loop_end}) must end with the optimal solution value stored in variable \(opt\).
+In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \autoref{theo:ukp1:opt_variable} is rather trivial. We know that at least one optimal solution is stored in \(g\) (\autoref{theo:ukp1:opt_is_present}), that the weight of an optimal solution is in the range \(c - w_{min} < w_{s^*} \leq c\) (\autoref{theo:opt_sol_weight_range}), and that an optimal solution has the biggest profit between all valid solutions (by definition), therefore the UKP1 last loop (lines~\ref{ukp1:get_opt_loop_begin}~to~\ref{ukp1:get_opt_loop_end}) must end with the optimal solution value stored in variable \(opt\).
 
 \section{UKP2 -- Pruning symmetry -- Only one way to reach each solution}
 
 \begin{algorithm}[H]
-\caption{UKP One}\label{alg:ukp1}
+\caption{UKP Two}\label{alg:ukp1}
 \begin{algorithmic}[1]
-\Procedure{UKP1}{$n, c, w, p, w_{min}, w_{max}$}
+\Procedure{UKP2}{$n, c, w, p, w_{min}, w_{max}$}
   \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp2:create_g}
   \State \underline{\(d \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(n\)\label{ukp2:create_d}}
   \State % Blank line
@@ -330,13 +342,13 @@ The code above is almost equal to the first one presented. The only lines added 
 
 The UKP1 does not store symmetric solutions. Of many solutions with the same weight only one is stored. As the same solution (reached from different paths) has the same weight, it will be stored only one time and used for creating new solutions only \(n\) times. This avoids creating an exponential number of equivalent solutions (all the permutations of an multiset). The problem with UKP1 is that the solution \(s\) will be stored in \(g[w_s]\) only one time, but it will be computed and compared (as in the line \(g[y + w_i] < g[y] + p_i\)) many times, when only one time was sufficient (for each distinct solution). 
 
-The path for reaching a solution can be defined as a list of the items that compose the solution. To say that UKP computed the \([3,2,1]\) path is to say that: at \(y = w_3\) it computed \(g[y + w_2] < g[y] + p_2\), and at \(y = w_3 + w_2\) it computed \(g[y + w_1] < g[y] + p_1\). The UKP1 compute all the possible paths for a solution \(s\). The UKP2 compute only one path for each solution \(s\). This is done by defining a canonical ordering. Any ordering will suffice, the UKP2 specifically define that we will only add an item to an existing solution if its index is lower than or equal to the index of the last item added. This is the same as specifying that only the path \([3,2,1]\) will be computed (and that none of the following paths are computed: \([3,1,2]\), \([2,3,1]\), \([2,1,3]\), \([1,2,3]\) and \([1,3,2]\)). To implement this control we use the \(d\) array. The cell \(d[w_s]\) stores the index of the last item used to make solution \(s\) (\(s\) is the undominated solution of weight \(w_s\)). 
+The path for reaching a solution can be defined as a list of the items that compose the solution. To say that UKP computed the \([3,2,1]\) path is to say that: at \(y = w_3\) it computed \(g[y + w_2] < g[y] + p_2\), and at \(y = w_3 + w_2\) it computed \(g[y + w_1] < g[y] + p_1\). The UKP1 compute all the possible paths for a solution \(s\). The UKP2 compute only one path for each solution \(s\). This is done by defining a canonical ordering. Any ordering will suffice, the UKP2 specifically define that we will only add an item to an existing solution if the item index is lower than or equal to the index of the last item added. This is the same as specifying that only the path \([3,2,1]\) will be computed (and that none of the following paths will be computed: \([3,1,2]\), \([2,3,1]\), \([2,1,3]\), \([1,2,3]\) and \([1,3,2]\)). To implement this control we use the \(d\) array. The cell \(d[w_s]\) stores the index of the last item used to make solution \(s\) (\(s\) is the undominated solution of weight \(w_s\)). 
 
 The \(\autoref{fig:symmetry}\) shows a two item and a three item example of the difference between the paths computed on UKP1 and UKP2. We will discuss only the three item example here. Paths as \(\{4,4,4\}\) or \(\{5,5,4\}\) are also generated by UKP1 and UKP2, but aren't show in the figure to not pollute the example. The only paths shown in the figure are the ones that can lead to \(\{3,2,1\}\) or some equivalent solution (i.e. paths that take only one of each item). The top example show the behavior of UKP1, and the bottom one the behavior of UKP2. While UKP1 generates and test all paths that can lead to \(\{3,2,1\}\), UKP2 generate only \(\{3\}\), \(\{3,1\}\), \(\{3,2\}\) and \(\{3,2,1\}\).
 
 \subsection{Updated theorem and proof}
 
-Our following theorem is the same as \ref{theo:ukp1:all_relevant_solutions_present} except it refers to UKP2.
+Our following theorem is the same as \autoref{theo:ukp1:all_relevant_solutions_present} except it refers to UKP2.
 \vspace{0.3cm}
 \begin{theorem}\label{theo:ukp2:all_relevant_solutions_present}
 After the execution of UKP2 line~\ref{ukp2:main_ext_loop_end}, for every valid non profit-dominated solution~\(s^*\), the profit value of \(s^*\) is stored in \(g[w_{s^*}]\). In mathematical notation: \(\forall s \in V.~\exists s^* \in V.~(w_s = w_{s^*}) \land (p_s \leq p_{s^*}) \land (g[w_{s^*}] = p_{s^*})\).
@@ -360,10 +372,11 @@ Lets define the function \(min\_ix(s)\) as a function that maps a solution \(s\)
 Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid nonempty non profit-dominated solution with \(w_s \leq c-w_{min}\) and \(i \in I\). Our code only generates \(s'\) if \(i \leq d[w_s]\), but, for any \(s'\), there's a solution \(s\) and an item \(i\) that satisfies that premise. If \(i = min\_ix(s')\), \(s = s' - \{i\}\) and \(y = w_s\), the lines \ref{ukp2:main_ext_loop_begin}~to~\ref{ukp2:main_ext_loop_end} will compute \(s'\). As \(w_s < w_{s'}\) we guarantee that the loop will generate \(s'\) before reaching \(g[w_{s'}]\) (and \(d[w_{s'}]\)).
 
 \section{UKP3 -- Pruning dominated solutions}
+
 \begin{algorithm}
-\caption{UKP One}\label{alg:ukp1}
+\caption{UKP Three}\label{alg:ukp1}
 \begin{algorithmic}[1]
-\Procedure{UKP1}{$n, c, w, p, w_{min}, w_{max}$}
+\Procedure{UKP3}{$n, c, w, p, w_{min}, w_{max}$}
   \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp3:create_g}
   \State \(d \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(n\)\label{ukp3:create_d}
   \State % Blank line
@@ -376,7 +389,7 @@ Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid 
   \State % Blank line
   \State \underline{\(opt \gets 0\)}
   \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp3:main_ext_loop_begin}
-    \If{\underline{\(g[y] \leq opt\)}}\label{ukp3:if_equal_to_zero}
+    \If{\underline{\(g[y] \leq opt\)}}\label{ukp3:if_no_greater_than_opt}
     	\State \textbf{continue}
     \EndIf\label{ukp3:if_equal_to_zero}
     \State % Blank line
@@ -400,16 +413,17 @@ Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid 
 \end{algorithmic}
 \end{algorithm}
 
-The UKP1 and UKP2 computed all valid solutions and stored only the non profit-dominated ones. The UKP3 doesn't computes all valid solutions anymore. If the UKP3 finds that a solution \(s\) that is dominated by a solution \(s'\), it wont create any new solutions from \(s\). As UKP2 Guaranteed that there was only one path for each distinct solution, any solution that is a superset of \(s\) wont be computed (saving time). Solutions that are an superset of \(s\) and are optimal can exist but, if this happens, there will be an optimal solution that is a superset of \(s'\) too. This was already proved on \autoref{theo:domination}. If UKP3 skips a dominated solution \(s\) there's the guarantee that a solution that dominates \(s\) wasn't skipped.
+The UKP1 and UKP2 compute all valid solutions and store only the non profit-dominated ones. The UKP3 doesn't compute all valid solutions. If the UKP3 finds that a solution \(s\) that is dominated by a solution \(s'\), it wont create any new solutions from \(s\). UKP2 guarantee that exists only one path for each distinct solution, UKP3 keep that guarantee. In UKP3, any solution that is a superset of a dominated solution wont be computed anymore (the path will be interrupted at that point). Solutions that are an superset of \(s\) and are optimal can exist but, if this happens, there will be an optimal solution that is a superset of \(s'\) too\footnote{This was already proved on \autoref{theo:dominance}.}. If UKP3 skips a dominated solution \(s\) there's the guarantee that a solution that dominates \(s\) wasn't skipped.
 
-Lets examine the UKP3 outer loop (LINES) first iteration. The \(opt\) variable is zero, any item profit is positive, therefore \(g[w_{min}] > opt\). We can state that the if statement in line (LINE) will eval to false.
+Lets examine the first iteration of UKP3 outer loop (lines~\ref{ukp3:main_ext_loop_begin}~to~\ref{ukp3:main_ext_loop_end}). The \(opt\) variable is zero, but any item profit is positive, therefore \(g[w_{min}] > opt\). In the first iteration the if statement in line \ref{ukp3:if_no_greater_than_opt} will eval to false. The \(opt\) value will be updated to \(g[w_{min}]\). In all iterations afterwards, \(opt > 0\) is true, and because of that UKP3 will skip the \(g[y] = 0\) positions as UKP1 and UKP2 already did. More than that, it will skip any dominated solution. If \(g[y] \leq opt\) and \(g[y] > 0\), there exists a previous solution \(s'\), where \(w_{s'} < y\) and \(p_{s'} = opt\), and exists a current solution \(s\), where \(w_s = y\) and \(p_s \leq opt\), therefore, by definition, \(s\) is dominated by \(s'\) (i.e. \((w_{s'} < y = w_s) \land (p_{s'} = opt \geq p_s)\)).
 
-\section{UKP4 -- Knowing when to stop}
-The algorithm with the periodic check change:
-	* We prove that if a condition defined by us is met, we can stop the computation and calculate the optimal solution value from a simple formula in O(1) time.
+We think that is clear that the UKP3 only doesn't compute solutions that are a superset of a dominated solution and, as already proven by \autoref{theo:dominance}, discarding only solutions with this property can't eliminate all optimal solutions. Therefore the changes introduced by UKP3 don't affect the correctness of the algorithm, and UKP3 stands correct.
 
-\section{UKP5 -- Recovering an optimal solution}
+%\section{UKP4 -- Knowing when to stop}
+%The algorithm with the periodic check change:
+%	* We prove that if a condition defined by us is met, we can stop the computation and calculate the optimal solution value from a simple formula in O(1) time.
 
+%\section{UKP5 -- Recovering an optimal solution}
 
 \end{document} 
 

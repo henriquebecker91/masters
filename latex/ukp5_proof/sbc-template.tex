@@ -133,7 +133,7 @@ An UKP5 algorithm correctness proof constructed directly over the algorithm opti
   \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp1:main_ext_loop_begin}
     \If{\(g[y] == 0\)}\label{ukp1:if_equal_to_zero}
     	\State \textbf{continue}
-    \EndIf\label{ukp1:if_equal_to_zero}
+    \EndIf
     \State % Blank line
     \For{\(i \gets 1,~n\)}\label{ukp1:main_inner_loop_begin}
       \If{\(g[y + w_i] < g[y] + p_i\)}\label{ukp1:if_better_solution_begin}
@@ -240,7 +240,7 @@ In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \aut
 \section{UKP2 -- Pruning symmetry -- Only one way to reach each solution}
 
 \begin{algorithm}[H]
-\caption{UKP Two}\label{alg:ukp1}
+\caption{UKP Two}\label{alg:ukp2}
 \begin{algorithmic}[1]
 \Procedure{UKP2}{$n, c, w, p, w_{min}, w_{max}$}
   \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp2:create_g}
@@ -256,7 +256,7 @@ In the light of \autoref{theo:opt_sol_weight_range} we can see that proving \aut
   \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp2:main_ext_loop_begin}
     \If{\(g[y] == 0\)}\label{ukp2:if_equal_to_zero}
     	\State \textbf{continue}
-    \EndIf\label{ukp2:if_equal_to_zero}
+    \EndIf
     \State % Blank line
     \For{\(i \gets 1,~\underline{d[y]}\)}\label{ukp2:main_inner_loop_begin}
       \If{\(g[y + w_i] < g[y] + p_i\)}\label{ukp2:if_better_solution_begin}
@@ -374,7 +374,7 @@ Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid 
 \section{UKP3 -- Pruning dominated solutions}
 
 \begin{algorithm}
-\caption{UKP Three}\label{alg:ukp1}
+\caption{UKP Three}\label{alg:ukp3}
 \begin{algorithmic}[1]
 \Procedure{UKP3}{$n, c, w, p, w_{min}, w_{max}$}
   \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp3:create_g}
@@ -391,7 +391,7 @@ Lets define the \(s'\) solution as \(s' = s \cup \{i\}\) where \(s\) is a valid 
   \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp3:main_ext_loop_begin}
     \If{\underline{\(g[y] \leq opt\)}}\label{ukp3:if_no_greater_than_opt}
     	\State \textbf{continue}
-    \EndIf\label{ukp3:if_equal_to_zero}
+    \EndIf
     \State % Blank line
     \State \underline{\(opt \gets g[y]\)}
     \State % Blank line
@@ -419,7 +419,62 @@ Lets examine the first iteration of UKP3 outer loop (lines~\ref{ukp3:main_ext_lo
 
 We think that is clear that the UKP3 only doesn't compute solutions that are a superset of a dominated solution and, as already proven by \autoref{theo:dominance}, discarding only solutions with this property can't eliminate all optimal solutions. Therefore the changes introduced by UKP3 don't affect the correctness of the algorithm, and UKP3 stands correct.
 
-%\section{UKP4 -- Knowing when to stop}
+\section{UKP4 -- Knowing when to stop}
+
+\begin{algorithm}
+\caption{UKP Four}\label{alg:ukp4}
+\begin{algorithmic}[1]
+\Procedure{UKP4}{$n, c, w, p, w_{min}, w_{max}$}
+  \State \(g \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(0\)\label{ukp4:create_g}
+  \State \(d \gets\) array of \(c + 1 + (w_{max} - w_{min})\) positions each one initialized with \(n\)\label{ukp4:create_d}
+  \State \(y' \gets 0\)
+  \State % Blank line
+  \For{\(i \gets 1,~n\)}\label{ukp4:begin_trivial_bounds}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \(d[w_i] \gets i\)
+      \If{\underline{\(i \neq 1 \land w_i > y'\)}}
+      	\State \underline{\(y' \gets w_i\)}
+      \EndIf
+    \EndIf
+  \EndFor\label{ukp4:end_trivial_bounds}
+  \State % Blank line
+  \State \(opt \gets 0\)
+  \For{\(y \gets w_{min},~c-w_{min}\)}\label{ukp4:main_ext_loop_begin}
+    \If{\(g[y] \leq opt\)}\label{ukp4:if_no_greater_than_opt}
+    	\State \textbf{continue}
+    \EndIf
+    \If{\(y > y'\)}\label{ukp4:if_greater_than_yprime}
+    	\State \textbf{break}
+    \EndIf
+    \State % Blank line
+    \State \(opt \gets g[y]\)
+    \State % Blank line
+    \For{\(i \gets 1,~d[y]\)}\label{ukp4:main_inner_loop_begin}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{ukp4:if_better_solution_begin}
+        \State \(g[y + w_i] \gets g[y] + p_i\)
+        \State \(d[y + w_i] \gets i\)
+        \If{\underline{\(i \neq 1 \land y + w_i > y'\)}}
+	  \State \underline{\(y' \gets y + w_i\)}
+        \EndIf
+      \EndIf\label{ukp4:if_better_solution_end}
+    \EndFor\label{ukp4:main_inner_loop_end}
+  \EndFor\label{ukp4:main_ext_loop_end}
+  \State % Blank line
+  \If{\(y' < c - w_{min}\)}\label{ukp4:check_yprime}
+  	
+  \Else
+    \For{\(y \gets c-w_{min}+1,~c\)}\label{ukp4:get_opt_loop_begin}
+      \If{\(g[y] > opt\)}\label{ukp4:opt_loop_if}
+        \State \(opt \gets g[y]\)
+      \EndIf
+    \EndFor\label{ukp4:get_opt_loop_end}
+  \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
 %The algorithm with the periodic check change:
 %	* We prove that if a condition defined by us is met, we can stop the computation and calculate the optimal solution value from a simple formula in O(1) time.
 

@@ -153,6 +153,7 @@ struct ukp_solution_t {
   std::vector<size_t> qt_i_in_dy;
   std::vector<size_t> g;
   std::vector<size_t> d;
+  std::vector<size_t> non_skipped_d;
   #endif /* PROFILE */
   #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
   size_t last_y_value_outer_loop;

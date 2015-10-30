@@ -257,7 +257,7 @@ def ukp5(ukpi, return_used_items = false)
 
   opt = 0
   (1..(c-1)).each do | y |
-    next if g[y] == 0 || g[y] < opt
+    next if g[y] <= opt
     break if last_y_where_nonbest_item_was_used < y
 
     opt = gy = g[y]

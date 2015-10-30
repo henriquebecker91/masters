@@ -1,0 +1,57 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+
+\usepackage{graphicx,url}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage{hyperref}
+
+\usepackage[brazil]{babel}   
+\usepackage[utf8]{inputenc}  
+
+     
+\sloppy
+
+\title{Plano de Estudo e Pesquisa}
+
+\author{Henrique Becker\inst{1}}
+
+%\address{Instituto de Ciências Exatas e Geociências -- Universidade Passo Fundo (UPF)\\
+%  Caixa Postal 611 -- CEP 99001-970 -- Passo Fundo -- RS -- Brasil
+\address{Instituto de Informática -- Universidade Federal do Rio Grande do Sul (UFRGS) \\
+  Caixa Postal 15064 -- CEP 91501-970 -- Porto Alegre -- RS -- Brasil
+  \email{henriquebecker91@gmail.com}
+}
+
+\begin{document} 
+
+\maketitle
+
+\section{Introdução}
+
+O problema de pesquisa escolhido foi a busca pela existência de um algoritmo para o UKP (Unbounded Knapsack Problem) mais eficiente do que o atual estado da arte. O atual estado da arte é o apresentado no artigo \cite{pyasukp}, e é chamado de PYAsUKP. O código pronto para compilação está disponível para download em \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.
+
+\section{O que já foi desenvolvido até o momento}
+
+Os resultados atuais são promissores. O algoritmo desenvolvido na pesquisa até o momento (doravante chamado de UKP5), teve um desempenho superior ao PYAsUKP (o qual foi baixado, compilado, e executado na mesma máquina que o UKP5). As instâncias usadas para teste foram as mesmas propostas como benchmark pelo PYAsUKP\footnote{Tais instâncias estão disponíveis em: \url{http://download.gna.org/pyasukp/pyasukpbench.html}}, as quais o mesmo resolvia de forma mais rápida que qualquer outro algoritmo conhecido na época. Uma planilha com os tempos de resolução do PYAsUKP e do UKP5 para as mesma instâncias nas mesmas condições está disponível em: \url{https://github.com/henriquebecker91/masters/blob/master/data/results/pyasukp_benchmark/time_comp.ods}. Duas instâncias apresentadas no benchmark do PYAsUKP fazem o PYAsUKP terminar com erros e sem o resultado (estas instâncias foram omitidas da comparação). Das instâncias restantes, o UKP5 gasta entre 5\% à 30\% do tempo usado pelo PYAsUKP. Todo material desenvolvido na pesquisa está disponível publicamente online em: \url{https://github.com/henriquebecker91/masters/}. Uma prova de corretude do algoritmo já está concluída e disponível em: \url{https://github.com/henriquebecker91/masters/blob/master/latex/ukp5_proof/sbc-template.pdf}
+
+\section{O que será realizado}
+
+As seguintes tarefas ainda precisam ser realizadas:
+
+\begin{itemize}
+  \item Adaptar tanto o UKP5 quanto o PYAsUKP para permitirem que o lucro dos items da instância seja um número de ponto flutuante.
+  \item Gerar instâncias do UKP que são passo intermediário para solução do CSP (Cutting Stock Problem). Este é um problema NP-Completo cuja solução mais eficiente conhecida hoje exige a solução de uma instância do UKP a cada iteração. As instâncias do UKP geradas por essa técnica de solução tem o lucro dos items em ponto flutuante. Comparar desempenho do UKP5 e do PYAsUKP na resolução dessas instâncias.
+  \item Acoplar o UKP5 ao CPlex de forma a usá-lo para acelerar a solução do CSP pelo meio da técnica mencionada acima.
+  \item Existem duas técnicas de redução de instâncias do UKP chamadas de dominância e periodicidade. É necessário verificar se o UKP5 implementa ambas técnicas implicitamente, e realizar a prova disso, ou então verificar se há possibilidade de aplicar ambas técnicas ao UKP5 sem afetar o seu desempenho negativamente.
+  \item Criar um novo benchmark para o UKP, uma vez que as instâncias atuais podem ser resolvidas em menos de um segundo. O que aumenta a probabilidade de que ruído seja introduzido a medição.
+  \item Verificar se existe um conjunto de instâncias (preferencialmente, que compartilhem uma propriedade comum) par o qual é possível garantir que o UKP5 terá sempre um desempenho superior ao PYASUKP.
+\end{itemize}
+
+\bibliographystyle{sbc}
+\bibliography{sbc-template}
+
+\end{document}
+

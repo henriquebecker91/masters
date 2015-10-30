@@ -82,6 +82,21 @@ int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool
   return EXIT_SUCCESS;
 }
 
+#ifdef PROFILE
+void dump(const string &path, const string &header, const vector<size_t> &v) {
+  ofstream f(path, ofstream::out|ofstream::trunc);
+  if (f.is_open())
+  {
+    f << header << endl;
+    for (size_t y = 0; y < v.size(); ++y) {
+      f << y << "\t" << v[y] << endl;
+    }
+  } else {
+    cerr << "Couldn't open file: " << path << endl;
+  }
+}
+#endif
+
 int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), int argc, char** argv) {
   if (argc != 2) {
     cout << "usage: a.out data.sukp" << endl;
@@ -101,27 +116,14 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
     #ifdef PROFILE
     path my_path(spath);
     path filename = my_path.filename();
-    const string gd_path = "./g_dump_" + filename.native() + ".dat", dd_path = "./d_dump_" + filename.native() + ".dat";
-    ofstream gd(gd_path, ofstream::out|ofstream::trunc);
-    if (gd.is_open())
-    {
-      gd << "y\tgy" << endl;
-      for (size_t y = 0; y < res.g.size(); ++y) {
-        gd << y << "\t" << res.g[y] << endl;
-      }
-    } else {
-      cerr << "Couldn't open file: " << gd_path << endl;
-    }
-    ofstream dd(dd_path, ofstream::out|ofstream::trunc);
-    if (dd.is_open())
-    {
-      dd << "y\tdy" << endl;
-      for (size_t y = 0; y < res.d.size(); ++y) {
-        dd << y << "\t" << res.d[y] << endl;
-      }
-    } else {
-      cerr << "Couldn't open file: " << dd_path << endl;
-    }
+    const string  gd_path = "./g_dump_" + filename.native() + ".dat",
+                  dd_path = "./d_dump_" + filename.native() + ".dat",
+                  nsd_path = "./nsd_dump_" + filename.native() + ".dat",
+                  dqt_path = "./dqt_dump_" + filename.native() + ".dat";
+    dump(gd_path, "y\tgy", res.g);
+    dump(dd_path, "y\tdy", res.d);
+    dump(nsd_path, "y\tdy", res.non_skipped_d);
+    dump(dqt_path, "i\tqt_in_d", res.qt_i_in_dy);
     #endif
 
     cout << "opt:    " << res.opt << endl;

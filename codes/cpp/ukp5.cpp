@@ -33,20 +33,22 @@ void ukp5_gen_stats(size_t c, size_t n, size_t w_min, size_t w_max, const vector
   sol.w_min = w_min;
   sol.w_max = w_max;
 
+  sol.non_skipped_d.assign(c-w_min + 1, n-1);
+
   sol.qt_i_in_dy.assign(n, 0);
   sol.qt_i_in_dy[n-1] = w_min;
-  for (size_t y = w_min; y <= c-w_min; ++y) {
-    ++sol.qt_i_in_dy[d[y]];
-  }
 
   sol.qt_gy_zeros = w_min;
   size_t opt = 0;
   sol.qt_non_skipped_ys = 0;
   sol.qt_inner_loop_executions = 0;
+
   for (size_t y = w_min; y <= c-w_min; ++y) {
+    ++sol.qt_i_in_dy[d[y]];
     if (g[y] > opt) {
       ++sol.qt_non_skipped_ys;
       sol.qt_inner_loop_executions += d[y];
+      sol.non_skipped_d[y] = d[y];
       opt = g[y];
     }
     if (g[y] == 0) ++sol.qt_gy_zeros;

@@ -85,8 +85,6 @@ subject~to: &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 
 The capacity \(c\), the quantity \(n\) and the weights of the items \(w_i~(\forall i.~1 \geq i \geq n)\) are all positive integers. The quantities \(x_i~(\forall i.~1 \geq i \geq n)\) are restricted to the non-negative integers, as shown in \eqref{eq:x_integer}. The profit of the items \(p_i~(\forall i.~1 \geq i \geq n)\) are all positive real numbers.
 
-%The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\). We will refer to the efficiency of an item as \(e_i\). The UKP5 works faster when the items are ordered by non-decreasing efficiency (i.e. \(i < j\) iff \(\frac{p_i}{w_i} < \frac{p_j}{w_j}\), or simply \(i < j\) iff \(e_i < e_j\) (if two or more items have the same efficiency, we order them by non-decreasing weight). If the items aren't ordered the UKP5 order them first.
-
 We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight and the biggest item weight, respectively.
 
 \subsection{Some extra definitions}
@@ -418,6 +416,36 @@ The UKP1 and UKP2 compute all valid solutions and store only the non profit-domi
 Lets examine the first iteration of UKP3 outer loop (lines~\ref{ukp3:main_ext_loop_begin}~to~\ref{ukp3:main_ext_loop_end}). The \(opt\) variable is zero, but any item profit is positive, therefore \(g[w_{min}] > opt\). In the first iteration the if statement in line \ref{ukp3:if_no_greater_than_opt} will eval to false. The \(opt\) value will be updated to \(g[w_{min}]\). In all iterations afterwards, \(opt > 0\) is true, and because of that UKP3 will skip the \(g[y] = 0\) positions as UKP1 and UKP2 already did. More than that, it will skip any dominated solution. If \(g[y] \leq opt\) and \(g[y] > 0\), there exists a previous solution \(s'\), where \(w_{s'} < y\) and \(p_{s'} = opt\), and exists a current solution \(s\), where \(w_s = y\) and \(p_s \leq opt\), therefore, by definition, \(s\) is dominated by \(s'\) (i.e. \((w_{s'} < y = w_s) \land (p_{s'} = opt \geq p_s)\)).
 
 We think that is clear that the UKP3 only doesn't compute solutions that are a superset of a dominated solution and, as already proven by \autoref{theo:dominance}, discarding only solutions with this property can't eliminate all optimal solutions. Therefore the changes introduced by UKP3 don't affect the correctness of the algorithm, and UKP3 stands correct.
+
+\section{UKP3.5 -- Works with any ordering, but some are better}
+
+The proofs of correctness presented here does not depend on the instance item list ordering. UKP3 exhibits some special properties when the item list is ordered by non-decreasing efficiency. The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\). We will refer to the efficiency of an item as \(e_i\). The properties can be summarized as: implicity application of all four dominances defined in (CITAR PYASUKP); imlicity application of the concept of periodicity (as was described in CITAR GARFINKEL). Both properties are intertwined, and are basically two faces of the same coin. Bellow, we will explain exactly what we mean by each of these properties, gives the proof the UKP exhibits these properties, and discuss how these affects the algorithm performance.
+
+\subsection{Implicit dominated item discard}
+
+\subsection{Simple dominance}
+
+%When \(g[y] \leq g[y]\)
+
+%Lets suppose exist a solution {3, 3, 2} and is dominated, but {3, 3} is not. {3, 3, 3, 2} will not exist, because \(e_3 < e_2\) and if {}
+
+%No improvável caso de uma solução menos eficiente que s existir, e for não dominada, enquanto s é dominado, paths que incluem serão computados. Então não eliminamos completamente um elemento dominado da nossas computações (o que poderia ser feito). Mas o custo de fazer isso seria colocar um if dentro do laço interno (e usar um vetor auxiliar de booleanos)? Um overhead maior que o ganho, provavelmente.
+
+%{3, 3} is dominated (4, 2) < (3, 2)
+%{3, 2} 
+
+%4 3
+%3 2
+%2 1
+
+\subsection{Multiple dominance}
+\subsection{Collective dominance}
+\subsection{Threshold dominance}
+
+%The UKP5 works faster when the items are ordered by non-decreasing efficiency (i.e. \(i < j\) iff \(\frac{p_i}{w_i} < \frac{p_j}{w_j}\), or simply \(i < j\) iff \(e_i < e_j\) (if two or more items have the same efficiency, we order them by non-decreasing weight). If the items aren't ordered the UKP5 order them first.
+
+
+
 
 \section{UKP4 -- Knowing when to stop}
 

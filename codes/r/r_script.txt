@@ -14,5 +14,15 @@ for (inst in instances) {
 	png(filename=paste("./",inst[1],"_g.png", sep=""), height=1080, width=1920, bg="white")
 	plot(g, ylim=c(0,(inst[[2]]*1.1)))
 	dev.off()
+
+	#nsd <- read.table(paste("./nsd_dump_",inst[1],".dat", sep=""), header=T, sep="\t")
+	#png(filename=paste("./",inst[[1]],"_nsd.png", sep=""), height=1080, width=1920, bg="white")
+	#plot(nsd)
+	#dev.off()
+
+	#dqt <- read.table(paste("./dqt_dump_",inst[1],".dat", sep=""), header=T, sep="\t")
+	#png(filename=paste("./",inst[[1]],"_dqt.png", sep=""), height=1080, width=1920, bg="white")
+	#plot(dqt)
+	#dev.off()
 }
 

@@ -40,14 +40,14 @@ int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const s
 
 int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool)) {
   array<instance_data_t, /*sizeof(instance_data_t)**/8> instances_data = {{
-    { "corepb", 10077782 },
     { "exnsd16", 1029680 },
     { "exnsd18", 1112131 },
     { "exnsd20",  1026086 },
     { "exnsd26", 1027564 },
     { "exnsdbis10", 1028035 },
     { "exnsdbis18",  1037156 },
-    { "exnsds12", 3793952 }
+    { "exnsds12", 3793952 },
+    { "corepb", 10077782 }
   }};
 
   bool everything_ok = true;
@@ -82,7 +82,11 @@ int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool
   return EXIT_SUCCESS;
 }
 
-#ifdef PROFILE
+#if !defined(PROFILE) && defined(DUMP)
+  #error The DUMP flag can only be used with the PROFILE flag
+#endif
+
+#if defined(PROFILE) && defined(DUMP)
 void dump(const string &path, const string &header, const vector<size_t> &v) {
   ofstream f(path, ofstream::out|ofstream::trunc);
   if (f.is_open())
@@ -113,7 +117,7 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
   if (status == EXIT_SUCCESS) {
     const auto &res = run.result;
 
-    #ifdef PROFILE
+    #if defined(PROFILE) && defined(DUMP)
     path my_path(spath);
     path filename = my_path.filename();
     const string  gd_path = "./g_dump_" + filename.native() + ".dat",
@@ -122,8 +126,8 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
                   dqt_path = "./dqt_dump_" + filename.native() + ".dat";
     dump(gd_path, "y\tgy", res.g);
     dump(dd_path, "y\tdy", res.d);
-    dump(nsd_path, "y\tdy", res.non_skipped_d);
-    dump(dqt_path, "i\tqt_in_d", res.qt_i_in_dy);
+    //dump(nsd_path, "y\tdy", res.non_skipped_d);
+    //dump(dqt_path, "i\tqt_in_d", res.qt_i_in_dy);
     #endif
 
     cout << "opt:    " << res.opt << endl;

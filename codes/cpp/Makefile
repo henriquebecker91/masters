@@ -1,4 +1,4 @@
-all: run_eduk.out run_ukp5.out test_eduk.out test_ukp5.out run_per.out test_per.out
+all: run_eduk.out run_ukp5.out test_eduk.out test_ukp5.out run_per.out test_per.out run_bb.out test_bb.out
 
 CC=g++
 # The boost linkage is only needed if the macro PROFILE is defined...
@@ -32,6 +32,12 @@ run_per.out: periodicity.cpp periodicity.hpp $(H_DEPS) $(O_DEPS)
 
 test_per.out: periodicity.cpp periodicity.hpp $(H_DEPS) $(O_DEPS)
 	$(CC) $(DEFS) -o $@ test_per.cpp periodicity.cpp $(O_DEPS) $(CFLAGS)
+
+run_bb.out: bb.cpp bb.hpp $(H_DEPS) $(O_DEPS)
+	$(CC) $(DEFS) -o $@ run_bb.cpp bb.cpp $(O_DEPS) $(CFLAGS)
+
+test_bb.out: bb.cpp bb.hpp $(H_DEPS) $(O_DEPS)
+	$(CC) $(DEFS) -o $@ test_bb.cpp bb.cpp $(O_DEPS) $(CFLAGS)
 
 .PHONY: clean
 

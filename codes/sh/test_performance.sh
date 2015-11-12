@@ -29,10 +29,10 @@ CPU_FOR_USE=$2
 # relative path from where the binaries are to the instances
 PATH_I=$3
 # relative path from where the binaries are to where to put the results
-PATH_R='../../data/results/pyasukp_benchmark/'
+PATH_R='../../data/results/tmp/'
 
 TIME_FORMAT="Ext_time: %e\nExt_mem: %M\n"
-CSV_HEADER="UKP5 Internal Time (seconds);UKP5 External Time (seconds);UKP5 Max Memory Use (Kb);UKP5 opt;Pyasukp Internal Time (seconds);Pyasukp External Time (seconds);Pyasukp Max Memory Use (Kb);PYAsUKP opt;"
+CSV_HEADER="Filename;UKP5 Internal Time (seconds);UKP5 External Time (seconds);UKP5 Max Memory Use (Kb);UKP5 opt;Pyasukp Internal Time (seconds);Pyasukp External Time (seconds);Pyasukp Max Memory Use (Kb);PYAsUKP opt;"
 
 declare -a files=("${!4}")
 for f in "${files[@]}"
@@ -60,8 +60,10 @@ do
 	rm "${pya_res}.itime" "${pya_res}.etime" "${pya_res}.emem" "${pya_res}.opt"
 
 	echo $CSV_HEADER > "$PATH_R${f}.all"
-	paste -d\; "$ukp5_res" "$pya_res" >> "$PATH_R${f}.all"
-	rm "$ukp5_res" "$pya_res"
+	tmp=`mktemp 'filename.tmp.XXX'`
+	yes "$f" | head -n `wc -l "$ukp5_res" | cut -d\  -f1` > $tmp
+	paste -d\; "$tmp" "$ukp5_res" "$pya_res" >> "$PATH_R${f}.all"
+	rm "$tmp" "$ukp5_res" "$pya_res"
 done
 
 echo "If there were no errors the results should be at the $PATH_R folder (from the sh folder)"
@@ -75,5 +77,9 @@ pyasukp_bench_files=(exnsd16.ukp exnsd18.ukp exnsd20.ukp exnsd26.ukp exnsdbis18.
 
 buriol_bench_folder='../../data/ukp/buriol/'
 buriol_bench_files=($(ls ${buriol_bench_folder}))
-test_performance 1 3 "$buriol_bench_folder" buriol_bench_files[@]
+#test_performance 1 3 "$buriol_bench_folder" buriol_bench_files[@]
+
+myinst_bench_folder='../../data/ukp/myinst/'
+myinst_bench_files=($(ls ${myinst_bench_folder}))
+test_performance 1 3 "$myinst_bench_folder" myinst_bench_files[@]
 

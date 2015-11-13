@@ -5,12 +5,12 @@
 
 #include "test_common.hpp"
 
-#ifdef PROFILE
+#ifdef HBM_PROFILE
   #include <boost/filesystem.hpp>
   using namespace boost::filesystem;
 #endif
-#ifndef PROFILE_PRECISION
-  #define PROFILE_PRECISION 5
+#ifndef HBM_PROFILE_PRECISION
+  #define HBM_PROFILE_PRECISION 5
 #endif
 
 using namespace std;
@@ -82,11 +82,11 @@ int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool
   return EXIT_SUCCESS;
 }
 
-#if !defined(PROFILE) && defined(DUMP)
-  #error The DUMP flag can only be used with the PROFILE flag
+#if !defined(HBM_PROFILE) && defined(HBM_DUMP)
+  #error The HBM_DUMP flag can only be used with the HBM_PROFILE flag
 #endif
 
-#if defined(PROFILE) && defined(DUMP)
+#if defined(HBM_PROFILE) && defined(HBM_DUMP)
 void dump(const string &path, const string &header, const vector<size_t> &v) {
   ofstream f(path, ofstream::out|ofstream::trunc);
   if (f.is_open())
@@ -117,7 +117,7 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
   if (status == EXIT_SUCCESS) {
     const auto &res = run.result;
 
-    #if defined(PROFILE) && defined(DUMP)
+    #if defined(HBM_PROFILE) && defined(HBM_DUMP)
     path my_path(spath);
     path filename = my_path.filename();
     const string  gd_path = "./g_dump_" + filename.native() + ".dat",
@@ -132,13 +132,13 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
 
     cout << "opt:    " << res.opt << endl;
     cout << "y_opt:  " << res.y_opt << endl;
-    #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+    #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
     cout << "last_y_value_outer_loop: " << res.last_y_value_outer_loop << endl;
     #endif
     for (auto it = res.used_items.cbegin(); it != res.used_items.cend(); ++it) {
       it->print();
     }
-    #ifdef PROFILE
+    #ifdef HBM_PROFILE
     cout << "c: " << res.c << endl;
     cout << "n: " << res.n << endl;
     cout << "w_min: " << res.w_min << endl;
@@ -156,8 +156,8 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
       &lctime = res.linear_comp_time, &p1time = res.phase1_time,
       &p2time = res.phase2_time, &ttime = res.total_time;
 
-    streamsize old_precision = cout.precision(PROFILE_PRECISION);
-    int percent_size = 3+PROFILE_PRECISION;
+    streamsize old_precision = cout.precision(HBM_PROFILE_PRECISION);
+    int percent_size = 3+HBM_PROFILE_PRECISION;
     ios_base::fmtflags old_flags = cout.setf(std::ios::fixed, std:: ios::floatfield);
     char old_fill = cout.fill(' ');
 

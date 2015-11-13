@@ -1,13 +1,13 @@
 #include "ukp5.hpp"
 
-#if (defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)) && (defined(INT_EFF) || defined(FP_EFF))
+#if (defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)) && (defined(HBM_INT_EFF) || defined(HBM_FP_EFF))
   #error CHECK PERIODICITY ONLY MAKE SENSE IF THE ORDER IS NOT AN APPROXIMATION
 #endif
-#if defined(CHECK_PERIODICITY) && defined(CHECK_PERIODICITY_FAST)
-  #error ONLY ONE OF CHECK_PERIODICITY OR CHECK_PERIODICITY_FAST CAN BE DEFINED AT THE SAME TIME
+#if defined(HBM_CHECK_PERIODICITY) && defined(HBM_CHECK_PERIODICITY_FAST)
+  #error ONLY ONE OF HBM_CHECK_PERIODICITY OR HBM_CHECK_PERIODICITY_FAST CAN BE DEFINED AT THE SAME TIME
 #endif
 
-#ifdef PROFILE
+#ifdef HBM_PROFILE
 #include <chrono>
 using namespace std::chrono;
 #endif
@@ -24,7 +24,7 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   return make_pair(min,max);
 }
 
-#ifdef PROFILE
+#ifdef HBM_PROFILE
 void ukp5_gen_stats(size_t c, size_t n, size_t w_min, size_t w_max, const vector<size_t> &g, const vector<size_t> &d, ukp_solution_t &sol) {
   sol.g = g;
   sol.d = d;
@@ -106,10 +106,10 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
 
   opt = 0;
 
-  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+  #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
   size_t last_y_where_nonbest_item_was_used = 0;
   #endif
-  #ifdef CHECK_PERIODICITY_FAST
+  #ifdef HBM_CHECK_PERIODICITY_FAST
   /* We could pre-compute the maximum weight at each point
    * to accelerate the periodicity check, but this would make
    * the looser, and the periodicity check doesn't seem to
@@ -124,13 +124,13 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
   #endif
 
   /* this block is a copy-past of the loop bellow only for the best item
-   * its utility is to simplify the code when CHECK_PERIODICITY is defined
+   * its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
    */
   size_t wb = items[0].w;
   g[wb] = items[0].p;;
   d[wb] = 0;
 
-  #ifdef CHECK_PERIODICITY_FAST
+  #ifdef HBM_CHECK_PERIODICITY_FAST
   last_y_where_nonbest_item_was_used = w_max;
   #endif
   for (size_t i = 0; i < n; ++i) {
@@ -139,7 +139,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
     if (g[wi] < pi) {
       g[wi] = pi;
       d[wi] = i;
-      #ifdef CHECK_PERIODICITY
+      #ifdef HBM_CHECK_PERIODICITY
       if (wi > last_y_where_nonbest_item_was_used) {
         last_y_where_nonbest_item_was_used = wi;
       }
@@ -150,7 +150,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
   opt = 0;
   for (size_t y = w_min; y <= c-w_min; ++y) {
     if (g[y] <= opt) continue;
-    #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+    #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
     if (last_y_where_nonbest_item_was_used < y) break;
     #endif
 
@@ -158,12 +158,12 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
     opt = gy = g[y];
     dy = d[y];
 
-    #ifdef CHECK_PERIODICITY_FAST
+    #ifdef HBM_CHECK_PERIODICITY_FAST
     if (dy != 0) last_y_where_nonbest_item_was_used = y + w_maxs[dy];
     #endif
 
     /* this block is a copy-past of the loop bellow only for the best item
-     * its utility is to simplify the code when CHECK_PERIODICITY is defined
+     * its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
      */
     item_t bi = items[0];
     size_t pb = bi.p;
@@ -186,14 +186,14 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
       if (ogny < ngny) {
         g[ny] = ngny;
         d[ny] = ix;
-        #ifdef CHECK_PERIODICITY
+        #ifdef HBM_CHECK_PERIODICITY
         if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
         #endif
       }
     } 
   }
 
-  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+  #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
   if (last_y_where_nonbest_item_was_used < c-w_min) {
     size_t y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
@@ -207,14 +207,14 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
     auto opts = get_opts(c-space_used_by_best_item, g, w_max);
     opt = opts.first;
     y_opt = opts.second;
-    #ifdef PROFILE
+    #ifdef HBM_PROFILE
     sol.last_y_value_outer_loop = last_y_where_nonbest_item_was_used+1;
     #endif
   } else {
     auto opts = get_opts(c, g, w_min);
     opt = opts.first;
     y_opt = opts.second;
-    #ifdef PROFILE
+    #ifdef HBM_PROFILE
     sol.last_y_value_outer_loop = c-w_min;
     #endif
   }
@@ -232,31 +232,31 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
  * and true for the parameter already_sorted.
  */
 void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   steady_clock::time_point all_ukp5_begin = steady_clock::now();
   steady_clock::time_point begin = steady_clock::now();
   #endif
   if (!already_sorted) sort_by_efficiency(ukpi.items);
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   sol.sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   #endif
 
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   begin = steady_clock::now();
   #endif
   size_t c = ukpi.c;
   size_t n = ukpi.items.size();
   auto minw_max = minmax_item_weight(ukpi.items);
   size_t w_min = minw_max.first, w_max = minw_max.second;
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   sol.linear_comp_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   #endif
 
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   begin = steady_clock::now();
   #endif
 
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   /* Use the ukp_solution_t fields instead of local variables to propagate
    * the array values. The arrays will be dumped to files, making possible
    * study them with R or other tool. */
@@ -269,29 +269,29 @@ void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = fal
   vector<size_t> d(c+1+(w_max-w_min), n-1);
   #endif
 
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   sol.vector_alloc_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   #endif
 
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   begin = steady_clock::now();
   #endif
   ukp5_phase1(ukpi, g, d, sol, w_min, w_max);
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   sol.phase1_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   begin = steady_clock::now();
   #endif
   ukp5_phase2(ukpi.items, d, sol);
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   sol.phase2_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   sol.total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
   #endif
 
-  #ifdef PROFILE
+  #ifdef HBM_PROFILE
   ukp5_gen_stats(c, n, w_min, w_max, g, d, sol);
   #endif
 
-  #if defined(CHECK_PERIODICITY) || defined(CHECK_PERIODICITY_FAST)
+  #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
   /* If we use our periodicity check the sol.used_items constructed by
    * ukp5_phase2 doesn't include the copies of the best item used to
    * fill all the extra_capacity. This solves it. */

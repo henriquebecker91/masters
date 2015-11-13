@@ -7,37 +7,36 @@ CC=g++
 CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -O3 -lboost_filesystem -lboost_system
 H_DEPS=test_common.hpp ukp_common.hpp
 O_DEPS=test_common.o ukp_common.o
-DEFS=-DTWO_MULT_COMP
 
 ukp_common.o: ukp_common.cpp ukp_common.hpp
-	$(CC) $(DEFS) -c -o $@ ukp_common.cpp $(CFLAGS)
+	$(CC) -c -o $@ ukp_common.cpp $(CFLAGS)
 
 test_common.o: test_common.cpp test_common.hpp
-	$(CC) $(DEFS) -c -o $@ test_common.cpp $(CFLAGS)
+	$(CC) -c -o $@ test_common.cpp $(CFLAGS)
 
 run_eduk.out: run_eduk.cpp eduk.cpp eduk.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ run_eduk.cpp eduk.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ run_eduk.cpp eduk.cpp $(O_DEPS) $(CFLAGS)
 
 test_eduk.out: test_eduk.cpp eduk.cpp eduk.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ test_eduk.cpp eduk.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ test_eduk.cpp eduk.cpp $(O_DEPS) $(CFLAGS)
 
 run_ukp5.out: run_ukp5.cpp ukp5.cpp ukp5.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ run_ukp5.cpp ukp5.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ run_ukp5.cpp ukp5.cpp $(O_DEPS) $(CFLAGS)
 
 test_ukp5.out: test_ukp5.cpp ukp5.cpp ukp5.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ test_ukp5.cpp ukp5.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ test_ukp5.cpp ukp5.cpp $(O_DEPS) $(CFLAGS)
 
 run_per.out: periodicity.cpp periodicity.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ run_per.cpp periodicity.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ run_per.cpp periodicity.cpp $(O_DEPS) $(CFLAGS)
 
 test_per.out: periodicity.cpp periodicity.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ test_per.cpp periodicity.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ test_per.cpp periodicity.cpp $(O_DEPS) $(CFLAGS)
 
 run_bb.out: bb.cpp bb.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ run_bb.cpp bb.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ run_bb.cpp bb.cpp $(O_DEPS) $(CFLAGS)
 
 test_bb.out: bb.cpp bb.hpp $(H_DEPS) $(O_DEPS)
-	$(CC) $(DEFS) -o $@ test_bb.cpp bb.cpp $(O_DEPS) $(CFLAGS)
+	$(CC) -o $@ test_bb.cpp bb.cpp $(O_DEPS) $(CFLAGS)
 
 .PHONY: clean
 

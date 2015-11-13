@@ -3,7 +3,7 @@
 #include <memory>
 #include <forward_list>
 
-#define MAX_MEMORY_WASTED_BY_S 10
+#define HBM_MAX_MEMORY_WASTED_BY_S 10
 
 using namespace std;
 
@@ -263,7 +263,7 @@ struct S {
     }
 
     /* Another possibility is to verify if (m > computed.size()/MAGIC_CONST) */
-    if (m > MAX_MEMORY_WASTED_BY_S) {
+    if (m > HBM_MAX_MEMORY_WASTED_BY_S) {
       vector<item_t> new_v(computed.cbegin()+m, computed.cend());
       computed.swap(new_v);
 

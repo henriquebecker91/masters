@@ -2,7 +2,7 @@
 #include <string> /* for stoull */
 #include <iostream> /* for cout */
 
-#ifdef INT_EFF
+#ifdef HBM_INT_EFF
 #include <boost/sort/spreadsort/spreadsort.hpp> /* for integer_sort */
 #else
 #include <algorithm> /* for sort */
@@ -169,7 +169,7 @@ void write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
 }
 
 void sort_by_efficiency(vector<item_t> &items) {
-  #ifdef INT_EFF
+  #ifdef HBM_INT_EFF
   boost::sort::spreadsort::integer_sort(items.begin(), items.end());
   #else
   std::sort(items.begin(), items.end());

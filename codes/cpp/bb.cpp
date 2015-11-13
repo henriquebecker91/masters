@@ -28,7 +28,7 @@ using namespace boost;
 //typedef rational<size_t> eff_t;
 typedef double eff_t;
 
-#ifdef NOT_DEFINED
+#ifdef HBM_NOT_DEFINED
 template <class T>
 struct solution {
   const vector<item_t> * const items;
@@ -93,7 +93,7 @@ struct solution {
   }
 };
 typedef solution<size_t> solution_t;
-#endif /* NOT_DEFINED */
+#endif /* HBM_NOT_DEFINED */
 
 struct stack_t {
   size_t i, ws, ps;

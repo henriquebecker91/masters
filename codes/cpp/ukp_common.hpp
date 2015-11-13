@@ -1,9 +1,12 @@
-#ifndef __UKP_COMMON_HPP_
-#define __UKP_COMMON_HPP_
+#ifndef HBM_UKP_COMMON_HPP
+#define HBM_UKP_COMMON_HPP
 
-#define FP_EFF_TYPE float
-#define INT_EFF_TYPE size_t
-#define RATIONAL_EFF_TYPE boost::rational<size_t>
+/* includes that don't depend on type definitions */
+#include <vector>
+#include <iostream>
+#include <stdexcept> /* for runtime_error */
+
+#include "ukp_types.hpp"
 
 #ifndef RATIONAL_EFF
   #ifndef FP_EFF
@@ -40,16 +43,8 @@
   #define EFF_TYPE RATIONAL_EFF_TYPE
 #endif /*RATIONAL_EFF*/
 
-#include <vector>
-#include <istream>
-#include <stdexcept> /* for runtime_error */
-
 #if defined(TWO_MULT_COMP) || defined(INT_EFF)
 #include <utility> /* to specialize swap */
-#endif
-
-#ifdef RATIONAL_EFF
-#include <boost/rational.hpp>
 #endif
 
 struct item_t {
@@ -84,7 +79,7 @@ struct item_t {
   #if defined(TWO_MULT_COMP)
   inline bool operator<(const item_t &o) const {
     size_t a = p * o.w, b = o.p * w;
-    return  a > b || (a == b && w < o.w); 
+    return a > b || (a == b && w < o.w); 
   }
   #elif defined(RATIONAL_EFF) || defined(FP_EFF) || defined(INT_EFF)
   inline bool operator<(const item_t &o) const {
@@ -94,7 +89,9 @@ struct item_t {
 
   #ifdef INT_EFF
   inline size_t operator>>(const int s) const {
-    /* As we sort by non-increasing efficiency, we cannot return
+    /* NOTE: this operator is needed for boost::sort::spreadsort::integer_sort
+     * that is the sort we use when INT_EFF is defined.
+     * As we sort by non-increasing efficiency, we cannot return
      * (efficiency >> s), because the integer_sort will compare the value
      * trying to sort them in non-decreasing order, as (a < b) iff (~a >= ~b)
      * this solves the problem. */
@@ -103,16 +100,18 @@ struct item_t {
   #endif
 };
 
+/* Use an optimized swap for the item class (improves sorting time),
+ * but only if this is possible (all ) */
 #if (defined(TWO_MULT_COMP) || defined(INT_EFF)) && !NO_XOR_SWAP
-#define XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
+#define HBM_XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
 namespace std {
   template <>
   inline void swap(item_t& a, item_t& b) noexcept
   {
-    XORSWAP(a.w, b.w);
-    XORSWAP(a.p, b.p);
+    HBM_XORSWAP(a.w, b.w);
+    HBM_XORSWAP(a.p, b.p);
     #ifdef INT_EFF
-    XORSWAP(a.efficiency, b.efficiency);
+    HBM_XORSWAP(a.efficiency, b.efficiency);
     #endif
   }
 }
@@ -124,11 +123,14 @@ struct ukp_instance_t {
 };
 
 struct ukp_itemqt_t {
-  item_t it;
-  size_t qt;
+  item_t it;      /* the item */
+  size_t qt, ix;  /* its quantity and index */
 
-  inline ukp_itemqt_t(void) {}
-  inline ukp_itemqt_t(const item_t &it, const size_t &qt) : it(it), qt(qt) {}
+  inline ukp_itemqt_t(const item_t &it, const size_t qt, const size_t ix) : it(it), qt(qt), ix(ix) {}
+
+  void print(std::ostream &cout = std::cout) const {
+    cout << "ix: " << ix << " qt: " << qt << " w: " << it.w << " p: " << it.p << std::endl;
+  }
 };
 
 struct ukp_solution_t {
@@ -171,5 +173,5 @@ void read_sukp_instance(std::istream &in, ukp_instance_t &ukpi);
 void write_sukp_instance(std::ostream &out, ukp_instance_t &ukpi);
 
 void sort_by_efficiency(std::vector<item_t> &items);
-#endif //__UKP_COMMON_HPP_ 
+#endif //HBM_UKP_COMMON_HPP
 

@@ -1,6 +1,5 @@
-#ifndef __TEST_COMMON_HPP_
-#define __TEST_COMMON_HPP_
-
+#ifndef HBM_TEST_COMMON_HPP
+#define HBM_TEST_COMMON_HPP
 #include "ukp_common.hpp"
 #include <chrono>
 
@@ -18,5 +17,4 @@ int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const s
 int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool));
 int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), int argc, char** argv);
 
-#endif //__TEST_COMMON_HPP_ 
-
+#endif //HBM_TEST_COMMON_HPP

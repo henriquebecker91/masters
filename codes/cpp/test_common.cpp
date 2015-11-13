@@ -136,7 +136,7 @@ int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), 
     cout << "last_y_value_outer_loop: " << res.last_y_value_outer_loop << endl;
     #endif
     for (auto it = res.used_items.cbegin(); it != res.used_items.cend(); ++it) {
-      cout << "qt: " << it->qt << " w: " << it->it.w << " p: " << it->it.p << endl;
+      it->print();
     }
     #ifdef PROFILE
     cout << "c: " << res.c << endl;

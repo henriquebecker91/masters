@@ -88,7 +88,7 @@ void ukp5_phase2(const vector<item_t> &items, const vector<size_t> &d, ukp_solut
 
   for (size_t i = 0; i < n; ++i) {
     if (qts_its[i] > 0) {
-      sol.used_items.emplace_back(items[i], qts_its[i]);
+      sol.used_items.emplace_back(items[i], qts_its[i], i);
     }
   }
   sol.used_items.shrink_to_fit();

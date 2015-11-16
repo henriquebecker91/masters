@@ -119,7 +119,7 @@ inline size_t upper_bound(const vector<eff_t> &effs, const vector<item_t> &items
     c -= qt*wi;
     if (qt == 0) {
       //for (; i < items.size(); ++i) if (c >= items[i].w) break;
-      u += (effs[i+1]*c);
+      u += static_cast<size_t>(effs[i+1]*((eff_t)c));
       break;
     }
   }

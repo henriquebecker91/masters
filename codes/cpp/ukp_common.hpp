@@ -9,46 +9,52 @@
 /* type definitions */
 #include "ukp_types.hpp"
 
-#ifndef HBM_RATIONAL_EFF
-  #ifndef HBM_FP_EFF
-    #ifndef HBM_INT_EFF
-      #ifndef HBM_TWO_MULT_COMP
-        #error ONE OF: HBM_RATIONAL_EFF, HBM_FP_EFF, HBM_INT_EFF OR HBM_TWO_MULT_COMP MUST BE \
-               DEFINED, THE RECOMMENDED IS HBM_TWO_MULT_COMP
-      #endif
-    #else /*HBM_INT_EFF*/
-      #ifdef HBM_TWO_MULT_COMP
-        #error HBM_INT_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
-      #endif
-      typedef int_eff efficiency;
-    #endif /*HBM_INT_EFF*/
-  #else /*HBM_FP_EFF*/
-    #ifdef HBM_TWO_MULT_COMP
-      #error HBM_FP_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
-    #endif
-    #ifdef HBM_INT_EFF
-      #error HBM_FP_EFF AND HBM_INT_EFF CANNOT BE DEFINED AT THE SAME TIME
-    #endif
-    typedef fp_eff efficiency;
-  #endif /*HBM_FP_EFF*/
-#else /*HBM_RATIONAL_EFF*/
-  #ifdef HBM_TWO_MULT_COMP
-    #error HBM_RATIONAL_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
-  #endif
-  #ifdef HBM_INT_EFF
-    #error HBM_RATIONAL_EFF AND HBM_INT_EFF CANNOT BE DEFINED AT THE SAME TIME
-  #endif
-  #ifdef HBM_FP_EFF
-    #error HBM_RATIONAL_EFF AND HBM_FP_EFF CANNOT BE DEFINED AT THE SAME TIME
-  #endif
-  typedef rational_eff efficiency;
-#endif /*HBM_RATIONAL_EFF*/
-
+/* includes that depend on type definitions */
 #if defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)
 #include <utility> /* to specialize swap */
 #endif
 
 namespace hbm {
+  /* The following code doesn't allow any two of the following macros to be
+   * defined at the same time: HBM_TWO_MULT_COMP, HBM_INT_EFF, HBM_FP_EFF
+   * and HBM_RATIONAL_EFF. Also it defines the efficiency type based on 
+   * the macro value*/
+  #ifndef HBM_RATIONAL_EFF
+    #ifndef HBM_FP_EFF
+      #ifndef HBM_INT_EFF
+        #ifndef HBM_TWO_MULT_COMP
+          #error ONE OF: HBM_RATIONAL_EFF, HBM_FP_EFF, HBM_INT_EFF OR HBM_TWO_MULT_COMP MUST BE \
+                 DEFINED, THE RECOMMENDED IS HBM_TWO_MULT_COMP
+        #endif
+      #else /*HBM_INT_EFF*/
+        #ifdef HBM_TWO_MULT_COMP
+          #error HBM_INT_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
+        #endif
+        typedef int_eff efficiency;
+      #endif /*HBM_INT_EFF*/
+    #else /*HBM_FP_EFF*/
+      #ifdef HBM_TWO_MULT_COMP
+        #error HBM_FP_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
+      #endif
+      #ifdef HBM_INT_EFF
+        #error HBM_FP_EFF AND HBM_INT_EFF CANNOT BE DEFINED AT THE SAME TIME
+      #endif
+      typedef fp_eff efficiency;
+    #endif /*HBM_FP_EFF*/
+  #else /*HBM_RATIONAL_EFF*/
+    #ifdef HBM_TWO_MULT_COMP
+      #error HBM_RATIONAL_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
+    #endif
+    #ifdef HBM_INT_EFF
+      #error HBM_RATIONAL_EFF AND HBM_INT_EFF CANNOT BE DEFINED AT THE SAME TIME
+    #endif
+    #ifdef HBM_FP_EFF
+      #error HBM_RATIONAL_EFF AND HBM_FP_EFF CANNOT BE DEFINED AT THE SAME TIME
+    #endif
+    typedef rational_eff efficiency;
+  #endif /*HBM_RATIONAL_EFF*/
+
+
   struct item_t {
     weight w;
     profit p;

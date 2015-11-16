@@ -12,6 +12,7 @@
 
 using namespace std;
 using namespace std::regex_constants;
+using namespace hbm;
 
 static const string bs("[[:blank:]]*");
 static const string bp("[[:blank:]]+");
@@ -74,7 +75,7 @@ void try_match(const regex &r, const string &l, const string &exp, smatch &m) {
   return;
 }
 
-void read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
+void hbm::read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
   static const string strange_line =
     "error: read_ukp_instance: Found a strange line inside data section: ";
 
@@ -139,7 +140,7 @@ void read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
   }
 }
 
-void read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
+void hbm::read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
   size_t n;
   in >> n;
   in >> ukpi.c;
@@ -155,7 +156,7 @@ void read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
   return;
 }
 
-void write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
+void hbm::write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
   size_t n = ukpi.items.size();
   out << n << endl;
   out << ukpi.c << endl;
@@ -168,7 +169,7 @@ void write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
   return;
 }
 
-void sort_by_efficiency(vector<item_t> &items) {
+void hbm::sort_by_eff(vector<item_t> &items) {
   #ifdef HBM_INT_EFF
   boost::sort::spreadsort::integer_sort(items.begin(), items.end());
   #else
@@ -176,4 +177,3 @@ void sort_by_efficiency(vector<item_t> &items) {
   #endif
   return;
 }
-

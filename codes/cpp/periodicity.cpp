@@ -4,10 +4,11 @@
 
 using namespace std;
 using namespace boost;
+using namespace hbm;
 
-size_t y_star(ukp_instance_t &ukpi, bool already_sorted = false) {
+size_t hbm::y_star(ukp_instance_t &ukpi, bool already_sorted = false) {
   vector<item_t> &items(ukpi.items);
-  if (!already_sorted) sort_by_efficiency(ukpi.items);
+  if (!already_sorted) sort_by_eff(ukpi.items);
 
   item_t i1 = items[0], i2 = items[1];
   //item_t i1 = ukpi.best_item, i2 = ukpi.second_best_item;
@@ -20,9 +21,9 @@ size_t y_star(ukp_instance_t &ukpi, bool already_sorted = false) {
   return rational_cast<size_t>(r_p1/(r1 - r2)) + 1;
 }
 
-size_t run_with_y_star(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false) {
+size_t hbm::run_with_y_star(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false) {
   vector<item_t> &items(ukpi.items);
-  if (!already_sorted) sort_by_efficiency(ukpi.items);
+  if (!already_sorted) sort_by_eff(ukpi.items);
 
   size_t y_ = y_star(ukpi, already_sorted);
 
@@ -50,7 +51,7 @@ size_t run_with_y_star(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, boo
   return y_;
 }
 
-void y_star_wrapper(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false) {
+void hbm::y_star_wrapper(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false) {
   //(void) run_with_y_star(&ukp5, ukpi, sol, false);
   sol.opt = y_star(ukpi, already_sorted);
 

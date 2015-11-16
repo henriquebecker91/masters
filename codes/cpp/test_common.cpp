@@ -15,8 +15,9 @@
 
 using namespace std;
 using namespace std::chrono;
+using namespace hbm;
 
-int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const string& path, run_t &run) {
+int hbm::run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const string& path, run_t &run) {
   ifstream f(path);
 
   if (f.is_open())
@@ -38,7 +39,7 @@ int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const s
   return EXIT_SUCCESS;
 }
 
-int benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool)) {
+int hbm::benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool)) {
   array<instance_data_t, /*sizeof(instance_data_t)**/8> instances_data = {{
     { "exnsd16", 1029680 },
     { "exnsd18", 1112131 },
@@ -101,7 +102,7 @@ void dump(const string &path, const string &header, const vector<size_t> &v) {
 }
 #endif
 
-int main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), int argc, char** argv) {
+int hbm::main_take_path(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), int argc, char** argv) {
   if (argc != 2) {
     cout << "usage: a.out data.sukp" << endl;
     return EXIT_FAILURE;

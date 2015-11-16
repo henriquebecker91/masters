@@ -7,11 +7,13 @@
   #error ONLY ONE OF HBM_CHECK_PERIODICITY OR HBM_CHECK_PERIODICITY_FAST CAN BE DEFINED AT THE SAME TIME
 #endif
 
+using namespace std;
 #ifdef HBM_PROFILE
 #include <chrono>
 using namespace std::chrono;
 #endif
-using namespace std;
+
+using namespace hbm;
 
 pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
   size_t min, max;
@@ -228,15 +230,15 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
 }
 
 /* This function reorders the ukpi.items vector, if you don't want this pass a
- * copy of the instance or pass it already ordered by non-decreasing efficiency
+ * copy of the instance or pass it already ordered by non-decreasing eff
  * and true for the parameter already_sorted.
  */
-void ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
+void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
   #ifdef HBM_PROFILE
   steady_clock::time_point all_ukp5_begin = steady_clock::now();
   steady_clock::time_point begin = steady_clock::now();
   #endif
-  if (!already_sorted) sort_by_efficiency(ukpi.items);
+  if (!already_sorted) sort_by_eff(ukpi.items);
   #ifdef HBM_PROFILE
   sol.sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   #endif

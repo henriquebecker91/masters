@@ -5,6 +5,7 @@
 
 using namespace std;
 using namespace boost;
+using namespace hbm;
 
 /* TODO: Instead of starting at zero elements of some item i,
  * start with the greatest possible quantity of elements of that
@@ -12,7 +13,7 @@ using namespace boost;
  * This helps mainly because we examine first the solutions with the
  * least of capacity left (most probability of being optimal).
  * TODO: The bound computed is very stupid. The items are already
- * ordered by efficiency, then if the first item can't be used anymore,
+ * ordered by eff, then if the first item can't be used anymore,
  * why use it in the bound? The upper bound over the remaining capacity
  * must be done by using the current (or next) item.
  * TODO: The type of pruning done by MTU/MT2 is a periodicity prunning,
@@ -240,8 +241,8 @@ vector<size_t> weight_mins(vector<item_t> &items) {
   return w_mins;
 }
 
-void bb(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
-  if (!already_sorted) sort_by_efficiency(ukpi.items);
+void hbm::bb(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
+  if (!already_sorted) sort_by_eff(ukpi.items);
 
   vector<size_t> w_mins = weight_mins(ukpi.items);
   w_mins.push_back(0);

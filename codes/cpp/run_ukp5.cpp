@@ -2,6 +2,6 @@
 #include "test_common.hpp"
 
 int main(int argc, char** argv) {
-    return main_take_path(&ukp5, argc, argv);
+    return hbm::main_take_path(&hbm::ukp5, argc, argv);
 }
 

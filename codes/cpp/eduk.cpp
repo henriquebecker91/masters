@@ -6,6 +6,7 @@
 #define HBM_MAX_MEMORY_WASTED_BY_S 10
 
 using namespace std;
+using namespace hbm;
 
 bool weight_order(const item_t& i, const item_t& j) {
   return i.w < j.w;
@@ -274,7 +275,7 @@ struct S {
   }
 };
 
-void eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
+void hbm::eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
   size_t n = ukpi.items.size();
   size_t c = ukpi.c;
   vector<item_t> &items(ukpi.items);

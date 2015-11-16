@@ -2,6 +2,6 @@
 #include "eduk.hpp"
 
 int main(int argc, char** argv) {
-    return main_take_path(&eduk, argc, argv);
+    return hbm::main_take_path(&hbm::eduk, argc, argv);
 }
 

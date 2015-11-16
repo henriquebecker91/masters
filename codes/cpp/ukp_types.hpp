@@ -1,8 +1,6 @@
 #ifndef HBM_UKP_TYPES_HPP
 #define HBM_UKP_TYPES_HPP
 
-#define HBM_UKP_TYPES_HPP
-
 /* See the README for the explanation of every macro and basic type */
 
 /* Efficiency related definitions

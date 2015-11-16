@@ -64,16 +64,16 @@ namespace hbm {
 
     inline item_t(void) {}
     #ifdef HBM_TWO_MULT_COMP
-    inline item_t(const size_t &w, const size_t &p) : w(w), p(p) {}
+    inline item_t(const weight &w, const profit &p) : w(w), p(p) {}
     #elif defined(HBM_RATIONAL_EFF)
-    inline item_t(const size_t &w, const size_t &p) : w(w), p(p), eff(p, w) {}
+    inline item_t(const weight &w, const profit &p) : w(w), p(p), eff(p, w) {}
     #elif defined(HBM_INT_EFF)
-    inline item_t(size_t w, size_t p) : w(w), p(p) {
+    inline item_t(const weight &w, const profit &p) : w(w), p(p) {
       eff = (p << 32) / w;
     }
     #elif defined(HBM_FP_EFF)
-    inline item_t(size_t w, size_t p) : w(w), p(p) {
-      eff = ((HBM_EFF_TYPE)p) / ((HBM_EFF_TYPE)w);
+    inline item_t(const weigth &w, const profit &p) : w(w), p(p) {
+      eff = static_cast<efficiency>(p) / static_cast<efficiency>(w);
     }
     #endif
 
@@ -86,7 +86,8 @@ namespace hbm {
      */
     #if defined(HBM_TWO_MULT_COMP)
     inline bool operator<(const item_t &o) const {
-      size_t a = p * o.w, b = o.p * w;
+      profit a = p * static_cast<profit>(o.w),
+             b = o.p * static_cast<profit>(w);
       return a > b || (a == b && w < o.w); 
     }
     #elif defined(HBM_RATIONAL_EFF) || defined(HBM_FP_EFF) || defined(HBM_INT_EFF)
@@ -109,13 +110,14 @@ namespace hbm {
   };
 
   struct ukp_instance_t {
-    size_t c;
+    weight c;
     std::vector<item_t> items;
   };
 
   struct ukp_itemqt_t {
     item_t it;      /* the item */
-    size_t qt, ix;  /* its quantity and index */
+    /* its quantity in the result, and index in the items list */
+    quantity qt, ix;
 
     inline ukp_itemqt_t(const item_t &it, const size_t qt, const size_t ix) : it(it), qt(qt), ix(ix) {}
 
@@ -125,8 +127,8 @@ namespace hbm {
   };
 
   struct ukp_solution_t {
-    size_t opt;
-    size_t y_opt;
+    profit opt;
+    weight y_opt;
     std::vector<ukp_itemqt_t> used_items;
     #ifdef HBM_PROFILE
     /* Time of each phase */
@@ -137,19 +139,20 @@ namespace hbm {
     double phase2_time;
     double total_time;
     /* Some data about instance */
-    size_t c, n, w_min, w_max;
+    quantity n;
+    weight c, w_min, w_max;
     /* Some data about structures manipulates by ukp5 */
-    size_t last_dy_non_zero_non_n;
-    size_t qt_non_skipped_ys;
-    size_t qt_gy_zeros;
-    size_t qt_inner_loop_executions;
-    std::vector<size_t> qt_i_in_dy;
-    std::vector<size_t> g;
-    std::vector<size_t> d;
-    std::vector<size_t> non_skipped_d;
+    weight last_dy_non_zero_non_n;
+    weight qt_non_skipped_ys;
+    weight qt_gy_zeros;
+    weight qt_inner_loop_executions;
+    std::vector<quantity> qt_i_in_dy;
+    std::vector<profit> g;
+    std::vector<quantity> d;
+    std::vector<quantity> non_skipped_d;
     #endif /* HBM_PROFILE */
     #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
-    size_t last_y_value_outer_loop;
+    weight last_y_value_outer_loop;
     #endif /* PERIODICITY */
   };
 

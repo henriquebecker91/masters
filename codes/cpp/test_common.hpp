@@ -11,7 +11,7 @@ namespace hbm {
 
   struct instance_data_t {
     std::string name;
-    size_t expected_opt;
+    profit expected_opt;
   };
 
   int run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), const std::string& path, run_t &run);

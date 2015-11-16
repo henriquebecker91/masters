@@ -15,11 +15,11 @@ using namespace std::chrono;
 
 using namespace hbm;
 
-pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
-  size_t min, max;
+pair<weight,weight> minmax_item_weight(vector<item_t> &items) {
+  weight min, max;
   min = max = items[0].w;
   for (auto it = items.begin()+1; it != items.end(); ++it) {
-    size_t x = (*it).w;
+    weight x = it->w;
     if (x < min) min = x;
     else if (x > max) max = x;
   }
@@ -27,7 +27,7 @@ pair<size_t,size_t> minmax_item_weight(vector<item_t> &items) {
 }
 
 #ifdef HBM_PROFILE
-void ukp5_gen_stats(size_t c, size_t n, size_t w_min, size_t w_max, const vector<size_t> &g, const vector<size_t> &d, ukp_solution_t &sol) {
+void ukp5_gen_stats(weight c, quantity n, weight w_min, weight w_max, const vector<profit> &g, const vector<quantity> &d, ukp_solution_t &sol) {
   sol.g = g;
   sol.d = d;
   sol.c = c;
@@ -41,11 +41,11 @@ void ukp5_gen_stats(size_t c, size_t n, size_t w_min, size_t w_max, const vector
   sol.qt_i_in_dy[n-1] = w_min;
 
   sol.qt_gy_zeros = w_min;
-  size_t opt = 0;
+  profit opt = 0;
   sol.qt_non_skipped_ys = 0;
   sol.qt_inner_loop_executions = 0;
 
-  for (size_t y = w_min; y <= c-w_min; ++y) {
+  for (weight y = w_min; y <= c-w_min; ++y) {
     ++sol.qt_i_in_dy[d[y]];
     if (g[y] > opt) {
       ++sol.qt_non_skipped_ys;
@@ -60,13 +60,13 @@ void ukp5_gen_stats(size_t c, size_t n, size_t w_min, size_t w_max, const vector
 }
 #endif
 
-pair<size_t, size_t> get_opts(size_t c, const vector<size_t> &g, size_t w_min) {
-  size_t opt = 0;
+pair<profit, weight> get_opts(weight c, const vector<profit> &g, weight w_min) {
+  profit opt = 0;
   /* Dont need to be initialized, but initializing to stop compiler
    * warning messages */
-  size_t y_opt = 0;
+  weight y_opt = 0;
 
-  for (size_t y = (c-w_min)+1; y <= c; ++y) {
+  for (weight y = (c-w_min)+1; y <= c; ++y) {
     if (opt < g[y]) {
       opt = g[y];
       y_opt = y;
@@ -76,19 +76,19 @@ pair<size_t, size_t> get_opts(size_t c, const vector<size_t> &g, size_t w_min) {
   return make_pair(opt, y_opt);
 }
 
-void ukp5_phase2(const vector<item_t> &items, const vector<size_t> &d, ukp_solution_t &sol) {
-  size_t n = items.size();
-  vector<size_t> qts_its(n, 0);
+void ukp5_phase2(const vector<item_t> &items, const vector<quantity> &d, ukp_solution_t &sol) {
+  quantity n = items.size();
+  vector<quantity> qts_its(n, 0);
 
-  size_t y_opt = sol.y_opt;
-  size_t dy_opt;
+  weight y_opt = sol.y_opt;
+  quantity dy_opt;
   while (y_opt != 0) {
     dy_opt = d[y_opt];
     y_opt -= items[dy_opt].w;
     ++qts_its[dy_opt];
   }
 
-  for (size_t i = 0; i < n; ++i) {
+  for (quantity i = 0; i < n; ++i) {
     if (qts_its[i] > 0) {
       sol.used_items.emplace_back(items[i], qts_its[i], i);
     }
@@ -98,18 +98,18 @@ void ukp5_phase2(const vector<item_t> &items, const vector<size_t> &d, ukp_solut
   return;
 }
 
-void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &d, ukp_solution_t &sol, size_t w_min, size_t w_max) {
-  const size_t &c = ukpi.c;
-  const size_t &n = ukpi.items.size();
+void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<quantity> &d, ukp_solution_t &sol, weight w_min, weight w_max) {
+  const weight &c = ukpi.c;
+  const quantity &n = ukpi.items.size();
   const vector<item_t> &items = ukpi.items;
 
-  size_t &y_opt = sol.y_opt;
-  size_t &opt = sol.opt;
+  weight &y_opt = sol.y_opt;
+  profit &opt = sol.opt;
 
   opt = 0;
 
   #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
-  size_t last_y_where_nonbest_item_was_used = 0;
+  weight  last_y_where_nonbest_item_was_used = 0;
   #endif
   #ifdef HBM_CHECK_PERIODICITY_FAST
   /* We could pre-compute the maximum weight at each point
@@ -117,10 +117,10 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
    * the looser, and the periodicity check doesn't seem to
    * consume much of the algorithm time
    */
-  vector<size_t> w_maxs;
+  vector<weight> w_maxs;
   w_maxs.reserve(n);
   w_maxs.push_back(items[0].w);
-  for (size_t i = 1; i < n; ++i) {
+  for (quantity i = 1; i < n; ++i) {
     w_maxs.push_back(max(w_maxs[i-1], items[i].w));
   }
   #endif
@@ -128,16 +128,16 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
   /* this block is a copy-past of the loop bellow only for the best item
    * its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
    */
-  size_t wb = items[0].w;
+  weight wb = items[0].w;
   g[wb] = items[0].p;;
   d[wb] = 0;
 
   #ifdef HBM_CHECK_PERIODICITY_FAST
   last_y_where_nonbest_item_was_used = w_max;
   #endif
-  for (size_t i = 0; i < n; ++i) {
-    size_t pi = items[i].p;
-    size_t wi = items[i].w;
+  for (weight i = 0; i < n; ++i) {
+    profit pi = items[i].p;
+    weight wi = items[i].w;
     if (g[wi] < pi) {
       g[wi] = pi;
       d[wi] = i;
@@ -150,13 +150,14 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
   }
 
   opt = 0;
-  for (size_t y = w_min; y <= c-w_min; ++y) {
+  for (weight y = w_min; y <= c-w_min; ++y) {
     if (g[y] <= opt) continue;
     #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
     if (last_y_where_nonbest_item_was_used < y) break;
     #endif
 
-    size_t gy, dy;
+    profit gy;
+    quantity dy;
     opt = gy = g[y];
     dy = d[y];
 
@@ -168,23 +169,23 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
      * its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
      */
     item_t bi = items[0];
-    size_t pb = bi.p;
-    size_t wb = bi.w;
-    size_t next_y = y + wb;
-    size_t old_gny = g[next_y];
-    size_t new_gny = gy + pb;
+    weight wb = bi.w;
+    profit pb = bi.p;
+    weight next_y = y + wb;
+    profit old_gny = g[next_y];
+    profit new_gny = gy + pb;
     if (old_gny < new_gny) {
       g[next_y] = new_gny;
       d[next_y] = 0;
     }
 
-    for (size_t ix = 1; ix <= dy; ++ix) {
+    for (quantity ix = 1; ix <= dy; ++ix) {
       item_t it = items[ix];
-      size_t pi = it.p;
-      size_t wi = it.w;
-      size_t ny = y + wi;
-      size_t ogny = g[ny];
-      size_t ngny = gy + pi;
+      weight wi = it.w;
+      profit pi = it.p;
+      weight ny = y + wi;
+      profit ogny = g[ny];
+      profit ngny = gy + pi;
       if (ogny < ngny) {
         g[ny] = ngny;
         d[ny] = ix;
@@ -197,14 +198,13 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<size_t> &g, vector<size_t> &
 
   #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
   if (last_y_where_nonbest_item_was_used < c-w_min) {
-    size_t y_ = last_y_where_nonbest_item_was_used;
+    weight y_ = last_y_where_nonbest_item_was_used;
     while (d[y_] != 0) ++y_;
 
-    size_t a1;
-    a1 = items[0].w;
-    size_t extra_capacity = c - y_;
+    weight a1 = items[0].w;
+    weight extra_capacity = c - y_;
 
-    size_t space_used_by_best_item = extra_capacity - (extra_capacity % a1);
+    weight space_used_by_best_item = extra_capacity - (extra_capacity % a1);
 
     auto opts = get_opts(c-space_used_by_best_item, g, w_max);
     opt = opts.first;
@@ -246,10 +246,10 @@ void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* 
   #ifdef HBM_PROFILE
   begin = steady_clock::now();
   #endif
-  size_t c = ukpi.c;
-  size_t n = ukpi.items.size();
+  weight c = ukpi.c;
+  quantity n = ukpi.items.size();
   auto minw_max = minmax_item_weight(ukpi.items);
-  size_t w_min = minw_max.first, w_max = minw_max.second;
+  weight w_min = minw_max.first, w_max = minw_max.second;
   #ifdef HBM_PROFILE
   sol.linear_comp_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
   #endif
@@ -262,13 +262,13 @@ void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* 
   /* Use the ukp_solution_t fields instead of local variables to propagate
    * the array values. The arrays will be dumped to files, making possible
    * study them with R or other tool. */
-  vector<size_t> &g = sol.g;
-  vector<size_t> &d = sol.d;
+  vector<profit> &g = sol.g;
+  vector<quantity> &d = sol.d;
   g.assign(c+1+(w_max-w_min), 0);
   d.assign(c+1+(w_max-w_min), n-1);
   #else
-  vector<size_t> g(c+1+(w_max-w_min), 0);
-  vector<size_t> d(c+1+(w_max-w_min), n-1);
+  vector<profit> g(c+1+(w_max-w_min), 0);
+  vector<quantity> d(c+1+(w_max-w_min), n-1);
   #endif
 
   #ifdef HBM_PROFILE
@@ -297,7 +297,7 @@ void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* 
   /* If we use our periodicity check the sol.used_items constructed by
    * ukp5_phase2 doesn't include the copies of the best item used to
    * fill all the extra_capacity. This solves it. */
-  size_t qt_best_item_inserted_by_periodicity = (c - sol.y_opt)/ukpi.items[0].w;
+  weight qt_best_item_inserted_by_periodicity = (c - sol.y_opt)/ukpi.items[0].w;
   sol.opt += qt_best_item_inserted_by_periodicity*ukpi.items[0].p;
   sol.y_opt+= qt_best_item_inserted_by_periodicity*ukpi.items[0].w;
   /* Our periodicity check will always get a partial solution that have at

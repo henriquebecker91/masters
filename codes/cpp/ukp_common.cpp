@@ -9,6 +9,7 @@
 #endif
 
 #include "ukp_common.hpp"
+#include "workarounds.hpp"
 
 using namespace std;
 using namespace std::regex_constants;
@@ -16,7 +17,11 @@ using namespace hbm;
 
 static const string bs("[[:blank:]]*");
 static const string bp("[[:blank:]]+");
-static const string nb("([1-9][0-9]*)");
+/* If you decided to use the ukp format, but instead of "normal" numbers
+ * you decided to use another base or encode they differently (as 
+ * infinite precision rationals maybe?) you need to change the regex
+ * bellow to something that matches your number encoding format. */
+static const string nb("([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)");
 
 static const string comm_s("[[:blank:]]*(#.*)?");
 static const regex  comm  (comm_s, extended | nosubs | optimize);
@@ -91,10 +96,10 @@ void hbm::read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
   static const string item_s        = bs + nb + bp + nb + comm_s;
   static const string end_data_s    = bs + "end" + bp + "data" + comm_s;
 
-  static const regex mline      (mline_s, extended | icase );
-  static const regex cline      (cline_s, extended | icase);
+  static const regex mline      (mline_s, icase );
+  static const regex cline      (cline_s, icase);
   static const regex begin_data (begin_data_s, extended | icase | nosubs);
-  static const regex item       (item_s, extended | icase | optimize);
+  static const regex item       (item_s, icase | optimize);
   static const regex end_data   (end_data_s, extended | icase | nosubs);
 
   smatch what;
@@ -103,22 +108,27 @@ void hbm::read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
   get_noncomment_line(in, line, m_exp);
   try_match(mline, line, m_exp, what);
 
-  size_t n = stoull(what[1]);
+  quantity n;
+  from_string(what[1], n);
   ukpi.items.reserve(n);
 
   get_noncomment_line(in, line, c_exp);
   try_match(cline, line, c_exp, what);
   
-  ukpi.c = stoull(what[1]);
+  from_string(what[1], ukpi.c);
   
   get_noncomment_line(in, line, begin_exp);
   try_match(begin_data, line, begin_exp, what);
 
-  for (size_t i = 0; i < n; ++i) {
+  for (quantity i = 0; i < n; ++i) {
     get_noncomm_line_in_data(in, line, item_exp);
 
     if (regex_match(line, what, item)) {
-      ukpi.items.emplace_back(stoull(what[1]), stoull(what[2]));
+      weight w;
+      profit p;
+      from_string(what[1], w);
+      from_string(what[2], p);
+      ukpi.items.emplace_back(w, p);
     } else {
       if (regex_match(line, end_data)) {
         warn_about_premature_end(n, i);
@@ -141,13 +151,14 @@ void hbm::read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
 }
 
 void hbm::read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
-  size_t n;
+  quantity n;
   in >> n;
   in >> ukpi.c;
   ukpi.items.reserve(n);
 
-  for (size_t i = 0; i < n; ++i) {
-    size_t w, p;
+  weight w;
+  profit p;
+  for (quantity i = 0; i < n; ++i) {
     in >> w;
     in >> p;
     ukpi.items.emplace_back(w, p);
@@ -157,11 +168,11 @@ void hbm::read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
 }
 
 void hbm::write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
-  size_t n = ukpi.items.size();
+  quantity n = ukpi.items.size();
   out << n << endl;
   out << ukpi.c << endl;
 
-  for (size_t i = 0; i < n; ++i) {
+  for (quantity i = 0; i < n; ++i) {
     item_t tmp = ukpi.items[i];
     out << tmp.w << "\t" << tmp.p << endl;
   }

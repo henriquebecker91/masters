@@ -171,7 +171,7 @@ namespace hbm {
 
 /* Use an optimized swap for the item class (improves sorting time),
  * but only if this is possible (all members have the operator ^= defined) */
-#if (defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)) && !HBM_NO_XOR_SWAP
+#if (defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)) && !defined(HBM_NO_XOR_SWAP)
 #define HBM_XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
 namespace std {
   template <>

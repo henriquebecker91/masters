@@ -8,10 +8,10 @@ CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -O3 -lboost_filesystem -lboost_s
 H_DEPS=test_common.hpp ukp_common.hpp
 O_DEPS=test_common.o ukp_common.o
 
-ukp_common.o: ukp_common.cpp ukp_common.hpp
+ukp_common.o: ukp_common.cpp ukp_common.hpp ukp_types.hpp workarounds.hpp
 	$(CC) -c -o $@ ukp_common.cpp $(CFLAGS)
 
-test_common.o: test_common.cpp test_common.hpp
+test_common.o: test_common.cpp test_common.hpp ukp_types.hpp workarounds.hpp
 	$(CC) -c -o $@ test_common.cpp $(CFLAGS)
 
 run_eduk.out: run_eduk.cpp eduk.cpp eduk.hpp $(H_DEPS) $(O_DEPS)

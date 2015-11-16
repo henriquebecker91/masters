@@ -11,7 +11,7 @@
 //#define HBM_RATIONAL_EFF
 
 /* Sort related definitions */
-//#define HBM_NO_XOR_SWAP
+#define HBM_NO_XOR_SWAP
 
 /* Other definitions */
 //#define HBM_PROFILE

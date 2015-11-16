@@ -40,7 +40,7 @@ int hbm::run_ukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), co
 }
 
 int hbm::benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool)) {
-  array<instance_data_t, /*sizeof(instance_data_t)**/8> instances_data = {{
+  array<instance_data_t, 8> instances_data = {{
     { "exnsd16", 1029680 },
     { "exnsd18", 1112131 },
     { "exnsd20",  1026086 },
@@ -60,8 +60,8 @@ int hbm::benchmark_pyasukp(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &,
     int status = run_ukp(ukp_solver, path, run);
 
     if (status == EXIT_SUCCESS) {
-      size_t expected = instances_data[i].expected_opt;
-      size_t obtained = run.result.opt;
+      profit expected = instances_data[i].expected_opt;
+      profit obtained = run.result.opt;
       cout << "Expected result: " << expected << endl;
       cout << "Obtained result: " << obtained << endl;
       everything_ok = everything_ok && expected == obtained;

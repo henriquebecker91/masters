@@ -11,7 +11,7 @@
 //#define HBM_RATIONAL_EFF
 
 /* Sort related definitions */
-#define HBM_NO_XOR_SWAP
+//#define HBM_NO_XOR_SWAP
 
 /* Other definitions */
 //#define HBM_PROFILE
@@ -44,13 +44,15 @@ namespace hbm {
    *      division) will convert the weight type to the profit type
    *      before performing the operation.
    */
-  typedef double profit;
+  typedef size_t profit;
   typedef size_t weight;
-  /* This type is used to hold the number of elements, when in doubt 
-   * we assume that weight is at least as large as quantity, and 
-   * probably larger. The quantity type is always assumed to be 
-   * integral. */
-  typedef size_t quantity;
+  /* This type is used to loop between the items and to store the 
+   * index of items. The only assumption made is that it's integral
+   * and sufficient large to contain 'n' (number of items).
+   * The itemix of items in a solution is of type weight, as it is
+   * the result of a capacity value divided by a item weight (both capacity
+   * and item weight are of the weight type). */
+  typedef size_t itemix;
   
   #ifdef HBM_INT_EFF
   typedef weight int_eff;

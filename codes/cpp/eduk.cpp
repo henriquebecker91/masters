@@ -227,7 +227,7 @@ struct S {
    * */
   forward_list<S::iterator> its;
 
-  S(quantity k, weight c, const vector<item_t> &items) {
+  S(itemix k, weight c, const vector<item_t> &items) {
     if (k > 0) { 
       empty = false;
 
@@ -285,7 +285,7 @@ struct S {
 };
 
 void hbm::eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
-  quantity n = ukpi.items.size();
+  itemix n = ukpi.items.size();
   weight c = ukpi.c;
   vector<item_t> &items(ukpi.items);
   if (!already_sorted) sort_by_weigth(ukpi.items);

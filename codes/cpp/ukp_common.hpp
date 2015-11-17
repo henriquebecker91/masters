@@ -115,9 +115,9 @@ namespace hbm {
   };
 
   struct ukp_itemqt_t {
-    item_t it;      /* the item */
-    /* its quantity in the result, and index in the items list */
-    quantity qt, ix;
+    item_t it; /* the item */
+    weight qt; /* its quantity in the result */
+    itemix ix; /* its index in the ordered items list */
 
     inline ukp_itemqt_t(const item_t &it, const size_t qt, const size_t ix) : it(it), qt(qt), ix(ix) {}
 
@@ -139,17 +139,17 @@ namespace hbm {
     double phase2_time;
     double total_time;
     /* Some data about instance */
-    quantity n;
+    itemix n;
     weight c, w_min, w_max;
     /* Some data about structures manipulates by ukp5 */
     weight last_dy_non_zero_non_n;
     weight qt_non_skipped_ys;
     weight qt_gy_zeros;
     weight qt_inner_loop_executions;
-    std::vector<quantity> qt_i_in_dy;
+    std::vector<itemix> qt_i_in_dy;
     std::vector<profit> g;
-    std::vector<quantity> d;
-    std::vector<quantity> non_skipped_d;
+    std::vector<itemix> d;
+    std::vector<itemix> non_skipped_d;
     #endif /* HBM_PROFILE */
     #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
     weight last_y_value_outer_loop;

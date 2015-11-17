@@ -8,7 +8,7 @@ using namespace boost;
 using namespace hbm;
 
 /* TODO: Instead of starting at zero elements of some item i,
- * start with the greatest possible quantity of elements of that
+ * start with the greatest possible itemix of elements of that
  * type, and then decreases the number (if it's greater than zero)
  * This helps mainly because we examine first the solutions with the
  * least of capacity left (most probability of being optimal).
@@ -167,7 +167,7 @@ void inner_bb(const vector<item_t> &items, const weight c, const vector<weight> 
     // Branch only if it is possible to add items to the solution
     //if (c - ws < w_mins[i+1]) continue;
 
-    // Test solutions with every possible quantity of i
+    // Test solutions with every possible itemix of i
     weight wi = items[i].w;
     profit pi = items[i].p;
     weight max_qt = (c-ws)/wi;
@@ -199,7 +199,7 @@ void inner_bb(const vector<item_t> &items, const weight c, const vector<weight> 
   // Branch only if it is possible to add items to the solution
   if (c - ws < w_mins[i+1]) return;
 
-  // Test solutions with every possible quantity of i
+  // Test solutions with every possible itemix of i
   for (; qt > 0; --qt) {
     inner_bb(items, c, w_mins, effs, bp, i+1, ws, ps);
     // Decrement the weight and the profit of the item removed
@@ -240,7 +240,7 @@ vector<efficiency> efficiencies(vector<item_t> &items) {
 vector<weight> weight_mins(vector<item_t> &items) {
   vector<weight> w_mins(items.size(), 0);
   w_mins.back() = items.back().w;
-  for (quantity i = items.size() - 1; i > 0; --i) {
+  for (itemix i = items.size() - 1; i > 0; --i) {
     w_mins[i] = min(items[i].w, w_mins[i+1]);
   }
   w_mins[0] = min(items[0].w, w_mins[1]);

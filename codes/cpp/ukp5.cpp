@@ -27,7 +27,7 @@ pair<weight,weight> minmax_item_weight(vector<item_t> &items) {
 }
 
 #ifdef HBM_PROFILE
-void ukp5_gen_stats(weight c, quantity n, weight w_min, weight w_max, const vector<profit> &g, const vector<quantity> &d, ukp_solution_t &sol) {
+void ukp5_gen_stats(weight c, itemix n, weight w_min, weight w_max, const vector<profit> &g, const vector<itemix> &d, ukp_solution_t &sol) {
   sol.g = g;
   sol.d = d;
   sol.c = c;
@@ -76,19 +76,19 @@ pair<profit, weight> get_opts(weight c, const vector<profit> &g, weight w_min) {
   return make_pair(opt, y_opt);
 }
 
-void ukp5_phase2(const vector<item_t> &items, const vector<quantity> &d, ukp_solution_t &sol) {
-  quantity n = items.size();
-  vector<quantity> qts_its(n, 0);
+void ukp5_phase2(const vector<item_t> &items, const vector<itemix> &d, ukp_solution_t &sol) {
+  itemix n = items.size();
+  vector<itemix> qts_its(n, 0);
 
   weight y_opt = sol.y_opt;
-  quantity dy_opt;
+  itemix dy_opt;
   while (y_opt != 0) {
     dy_opt = d[y_opt];
     y_opt -= items[dy_opt].w;
     ++qts_its[dy_opt];
   }
 
-  for (quantity i = 0; i < n; ++i) {
+  for (itemix i = 0; i < n; ++i) {
     if (qts_its[i] > 0) {
       sol.used_items.emplace_back(items[i], qts_its[i], i);
     }
@@ -98,9 +98,9 @@ void ukp5_phase2(const vector<item_t> &items, const vector<quantity> &d, ukp_sol
   return;
 }
 
-void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<quantity> &d, ukp_solution_t &sol, weight w_min, weight w_max) {
+void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<itemix> &d, ukp_solution_t &sol, weight w_min, weight w_max) {
   const weight &c = ukpi.c;
-  const quantity &n = ukpi.items.size();
+  const itemix &n = ukpi.items.size();
   const vector<item_t> &items = ukpi.items;
 
   weight &y_opt = sol.y_opt;
@@ -120,7 +120,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<quantity>
   vector<weight> w_maxs;
   w_maxs.reserve(n);
   w_maxs.push_back(items[0].w);
-  for (quantity i = 1; i < n; ++i) {
+  for (itemix i = 1; i < n; ++i) {
     w_maxs.push_back(max(w_maxs[i-1], items[i].w));
   }
   #endif
@@ -157,7 +157,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<quantity>
     #endif
 
     profit gy;
-    quantity dy;
+    itemix dy;
     opt = gy = g[y];
     dy = d[y];
 
@@ -179,7 +179,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<quantity>
       d[next_y] = 0;
     }
 
-    for (quantity ix = 1; ix <= dy; ++ix) {
+    for (itemix ix = 1; ix <= dy; ++ix) {
       item_t it = items[ix];
       weight wi = it.w;
       profit pi = it.p;
@@ -247,7 +247,7 @@ void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* 
   begin = steady_clock::now();
   #endif
   weight c = ukpi.c;
-  quantity n = ukpi.items.size();
+  itemix n = ukpi.items.size();
   auto minw_max = minmax_item_weight(ukpi.items);
   weight w_min = minw_max.first, w_max = minw_max.second;
   #ifdef HBM_PROFILE
@@ -263,12 +263,12 @@ void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* 
    * the array values. The arrays will be dumped to files, making possible
    * study them with R or other tool. */
   vector<profit> &g = sol.g;
-  vector<quantity> &d = sol.d;
+  vector<itemix> &d = sol.d;
   g.assign(c+1+(w_max-w_min), 0);
   d.assign(c+1+(w_max-w_min), n-1);
   #else
   vector<profit> g(c+1+(w_max-w_min), 0);
-  vector<quantity> d(c+1+(w_max-w_min), n-1);
+  vector<itemix> d(c+1+(w_max-w_min), n-1);
   #endif
 
   #ifdef HBM_PROFILE

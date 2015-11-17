@@ -108,7 +108,7 @@ void hbm::read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
   get_noncomment_line(in, line, m_exp);
   try_match(mline, line, m_exp, what);
 
-  quantity n;
+  itemix n;
   from_string(what[1], n);
   ukpi.items.reserve(n);
 
@@ -120,7 +120,7 @@ void hbm::read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
   get_noncomment_line(in, line, begin_exp);
   try_match(begin_data, line, begin_exp, what);
 
-  for (quantity i = 0; i < n; ++i) {
+  for (itemix i = 0; i < n; ++i) {
     get_noncomm_line_in_data(in, line, item_exp);
 
     if (regex_match(line, what, item)) {
@@ -151,14 +151,14 @@ void hbm::read_ukp_instance(istream &in, ukp_instance_t &ukpi) {
 }
 
 void hbm::read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
-  quantity n;
+  itemix n;
   in >> n;
   in >> ukpi.c;
   ukpi.items.reserve(n);
 
   weight w;
   profit p;
-  for (quantity i = 0; i < n; ++i) {
+  for (itemix i = 0; i < n; ++i) {
     in >> w;
     in >> p;
     ukpi.items.emplace_back(w, p);
@@ -168,11 +168,11 @@ void hbm::read_sukp_instance(istream &in, ukp_instance_t &ukpi) {
 }
 
 void hbm::write_sukp_instance(ostream &out, ukp_instance_t &ukpi) {
-  quantity n = ukpi.items.size();
+  itemix n = ukpi.items.size();
   out << n << endl;
   out << ukpi.c << endl;
 
-  for (quantity i = 0; i < n; ++i) {
+  for (itemix i = 0; i < n; ++i) {
     item_t tmp = ukpi.items[i];
     out << tmp.w << "\t" << tmp.p << endl;
   }

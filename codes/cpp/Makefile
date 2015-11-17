@@ -1,4 +1,4 @@
-all: run_eduk.out run_ukp5.out test_eduk.out test_ukp5.out run_per.out test_per.out run_bb.out test_bb.out
+all: run_eduk.out run_ukp5.out test_eduk.out test_ukp5.out run_bb.out test_bb.out run_per.out test_per.out 
 
 CC=g++
 # The boost linkage is only needed if the macro PROFILE is defined...
@@ -41,6 +41,5 @@ test_bb.out: bb.cpp bb.hpp $(H_DEPS) $(O_DEPS)
 .PHONY: clean
 
 clean:
-	rm *.out
-	rm *.o
+	rm *.o *.out
 

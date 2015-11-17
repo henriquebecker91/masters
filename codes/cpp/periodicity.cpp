@@ -1,10 +1,17 @@
 #include "periodicity.hpp"
 
+#include <type_traits>
 #include <boost/rational.hpp>
 
 using namespace std;
 using namespace boost;
 using namespace hbm;
+
+static_assert(std::is_integral<weight>::value &&
+              std::is_integral<profit>::value &&
+              std::is_same<weight, profit>::value,
+              "For now, periodicity.cpp only compiles if the "
+              "profit and weight types are the same integral type.");
 
 size_t hbm::y_star(ukp_instance_t &ukpi, bool already_sorted = false) {
   vector<item_t> &items(ukpi.items);

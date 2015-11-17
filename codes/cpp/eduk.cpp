@@ -59,15 +59,20 @@ struct Lazyfy : LazyList {
 struct AddTest : LazyList {
   item_t g;
   LazyList * l;
-  size_t c;
+  weight c;
 
   AddTest(void) {
+    #ifdef HBM_TWO_MULT_COMP
     g = {0, 0};
-    l = NULL;
+    #elif defined(HBM_INT_EFF) || defined(HBM_FP_EFF) || defined(HBM_RATIONAL_EFF)
+    g = {0, 0, 0} /* define efficiency manually as zero */
+    #endif
+
+    l = nullptr;
     c = 0;
   }
 
-  AddTest(item_t g, LazyList * l, size_t c) : g(g), l(l), c(c) { }
+  AddTest(item_t g, LazyList * l, weight c) : g(g), l(l), c(c) { }
 
   bool get_next(item_t& i) {
     bool has_next = l->get_next(i);
@@ -79,14 +84,14 @@ struct AddTest : LazyList {
 
 struct Filter : LazyList {
   LazyList * l;
-  size_t limit;
+  profit limit;
 
   Filter(void) {
     limit = 0;
-    l = NULL;
+    l = nullptr;
   }
 
-  Filter(LazyList * l, size_t limit) : l(l), limit(limit) { }
+  Filter(LazyList * l, profit limit) : l(l), limit(limit) { }
 
   bool get_next(item_t& i) {
     bool has_next = l->get_next(i);
@@ -108,8 +113,12 @@ struct Merge : LazyList {
 
   Merge(void) {
     has_h1 = has_h2 = has_old_h1 = has_old_h2 = false;
-    l1 = l2 = NULL;
+    l1 = l2 = nullptr;
+    #ifdef HBM_TWO_MULT_COMP
     h1 = h2 = {0, 0};
+    #elif defined(HBM_INT_EFF) || defined(HBM_FP_EFF) || defined(HBM_RATIONAL_EFF)
+    h1 = h2 = {0, 0, 0} /* define efficiency manually as zero */
+    #endif
   }
 
   Merge(LazyList * l1, LazyList * l2) : l1(l1), l2(l2) {
@@ -156,7 +165,7 @@ struct AddHead : LazyList {
   bool has_original_head;
 
   AddHead(void) {
-    l = NULL;
+    l = nullptr;
     has_original_head = false;
     original_head = {0, 0};
   }
@@ -218,7 +227,7 @@ struct S {
    * */
   forward_list<S::iterator> its;
 
-  S(size_t k, size_t c, const vector<item_t> &items) {
+  S(quantity k, weight c, const vector<item_t> &items) {
     if (k > 0) { 
       empty = false;
 
@@ -276,8 +285,8 @@ struct S {
 };
 
 void hbm::eduk(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
-  size_t n = ukpi.items.size();
-  size_t c = ukpi.c;
+  quantity n = ukpi.items.size();
+  weight c = ukpi.c;
   vector<item_t> &items(ukpi.items);
   if (!already_sorted) sort_by_weigth(ukpi.items);
 

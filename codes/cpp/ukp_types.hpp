@@ -44,7 +44,7 @@ namespace hbm {
    *      division) will convert the weight type to the profit type
    *      before performing the operation.
    */
-  typedef size_t profit;
+  typedef double profit;
   typedef size_t weight;
   /* This type is used to hold the number of elements, when in doubt 
    * we assume that weight is at least as large as quantity, and 

@@ -1,10 +1,10 @@
+* Make templated versions of all types and functions, the *_t versions will be templates, and the non *_t versions will be using weight, profit
+* Verify if there's a right way to make HBM_INT_EFF work with any integral types (we can use static_assert to verify if the chosen type has the double of the size of the profit and weight types, probably the type must be suggested by the user, as the other way would need a long chained type_trait conditional expression).
+* Abolish the HBM_*_EFF, use type_traits and templates to select the right code based on the type of efficiency? 
 * Check notation used here (https://en.wikipedia.org/wiki/Global_optimization) and consider using it on the proof.
 * Add test of profit dominance in the instance loading. Use dirty vector and a list to do this in O(2n).
-* Add read_upk procedure to ruby too.
-* Print n and c with the profile info.
-* Test the sort variants using the run_per.out and test_per.out. Remember to remove hypertreading, isolate cpus and execute on distinct cores.
-* Use tha above to Compare performance of XOR swap with generic template swap.
-* Debug CHECK_PERIODICITY_FAST. It's segfaulting with big instances (/data/sukp/big_instances/).
+* Test the sort variants using the run_per.out and test_per.out. Remember to remove hypertreading, isolate cpus and execute on distinct cores.  Use this test to compare performance of XOR swap with generic template swap.
+* Debug CHECK_PERIODICITY_FAST. It's segfaulting with big instances (/data/sukp/big_instances/). Consider removing it (don't seem very useful).
 * Comment the code more. Take one day to comment every tricky bit.
 * Consider the possibility of not initializing all the g and d vectors at first, but only reserve the necessary memory, and resize it as is necessary. The profiling shows that the vector initialization is dominant on some instances when periodicity is activated, and also that sometimes only a fraction of that vector is used.
 

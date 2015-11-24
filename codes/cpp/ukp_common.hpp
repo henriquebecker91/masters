@@ -1,24 +1,38 @@
 #ifndef HBM_UKP_COMMON_HPP
 #define HBM_UKP_COMMON_HPP
 
-/* includes that don't depend on type definitions */
+/* includes that don't depend on type or macro definitions */
 #include <vector>
 #include <iostream>
 #include <stdexcept> /* for runtime_error */
 
-/* type definitions */
+/* type and macro definitions */
 #include "ukp_types.hpp"
 
-/* includes that depend on type definitions */
+/* includes that depend on type or macro definitions */
 #if defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)
 #include <utility> /* to specialize swap */
 #endif
 
+/* Includes for the implementation code inside hbm::hbm_ukp_common_impl
+ * namespace. They pollute the global namespace a little, but everything
+ * is inside their own namespace (std and boost) so this should
+ * be an OK thing to do. */
+#include <regex>    /* for regex, regex_match */
+#include <string>   /* for stoull */
+#include <iostream> /* for cout */
+#ifdef HBM_INT_EFF
+  #include <boost/sort/spreadsort/spreadsort.hpp> /* for integer_sort */
+#else
+  #include <algorithm> /* for sort */
+#endif
+#include "workarounds.hpp" /* for from_string */
+
 namespace hbm {
-  /* The following code doesn't allow any two of the following macros to be
-   * defined at the same time: HBM_TWO_MULT_COMP, HBM_INT_EFF, HBM_FP_EFF
-   * and HBM_RATIONAL_EFF. Also it defines the efficiency type based on 
-   * the macro value*/
+  /* The following preprocessor directives code doesn't allow any two of the
+   * following macros to be defined at the same time: HBM_TWO_MULT_COMP,
+   * HBM_INT_EFF, HBM_FP_EFF and HBM_RATIONAL_EFF. Also it defines the
+   * efficiency type based on the macro value*/
   #ifndef HBM_RATIONAL_EFF
     #ifndef HBM_FP_EFF
       #ifndef HBM_INT_EFF
@@ -54,25 +68,25 @@ namespace hbm {
     typedef rational_eff efficiency;
   #endif /*HBM_RATIONAL_EFF*/
 
-
+  template <typename W = weight, typename P = profit>
   struct item_t {
-    weight w;
-    profit p;
+    W w;
+    P p;
     #if defined(HBM_RATIONAL_EFF) || defined(HBM_INT_EFF) || defined(HBM_FP_EFF)
     efficiency eff;
     #endif
 
     inline item_t(void) {}
     #ifdef HBM_TWO_MULT_COMP
-    inline item_t(const weight &w, const profit &p) : w(w), p(p) {}
+    inline item_t(const W &w, const P &p) : w(w), p(p) {}
     #elif defined(HBM_RATIONAL_EFF)
-    inline item_t(const weight &w, const profit &p) : w(w), p(p), eff(p, w) {}
+    inline item_t(const W &w, const P &p) : w(w), p(p), eff(p, w) {}
     #elif defined(HBM_INT_EFF)
-    inline item_t(const weight &w, const profit &p) : w(w), p(p) {
+    inline item_t(const W &w, const P &p) : w(w), p(p) {
       eff = (p << 32) / w;
     }
     #elif defined(HBM_FP_EFF)
-    inline item_t(const weigth &w, const profit &p) : w(w), p(p) {
+    inline item_t(const W &w, const P &p) : w(w), p(p) {
       eff = static_cast<efficiency>(p) / static_cast<efficiency>(w);
     }
     #endif
@@ -86,8 +100,8 @@ namespace hbm {
      */
     #if defined(HBM_TWO_MULT_COMP)
     inline bool operator<(const item_t &o) const {
-      profit a = p * static_cast<profit>(o.w),
-             b = o.p * static_cast<profit>(w);
+      P a = p * static_cast<P>(o.w),
+            b = o.p * static_cast<P>(w);
       return a > b || (a == b && w < o.w); 
     }
     #elif defined(HBM_RATIONAL_EFF) || defined(HBM_FP_EFF) || defined(HBM_INT_EFF)
@@ -97,7 +111,7 @@ namespace hbm {
     #endif
 
     #ifdef HBM_INT_EFF
-    inline size_t operator>>(const int s) const {
+    inline efficiency operator>>(const int s) const {
       /* NOTE: this operator is needed for boost::sort::spreadsort::integer_sort
        * that is the sort we use when HBM_INT_EFF is defined.
        * As we sort by non-increasing eff, we cannot return
@@ -109,27 +123,30 @@ namespace hbm {
     #endif
   };
 
-  struct ukp_instance_t {
-    weight c;
-    std::vector<item_t> items;
+  template <typename W = weight, typename P = profit>
+  struct instance_t {
+    W c;
+    std::vector< item_t<W, P> > items;
   };
 
-  struct ukp_itemqt_t {
-    item_t it; /* the item */
-    weight qt; /* its quantity in the result */
-    itemix ix; /* its index in the ordered items list */
+  template <typename W = weight, typename P = profit, typename I = itemix>
+  struct itemqt_t {
+    item_t<W, P> it; /* the item */
+    W qt; /* its quantity in the result */
+    I ix; /* its index in the ordered items list */
 
-    inline ukp_itemqt_t(const item_t &it, const size_t qt, const size_t ix) : it(it), qt(qt), ix(ix) {}
+    itemqt_t(const item_t<W, P> &it, const W &qt, const I &ix) : it(it), qt(qt), ix(ix) {}
 
     void print(std::ostream &cout = std::cout) const {
       cout << "ix: " << ix << " qt: " << qt << " w: " << it.w << " p: " << it.p << std::endl;
     }
   };
 
-  struct ukp_solution_t {
-    profit opt;
-    weight y_opt;
-    std::vector<ukp_itemqt_t> used_items;
+  template <typename W = weight, typename P = profit, typename I = itemix>
+  struct solution_t {
+    P opt;
+    W y_opt;
+    std::vector< itemqt_t<W, P, I> > used_items;
     #ifdef HBM_PROFILE
     /* Time of each phase */
     double sort_time;
@@ -139,20 +156,20 @@ namespace hbm {
     double phase2_time;
     double total_time;
     /* Some data about instance */
-    itemix n;
-    weight c, w_min, w_max;
+    I n;
+    W c, w_min, w_max;
     /* Some data about structures manipulates by ukp5 */
-    weight last_dy_non_zero_non_n;
-    weight qt_non_skipped_ys;
-    weight qt_gy_zeros;
-    weight qt_inner_loop_executions;
-    std::vector<itemix> qt_i_in_dy;
-    std::vector<profit> g;
-    std::vector<itemix> d;
-    std::vector<itemix> non_skipped_d;
+    W last_dy_non_zero_non_n;
+    W qt_non_skipped_ys;
+    W qt_gy_zeros;
+    W qt_inner_loop_executions;
+    std::vector<I> qt_i_in_dy;
+    std::vector<P> g;
+    std::vector<I> d;
+    std::vector<I> non_skipped_d;
     #endif /* HBM_PROFILE */
     #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
-    weight last_y_value_outer_loop;
+    W last_y_value_outer_loop;
     #endif /* PERIODICITY */
   };
 
@@ -161,12 +178,209 @@ namespace hbm {
     explicit ukp_read_error (const char* s) noexcept : runtime_error(s) {};
   };
 
-  void read_ukp_instance(std::istream &in, ukp_instance_t &ukpi);
-  void read_sukp_instance(std::istream &in, ukp_instance_t &ukpi);
+  inline namespace hbm_ukp_common_impl {
+    using namespace std;
+    using namespace std::regex_constants;
+    using namespace hbm;
 
-  void write_sukp_instance(std::ostream &out, ukp_instance_t &ukpi);
+    const string bs("[[:blank:]]*");
+    const string bp("[[:blank:]]+");
+    /* If you decided to use the ukp format, but instead of "normal" numbers
+     * you decided to use another base or encode they differently (as 
+     * infinite precision rationals maybe?) you need to change the regex
+     * bellow to something that matches your number encoding format. */
+    const string nb("([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)");
 
-  void sort_by_eff(std::vector<item_t> &items);
+    const string comm_s("[[:blank:]]*(#.*)?");
+    const regex  comm  (comm_s, extended | nosubs | optimize);
+
+    void warn_about_premature_end(size_t n, size_t i) {
+      cerr << "WARNING: read_ukp_instance: the n value is " << n <<
+              " but 'end data' was found after only " << i << " items"
+              << endl;
+
+      return;
+    }
+
+    void warn_about_no_end(size_t n) {
+      cerr  << "WARNING: read_ukp_instance: the n value is " << n <<
+            " but no 'end data' was found after this number of items, instead" <<
+            " more items were found, ignoring those (only read the first " <<
+            n << " items)." << endl;
+
+      return;
+    }
+
+    void io_guard(const istream &in, const string &expected) {
+      if (!in.good()) {
+        throw ukp_read_error("Expected '" + expected + "' but file ended first.");
+      }
+
+      return;
+    }
+
+    void get_noncomment_line(istream &in, string &line, const string &exp) {
+      do getline(in, line); while (in.good() && regex_match(line, comm));
+      io_guard(in, exp);
+
+      return;
+    }
+
+    void get_noncomm_line_in_data(istream &in, string &line, const string &exp) {
+        static const string warn_blank_in_data =
+          "WARNING: read_ukp_instance: found a blank line inside data section.";
+
+        getline(in, line);
+        while (in.good() && regex_match(line, comm)) {
+          cout << warn_blank_in_data << endl;
+          getline(in, line);
+        }
+        io_guard(in, exp);
+
+        return;
+    }
+
+    void try_match(const regex &r, const string &l, const string &exp, smatch &m) {
+      if (!regex_match(l, m, r)) {
+        throw ukp_read_error("Expected '" + exp + "' but found '" + l + "'");
+      }
+      
+      return;
+    }
+
+    template<typename W, typename P, typename I = size_t>
+    void read_ukp_instance(istream &in, instance_t<W, P> &ukpi) {
+      static const string strange_line =
+        "error: read_ukp_instance: Found a strange line inside data section: ";
+
+      static const string m_exp     = "n/m: <number>";
+      static const string c_exp     = "c: <number>";
+      static const string begin_exp = "begin data";
+      static const string item_exp  = "<number> <number>";
+      static const string end_exp   = "end data";
+
+      static const string mline_s       = bs + "[mn]:" + bs + nb + comm_s;
+      static const string cline_s       = bs + "c:" + bs + nb + comm_s;
+      static const string begin_data_s  = bs + "begin" + bp + "data" + comm_s;
+      static const string item_s        = bs + nb + bp + nb + comm_s;
+      static const string end_data_s    = bs + "end" + bp + "data" + comm_s;
+
+      static const regex mline      (mline_s, icase );
+      static const regex cline      (cline_s, icase);
+      static const regex begin_data (begin_data_s, extended | icase | nosubs);
+      static const regex item       (item_s, icase | optimize);
+      static const regex end_data   (end_data_s, extended | icase | nosubs);
+
+      smatch what;
+      string line;
+
+      get_noncomment_line(in, line, m_exp);
+      try_match(mline, line, m_exp, what);
+
+      I n;
+      from_string(what[1], n);
+      ukpi.items.reserve(n);
+
+      get_noncomment_line(in, line, c_exp);
+      try_match(cline, line, c_exp, what);
+      
+      from_string(what[1], ukpi.c);
+      
+      get_noncomment_line(in, line, begin_exp);
+      try_match(begin_data, line, begin_exp, what);
+
+      for (I i = 0; i < n; ++i) {
+        get_noncomm_line_in_data(in, line, item_exp);
+
+        if (regex_match(line, what, item)) {
+          W w;
+          P p;
+          from_string(what[1], w);
+          from_string(what[2], p);
+          ukpi.items.emplace_back(w, p);
+        } else {
+          if (regex_match(line, end_data)) {
+            warn_about_premature_end(n, i);
+            break;
+          } else {
+            throw ukp_read_error(strange_line + "(" + line + ")");
+          }
+        }
+      }
+
+      get_noncomm_line_in_data(in, line, end_exp);
+
+      if (!regex_match(line, end_data)) {
+        if (regex_match(line, item)) {
+          warn_about_no_end(n);
+        } else {
+          throw ukp_read_error(strange_line + "(" + line + ")");
+        }
+      }
+    }
+
+    template<typename W, typename P, typename I = size_t>
+    void read_sukp_instance(istream &in, instance_t<W, P> &ukpi) {
+      I n;
+      in >> n;
+      in >> ukpi.c;
+      ukpi.items.reserve(n);
+
+      W w;
+      P p;
+      for (I i = 0; i < n; ++i) {
+        in >> w;
+        in >> p;
+        ukpi.items.emplace_back(w, p);
+      }
+
+      return;
+    }
+
+    template<typename W, typename P, typename I = size_t>
+    void write_sukp_instance(ostream &out, instance_t<W, P> &ukpi) {
+      I n = ukpi.items.size();
+      out << n << endl;
+      out << ukpi.c << endl;
+
+      for (I i = 0; i < n; ++i) {
+        item_t<W, P> tmp = ukpi.items[i];
+        out << tmp.w << "\t" << tmp.p << endl;
+      }
+
+      return;
+    }
+
+    template<typename W, typename P>
+    void sort_by_eff(vector< item_t<W, P> > &items) {
+      #ifdef HBM_INT_EFF
+      boost::sort::spreadsort::integer_sort(items.begin(), items.end());
+      #else
+      std::sort(items.begin(), items.end());
+      #endif
+      return;
+    }
+  }
+
+  template <typename W, typename P, typename I = size_t>
+  void read_ukp_instance(std::istream &in, instance_t<W, P> &ukpi) {
+    hbm_ukp_common_impl::read_ukp_instance(in, ukpi);
+  }
+
+  template<typename W, typename P, typename I = size_t>
+  void read_sukp_instance(std::istream &in, instance_t<W, P> &ukpi) {
+    hbm_ukp_common_impl::read_sukp_instance(in, ukpi);
+  }
+
+  template<typename W, typename P, typename I = size_t>
+  void write_sukp_instance(std::ostream &out, instance_t<W, P> &ukpi) {
+    hbm_ukp_common_impl::write_sukp_instance(out, ukpi);
+  }
+
+  template<typename W, typename P>
+  void sort_by_eff(std::vector< item_t<W, P> > &items) {
+    hbm_ukp_common_impl::sort_by_eff(items);
+  }
 }
 
 /* Use an optimized swap for the item class (improves sorting time),
@@ -174,8 +388,8 @@ namespace hbm {
 #if (defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)) && !defined(HBM_NO_XOR_SWAP)
 #define HBM_XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
 namespace std {
-  template <>
-  inline void swap(hbm::item_t& a, hbm::item_t& b) noexcept
+  template<typename W, typename P>
+  inline void swap(hbm::item_t<W, P>& a, hbm::item_t<W, P>& b) noexcept
   {
     HBM_XORSWAP(a.w, b.w);
     HBM_XORSWAP(a.p, b.p);

@@ -46,12 +46,14 @@ namespace hbm {
    */
   typedef size_t profit;
   typedef size_t weight;
+
   /* This type is used to loop between the items and to store the 
    * index of items. The only assumption made is that it's integral
-   * and sufficient large to contain 'n' (number of items).
-   * The itemix of items in a solution is of type weight, as it is
+   * and sufficient large to contain the 'n' value (number of items).
+   * The quantity of items in a solution is of type weight, as it is
    * the result of a capacity value divided by a item weight (both capacity
-   * and item weight are of the weight type). */
+   * and item weight are of the weight type). And if the item weight is 1
+   * (one) the the quantity is equal to the capacity. */
   typedef size_t itemix;
   
   #ifdef HBM_INT_EFF

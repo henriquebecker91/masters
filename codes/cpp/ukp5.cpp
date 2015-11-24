@@ -15,7 +15,7 @@ using namespace std::chrono;
 
 using namespace hbm;
 
-pair<weight,weight> minmax_item_weight(vector<item_t> &items) {
+pair<weight,weight> minmax_item_weight(vector<item> &items) {
   weight min, max;
   min = max = items[0].w;
   for (auto it = items.begin()+1; it != items.end(); ++it) {
@@ -27,7 +27,7 @@ pair<weight,weight> minmax_item_weight(vector<item_t> &items) {
 }
 
 #ifdef HBM_PROFILE
-void ukp5_gen_stats(weight c, itemix n, weight w_min, weight w_max, const vector<profit> &g, const vector<itemix> &d, ukp_solution_t &sol) {
+void ukp5_gen_stats(weight c, itemix n, weight w_min, weight w_max, const vector<profit> &g, const vector<itemix> &d, solution &sol) {
   sol.g = g;
   sol.d = d;
   sol.c = c;
@@ -76,7 +76,7 @@ pair<profit, weight> get_opts(weight c, const vector<profit> &g, weight w_min) {
   return make_pair(opt, y_opt);
 }
 
-void ukp5_phase2(const vector<item_t> &items, const vector<itemix> &d, ukp_solution_t &sol) {
+void ukp5_phase2(const vector<item> &items, const vector<itemix> &d, solution &sol) {
   itemix n = items.size();
   vector<itemix> qts_its(n, 0);
 
@@ -98,10 +98,10 @@ void ukp5_phase2(const vector<item_t> &items, const vector<itemix> &d, ukp_solut
   return;
 }
 
-void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<itemix> &d, ukp_solution_t &sol, weight w_min, weight w_max) {
+void ukp5_phase1(const instance &ukpi, vector<profit> &g, vector<itemix> &d, solution &sol, weight w_min, weight w_max) {
   const weight &c = ukpi.c;
   const itemix &n = ukpi.items.size();
-  const vector<item_t> &items = ukpi.items;
+  const vector<item> &items = ukpi.items;
 
   weight &y_opt = sol.y_opt;
   profit &opt = sol.opt;
@@ -168,7 +168,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<itemix> &
     /* this block is a copy-past of the loop bellow only for the best item
      * its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
      */
-    item_t bi = items[0];
+    item bi = items[0];
     weight wb = bi.w;
     profit pb = bi.p;
     weight next_y = y + wb;
@@ -180,7 +180,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<itemix> &
     }
 
     for (itemix ix = 1; ix <= dy; ++ix) {
-      item_t it = items[ix];
+      item it = items[ix];
       weight wi = it.w;
       profit pi = it.p;
       weight ny = y + wi;
@@ -233,7 +233,7 @@ void ukp5_phase1(const ukp_instance_t &ukpi, vector<profit> &g, vector<itemix> &
  * copy of the instance or pass it already ordered by non-decreasing eff
  * and true for the parameter already_sorted.
  */
-void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* = false*/) {
+void hbm::ukp5(instance &ukpi, solution &sol, bool already_sorted/* = false*/) {
   #ifdef HBM_PROFILE
   steady_clock::time_point all_ukp5_begin = steady_clock::now();
   steady_clock::time_point begin = steady_clock::now();
@@ -259,7 +259,7 @@ void hbm::ukp5(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted/* 
   #endif
 
   #ifdef HBM_PROFILE
-  /* Use the ukp_solution_t fields instead of local variables to propagate
+  /* Use the solution fields instead of local variables to propagate
    * the array values. The arrays will be dumped to files, making possible
    * study them with R or other tool. */
   vector<profit> &g = sol.g;

@@ -13,12 +13,12 @@ static_assert(std::is_integral<weight>::value &&
               "For now, periodicity.cpp only compiles if the "
               "profit and weight types are the same integral type.");
 
-size_t hbm::y_star(ukp_instance_t &ukpi, bool already_sorted = false) {
-  vector<item_t> &items(ukpi.items);
+size_t hbm::y_star(instance &ukpi, bool already_sorted = false) {
+  vector<item> &items(ukpi.items);
   if (!already_sorted) sort_by_eff(ukpi.items);
 
-  item_t i1 = items[0], i2 = items[1];
-  //item_t i1 = ukpi.best_item, i2 = ukpi.second_best_item;
+  item i1 = items[0], i2 = items[1];
+  //item i1 = ukpi.best_item, i2 = ukpi.second_best_item;
   size_t w1 = i1.w, w2 = i2.w, p1 = i1.p, p2 = i2.p;
   
   rational<size_t> r_p1(i1.p);
@@ -28,8 +28,8 @@ size_t hbm::y_star(ukp_instance_t &ukpi, bool already_sorted = false) {
   return rational_cast<size_t>(r_p1/(r1 - r2)) + 1;
 }
 
-size_t hbm::run_with_y_star(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &, bool), ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false) {
-  vector<item_t> &items(ukpi.items);
+size_t hbm::run_with_y_star(void(*ukp_solver)(instance &, solution &, bool), instance &ukpi, solution &sol, bool already_sorted = false) {
+  vector<item> &items(ukpi.items);
   if (!already_sorted) sort_by_eff(ukpi.items);
 
   size_t y_ = y_star(ukpi, already_sorted);
@@ -58,7 +58,7 @@ size_t hbm::run_with_y_star(void(*ukp_solver)(ukp_instance_t &, ukp_solution_t &
   return y_;
 }
 
-void hbm::y_star_wrapper(ukp_instance_t &ukpi, ukp_solution_t &sol, bool already_sorted = false) {
+void hbm::y_star_wrapper(instance &ukpi, solution &sol, bool already_sorted = false) {
   //(void) run_with_y_star(&ukp5, ukpi, sol, false);
   sol.opt = y_star(ukpi, already_sorted);
 

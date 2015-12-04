@@ -21,13 +21,13 @@
 #include "ukp_common.hpp"
 
 namespace hbm {
-  template <typename W = weight, typename P = profit, typename I = itemix>
+  template <typename W, typename P, typename I>
   struct run_t {
     solution_t<W, P, I> result;
     std::chrono::duration<double> time;
   };
 
-  template <typename P = profit>
+  template <typename P>
   struct instance_data_t {
     std::string name;
     P expected_opt;

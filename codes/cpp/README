@@ -1,0 +1,6 @@
+Some notes:
+  * HBM is the acronym for the project name: Henrique Becker Master's.
+  * All macros are prefixed with "HBM_".
+  * All C++ guard macros are prefixed by HBM_ and followed by the filename with all the letters in caps and all the periods replaced by underscores (i.e.: ukp5.hpp -> HBM_UKP5_HPP). This should suffice to avoid conflicts between the project files, and allow other people to include the files in their own projects without too much risk. All files are inside codes/cpp so the directory name isn't necessary.
+  * Everything is inside the hbm namespace (except the macros, obviously).
+

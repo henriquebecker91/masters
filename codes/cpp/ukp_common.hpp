@@ -178,10 +178,9 @@ namespace hbm {
     explicit ukp_read_error (const char* s) noexcept : runtime_error(s) {};
   };
 
-  inline namespace hbm_ukp_common_impl {
+  namespace hbm_ukp_common_impl {
     using namespace std;
     using namespace std::regex_constants;
-    using namespace hbm;
 
     const string bs("[[:blank:]]*");
     const string bp("[[:blank:]]+");

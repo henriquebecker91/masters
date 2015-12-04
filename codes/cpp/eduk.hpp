@@ -14,7 +14,6 @@
 namespace hbm {
   namespace hbm_eduk_impl {
     using namespace std;
-    using namespace hbm;
 
     template<typename W, typename P>
     bool weight_order(const item_t<W, P>& i, const item_t<W, P>& j) {

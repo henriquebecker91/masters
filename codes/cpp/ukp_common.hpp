@@ -168,9 +168,9 @@ namespace hbm {
     std::vector<I> d;
     std::vector<I> non_skipped_d;
     #endif /* HBM_PROFILE */
-    #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
+    #ifdef HBM_CHECK_PERIODICITY
     W last_y_value_outer_loop;
-    #endif /* PERIODICITY */
+    #endif /* HBM_CHECK_PERIODICITY */
   };
 
   struct ukp_read_error : std::runtime_error {

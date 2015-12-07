@@ -7,18 +7,21 @@
 #include <array>
 #include <iomanip>
 
+#include "ukp_common.hpp"
+
 #if !defined(HBM_PROFILE) && defined(HBM_DUMP)
   #error The HBM_DUMP flag can only be used with the HBM_PROFILE flag
 #endif
 
 #if defined(HBM_PROFILE) && defined(HBM_DUMP)
   #include <boost/filesystem.hpp>
+#endif
+
+#ifdef HBM_PROFILE
   #ifndef HBM_PROFILE_PRECISION
     #define HBM_PROFILE_PRECISION 5
   #endif
 #endif
-
-#include "ukp_common.hpp"
 
 namespace hbm {
   template <typename W, typename P, typename I>
@@ -158,7 +161,7 @@ namespace hbm {
 
       cout << "opt:    " << res.opt << endl;
       cout << "y_opt:  " << res.y_opt << endl;
-      #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
+      #ifdef HBM_CHECK_PERIODICITY
       cout << "last_y_value_outer_loop: " << res.last_y_value_outer_loop << endl;
       #endif
       for (auto it = res.used_items.cbegin(); it != res.used_items.cend(); ++it) {

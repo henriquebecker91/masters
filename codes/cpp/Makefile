@@ -25,12 +25,6 @@ run_per.out: run_per.cpp periodicity.hpp $(H_DEPS)
 test_per.out: test_per.cpp periodicity.hpp $(H_DEPS)
 	$(CC) -o $@ test_per.cpp $(CFLAGS)
 
-#run_bb.out: run_bb.cpp bb.hpp $(H_DEPS)
-#	$(CC) -o $@ run_bb.cpp $(CFLAGS)
-
-#test_bb.out: test_bb.cpp bb.hpp $(H_DEPS)
-#	$(CC) -o $@ test_bb.cpp $(CFLAGS)
-
 .PHONY: clean
 
 clean:

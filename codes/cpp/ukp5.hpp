@@ -1,17 +1,10 @@
 #ifndef HBM_UKP5_HPP
 #define HBM_UKP5_HPP
 
-#ifdef HBM_PROFILE
-  #include <chrono>
-#endif
-
 #include "ukp_common.hpp"
 
-#if (defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)) && (defined(HBM_INT_EFF) || defined(HBM_FP_EFF))
-  #error CHECK PERIODICITY ONLY MAKE SENSE IF THE ORDER IS NOT AN APPROXIMATION
-#endif
-#if defined(HBM_CHECK_PERIODICITY) && defined(HBM_CHECK_PERIODICITY_FAST)
-  #error ONLY ONE OF HBM_CHECK_PERIODICITY OR HBM_CHECK_PERIODICITY_FAST CAN BE DEFINED AT THE SAME TIME
+#ifdef HBM_PROFILE
+  #include <chrono>
 #endif
 
 namespace hbm {
@@ -118,21 +111,8 @@ namespace hbm {
 
       opt = 0;
 
-      #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
+      #ifdef HBM_CHECK_PERIODICITY
       W last_y_where_nonbest_item_was_used = 0;
-      #endif
-      #ifdef HBM_CHECK_PERIODICITY_FAST
-      /* We could pre-compute the maximum weight at each point
-       * to accelerate the periodicity check, but this would make
-       * the looser, and the periodicity check doesn't seem to
-       * consume much of the algorithm time
-       */
-      vector<W> w_maxs;
-      w_maxs.reserve(n);
-      w_maxs.push_back(items[0].w);
-      for (I i = 1; i < n; ++i) {
-        w_maxs.push_back(max(w_maxs[i-1], items[i].w));
-      }
       #endif
 
       /* this block is a copy-past of the loop bellow only for the best item
@@ -142,9 +122,6 @@ namespace hbm {
       g[wb] = items[0].p;;
       d[wb] = 0;
 
-      #ifdef HBM_CHECK_PERIODICITY_FAST
-      last_y_where_nonbest_item_was_used = w_max;
-      #endif
       for (W i = 0; i < n; ++i) {
         P pi = items[i].p;
         W wi = items[i].w;
@@ -162,7 +139,7 @@ namespace hbm {
       opt = 0;
       for (W y = w_min; y <= c-w_min; ++y) {
         if (g[y] <= opt) continue;
-        #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
+        #ifdef HBM_CHECK_PERIODICITY
         if (last_y_where_nonbest_item_was_used < y) break;
         #endif
 
@@ -170,10 +147,6 @@ namespace hbm {
         I dy;
         opt = gy = g[y];
         dy = d[y];
-
-        #ifdef HBM_CHECK_PERIODICITY_FAST
-        if (dy != 0) last_y_where_nonbest_item_was_used = y + w_maxs[dy];
-        #endif
 
         /* this block is a copy-past of the loop bellow only for the best item
          * its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
@@ -206,7 +179,7 @@ namespace hbm {
         } 
       }
 
-      #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
+      #ifdef HBM_CHECK_PERIODICITY
       if (last_y_where_nonbest_item_was_used < c-w_min) {
         W y_ = last_y_where_nonbest_item_was_used;
         while (d[y_] != 0) ++y_;
@@ -234,7 +207,7 @@ namespace hbm {
       auto opts = get_opts(c, g, w_min);
       opt = opts.first;
       y_opt = opts.second;
-      #endif
+      #endif //HBM_CHECK_PERIODICITY
 
       return;
     }
@@ -300,7 +273,7 @@ namespace hbm {
       ukp5_gen_stats(c, n, w_min, w_max, g, d, sol);
       #endif
 
-      #if defined(HBM_CHECK_PERIODICITY) || defined(HBM_CHECK_PERIODICITY_FAST)
+      #ifdef HBM_CHECK_PERIODICITY
       /* If we use our periodicity check the sol.used_items constructed by
        * ukp5_phase2 doesn't include the copies of the best item used to
        * fill all the extra_capacity. This solves it. */

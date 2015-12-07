@@ -18,7 +18,7 @@
 //#define HBM_DUMP
 //#define HBM_CHECK_PERIODICITY
 
-/* Only avoiding unnecessary include */
+/* Avoids unnecessary include */
 #ifdef HBM_RATIONAL_EFF
   #include <boost/rational.hpp>
 #endif

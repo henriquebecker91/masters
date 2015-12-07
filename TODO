@@ -1,10 +1,15 @@
-* Make templated versions of all types and functions, the *_t versions will be templates, and the non *_t versions will be using weight, profit
+* Remove CHECK_PERIODICITY_FAST
+* Remove ukp_types (put macros again in the Makefile)
+* Write every macro utility in README, and write about the what we presume
+* Comment every type and function with doxygen documentation syntax 
+
+* Consider the possibility of not initializing all the g and d vectors at first, but only reserve C, where C > w_max (for good performance, C > 2*w_max). Execute the code from 0 to C-w_max, and then copy the C-w_max+1 to C. The profiling shows that the vector initialization is dominant on some instances when periodicity is activated, and also that sometimes only a fraction of that vector is used. Also, with this technique, we can work with capacities greater than the available memory (if the w_max is sufficiently small).
+
+* Add test of profit dominance in the instance loading. Use dirty vector and a list to do this in O(2n).
+
+* Test the sort variants using the run_per.out and test_per.out. Remember to remove hypertreading, isolate cpus and execute on distinct cores.  Use this test to compare performance of XOR swap with generic template swap.
+
+* Check notation used here (https://en.wikipedia.org/wiki/Global_optimization) and consider using it on the proof.
 * Verify if there's a right way to make HBM_INT_EFF work with any integral types (we can use static_assert to verify if the chosen type has the double of the size of the profit and weight types, probably the type must be suggested by the user, as the other way would need a long chained type_trait conditional expression).
 * Abolish the HBM_*_EFF, use type_traits and templates to select the right code based on the type of efficiency? 
-* Check notation used here (https://en.wikipedia.org/wiki/Global_optimization) and consider using it on the proof.
-* Add test of profit dominance in the instance loading. Use dirty vector and a list to do this in O(2n).
-* Test the sort variants using the run_per.out and test_per.out. Remember to remove hypertreading, isolate cpus and execute on distinct cores.  Use this test to compare performance of XOR swap with generic template swap.
-* Debug CHECK_PERIODICITY_FAST. It's segfaulting with big instances (/data/sukp/big_instances/). Consider removing it (don't seem very useful).
-* Comment the code more. Take one day to comment every tricky bit.
-* Consider the possibility of not initializing all the g and d vectors at first, but only reserve the necessary memory, and resize it as is necessary. The profiling shows that the vector initialization is dominant on some instances when periodicity is activated, and also that sometimes only a fraction of that vector is used.
 

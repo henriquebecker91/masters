@@ -2,6 +2,6 @@
 #include "test_common.hpp"
 
 int main(int argc, char** argv) {
-  return hbm::benchmark_pyasukp(&hbm::ukp5);
+  return hbm::benchmark_pyasukp<size_t, size_t, size_t>(&hbm::ukp5);
 }
 

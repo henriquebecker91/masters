@@ -7,7 +7,20 @@
 #include <stdexcept> /* for runtime_error */
 
 /* type and macro definitions */
-#include "ukp_types.hpp"
+/* UKP_TYPES BEGIN */
+/* Basic types */
+namespace hbm {
+  #ifdef HBM_INT_EFF
+  typedef weight int_eff;
+  #endif
+  #ifdef HBM_FP_EFF
+  typedef float fp_eff;
+  #endif
+  #ifdef HBM_RATIONAL_EFF
+  typedef boost::rational<weight> rational_eff;
+  #endif
+}
+/* UKP_TYPES END */
 
 /* includes that depend on type or macro definitions */
 #if defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)
@@ -29,6 +42,7 @@
 #include "workarounds.hpp" /* for from_string */
 
 namespace hbm {
+  #ifdef NOT_DEFINED
   /* The following preprocessor directives code doesn't allow any two of the
    * following macros to be defined at the same time: HBM_TWO_MULT_COMP,
    * HBM_INT_EFF, HBM_FP_EFF and HBM_RATIONAL_EFF. Also it defines the
@@ -68,8 +82,23 @@ namespace hbm {
     typedef rational_eff efficiency;
   #endif /*HBM_RATIONAL_EFF*/
 
-  template <typename W = weight, typename P = profit>
-  struct item_t {
+  template <typename W, typename>
+  struct item_and_eff_t {
+    /* Same as item_t, but with an efficiency field. The item_t type was
+     * originally this type. The only utility of caching the efficiency
+     * was to speed-up the sorting phase. The speed-up was, at max, of 2 times
+     * (only taking in account the sorting phase time). Also, the efficiency is
+     * innacurate and fast (HBM_INT_EFF or HBM_FP_EFF), or exact and slow
+     * (HBM_RATIONAL_EFF). It's also hard to plan for any type that can
+     * be used for profit and weight (this was used when the type wasn't
+     * a template). There are some instances where sorting takes a significant
+     * fraction of the algorithm total time, but for this instances a better
+     * solution would be removing profit-dominance in linear time, and/or
+     * removing part of the simple dominance using a O(CN) simple dominance 
+     * detection algorithm variant. This code can be removed safely, and
+     * was there only to this explanation appear at a commit with
+     * the last version of this type code.
+     */
     W w;
     P p;
     #if defined(HBM_RATIONAL_EFF) || defined(HBM_INT_EFF) || defined(HBM_FP_EFF)
@@ -122,14 +151,37 @@ namespace hbm {
     }
     #endif
   };
+  #endif //NOT_DEFINED
 
-  template <typename W = weight, typename P = profit>
+  template <typename W, typename P>
+  struct item_t {
+    W w;
+    P p;
+
+    inline item_t(void) {}
+    inline item_t(const W &w, const P &p) : w(w), p(p) {}
+
+    inline bool operator==(const item_t &o) const {
+      return p == o.p && w == o.w;
+    }
+
+    /* Sort by non-increasing eff, if the efficiences are equal
+     * sort by non-decreasing weight
+     */
+    inline bool operator<(const item_t &o) const {
+      P a = p * static_cast<P>(o.w),
+            b = o.p * static_cast<P>(w);
+      return a > b || (a == b && w < o.w); 
+    }
+  };
+
+  template <typename W, typename P>
   struct instance_t {
     W c;
     std::vector< item_t<W, P> > items;
   };
 
-  template <typename W = weight, typename P = profit, typename I = itemix>
+  template <typename W, typename P, typename I>
   struct itemqt_t {
     item_t<W, P> it; /* the item */
     W qt; /* its quantity in the result */
@@ -142,7 +194,7 @@ namespace hbm {
     }
   };
 
-  template <typename W = weight, typename P = profit, typename I = itemix>
+  template <typename W, typename P, typename I>
   struct solution_t {
     P opt;
     W y_opt;

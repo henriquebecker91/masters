@@ -217,17 +217,17 @@ namespace hbm {
     }
   }
 
-  template <typename W = weight, typename P = profit, typename I = itemix>
+  template <typename W, typename P, typename I>
   int run_ukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool), const std::string& path, run_t<W, P, I> &run) {
     return hbm_test_common_impl::run_ukp(ukp_solver, path, run);
   }
 
-  template <typename W = weight, typename P = profit, typename I = itemix>
+  template <typename W, typename P, typename I>
   int benchmark_pyasukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool)) {
     return hbm_test_common_impl::benchmark_pyasukp(ukp_solver);
   }
 
-  template <typename W = weight, typename P = profit, typename I = itemix>
+  template <typename W, typename P, typename I>
   int main_take_path(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool), int argc, char** argv) {
     return hbm_test_common_impl::main_take_path(ukp_solver, argc, argv);
   }

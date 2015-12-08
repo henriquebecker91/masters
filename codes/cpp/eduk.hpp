@@ -75,11 +75,7 @@ namespace hbm {
       W c;
 
       AddTest(void) {
-        #ifdef HBM_TWO_MULT_COMP
         g = {0, 0};
-        #elif defined(HBM_INT_EFF) || defined(HBM_FP_EFF) || defined(HBM_RATIONAL_EFF)
-        g = {0, 0, 0} /* define efficiency manually as zero */
-        #endif
 
         l = nullptr;
         c = 0;
@@ -129,11 +125,7 @@ namespace hbm {
       Merge(void) {
         has_h1 = has_h2 = has_old_h1 = has_old_h2 = false;
         l1 = l2 = nullptr;
-        #ifdef HBM_TWO_MULT_COMP
         h1 = h2 = {0, 0};
-        #elif defined(HBM_INT_EFF) || defined(HBM_FP_EFF) || defined(HBM_RATIONAL_EFF)
-        h1 = h2 = {0, 0, 0} /* define efficiency manually as zero */
-        #endif
       }
 
       Merge(LazyList<W, P> * l1, LazyList<W, P> * l2) : l1(l1), l2(l2) {
@@ -183,11 +175,7 @@ namespace hbm {
       AddHead(void) {
         l = nullptr;
         has_original_head = false;
-        #ifdef HBM_TWO_MULT_COMP
         original_head = {0, 0};
-        #elif defined(HBM_INT_EFF) || defined(HBM_FP_EFF) || defined(HBM_RATIONAL_EFF)
-        original_head = {0, 0, 0} /* define efficiency manually as zero */
-        #endif
       }
 
       AddHead(const item_t<W, P> &head, LazyList<W, P> * l) : original_head(head), l(l) {
@@ -255,11 +243,7 @@ namespace hbm {
 
           s_pred_k = unique_ptr< S<W, P, I> >(new S<W, P, I>(k-1, c, items));
           l_items = Lazyfy<W, P>(items);
-          #ifdef HBM_TWO_MULT_COMP
           item_t<W, P> zero = {0, 0};
-          #elif defined(HBM_INT_EFF) || defined(HBM_FP_EFF) || defined(HBM_RATIONAL_EFF)
-          item_t<W, P> zero = {0, 0, 0}; /* define efficiency manually as zero */
-          #endif
           addhead = AddHead<W, P>(zero, this->begin());
           addtest = AddTest<W, P>(items[k-1], &addhead, c);
           merge = Merge<W, P>(s_pred_k->begin(), &addtest);

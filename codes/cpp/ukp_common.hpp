@@ -1,158 +1,21 @@
 #ifndef HBM_UKP_COMMON_HPP
 #define HBM_UKP_COMMON_HPP
 
-/* includes that don't depend on type or macro definitions */
 #include <vector>
 #include <iostream>
 #include <stdexcept> /* for runtime_error */
-
-/* type and macro definitions */
-/* UKP_TYPES BEGIN */
-/* Basic types */
-namespace hbm {
-  #ifdef HBM_INT_EFF
-  typedef weight int_eff;
-  #endif
-  #ifdef HBM_FP_EFF
-  typedef float fp_eff;
-  #endif
-  #ifdef HBM_RATIONAL_EFF
-  typedef boost::rational<weight> rational_eff;
-  #endif
-}
-/* UKP_TYPES END */
-
-/* includes that depend on type or macro definitions */
-#if defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)
-#include <utility> /* to specialize swap */
-#endif
+#include <utility>   /* to specialize swap */
 
 /* Includes for the implementation code inside hbm::hbm_ukp_common_impl
  * namespace. They pollute the global namespace a little, but everything
  * is inside their own namespace (std and boost) so this should
  * be an OK thing to do. */
-#include <regex>    /* for regex, regex_match */
-#include <string>   /* for stoull */
-#include <iostream> /* for cout */
-#ifdef HBM_INT_EFF
-  #include <boost/sort/spreadsort/spreadsort.hpp> /* for integer_sort */
-#else
-  #include <algorithm> /* for sort */
-#endif
-#include "workarounds.hpp" /* for from_string */
+#include <regex>            /* for regex, regex_match */
+#include <iostream>         /* for cout */
+#include <algorithm>        /* for sort */
+#include "workarounds.hpp"  /* for from_string */
 
 namespace hbm {
-  #ifdef NOT_DEFINED
-  /* The following preprocessor directives code doesn't allow any two of the
-   * following macros to be defined at the same time: HBM_TWO_MULT_COMP,
-   * HBM_INT_EFF, HBM_FP_EFF and HBM_RATIONAL_EFF. Also it defines the
-   * efficiency type based on the macro value*/
-  #ifndef HBM_RATIONAL_EFF
-    #ifndef HBM_FP_EFF
-      #ifndef HBM_INT_EFF
-        #ifndef HBM_TWO_MULT_COMP
-          #error ONE OF: HBM_RATIONAL_EFF, HBM_FP_EFF, HBM_INT_EFF OR HBM_TWO_MULT_COMP MUST BE \
-                 DEFINED, THE RECOMMENDED IS HBM_TWO_MULT_COMP
-        #endif
-      #else /*HBM_INT_EFF*/
-        #ifdef HBM_TWO_MULT_COMP
-          #error HBM_INT_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
-        #endif
-        typedef int_eff efficiency;
-      #endif /*HBM_INT_EFF*/
-    #else /*HBM_FP_EFF*/
-      #ifdef HBM_TWO_MULT_COMP
-        #error HBM_FP_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
-      #endif
-      #ifdef HBM_INT_EFF
-        #error HBM_FP_EFF AND HBM_INT_EFF CANNOT BE DEFINED AT THE SAME TIME
-      #endif
-      typedef fp_eff efficiency;
-    #endif /*HBM_FP_EFF*/
-  #else /*HBM_RATIONAL_EFF*/
-    #ifdef HBM_TWO_MULT_COMP
-      #error HBM_RATIONAL_EFF AND HBM_TWO_MULT_COMP CANNOT BE DEFINED AT THE SAME TIME
-    #endif
-    #ifdef HBM_INT_EFF
-      #error HBM_RATIONAL_EFF AND HBM_INT_EFF CANNOT BE DEFINED AT THE SAME TIME
-    #endif
-    #ifdef HBM_FP_EFF
-      #error HBM_RATIONAL_EFF AND HBM_FP_EFF CANNOT BE DEFINED AT THE SAME TIME
-    #endif
-    typedef rational_eff efficiency;
-  #endif /*HBM_RATIONAL_EFF*/
-
-  template <typename W, typename>
-  struct item_and_eff_t {
-    /* Same as item_t, but with an efficiency field. The item_t type was
-     * originally this type. The only utility of caching the efficiency
-     * was to speed-up the sorting phase. The speed-up was, at max, of 2 times
-     * (only taking in account the sorting phase time). Also, the efficiency is
-     * innacurate and fast (HBM_INT_EFF or HBM_FP_EFF), or exact and slow
-     * (HBM_RATIONAL_EFF). It's also hard to plan for any type that can
-     * be used for profit and weight (this was used when the type wasn't
-     * a template). There are some instances where sorting takes a significant
-     * fraction of the algorithm total time, but for this instances a better
-     * solution would be removing profit-dominance in linear time, and/or
-     * removing part of the simple dominance using a O(CN) simple dominance 
-     * detection algorithm variant. This code can be removed safely, and
-     * was there only to this explanation appear at a commit with
-     * the last version of this type code.
-     */
-    W w;
-    P p;
-    #if defined(HBM_RATIONAL_EFF) || defined(HBM_INT_EFF) || defined(HBM_FP_EFF)
-    efficiency eff;
-    #endif
-
-    inline item_t(void) {}
-    #ifdef HBM_TWO_MULT_COMP
-    inline item_t(const W &w, const P &p) : w(w), p(p) {}
-    #elif defined(HBM_RATIONAL_EFF)
-    inline item_t(const W &w, const P &p) : w(w), p(p), eff(p, w) {}
-    #elif defined(HBM_INT_EFF)
-    inline item_t(const W &w, const P &p) : w(w), p(p) {
-      eff = (p << 32) / w;
-    }
-    #elif defined(HBM_FP_EFF)
-    inline item_t(const W &w, const P &p) : w(w), p(p) {
-      eff = static_cast<efficiency>(p) / static_cast<efficiency>(w);
-    }
-    #endif
-
-    inline bool operator==(const item_t &o) const {
-      return p == o.p && w == o.w;
-    }
-
-    /* Sort by non-increasing eff, if the efficiences are equal
-     * sort by non-decreasing weight
-     */
-    #if defined(HBM_TWO_MULT_COMP)
-    inline bool operator<(const item_t &o) const {
-      P a = p * static_cast<P>(o.w),
-            b = o.p * static_cast<P>(w);
-      return a > b || (a == b && w < o.w); 
-    }
-    #elif defined(HBM_RATIONAL_EFF) || defined(HBM_FP_EFF) || defined(HBM_INT_EFF)
-    inline bool operator<(const item_t &o) const {
-      return eff > o.eff || (eff == o.eff && w < o.w);
-    }
-    #endif
-
-    #ifdef HBM_INT_EFF
-    inline efficiency operator>>(const int s) const {
-      /* NOTE: this operator is needed for boost::sort::spreadsort::integer_sort
-       * that is the sort we use when HBM_INT_EFF is defined.
-       * As we sort by non-increasing eff, we cannot return
-       * (eff >> s), because the integer_sort will compare the value
-       * trying to sort them in non-decreasing order, as (a < b) iff (~a >= ~b)
-       * this solves the problem. */
-      return (~eff) >> s;
-    }
-    #endif
-  };
-  #endif //NOT_DEFINED
-
   template <typename W, typename P>
   struct item_t {
     W w;
@@ -199,6 +62,9 @@ namespace hbm {
     P opt;
     W y_opt;
     std::vector< itemqt_t<W, P, I> > used_items;
+    #ifdef HBM_CHECK_PERIODICITY
+    W last_y_value_outer_loop;
+    #endif /* HBM_CHECK_PERIODICITY */
     #ifdef HBM_PROFILE
     /* Time of each phase */
     double sort_time;
@@ -210,7 +76,7 @@ namespace hbm {
     /* Some data about instance */
     I n;
     W c, w_min, w_max;
-    /* Some data about structures manipulates by ukp5 */
+    /* Some data about structures manipulated by ukp5 */
     W last_dy_non_zero_non_n;
     W qt_non_skipped_ys;
     W qt_gy_zeros;
@@ -220,9 +86,6 @@ namespace hbm {
     std::vector<I> d;
     std::vector<I> non_skipped_d;
     #endif /* HBM_PROFILE */
-    #ifdef HBM_CHECK_PERIODICITY
-    W last_y_value_outer_loop;
-    #endif /* HBM_CHECK_PERIODICITY */
   };
 
   struct ukp_read_error : std::runtime_error {
@@ -404,11 +267,7 @@ namespace hbm {
 
     template<typename W, typename P>
     void sort_by_eff(vector< item_t<W, P> > &items) {
-      #ifdef HBM_INT_EFF
-      boost::sort::spreadsort::integer_sort(items.begin(), items.end());
-      #else
       std::sort(items.begin(), items.end());
-      #endif
       return;
     }
   }
@@ -436,7 +295,7 @@ namespace hbm {
 
 /* Use an optimized swap for the item class (improves sorting time),
  * but only if this is possible (all members have the operator ^= defined) */
-#if (defined(HBM_TWO_MULT_COMP) || defined(HBM_INT_EFF)) && !defined(HBM_NO_XOR_SWAP)
+#if !defined(HBM_NO_XOR_SWAP)
 #define HBM_XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
 namespace std {
   template<typename W, typename P>
@@ -444,9 +303,6 @@ namespace std {
   {
     HBM_XORSWAP(a.w, b.w);
     HBM_XORSWAP(a.p, b.p);
-    #ifdef HBM_INT_EFF
-    HBM_XORSWAP(a.eff, b.eff);
-    #endif
   }
 }
 #endif //XOR_SWAP SPECIALIZATION

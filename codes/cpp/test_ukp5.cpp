@@ -2,6 +2,13 @@
 #include "test_common.hpp"
 
 int main(int argc, char** argv) {
-  return hbm::benchmark_pyasukp<size_t, size_t, size_t>(&hbm::ukp5);
+  int exit_code;
+
+  std::cout << "hbm::benchmark_pyasukp<size_t, size_t, size_t>(&hbm::ukp5)" << std::endl;
+  exit_code = hbm::benchmark_pyasukp<size_t, size_t, size_t>(&hbm::ukp5);
+  if (exit_code != EXIT_SUCCESS) return exit_code;
+
+  std::cout << "hbm::benchmark_pyasukp<size_t, double, size_t>(&hbm::ukp5)" << std::endl;
+  return hbm::benchmark_pyasukp<size_t, double, size_t>(&hbm::ukp5);
 }
 

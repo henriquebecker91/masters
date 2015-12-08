@@ -6,7 +6,7 @@ CC=g++
 # some control.
 CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -O3 -lboost_filesystem -lboost_system
 H_DEPS=ukp_common.hpp test_common.hpp
-DEFS=-DHBM_TWO_MULT_COMP -DHBM_CHECK_PERIODICITY
+DEFS=-DHBM_CHECK_PERIODICITY
 
 run_eduk.out: run_eduk.cpp eduk.hpp $(H_DEPS)
 	$(CC) -o $@ run_eduk.cpp $(CFLAGS) $(DEFS)

@@ -4,71 +4,96 @@ Some notes:
   * All C++ guard macros are prefixed by HBM_ and followed by the filename with all the letters in caps and all the periods replaced by underscores (i.e.: ukp5.hpp -> HBM_UKP5_HPP). This should suffice to avoid conflicts between the project files, and allow other people to include the files in their own projects without too much risk. All files are inside codes/cpp so the directory name isn't necessary.
   * Everything is inside the hbm namespace (except the macros, obviously).
 
-/* See the README for the explanation of every macro and basic type */
+MACROS EXPLANATION
 
-/* Efficiency related definitions
- * Only one of the bellow can be defined at the same time */
-#define HBM_TWO_MULT_COMP
-//#define HBM_INT_EFF
-//#define HBM_FP_EFF
-//#define HBM_RATIONAL_EFF
+HBM_NOT_DEFINED
+A macro that MUST NOT be ever defined. Its function is to allow to comment
+large portions of code that have /**/ style commentaries inside then, as
+C++ doesn't allow nested comments.
 
-/* Sort related definitions */
-//#define HBM_NO_XOR_SWAP
+HBM_NO_XOR_SWAP
+See the ASSUMPTION RULES rule number 2 below.
 
-/* Other definitions */
-#define HBM_PROFILE
-//#define HBM_DUMP
-#define HBM_CHECK_PERIODICITY
+HBM_XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
+A function macro definition that is used in the inner workings
+of the library. Don't redefine it, or depend on its existence.
 
-/* Avoids unnecessary include */
-#ifdef HBM_RATIONAL_EFF
-  #include <boost/rational.hpp>
-#endif
+HBM_PROFILE
+A macro you define if you want extra info about the UKP5 execution.
+If this macro is defined:
+* The solution_t type will get a lot of extra fields.
+* The ukp5 procedure will compute and set these extra fields. It will execute
+  a little slower, but this will not be shown by the output, as the computation
+  needed to obtain this extra info is not measured.
+* The main_take_path function will print many of this extra fields, and some
+  more. If the main_take_path is used with other function that not
+  ukp5 it will print garbage instead of the extra info, as other functions
+  don't set the extra fields at solution_t.
 
-/* Basic types */
-namespace hbm {
-  /* The code makes some assumptions about the profit and weight types,
-   * if you break these the code probably won't compile or work as
-   * intended.
-   * 0) The profit and weight types behave as primitive numbers in c++
-   *    would behave (define the same operators, you can output them
-   *    with an ostream, etc...).
-   * 1) For UKP5 (dynamic programming) the weight must always be an
-   *    integral number (it is used to index arrays).
-   * 2) The int_eff should be an integral type, fp_eff should be a
-   *    floating point type.
-   * 3) If profit or weight isn't integral, the macro HBM_NO_XOR_SWAP
-   *    should be defined (it avoids applying ^= over those datatypes).
-   * 3) If profit and weight aren't the same type:
-   * 3.a) You probably shouldn't use HBM_RATIONAL_EFF.
-   * 3.b) You should understand that any operation between a value of
-   *      type profit and one of type weight (like multiplication, or
-   *      division) will convert the weight type to the profit type
-   *      before performing the operation.
-   */
-  typedef size_t profit;
-  typedef size_t weight;
+HBM_DUMP
+A macro you define if you want to know how the arrays used by UKP5
+were after the algorithm execution.
+This macro can only be defined if HBM_PROFILE macro is defined. This
+happens because the info that is dumped will only exist as a field
+of the result_t struct if the HBM_PROFILE macro is defined.
+If this macro is defined:
+* The boost filesystem library is required. The g++ arguments are
+  "-lboost_filesystem -lboost_system". The Makefile already include
+  these arguments, if you don't plan to use HBM_DUMP you don't need
+  the boost.
+* The ukp5 procedure will not do any extra effort. All the extra effort
+  is already done by HBM_PROFILE.
+* The time that is shown in the standard output will not change, as
+  writing the dump files is not measured.
+* A "g_dump_<filename>.dat" and a "d_dump_<filename>.dat" files will be
+  created at the directory where ukp5 was called. They are simple tables
+  with a header "y gy" or "y dy", the first column is the capacity value
+  from 0 to C, and the second one is: gy = summed profit values (not
+  guaranteed to be optimal), dy = item index numbers (between 0 and N).
+  You need to understand the inner workings of the ukp5 algorithm
+  to know what those numbers mean. The files size vary with C.
 
-  /* This type is used to loop between the items and to store the 
-   * index of items. The only assumption made is that it's integral
-   * and sufficient large to contain the 'n' value (number of items).
-   * The quantity of items in a solution is of type weight, as it is
-   * the result of a capacity value divided by a item weight (both capacity
-   * and item weight are of the weight type). And if the item weight is 1
-   * (one) the the quantity is equal to the capacity. */
-  typedef size_t itemix;
-  
-  #ifdef HBM_INT_EFF
-  typedef weight int_eff;
-  #endif
-  #ifdef HBM_FP_EFF
-  typedef float fp_eff;
-  #endif
-  #ifdef HBM_RATIONAL_EFF
-  typedef boost::rational<weight> rational_eff;
-  #endif
-}
+HBM_CHECK_PERIODICITY
+A macro you define if you want the UKP5 algorithm to execute much faster
+over some easy instances and a little slower at all other instances. Some
+instances have items that are very small compared to the capacity, and
+these items have very different efficiencies (profit/weight ratio).
+Optimal solutions of instances with those attributes frequently have a
+big quantity of an item type (the most efficient one) and almost none
+of the other item types. If this macro is defined, the ukp5 will try to
+detect when we can stop computing and simply fill the remaining capacity
+with the most efficient item. The consequence is that the computation will
+stop earlier for instances with the properties described above, and will
+last a litlle longer for other instances (because of the overhead of trying
+to detect this situation).
 
-#endif // HBM_UKP_TYPES_HPP
+ASSUMPTION RULES
+The code makes some assumptions about the profit and weight types,
+if you break those the code probably won't compile or work as
+intended. The W template parameter refer to item weight and instance
+capacity, the P refer to the item profit, and the I refer to the
+item indexes.
+0) The weight and the profit types behave as primitive numbers in c++
+   would behave (define the same operators, you can output them
+   with an ostream, cast from and to them with static_cast, etc...).
+1) For UKP5 (dynamic programming) the weight must always be an
+   integral number, as it is used to index arrays. If you want to use 
+   big numbers (that can't be used to index an array/vector) you will
+   need to rewrite the code to change the vector to a min heap (with
+   the capacity as a key).
+2) If profit or weight don't define the ^= operator, the macro HBM_NO_XOR_SWAP
+   must be defined (it avoids applying ^= over those datatypes).
+3) If profit and weight aren't the same type: You should understand that any
+   operation between a value of type profit and one of type weight
+   (like multiplication, or division) will convert the weight type
+   to the profit type before performing the operation (with
+   static_cast<P>(W)).
+4) The I template type is used to loop between the items and to store the 
+   index of items. The assumptions made about it are: I is integral, I can
+   be used to index vectors, I is sufficient large to contain the 'n' value
+   (number of items).
+   The quantity of items in a solution is of type weight, as it is
+   the result of a capacity value divided by a item weight (both capacity
+   and item weight are of the weight type). And if the item weight is 1
+   (one) the the quantity can be equal to the capacity.
 

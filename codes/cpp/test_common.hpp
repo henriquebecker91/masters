@@ -24,18 +24,17 @@
 #endif
 
 namespace hbm {
+  /// @brief A type that contains a solution, and how much time was needed
+  ///   to obtain it.
   template <typename W, typename P, typename I>
   struct run_t {
+    /// An UKP solution.
     solution_t<W, P, I> result;
-    std::chrono::duration<double> time;
+    /// The time needed to obtain the solution.
+    std::chrono::duration<double> time; 
   };
 
-  template <typename P>
-  struct instance_data_t {
-    std::string name;
-    P expected_opt;
-  };
-
+  /// Inner test_common implementations. Do not depend.
   namespace hbm_test_common_impl {
     using namespace std;
     using namespace std::chrono;
@@ -63,6 +62,14 @@ namespace hbm {
       return EXIT_SUCCESS;
     }
 
+    /// @brief Internal datatype used to store an instance name and its
+    ///   optimal solution value.
+    template <typename P>
+    struct instance_data_t {
+      std::string name;
+      P expected_opt;
+    };
+
     template <typename W, typename P, typename I>
     int benchmark_pyasukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool)) {
       array<instance_data_t<P>, 8> instances_data = {{
@@ -78,7 +85,7 @@ namespace hbm {
 
       bool everything_ok = true;
       for (size_t i = 0; i < instances_data.size(); ++i) {
-        string path = "../../data/ukp/" + instances_data[i].name + ".ukp";
+        const string path = "../../data/ukp/" + instances_data[i].name + ".ukp";
         cout << path << endl;
 
         run_t<W, P, I> run;
@@ -218,18 +225,62 @@ namespace hbm {
     }
   }
 
+  /// Run a custom procedure over the ukp instance file at path.
+  ///
+  /// The time for reading the instance isn't measured, only the time taken
+  /// by the ukp_solver is measured.
+  ///
+  /// @param ukp_solver A procedure that takes an instance_t and writes the
+  ///   result at an solution_t.
+  /// @param path A string with the path to an instance on the UPK format.
+  /// @param run Where the solution_t written by ukp_solver and the time
+  ///   used by the the ukp_solver will be stored.
+  ///
+  /// @return EXIT_SUCCESS or EXIT_FAILURE. It's a failure if the file
+  ///   at path can't be opened.
+  ///
+  /// @exception ukp_read_error If the instance format is wrong.
+  /// @see read_ukp_instance For the ukp format.
   template <typename W, typename P, typename I>
   int run_ukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool), const std::string& path, run_t<W, P, I> &run) {
     return hbm_test_common_impl::run_ukp(ukp_solver, path, run);
   }
 
+  /// Procedure used to test if a solver procedure is working.
+  ///
+  /// This procedure is very limited. It simply try to read the
+  /// eight benchmark instances of PYAsUKP from ../../data/ukp/
+  /// and execute ukp_solver over each one. Everything is
+  /// hardcoded. This procedure aim is only to do a quick
+  /// empirical test to check if the ukp_solver solver function
+  /// remains working after a change. Used in the development
+  /// of the solver functions.
+  ///
+  /// @param ukp_solver A procedure that takes an instance_t and
+  ///   writes the result at an solution_t.
+  ///
+  /// @return EXIT_SUCCESS or EXIT_FAILURE. It's a failure if the
+  ///   PYAsUKP benchmark files aren't found at the hardcoded path.
+  /// @exception ukp_read_error If the instance format is wrong.
   template <typename W, typename P, typename I>
   int benchmark_pyasukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool)) {
     return hbm_test_common_impl::benchmark_pyasukp(ukp_solver);
   }
 
+  /// TODO
+  ///
+  /// @param ukp_solver
+  /// @param argc
+  /// @param argv
+  ///
+  /// @return 
   template <typename W, typename P, typename I>
   int main_take_path(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool), int argc, char** argv) {
+    return hbm_test_common_impl::main_take_path(ukp_solver, argc, argv);
+  }
+
+  template <typename W, typename P, typename I>
+  int run_ukp_with_profile(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool), int argc, char** argv) {
     return hbm_test_common_impl::main_take_path(ukp_solver, argc, argv);
   }
 }

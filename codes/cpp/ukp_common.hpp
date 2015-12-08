@@ -15,9 +15,9 @@
 #include <algorithm>        // for sort
 #include "workarounds.hpp"  // for from_string
 
-/// @brief Namespace that encloses everything about Henrique Becker Master's.
+/// Namespace that encloses everything about Henrique Becker Master's.
 namespace hbm {
-  /// @brief The item on an UKP (unbounded knapsack problem).
+  /// The item on an UKP (unbounded knapsack problem).
   ///
   /// @tparam W The weight type. See README for assumptions about this type.
   /// @tparam P The profit type. See README for assumptions about this type.
@@ -26,12 +26,12 @@ namespace hbm {
     W w; ///< The public weight field.
     P p; ///< The public profit field.
 
-    /// @brief An empty constructor. Don't initialize anything.
+    /// An empty constructor. Don't initialize anything.
     ///
     /// Useful if you will set the field values after.
     inline item_t(void) {}
 
-    /// @brief The parametrized constructor.
+    /// The parametrized constructor.
     ///
     /// Simply uses the w and p arguments to initialize the fields w and p.
     ///
@@ -39,7 +39,7 @@ namespace hbm {
     /// @param p Initial profit value.
     inline item_t(const W &w, const P &p) : w(w), p(p) {}
 
-    /// @brief Equality test. Depend on W and P defining equality.
+    /// Equality test. Depend on W and P defining equality.
     ///
     /// @param o The item at the right of the == operator.
     ///
@@ -48,7 +48,7 @@ namespace hbm {
       return p == o.p && w == o.w;
     }
 
-    /// @brief The standard ordering for items.
+    /// The standard ordering for items.
     ///
     /// The condition x \< y is true iff the item x is more efficient
     /// than y (x.p/x.w \> y.p/y.w) or, if the efficiencies are equal,
@@ -64,7 +64,7 @@ namespace hbm {
     }
   };
 
-  /// @brief Type that represents an instance of the UKP problem.
+  /// Type that represents an instance of the UKP problem.
   template <typename W, typename P>
   struct instance_t {
     /// The capacity of the instance.
@@ -73,7 +73,7 @@ namespace hbm {
     std::vector< item_t<W, P> > items;
   };
 
-  /// @brief Auxiliar type used by solution_t.
+  /// Auxiliar type used by solution_t.
   ///
   /// This type represents the quantity of an item in a solution.
   /// It aggregates extra info about the item and how to pretty print
@@ -86,7 +86,7 @@ namespace hbm {
     W qt; /// The item quantity (in the optimal result, normally).
     I ix; /// The item index (in the order used by the algorithm, normally).
 
-    /// @brief The parametrized constructor.
+    /// The parametrized constructor.
     ///
     /// Basically takes every argument and use it to initialize the
     /// matching field.
@@ -96,7 +96,7 @@ namespace hbm {
     /// @param ix The initial value of ix.
     itemqt_t(const item_t<W, P> &it, const W &qt, const I &ix) : it(it), qt(qt), ix(ix) {}
 
-    /// @brief Write human-readable object representation to a stream.
+    /// Write human-readable object representation to a stream.
     ///
     /// @param cout An ostream where the object representation will be
     ///   outputed.
@@ -106,7 +106,7 @@ namespace hbm {
     }
   };
 
-  /// @brief Type that represents a solution of an UKP problem
+  /// Type that represents a solution of an UKP problem
   ///   (usually the optimal solution).
   ///
   /// @attention If HBM_PROFILE is NOT defined the only fields that exist are
@@ -160,13 +160,13 @@ namespace hbm {
     #endif // HBM_PROFILE
   };
 
-  /// @brief Exception type for UKP instance read errors.
+  /// Exception type for UKP instance read errors.
   struct ukp_read_error : std::runtime_error {
     explicit ukp_read_error (const std::string &s) noexcept : std::runtime_error(s) {};
     explicit ukp_read_error (const char* s) noexcept : runtime_error(s) {};
   };
 
-  /// @brief Inner ukp_common implementations. Do not depend.
+  /// Inner ukp_common implementations. Do not depend.
   namespace hbm_ukp_common_impl {
     using namespace std;
     using namespace std::regex_constants;
@@ -362,7 +362,7 @@ namespace hbm {
     }
   }
 
-  /// @brief Read an instance in the ukp format from the stream to instance_t.
+  /// Read an instance in the ukp format from the stream to instance_t.
   ///
   /** A description of the ukp format follows:
   \verbatim
@@ -378,12 +378,13 @@ namespace hbm {
   ///
   /// @param in The istream with the instance formatted as described.
   /// @param ukpi The object that will receive the instance.
+  /// @exception ukp_read_error If the instance format is wrong.
   template <typename W, typename P, typename I = size_t>
   void read_ukp_instance(std::istream &in, instance_t<W, P> &ukpi) {
     hbm_ukp_common_impl::read_ukp_instance(in, ukpi);
   }
 
-  /// @brief Write an instance_t to a stream in the ukp format.
+  /// Write an instance_t to a stream in the ukp format.
   ///
   /// See read_ukp_instance for info about this format.
   /// @see read_ukp_instance
@@ -395,7 +396,7 @@ namespace hbm {
     hbm_ukp_common_impl::write_ukp_instance(out, ukpi);
   }
 
-  /// @brief Read an instance in the sukp format from the stream to instance_t.
+  /// Read an instance in the sukp format from the stream to instance_t.
   ///
   /** A description of the ukp format follows:
   \verbatim
@@ -414,7 +415,7 @@ namespace hbm {
     hbm_ukp_common_impl::read_sukp_instance(in, ukpi);
   }
 
-  /// @brief Write an instance_t to a stream in the sukp format.
+  /// Write an instance_t to a stream in the sukp format.
   ///
   /// See read_sukp_instance for info about this format.
   /// @see read_sukp_instance

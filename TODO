@@ -1,6 +1,7 @@
 * Comment every type and function with doxygen documentation syntax 
 * Study about the noexcept modifier and verify if the functions should be using it.
 * Maybe item_t needs a third templaye type, both W and P will be converted to this third type before multiplying them. This allows to use an bigger type in computations that are prone to overflow the P type without having to use a bigger P everywhere (what can slow the algorithm unecessary).
+* Create a variant of solution_t called solution_prfl_t. Create a run_ukp/main_take_path variant called run_ukp_prfl. It's exactly as main_take_path but with the run_ukp parameters and solution_prfl_t instead of solution_t. Overload main_take_path to call run_ukp or run_ukp_prfl based on the result type (solution_t o solution_prfl_t). 
 
 * Consider the possibility of not initializing all the g and d vectors at first, but only reserve C, where C > w_max (for good performance, C > 2*w_max). Execute the code from 0 to C-w_max, and then copy the C-w_max+1 to C. The profiling shows that the vector initialization is dominant on some instances when periodicity is activated, and also that sometimes only a fraction of that vector is used. Also, with this technique, we can work with capacities greater than the available memory (if the w_max is sufficiently small).
 

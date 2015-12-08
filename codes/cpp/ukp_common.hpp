@@ -1,36 +1,62 @@
 #ifndef HBM_UKP_COMMON_HPP
 #define HBM_UKP_COMMON_HPP
 
-#include <vector>
-#include <iostream>
-#include <stdexcept> /* for runtime_error */
-#include <utility>   /* to specialize swap */
+#include <vector>    // for vector
+#include <iostream>  // for istream and ostream
+#include <stdexcept> // for runtime_error
+#include <utility>   // to specialize swap
 
-/* Includes for the implementation code inside hbm::hbm_ukp_common_impl
- * namespace. They pollute the global namespace a little, but everything
- * is inside their own namespace (std and boost) so this should
- * be an OK thing to do. */
-#include <regex>            /* for regex, regex_match */
-#include <iostream>         /* for cout */
-#include <algorithm>        /* for sort */
-#include "workarounds.hpp"  /* for from_string */
+// Includes for the implementation code inside hbm::hbm_ukp_common_impl
+// namespace. They pollute the global namespace a little, but everything
+// is inside their own namespace (std and hbm) so this should
+// be an OK thing to do.
+#include <regex>            // for regex, regex_match
+#include <iostream>         // for cout
+#include <algorithm>        // for sort
+#include "workarounds.hpp"  // for from_string
 
+/// @brief Namespace that encloses everything about Henrique Becker Master's.
 namespace hbm {
+  /// @brief The item on an UKP (unbounded knapsack problem).
+  ///
+  /// @tparam W The weight type. See README for assumptions about this type.
+  /// @tparam P The profit type. See README for assumptions about this type.
   template <typename W, typename P>
   struct item_t {
-    W w;
-    P p;
+    W w; ///< The public weight field.
+    P p; ///< The public profit field.
 
+    /// @brief An empty constructor. Don't initialize anything.
+    ///
+    /// Useful if you will set the field values after.
     inline item_t(void) {}
+
+    /// @brief The parametrized constructor.
+    ///
+    /// Simply uses the w and p arguments to initialize the fields w and p.
+    ///
+    /// @param w Initial weight value.
+    /// @param p Initial profit value.
     inline item_t(const W &w, const P &p) : w(w), p(p) {}
 
+    /// @brief Equality test. Depend on W and P defining equality.
+    ///
+    /// @param o The item at the right of the == operator.
+    ///
+    /// @return True if the items are equal, False otherwise.
     inline bool operator==(const item_t &o) const {
       return p == o.p && w == o.w;
     }
 
-    /* Sort by non-increasing eff, if the efficiences are equal
-     * sort by non-decreasing weight
-     */
+    /// @brief The standard ordering for items.
+    ///
+    /// The condition x \< y is true iff the item x is more efficient
+    /// than y (x.p/x.w \> y.p/y.w) or, if the efficiencies are equal,
+    /// the condition x.w \< y.w is true. 
+    ///
+    /// @param o The item at the right of the < operator.
+    ///
+    /// @return True if the criterion described above is met, False otherwise.
     inline bool operator<(const item_t &o) const {
       P a = p * static_cast<P>(o.w),
             b = o.p * static_cast<P>(w);
@@ -38,71 +64,119 @@ namespace hbm {
     }
   };
 
+  /// @brief Type that represents an instance of the UKP problem.
   template <typename W, typename P>
   struct instance_t {
+    /// The capacity of the instance.
     W c;
+    /// The items of the instance. Can be in any order.
     std::vector< item_t<W, P> > items;
   };
 
+  /// @brief Auxiliar type used by solution_t.
+  ///
+  /// This type represents the quantity of an item in a solution.
+  /// It aggregates extra info about the item and how to pretty print
+  /// this info.
+  ///
+  /// @tparam I The index type. See README for assumptions about this type.
   template <typename W, typename P, typename I>
   struct itemqt_t {
-    item_t<W, P> it; /* the item */
-    W qt; /* its quantity in the result */
-    I ix; /* its index in the ordered items list */
+    item_t<W, P> it; /// The item in question.
+    W qt; /// The item quantity (in the optimal result, normally).
+    I ix; /// The item index (in the order used by the algorithm, normally).
 
+    /// @brief The parametrized constructor.
+    ///
+    /// Basically takes every argument and use it to initialize the
+    /// matching field.
+    ///
+    /// @param it The initial value of it.
+    /// @param qt The initial value of qt.
+    /// @param ix The initial value of ix.
     itemqt_t(const item_t<W, P> &it, const W &qt, const I &ix) : it(it), qt(qt), ix(ix) {}
 
+    /// @brief Write human-readable object representation to a stream.
+    ///
+    /// @param cout An ostream where the object representation will be
+    ///   outputed.
     void print(std::ostream &cout = std::cout) const {
+      // The cout below don't have std:: as it refers to the parameter.
       cout << "ix: " << ix << " qt: " << qt << " w: " << it.w << " p: " << it.p << std::endl;
     }
   };
 
+  /// @brief Type that represents a solution of an UKP problem
+  ///   (usually the optimal solution).
+  ///
+  /// @attention If HBM_PROFILE is NOT defined the only fields that exist are
+  /// opt, y_opt, used_items and last_y_value_outer_loop (this last only
+  /// exists if HBM_CHECK_PERIODICITY is defined).
   template <typename W, typename P, typename I>
   struct solution_t {
-    P opt;
-    W y_opt;
+    P opt;   ///< The solution value (solution items profit sum).
+    W y_opt; ///< The solution weight (solution items weight sum).
+
+    /// The quantities of each item used in the solution.
     std::vector< itemqt_t<W, P, I> > used_items;
+
     #ifdef HBM_CHECK_PERIODICITY
+    /// @attention The last_y_value_outer_loop field exists only if 
+    /// HBM_CHECK_PERIODICITY is defined.
+
+    /// The last capacity computed before detecting periodicity and stoping.
     W last_y_value_outer_loop;
-    #endif /* HBM_CHECK_PERIODICITY */
+    #endif // HBM_CHECK_PERIODICITY
+
     #ifdef HBM_PROFILE
-    /* Time of each phase */
-    double sort_time;
-    double vector_alloc_time;
-    double linear_comp_time;
-    double phase1_time;
-    double phase2_time;
-    double total_time;
-    /* Some data about instance */
-    I n;
-    W c, w_min, w_max;
-    /* Some data about structures manipulated by ukp5 */
-    W last_dy_non_zero_non_n;
-    W qt_non_skipped_ys;
-    W qt_gy_zeros;
-    W qt_inner_loop_executions;
-    std::vector<I> qt_i_in_dy;
-    std::vector<P> g;
-    std::vector<I> d;
+    // Time of each phase
+    double sort_time;        ///< Time used sorting items.
+    double vector_alloc_time;///< Time used allocating vectors for DP.
+    double linear_comp_time; ///< Time used by linear time preprocessing.
+    double phase1_time;      ///< Time used by ukp5 phase1 (find optimal).
+    double phase2_time;      ///< Time used by ukp5 phase2 (assemble solution).
+    double total_time;       ///< Time used by all previous steps.
+    // Some data about instance
+    I n;   ///< Instance number of items.
+    W c,   ///< Instance capacity.
+    w_min, ///< Instance smallest item weight.
+    w_max; ///< Instance biggest item weight.
+    // Some data about structures manipulated by ukp5
+    std::vector<P> g; ///< The vector of size c+w_max+1 and profit values.
+    std::vector<I> d; ///< The vector of size c+w_max+1 and item index values.
+    // Some statistics
+    /// Number of items sized vector, with the quantity of each value i in dy.
+    std::vector<W> qt_i_in_dy;
+    /// Same as d, but without the positions skipped.
     std::vector<I> non_skipped_d;
-    #endif /* HBM_PROFILE */
+    /// Last position of the d vector that wasn't zero or n (number of items).
+    W last_dy_non_zero_non_n; 
+    /// Quantity of g positions that weren't skipped by ukp5.
+    W qt_non_skipped_ys;
+    /// Quantity of zeros in g.
+    W qt_gy_zeros;
+    /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
+    W qt_inner_loop_executions;
+    #endif // HBM_PROFILE
   };
 
+  /// @brief Exception type for UKP instance read errors.
   struct ukp_read_error : std::runtime_error {
     explicit ukp_read_error (const std::string &s) noexcept : std::runtime_error(s) {};
     explicit ukp_read_error (const char* s) noexcept : runtime_error(s) {};
   };
 
+  /// @brief Inner ukp_common implementations. Do not depend.
   namespace hbm_ukp_common_impl {
     using namespace std;
     using namespace std::regex_constants;
 
     const string bs("[[:blank:]]*");
     const string bp("[[:blank:]]+");
-    /* If you decided to use the ukp format, but instead of "normal" numbers
-     * you decided to use another base or encode they differently (as 
-     * infinite precision rationals maybe?) you need to change the regex
-     * bellow to something that matches your number encoding format. */
+    // If you decided to use the ukp format, but instead of "normal" numbers
+    // you decided to use another base or encode they differently (as 
+    // infinite precision rationals maybe?) you need to change the regex
+    // bellow to something that matches your number encoding format.
     const string nb("([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)");
 
     const string comm_s("[[:blank:]]*(#.*)?");
@@ -234,6 +308,22 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I = size_t>
+    void write_ukp_instance(ostream &out, instance_t<W, P> &ukpi) {
+      I n = ukpi.items.size();
+      out << "n: " << n << endl;
+      out << "c: " << ukpi.c << endl;
+
+      out << "begin data" << endl;
+      for (I i = 0; i < n; ++i) {
+        item_t<W, P> tmp = ukpi.items[i];
+        out << tmp.w << "\t" << tmp.p << endl;
+      }
+      out << "end data" << endl;
+
+      return;
+    }
+
+    template<typename W, typename P, typename I = size_t>
     void read_sukp_instance(istream &in, instance_t<W, P> &ukpi) {
       I n;
       in >> n;
@@ -272,31 +362,85 @@ namespace hbm {
     }
   }
 
+  /// @brief Read an instance in the ukp format from the stream to instance_t.
+  ///
+  /** A description of the ukp format follows:
+  \verbatim
+  n: <number of itens>
+  c: <knapsack capacity>
+  begin data
+  <weight of first item> <profit of first item>
+  <weight of second item> <profit of second item>
+  ...                     ...
+  <weight of the n item> <profit of the n item>
+  end data
+  \endverbatim */
+  ///
+  /// @param in The istream with the instance formatted as described.
+  /// @param ukpi The object that will receive the instance.
   template <typename W, typename P, typename I = size_t>
   void read_ukp_instance(std::istream &in, instance_t<W, P> &ukpi) {
     hbm_ukp_common_impl::read_ukp_instance(in, ukpi);
   }
 
+  /// @brief Write an instance_t to a stream in the ukp format.
+  ///
+  /// See read_ukp_instance for info about this format.
+  /// @see read_ukp_instance
+  ///
+  /// @param out The output stream where the instance will be written.
+  /// @param ukpi The instance that will be written.
+  template<typename W, typename P, typename I = size_t>
+  void write_ukp_instance(std::ostream &out, instance_t<W, P> &ukpi) {
+    hbm_ukp_common_impl::write_ukp_instance(out, ukpi);
+  }
+
+  /// @brief Read an instance in the sukp format from the stream to instance_t.
+  ///
+  /** A description of the ukp format follows:
+  \verbatim
+  <number of itens>
+  <knapsack capacity>
+  <weight of first item> <profit of first item>
+  <weight of second item> <profit of second item>
+  ...                     ...
+  <weight of the n item> <profit of the n item>
+  \endverbatim */
+  ///
+  /// @param in The istream with the instance formatted as described.
+  /// @param ukpi The object that will receive the instance.
   template<typename W, typename P, typename I = size_t>
   void read_sukp_instance(std::istream &in, instance_t<W, P> &ukpi) {
     hbm_ukp_common_impl::read_sukp_instance(in, ukpi);
   }
 
+  /// @brief Write an instance_t to a stream in the sukp format.
+  ///
+  /// See read_sukp_instance for info about this format.
+  /// @see read_sukp_instance
+  ///
+  /// @param out The output stream where the instance will be written.
+  /// @param ukpi The instance that will be written.
   template<typename W, typename P, typename I = size_t>
   void write_sukp_instance(std::ostream &out, instance_t<W, P> &ukpi) {
     hbm_ukp_common_impl::write_sukp_instance(out, ukpi);
   }
 
+  /// @brief Sort the items by non-increasing efficiency and,
+  ///   if tied, by non-decreasing weight. Is not guaranteed to
+  ///   be stable.
+  ///
+  /// @param items An item vector that will be changed by the procedure.
   template<typename W, typename P>
   void sort_by_eff(std::vector< item_t<W, P> > &items) {
     hbm_ukp_common_impl::sort_by_eff(items);
   }
 }
 
-/* Use an optimized swap for the item class (improves sorting time),
- * but only if this is possible (all members have the operator ^= defined) */
-#if !defined(HBM_NO_XOR_SWAP)
-#define HBM_XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
+// Use an optimized swap for the item class (improves sorting time),
+// but only if this is possible (all members have the operator ^= defined).
+#ifdef HBM_XOR_SWAP
+#define HBM_INNER_XOR_SWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
 namespace std {
   template<typename W, typename P>
   inline void swap(hbm::item_t<W, P>& a, hbm::item_t<W, P>& b) noexcept

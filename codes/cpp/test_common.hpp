@@ -186,7 +186,8 @@ namespace hbm {
         &p2time = res.phase2_time, &ttime = res.total_time;
 
       streamsize old_precision = cout.precision(HBM_PROFILE_PRECISION);
-      int percent_size = 3+HBM_PROFILE_PRECISION;
+      const int two_first_digits_and_period = 3;
+      const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
       ios_base::fmtflags old_flags = cout.setf(std::ios::fixed, std:: ios::floatfield);
       char old_fill = cout.fill(' ');
 

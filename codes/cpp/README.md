@@ -1,24 +1,15 @@
-Some notes:
+This is the README of the HBM library.
+
+## Namespace and macros
+
   * HBM is the acronym for the project name: Henrique Becker Master's.
   * All macros are prefixed with "HBM_".
   * All C++ guard macros are prefixed by HBM_ and followed by the filename with all the letters in caps and all the periods replaced by underscores (i.e.: ukp5.hpp -> HBM_UKP5_HPP). This should suffice to avoid conflicts between the project files, and allow other people to include the files in their own projects without too much risk. All files are inside codes/cpp so the directory name isn't necessary.
   * Everything is inside the hbm namespace (except the macros, obviously).
 
-MACROS EXPLANATION
+### Macros explanation
 
-HBM_NOT_DEFINED
-A macro that MUST NOT be ever defined. Its function is to allow to comment
-large portions of code that have /**/ style commentaries inside then, as
-C++ doesn't allow nested comments.
-
-HBM_NO_XOR_SWAP
-See the ASSUMPTION RULES rule number 2 below.
-
-HBM_XORSWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
-A function macro definition that is used in the inner workings
-of the library. Don't redefine it, or depend on its existence.
-
-HBM_PROFILE
+#### HBM_PROFILE
 A macro you define if you want extra info about the UKP5 execution.
 If this macro is defined:
 * The solution_t type will get a lot of extra fields.
@@ -30,7 +21,7 @@ If this macro is defined:
   ukp5 it will print garbage instead of the extra info, as other functions
   don't set the extra fields at solution_t.
 
-HBM_DUMP
+#### HBM_DUMP
 A macro you define if you want to know how the arrays used by UKP5
 were after the algorithm execution.
 This macro can only be defined if HBM_PROFILE macro is defined. This
@@ -53,7 +44,7 @@ If this macro is defined:
   You need to understand the inner workings of the ukp5 algorithm
   to know what those numbers mean. The files size vary with C.
 
-HBM_CHECK_PERIODICITY
+#### HBM_CHECK_PERIODICITY
 A macro you define if you want the UKP5 algorithm to execute much faster
 over some easy instances and a little slower at all other instances. Some
 instances have items that are very small compared to the capacity, and
@@ -67,33 +58,51 @@ stop earlier for instances with the properties described above, and will
 last a litlle longer for other instances (because of the overhead of trying
 to detect this situation).
 
-ASSUMPTION RULES
+#### HBM_PROFILE_PRECISION
+A macro that defines how many digits after the period will be used to display
+some percentages outputed by HBM_PROFILE. Its value should be an integral
+number.
+
+#### HBM_NOT_DEFINED
+A macro that MUST NOT be ever defined. Its function is to allow to comment
+large portions of code that have /**/ style commentaries inside then, as
+C++ doesn't allow nested comments.
+
+#### HBM_XOR_SWAP
+Specializes the swap of items to a XOR swap. See the **Assumption Rules**
+rule number 3 below.
+
+#### HBM_INNER_XOR_SWAP(a, b) ((a)^=(b),(b)^=(a),(a)^=(b))
+A function macro definition that is used in the inner workings
+of the library. Don't redefine it, or depend on its existence.
+
+### Assumption Rules
 The code makes some assumptions about the profit and weight types,
 if you break those the code probably won't compile or work as
 intended. The W template parameter refer to item weight and instance
 capacity, the P refer to the item profit, and the I refer to the
 item indexes.
-0) The weight and the profit types behave as primitive numbers in c++
+1. The weight and the profit types behave as primitive numbers in c++
    would behave (define the same operators, you can output them
    with an ostream, cast from and to them with static_cast, etc...).
-1) For UKP5 (dynamic programming) the weight must always be an
+2. For UKP5 (dynamic programming) the weight must always be an
    integral number, as it is used to index arrays. If you want to use 
    big numbers (that can't be used to index an array/vector) you will
    need to rewrite the code to change the vector to a min heap (with
    the capacity as a key).
-2) If profit or weight don't define the ^= operator, the macro HBM_NO_XOR_SWAP
-   must be defined (it avoids applying ^= over those datatypes).
-3) If profit and weight aren't the same type: You should understand that any
+3. If profit or weight don't define the ^= operator, the macro HBM_XOR_SWAP
+   MUST NOT be defined (it applies ^= over those datatypes).
+4. If profit and weight aren't the same type: You should understand that any
    operation between a value of type profit and one of type weight
    (like multiplication, or division) will convert the weight type
    to the profit type before performing the operation (with
    static_cast<P>(W)).
-4) The I template type is used to loop between the items and to store the 
+5. The I template type is used to loop between the items and to store the 
    index of items. The assumptions made about it are: I is integral, I can
    be used to index vectors, I is sufficient large to contain the 'n' value
    (number of items).
    The quantity of items in a solution is of type weight, as it is
    the result of a capacity value divided by a item weight (both capacity
    and item weight are of the weight type). And if the item weight is 1
-   (one) the the quantity can be equal to the capacity.
+   (one) then the quantity can be equal to the capacity.
 

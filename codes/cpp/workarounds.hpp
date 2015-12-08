@@ -4,8 +4,16 @@
 #include <sstream>
 
 namespace hbm {
-  /* It's utter ridiculous, but seems that is already 2015 and this function
-   * isn't some sort of standard library utility. */
+  /// @brief Convert the string to type T.
+  ///
+  /// This works as we were reading the string from the standard input with
+  /// the >> operator. So this can be used with any type that defines an >> 
+  /// operator.
+  ///
+  /// @tparam T A type that defines the >> operator.
+  /// @param s The string representation of a value of type T.
+  /// @param t The variable that will receive the value represented in
+  ///   the string.
   template <class T>
   inline void from_string(const std::string& s, T& t)
   {

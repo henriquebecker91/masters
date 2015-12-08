@@ -14,11 +14,14 @@
 # n: <number of itens>
 # c: <knapsack capacity>
 # begin data
-# <profit of first item>	<weight of first item>
-# <profit of second item>	<weight of second item>
+# <weight of first item> <profit of first item>	
+# <weight of second item> <profit of second item>	
 # ...	...			...
-# <profit of the n item>	<weight of the n item>
+# <weight of the n item> <profit of the n item>	
 # end data
+#
+# IMPORTANT: note that the profit and weight column switch place between
+# formats.
 #
 
 f="$1"

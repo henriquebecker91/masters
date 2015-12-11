@@ -98,11 +98,12 @@ namespace hbm {
 
     /// Write human-readable object representation to a stream.
     ///
-    /// @param cout An ostream where the object representation will be
+    /// @param out An ostream where the object representation will be
     ///   outputed.
-    void print(std::ostream &cout = std::cout) const {
-      // The cout below don't have std:: as it refers to the parameter.
-      cout << "ix: " << ix << " qt: " << qt << " w: " << it.w << " p: " << it.p << std::endl;
+    void print(std::ostream &out = std::cout) const {
+      double e = static_cast<double>(it.p)/static_cast<double>(it.w);
+
+      out << "ix: " << ix << " qt: " << qt << " w: " << it.w << " p: " << it.p << " e: " << e << std::endl;
     }
   };
 

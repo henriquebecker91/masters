@@ -1,0 +1,68 @@
+instances = list(list("corepb",1000000), list("exnsd16",889304), list("exnsd18", 933367), list("exnsd20", 914968), list("exnsd26", 934160), list("exnsdbis10", 894645), list("exnsdbis18", 917598), list("exnsds12", 1624196))
+
+#args = commandArgs(trailingOnly = TRUE);
+for (inst in instances) {
+	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	png(filename=paste(inst[[1]], ".png", sep=""), height=1080, width=1920, bg="white")
+	plot(t)
+	dev.off()
+
+	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	png(filename=paste(inst[[1]], "_with_c.png", sep=""), height=1080, width=1920, bg="white")
+	plot(t, xlim=c(0,inst[[2]]))
+	dev.off()
+
+	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
+	png(filename=paste(inst[[1]], "_with_res.png", sep=""), height=1080, width=1920, bg="white")
+	plot(t)
+	points(tr, pch = 19, col = "green")
+	dev.off()
+
+	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
+	png(filename=paste(inst[[1]], "_with_c_and_res.png", sep=""), height=1080, width=1920, bg="white")
+	plot(t, xlim=c(0,inst[[2]]))
+	points(tr, pch = 19, col = "green")
+	dev.off()
+
+	te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	te$e <- te$p/te$w
+	te$p <- NULL
+	png(filename=paste(inst[[1]], "_eff.png", sep=""), height=1080, width=1920, bg="white")
+	plot(te)
+	dev.off()
+
+	te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	te$e <- te$p/te$w
+	te$p <- NULL
+	tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
+	tr$e <- tr$p/tr$w
+	tr$p <- NULL
+	png(filename=paste(inst[[1]], "_eff.png", sep=""), height=1080, width=1920, bg="white")
+	plot(te)
+	points(tr, pch = 19, col = "green")
+	dev.off()
+
+	if (FALSE) {
+		# needs improvement, get the efficiencies index from te to tr and
+		# use points to print the used items instead of abline
+		te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+		te$e <- te$p/te$w
+		te$p <- NULL
+		te$w <- NULL
+		te <- te[with(te, order(e, decreasing=TRUE)), ]
+		tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
+		tr$e <- tr$p/tr$w
+		tr$p <- NULL
+		tr$w <- NULL
+		tr <- tr[with(tr, order(e, decreasing=TRUE)), ]
+		png(filename=paste(inst[[1]], "_eff_order.png", sep=""), height=1080, width=1920, bg="white")
+		plot(te)
+		for (opt_sol_eff in tr) {
+			abline(h = opt_sol_eff, col = "green")
+		}
+		dev.off()
+	}
+}
+

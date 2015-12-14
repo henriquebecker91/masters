@@ -134,7 +134,7 @@ namespace hbm {
     template <typename W, typename P, typename I>
     int main_take_path(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool), int argc, char** argv) {
       if (argc != 2) {
-        cout << "usage: a.out data.sukp" << endl;
+        cout << "usage: a.out data.ukp" << endl;
         return EXIT_FAILURE;
       }
 

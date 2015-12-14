@@ -356,9 +356,11 @@ namespace hbm {
       return;
     }
 
-    template<typename W, typename P>
-    void sort_by_eff(vector< item_t<W, P> > &items) {
-      std::sort(items.begin(), items.end());
+    template<typename W, typename P, typename I>
+    void sort_by_eff(vector< item_t<W, P> > &items, I sort_k_most_eff) {
+      auto begin = items.begin();
+      auto middle = begin + sort_k_most_eff;
+      std::partial_sort(begin, middle, items.end());
       return;
     }
   }
@@ -429,13 +431,19 @@ namespace hbm {
   }
 
   /// @brief Sort the items by non-increasing efficiency and,
-  ///   if tied, by non-decreasing weight. Is not guaranteed to
-  ///   be stable.
+  ///   if tied, by non-decreasing weight.
+  ///
+  /// Is not guaranteed to be stable. The first sort_k_most_eff items
+  /// of the vector will be equal to the sort_k_most_eff items of a 
+  /// completely ordered vector. The remaining items (sort_k_most_eff+1
+  /// until items.size()) can be in any order. If sort_k_most_eff is
+  /// zero nothing is done, if is items.size() all the vector is ordered.
   ///
   /// @param items An item vector that will be changed by the procedure.
-  template<typename W, typename P>
-  void sort_by_eff(std::vector< item_t<W, P> > &items) {
-    hbm_ukp_common_impl::sort_by_eff(items);
+  /// @param sort_k_most_eff A integer between 0 and items.size().
+  template<typename W, typename P, typename I>
+  void sort_by_eff(std::vector< item_t<W, P> > &items, I sort_k_most_eff) {
+    hbm_ukp_common_impl::sort_by_eff(items, sort_k_most_eff);
   }
 }
 

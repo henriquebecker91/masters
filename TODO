@@ -2,14 +2,13 @@
 * Study about the noexcept modifier and verify if the functions should be using it.
 * Maybe item_t needs a third templaye type, both W and P will be converted to this third type before multiplying them. This allows to use an bigger type in computations that are prone to overflow the P type without having to use a bigger P everywhere (what can slow the algorithm unecessary).
 * Create a variant of solution_t called solution_prfl_t. Create a run_ukp/main_take_path variant called run_ukp_prfl. It's exactly as main_take_path but with the run_ukp parameters and solution_prfl_t instead of solution_t. Overload main_take_path to call run_ukp or run_ukp_prfl based on the result type (solution_t o solution_prfl_t). 
+* Test the core idea. Get the first N or N% most efficient elements. Put them ordered by efficiency at the items list beggining. Execute UKP5 normally. Check if there's an efficient function to do this, otherwise: iterate the vector until N putting items in min-heap by efficiency; the item datatype should store the index in the unordered vector; after this point only put item if it's more efficient than the min, and after doing it, remove the min; convert heap to two ordered vectors: one by efficiency, other by index; allocate the total item quantity at the efficiency one (we will push_back every other item at the back of this vector); do a double for loop, for every item in the index ordered vector we will copy between the last_index+1 to the next_index-1 from the unordered vector to the efficiency ordered vector (the last_index is initialized with 0 and the next_index after the vector has ended is the items quantity). Comparar o tempo do sort normal com o core 100%, 50%, 25% e 5%.
+* Test using simple/multiple domination elimination before and not using it. 
+* Find subset sum hard instances and use them as knapsack problems.
 
 * Consider the possibility of not initializing all the g and d vectors at first, but only reserve C, where C > w_max (for good performance, C > 2*w_max). Execute the code from 0 to C-w_max, and then copy the C-w_max+1 to C. The profiling shows that the vector initialization is dominant on some instances when periodicity is activated, and also that sometimes only a fraction of that vector is used. Also, with this technique, we can work with capacities greater than the available memory (if the w_max is sufficiently small).
 
 * Add test of profit dominance in the instance loading. Use dirty vector and a list to do this in O(2n).
 
-* Test the sort variants using the run_per.out and test_per.out. Remember to remove hypertreading, isolate cpus and execute on distinct cores.  Use this test to compare performance of XOR swap with generic template swap.
-
 * Check notation used here (https://en.wikipedia.org/wiki/Global_optimization) and consider using it on the proof.
-* Verify if there's a right way to make HBM_INT_EFF work with any integral types (we can use static_assert to verify if the chosen type has the double of the size of the profit and weight types, probably the type must be suggested by the user, as the other way would need a long chained type_trait conditional expression).
-* Abolish the HBM_*_EFF, use type_traits and templates to select the right code based on the type of efficiency? 
 

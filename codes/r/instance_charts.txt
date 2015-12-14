@@ -1,17 +1,71 @@
+# Taken from: http://www.cookbook-r.com/Manipulating_data/Comparing_data_frames/
+dupsBetweenGroups <- function (df, idcol) {
+	# df: the data frame
+	# idcol: the column which identifies the group each row belongs to
+
+	# Get the data columns to use for finding matches
+	datacols <- setdiff(names(df), idcol)
+
+	# Sort by idcol, then datacols. Save order so we can undo the sorting later.
+	sortorder <- do.call(order, df)
+	df <- df[sortorder,]
+
+	# Find duplicates within each id group (first copy not marked)
+	dupWithin <- duplicated(df)
+
+	# With duplicates within each group filtered out, find duplicates between groups. 
+	# Need to scan up and down with duplicated() because first copy is not marked.
+	dupBetween = rep(NA, nrow(df))
+	dupBetween[!dupWithin] <- duplicated(df[!dupWithin,datacols])
+	dupBetween[!dupWithin] <- duplicated(df[!dupWithin,datacols], fromLast=TRUE) | dupBetween[!dupWithin]
+
+	# ============= Replace NA's with previous non-NA value ==============
+	# This is why we sorted earlier - it was necessary to do this part efficiently
+
+	# Get indexes of non-NA's
+	goodIdx <- !is.na(dupBetween)
+
+	# These are the non-NA values from x only
+	# Add a leading NA for later use when we index into this vector
+	goodVals <- c(NA, dupBetween[goodIdx])
+
+	# Fill the indices of the output vector with the indices pulled from
+	# these offsets of goodVals. Add 1 to avoid indexing to zero.
+	fillIdx <- cumsum(goodIdx)+1
+
+	# The original vector, now with gaps filled
+	dupBetween <- goodVals[fillIdx]
+
+	# Undo the original sort
+	dupBetween[sortorder] <- dupBetween
+
+	# Return the vector of which entries are duplicated across groups
+	return(dupBetween)
+}
+
 instances = list(list("corepb",1000000), list("exnsd16",889304), list("exnsd18", 933367), list("exnsd20", 914968), list("exnsd26", 934160), list("exnsdbis10", 894645), list("exnsdbis18", 917598), list("exnsds12", 1624196))
 
 #args = commandArgs(trailingOnly = TRUE);
 for (inst in instances) {
-	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
-	png(filename=paste(inst[[1]], ".png", sep=""), height=1080, width=1920, bg="white")
-	plot(t)
-	dev.off()
+	# The same charts but without the items used on the optimal solution
+	#t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	#png(filename=paste(inst[[1]], ".png", sep=""), height=1080, width=1920, bg="white")
+	#plot(t)
+	#dev.off()
 
-	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
-	png(filename=paste(inst[[1]], "_with_c.png", sep=""), height=1080, width=1920, bg="white")
-	plot(t, xlim=c(0,inst[[2]]))
-	dev.off()
+	#t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	#png(filename=paste(inst[[1]], "_with_c.png", sep=""), height=1080, width=1920, bg="white")
+	#plot(t, xlim=c(0,inst[[2]]))
+	#dev.off()
 
+	#te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	#te$e <- te$p/te$w
+	#te$p <- NULL
+	#png(filename=paste(inst[[1]], "_eff.png", sep=""), height=1080, width=1920, bg="white")
+	#plot(te)
+	#dev.off()
+
+	# Simple profit and weight chart (with opt solution items in green)
 	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
 	tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
 	png(filename=paste(inst[[1]], "_with_res.png", sep=""), height=1080, width=1920, bg="white")
@@ -19,6 +73,8 @@ for (inst in instances) {
 	points(tr, pch = 19, col = "green")
 	dev.off()
 
+	# Simple profit and weight chart (with opt solution items in green)
+	# The only difference is that the w axis goes until C
 	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
 	tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
 	png(filename=paste(inst[[1]], "_with_c_and_res.png", sep=""), height=1080, width=1920, bg="white")
@@ -26,13 +82,10 @@ for (inst in instances) {
 	points(tr, pch = 19, col = "green")
 	dev.off()
 
-	te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
-	te$e <- te$p/te$w
-	te$p <- NULL
-	png(filename=paste(inst[[1]], "_eff.png", sep=""), height=1080, width=1920, bg="white")
-	plot(te)
-	dev.off()
-
+	# A little complex efficiency chart (with opt solution items in green)
+	# The y axis is the item efficiency, and the x axis is the item index
+	# if the vector is ordered by efficiency. The hard part is compute the
+	# index for the items used in the solution.
 	te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
 	te$e <- te$p/te$w
 	te$p <- NULL
@@ -44,25 +97,46 @@ for (inst in instances) {
 	points(tr, pch = 19, col = "green")
 	dev.off()
 
-	if (FALSE) {
-		# needs improvement, get the efficiencies index from te to tr and
-		# use points to print the used items instead of abline
-		te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
-		te$e <- te$p/te$w
-		te$p <- NULL
-		te$w <- NULL
-		te <- te[with(te, order(e, decreasing=TRUE)), ]
-		tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
-		tr$e <- tr$p/tr$w
-		tr$p <- NULL
-		tr$w <- NULL
-		tr <- tr[with(tr, order(e, decreasing=TRUE)), ]
-		png(filename=paste(inst[[1]], "_eff_order.png", sep=""), height=1080, width=1920, bg="white")
-		plot(te)
-		for (opt_sol_eff in tr) {
-			abline(h = opt_sol_eff, col = "green")
-		}
-		dev.off()
-	}
+	# Read all the items (te) and the items in the solution (tr)
+	te <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
+	tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")
+
+	# Compute efficiency and order both by nondecreasing efficiency
+	tr$e <- tr$p/tr$w
+	tr <- tr[with(tr, order(e, decreasing=TRUE)), ]
+	te$e <- te$p/te$w
+	te <- te[with(te, order(e, decreasing=TRUE)), ]
+
+	# Create a column to store the table origin info
+	te$id <- "te"
+	tr$id <- "tr"
+	# Create a table with all te rows and AFTER all tr rows
+	tre <- rbind(te, tr)
+	# Get the index of the solution items when all items are ordered
+	# by efficiency. ATTENTION: which is base 1, so the most efficient
+	# item is index 1, not zero
+	tre$dup <- dupsBetweenGroups(tre, "id")
+	tr$ix <- which(tre$dup == TRUE & tre$id == "te")
+
+	# Create the ix column on the te table too
+	te$ix <- 1:length(te$e)
+	
+	# Discard p, w and id columns
+	te$id <- NULL
+	te$p <- NULL
+	te$w <- NULL
+	tr$id <- NULL
+	tr$p <- NULL
+	tr$w <- NULL
+
+	# Reorder the columns so the 'ix' is the y axis and the 'e' is the x axis
+	te <- te[c(2,1)]
+	tr <- tr[c(2,1)]
+
+	# Plot all instance items first and then plot the solution items over
+	png(filename=paste(inst[[1]], "_eff_order.png", sep=""), height=1080, width=1920, bg="white")
+	plot(te)
+	points(tr, pch = 19, col = "green")
+	dev.off()
 }
 

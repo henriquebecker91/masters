@@ -1,6 +1,8 @@
 #ifndef HBM_UKP5_HPP
 #define HBM_UKP5_HPP
 
+#include <iostream>
+
 #include "ukp_common.hpp"
 
 #ifdef HBM_PROFILE
@@ -213,12 +215,12 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
-    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, I sort_k_most_eff) {
       #ifdef HBM_PROFILE
       steady_clock::time_point all_ukp5_begin = steady_clock::now();
       steady_clock::time_point begin = steady_clock::now();
       #endif
-      if (!already_sorted) sort_by_eff(ukpi.items);
+      sort_by_eff(ukpi.items, sort_k_most_eff);
       #ifdef HBM_PROFILE
       sol.sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
       #endif
@@ -290,15 +292,64 @@ namespace hbm {
 
       return;
     }
+
+    template<typename W, typename P, typename I>
+    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, double sort_k_most_eff) {
+      /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
+       * overloaded version. */
+      if (sort_k_most_eff < 0.0 || sort_k_most_eff > 1.0) {
+        err << "WARNING: ukp5 (double sort_k_most_eff overloaded version): "
+                "the value of sort_k_most_eff must be between 0 and 1. "
+                "The sort_k_most_eff value was: " << sort_k_most_eff << ". "
+                "Will execute ukp5 with sort_k_most_eff = 1."
+        << endl;
+        ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+      } else {
+        double dsize = static_cast<double>(ukpi.items.size());
+        I k = static_cast<I>(dsize*sort_k_most_eff);
+        ukp5(ukpi, sol, k);
+      }
+    }
+
+    template<typename W, typename P, typename I>
+    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+      /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
+       * or the "double sort_k_most_eff" overloaded versions. */
+      if (argc == 0) {
+        ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+      } else if (argc == 1) {
+        double percent;
+        from_string(argv[0], percent);
+        ukp5(ukpi, sol, percent);
+      } else if (argc > 1) {
+        cout << "WARNING: more than one extra parameter to ukp5." << endl;
+        cout << "usage: a.out data.ukp [k]" << endl;
+        cout << "       k: A real number between 0 and 1. The items will be"
+                " reordered before ukp5 is called, as std::partial_sort"
+                " was called with the 'middle' argument being position k*"
+                "<number of items>. If k is not provided we assume 1 (the"
+                " entire vector will be ordered by efficiency). Use 0 if the"
+                " items are already ordered by efficiency in the instance"
+                " file, or you don't want to sort the items by efficiency."
+                << endl;
+        ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+      }
+    }
   }
 
-  /* This function reorders the ukpi.items vector, if you don't want this pass a
-   * copy of the instance or pass it already ordered by non-decreasing eff
-   * and true for the parameter already_sorted.
-   */
   template<typename W, typename P, typename I>
-  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
-    hbm_ukp5_impl::ukp5(ukpi, sol, already_sorted);
+  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, I sort_k_most_eff) {
+    hbm_ukp5_impl::ukp5(ukpi, sol, sort_k_most_eff);
+  }
+
+  template<typename W, typename P, typename I>
+  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, double sort_k_most_eff) {
+    hbm_ukp5_impl::ukp5(ukpi, sol, sort_k_most_eff);
+  }
+
+  template<typename W, typename P, typename I>
+  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    hbm_ukp5_impl::ukp5(ukpi, sol, sort_k_most_eff, argc, argv);
   }
 }
 

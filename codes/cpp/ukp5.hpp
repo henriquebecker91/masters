@@ -298,16 +298,16 @@ namespace hbm {
       /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
        * overloaded version. */
       if (sort_k_most_eff < 0.0 || sort_k_most_eff > 1.0) {
-        err << "WARNING: ukp5 (double sort_k_most_eff overloaded version): "
+        cerr << "WARNING: ukp5 (double sort_k_most_eff overloaded version): "
                 "the value of sort_k_most_eff must be between 0 and 1. "
                 "The sort_k_most_eff value was: " << sort_k_most_eff << ". "
                 "Will execute ukp5 with sort_k_most_eff = 1."
         << endl;
-        ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
       } else {
         double dsize = static_cast<double>(ukpi.items.size());
         I k = static_cast<I>(dsize*sort_k_most_eff);
-        ukp5(ukpi, sol, k);
+        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, k);
       }
     }
 
@@ -316,11 +316,11 @@ namespace hbm {
       /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
        * or the "double sort_k_most_eff" overloaded versions. */
       if (argc == 0) {
-        ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
       } else if (argc == 1) {
         double percent;
         from_string(argv[0], percent);
-        ukp5(ukpi, sol, percent);
+        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, percent);
       } else if (argc > 1) {
         cout << "WARNING: more than one extra parameter to ukp5." << endl;
         cout << "usage: a.out data.ukp [k]" << endl;
@@ -332,7 +332,7 @@ namespace hbm {
                 " items are already ordered by efficiency in the instance"
                 " file, or you don't want to sort the items by efficiency."
                 << endl;
-        ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
       }
     }
   }
@@ -349,7 +349,7 @@ namespace hbm {
 
   template<typename W, typename P, typename I>
   void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-    hbm_ukp5_impl::ukp5(ukpi, sol, sort_k_most_eff, argc, argv);
+    hbm_ukp5_impl::ukp5(ukpi, sol, argc, argv);
   }
 }
 

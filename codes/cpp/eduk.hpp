@@ -7,7 +7,7 @@
 
 #include "ukp_common.hpp"
 
-#ifndef HBM_MAX_MEMORY_WASTED_BY_S 
+#ifndef HBM_MAX_MEMORY_WASTED_BY_S
   #define HBM_MAX_MEMORY_WASTED_BY_S 10
 #endif
 
@@ -42,13 +42,13 @@ namespace hbm {
       }
     }
 
-    /* Makes reference to the v argument, v can't be freed before 
+    /* Makes reference to the v argument, v can't be freed before
      * this struct */
     template<typename W, typename P>
     struct Lazyfy : LazyList<W, P> {
       typename vector< item_t<W, P> >::const_iterator begin;
       typename vector< item_t<W, P> >::const_iterator end;
-      
+
       Lazyfy(void) {
       }
 
@@ -107,7 +107,7 @@ namespace hbm {
         bool has_next = l->get_next(i);
         while (has_next && i.p <= limit) {
           has_next = l->get_next(i);
-        } 
+        }
         if (has_next) {
           limit = i.p;
         }
@@ -238,7 +238,7 @@ namespace hbm {
       forward_list< S<W, P, I>::iterator > its;
 
       S(I k, W c, const vector< item_t<W, P> > &items) {
-        if (k > 0) { 
+        if (k > 0) {
           empty = false;
 
           s_pred_k = unique_ptr< S<W, P, I> >(new S<W, P, I>(k-1, c, items));
@@ -309,11 +309,51 @@ namespace hbm {
 
       sol.opt = res.back().p;
     }
+
+    template<typename W, typename P, typename I = size_t>
+    void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+      // This function don't call itself. It call its overloaded variant
+      // where the third parameter is a bool.
+      if (argc == 0) {
+        eduk(ukpi, sol);
+      } else if (argc == 1) {
+        if ("--already-sorted" == argv[0]) {
+          eduk(ukpi, sol, true)
+        } else {
+          cerr << #__func__"(argc/argv overload): parameter error:"
+                  " The only allowed flag is --already-sorted."
+                  " The flag received was \"" << argv[0] <<
+                  "\". Executing the algorithm as no"
+                  " flags were given. " << endl;
+          eduk(ukpi, sol)
+        }
+      } else {
+          cerr << #__func__"(argc/argv overload): parameter error: Only one"
+                  " flag is allowed. The allowed flag is "
+                  "--already-sorted. The first flag received was \""
+                  << argv[0] << "\". Executing the algorithm as no"
+                  " flags were given. " << endl;
+          eduk(ukpi, sol)
+      }
+    }
   }
 
   template<typename W, typename P, typename I = size_t>
   void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
     hbm_eduk_impl::eduk(ukpi, sol, already_sorted);
+  }
+
+  /// An overloaded function, it's used as argument to test_common functions.
+  ///
+  /// The only parameter recognized is "--already-sorted". If this parameter is
+  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
+  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  ///
+  /// @see main_take_path
+  /// @see eduk(instance_t<W, P> &, solution_t<W, P, I> &, bool)
+  template<typename W, typename P, typename I = size_t>
+  void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    hbm_eduk_impl::eduk(ukpi, sol, argc, argv);
   }
 }
 

@@ -52,7 +52,7 @@ namespace hbm {
     ///
     /// The condition x \< y is true iff the item x is more efficient
     /// than y (x.p/x.w \> y.p/y.w) or, if the efficiencies are equal,
-    /// the condition x.w \< y.w is true. 
+    /// the condition x.w \< y.w is true.
     ///
     /// @param o The item at the right of the < operator.
     ///
@@ -60,7 +60,7 @@ namespace hbm {
     inline bool operator<(const item_t &o) const {
       P a = p * static_cast<P>(o.w),
             b = o.p * static_cast<P>(w);
-      return a > b || (a == b && w < o.w); 
+      return a > b || (a == b && w < o.w);
     }
   };
 
@@ -122,7 +122,7 @@ namespace hbm {
     std::vector< itemqt_t<W, P, I> > used_items;
 
     #ifdef HBM_CHECK_PERIODICITY
-    /// @attention The last_y_value_outer_loop field exists only if 
+    /// @attention The last_y_value_outer_loop field exists only if
     /// HBM_CHECK_PERIODICITY is defined.
 
     /// The last capacity computed before detecting periodicity and stoping.
@@ -151,7 +151,7 @@ namespace hbm {
     /// Same as d, but without the positions skipped.
     std::vector<I> non_skipped_d;
     /// Last position of the d vector that wasn't zero or n (number of items).
-    W last_dy_non_zero_non_n; 
+    W last_dy_non_zero_non_n;
     /// Quantity of g positions that weren't skipped by ukp5.
     W qt_non_skipped_ys;
     /// Quantity of zeros in g.
@@ -175,7 +175,7 @@ namespace hbm {
     const string bs("[[:blank:]]*");
     const string bp("[[:blank:]]+");
     // If you decided to use the ukp format, but instead of "normal" numbers
-    // you decided to use another base or encode they differently (as 
+    // you decided to use another base or encode they differently (as
     // infinite precision rationals maybe?) you need to change the regex
     // bellow to something that matches your number encoding format.
     const string nb("([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)");
@@ -233,7 +233,7 @@ namespace hbm {
       if (!regex_match(l, m, r)) {
         throw ukp_read_error("Expected '" + exp + "' but found '" + l + "'");
       }
-      
+
       return;
     }
 
@@ -272,9 +272,9 @@ namespace hbm {
 
       get_noncomment_line(in, line, c_exp);
       try_match(cline, line, c_exp, what);
-      
+
       from_string(what[1], ukpi.c);
-      
+
       get_noncomment_line(in, line, begin_exp);
       try_match(begin_data, line, begin_exp, what);
 
@@ -358,8 +358,15 @@ namespace hbm {
 
     template<typename W, typename P, typename I>
     void sort_by_eff(vector< item_t<W, P> > &items, I sort_k_most_eff) {
+      if (sort_k_most_eff == 0) return;
+
+      if (sort_k_most_eff > items.size()) {
+        std::sort(items.begin(), items.end());
+        return;
+      }
+
       auto begin = items.begin();
-      auto middle = begin + sort_k_most_eff;
+      auto middle = begin + (sort_k_most_eff - 1);
       std::partial_sort(begin, middle, items.end());
       return;
     }
@@ -434,13 +441,13 @@ namespace hbm {
   ///   if tied, by non-decreasing weight.
   ///
   /// Is not guaranteed to be stable. The first sort_k_most_eff items
-  /// of the vector will be equal to the sort_k_most_eff items of a 
+  /// of the vector will be equal to the sort_k_most_eff items of a
   /// completely ordered vector. The remaining items (sort_k_most_eff+1
   /// until items.size()) can be in any order. If sort_k_most_eff is
-  /// zero nothing is done, if is items.size() all the vector is ordered.
+  /// zero nothing is done, if is items.size()+1 all the vector is ordered.
   ///
   /// @param items An item vector that will be changed by the procedure.
-  /// @param sort_k_most_eff A integer between 0 and items.size().
+  /// @param sort_k_most_eff A integer between 0 and items.size()+1.
   template<typename W, typename P, typename I>
   void sort_by_eff(std::vector< item_t<W, P> > &items, I sort_k_most_eff) {
     hbm_ukp_common_impl::sort_by_eff(items, sort_k_most_eff);

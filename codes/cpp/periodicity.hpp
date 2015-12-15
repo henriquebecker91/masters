@@ -63,12 +63,40 @@ namespace hbm {
     }
 
     template <typename W, typename P, typename I>
-    void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted/* = false*/) {
+    void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
       //(void) run_with_y_star(&ukp5, ukpi, sol, false);
       sol.opt = hbm_periodicity_impl::y_star(ukpi, already_sorted);
 
       return;
     }
+
+    template<typename W, typename P, typename I = size_t>
+    void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+      // This function don't call itself. It call its overloaded variant
+      // where the third parameter is a bool.
+      if (argc == 0) {
+        y_star_wrapper(ukpi, sol);
+      } else if (argc == 1) {
+        if ("--already-sorted" == argv[0]) {
+          y_star_wrapper(ukpi, sol, true)
+        } else {
+          cerr << #__func__" (argc/argv overload): parameter error:"
+                  " The only allowed flag is --already-sorted."
+                  " The flag received was \"" << argv[0] << 
+                  "\". Executing the algorithm as no"
+                  " flags were given. " << endl;
+          y_star_wrapper(ukpi, sol)
+        }
+      } else {
+          cerr << #__func__"(argc/argv overload): parameter error: Only one"
+                  " flag is allowed. The allowed flag is "
+                  "--already-sorted. The first flag received was \""
+                  << argv[0] << "\". Executing the algorithm as no"
+                  " flags were given. " << endl;
+          y_star_wrapper(ukpi, sol)
+      }
+    }
+  }
   }
 
   /* Assumes that ukpi has at least two items */
@@ -84,6 +112,11 @@ namespace hbm {
   template <typename W, typename P, typename I>
   void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
     hbm_periodicity_impl::y_star_wrapper(ukpi, sol, already_sorted);
+  }
+
+  template<typename W, typename P, typename I = size_t>
+  void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    hbm_periodicity_impl::y_star_wrapper(ukpi, argc, argc, argv);
   }
 }
 

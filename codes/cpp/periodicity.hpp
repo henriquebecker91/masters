@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <boost/rational.hpp>
 #include "ukp_common.hpp"
+#include "wrapper.hpp"
 
 namespace hbm {
   namespace hbm_periodicity_impl {
@@ -69,33 +70,25 @@ namespace hbm {
 
       return;
     }
+    
+    template<typename W, typename P, typename I>
+    struct y_star_wrap : wrapper_t<W, P, I> {
+      virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
+        // Calls the overloaded version with the third argument as a bool
+        hbm_periodicity_impl::y_star_wrapper(ukpi, sol, already_sorted);
+
+        return;
+      }
+
+      virtual const std::string& name(void) const {
+        static const std::string name = "y_star";
+        return name;
+      }
+    };
 
     template<typename W, typename P, typename I = size_t>
     void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-      // This function don't call itself. It call its overloaded variant
-      // where the third parameter is a bool.
-      static const string ALREADY_SORTED = "--already-sorted";
-      if (argc == 0) {
-        hbm_periodicity_impl::y_star_wrapper(ukpi, sol);
-      } else if (argc == 1) {
-        if (ALREADY_SORTED == argv[0]) {
-          hbm_periodicity_impl::y_star_wrapper(ukpi, sol, true);
-        } else {
-          cerr << __func__ << " (argc/argv overload): parameter error:"
-                  " The only allowed flag is " << ALREADY_SORTED <<
-                  " The flag received was \"" << argv[0] <<
-                  "\". Executing the algorithm as no"
-                  " flags were given. " << endl;
-          hbm_periodicity_impl::y_star_wrapper(ukpi, sol);
-        }
-      } else {
-          cerr << __func__ << " (argc/argv overload): parameter error: "
-                  "Only one flag is allowed. The allowed flag is "
-                  << ALREADY_SORTED << ". The first flag received was \""
-                  << argv[0] << "\". Executing the algorithm as no"
-                  " flags were given. " << endl;
-          hbm_periodicity_impl::y_star_wrapper(ukpi, sol);
-      }
+      simple_wrapper(y_star_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
   }
 

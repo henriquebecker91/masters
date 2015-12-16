@@ -225,7 +225,6 @@ namespace hbm {
       cout << endl;
       return EXIT_SUCCESS;
     }
-
   }
 
   /// Run a custom procedure over the ukp instance file at path.

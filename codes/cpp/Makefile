@@ -1,4 +1,4 @@
-all: run_eduk.out test_eduk.out run_ukp5.out test_ukp5.out run_per.out test_per.out
+all: run_eduk.out test_eduk.out run_ukp5.out test_ukp5.out run_per.out test_per.out run_dom.out
 
 CC=g++
 # The boost linkage is only needed if the macro HBM_PROFILE is defined...
@@ -8,10 +8,10 @@ CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -O3 -lboost_filesystem -lboost_s
 H_DEPS=ukp_common.hpp test_common.hpp
 DEFS=-DHBM_CHECK_PERIODICITY -DHBM_XOR_SWAP
 
-run_eduk.out: run_eduk.cpp eduk.hpp $(H_DEPS)
+run_eduk.out: run_eduk.cpp eduk.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_eduk.cpp $(CFLAGS) $(DEFS)
 
-test_eduk.out: test_eduk.cpp eduk.hpp $(H_DEPS)
+test_eduk.out: test_eduk.cpp eduk.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ test_eduk.cpp $(CFLAGS) $(DEFS)
 
 run_ukp5.out: run_ukp5.cpp ukp5.hpp $(H_DEPS)
@@ -20,11 +20,14 @@ run_ukp5.out: run_ukp5.cpp ukp5.hpp $(H_DEPS)
 test_ukp5.out: test_ukp5.cpp ukp5.hpp $(H_DEPS)
 	$(CC) -o $@ test_ukp5.cpp $(CFLAGS) $(DEFS)
 
-run_per.out: run_per.cpp periodicity.hpp $(H_DEPS)
+run_per.out: run_per.cpp periodicity.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_per.cpp $(CFLAGS) $(DEFS)
 
-test_per.out: test_per.cpp periodicity.hpp $(H_DEPS)
+test_per.out: test_per.cpp periodicity.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ test_per.cpp $(CFLAGS) $(DEFS)
+
+run_dom.out: run_dom.cpp dominance.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_dom.cpp $(CFLAGS) $(DEFS)
 
 .PHONY: clean
 

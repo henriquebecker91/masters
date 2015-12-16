@@ -1,5 +1,15 @@
 This is the README of the HBM library.
 
+## Sample programs
+
+All .cpp files in the same directory that this README are sample programs. Calling the "make" command in this directory will compile them. The test_<method>.out binaries will try to execute the <method> over all PYAsUKP bencmark instances (they should be in ../../data/ukp/), the run_<method>.out takes an instance filename as first parameter and execute the <method> over it (other additional parameters will be repassed to the method).
+
+If you don't have the boost library (http://www.boost.org/) installed:
+  * You can't compile run_per.out and test_per.out or use the periodicity.hpp header.
+  * You can compile the other sample programs, but you need to NOT DEFINE the HBM_PROFILE flag (and maybe edit the Makefile to remove the -lboost_* flags).
+
+If you want to use the the hbm library on your own programs you don't need to pass any extra argument to the linker (this library tries to be header-only), you only need to include the right header. The only exception is if you include test_common.hpp with the HBM_PROFILE macro defined, then you need to link the boost fileystem library (-lboost_filesystem -lboost_system). The code was written in valid C++11.
+
 ## Namespace and macros
 
   * HBM is the acronym for the project name: Henrique Becker Master's.

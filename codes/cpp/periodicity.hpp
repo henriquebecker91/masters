@@ -11,7 +11,7 @@ namespace hbm {
     using namespace boost;
 
     template <typename W, typename P>
-    W y_star(instance_t<W, P> &ukpi, bool already_sorted/* = false*/) {
+    W y_star(instance_t<W, P> &ukpi, bool already_sorted = false) {
       static_assert(std::is_integral<W>::value &&
                     std::is_integral<P>::value &&
                     std::is_same<W, P>::value,
@@ -32,7 +32,7 @@ namespace hbm {
 
     template <typename W, typename P, typename I>
     W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool),
-      instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted/* = false*/) {
+      instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
       vector< item_t<W, P> > &items(ukpi.items);
       if (!already_sorted) sort_by_eff(ukpi.items);
 
@@ -74,29 +74,29 @@ namespace hbm {
     void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
       // This function don't call itself. It call its overloaded variant
       // where the third parameter is a bool.
+      static const string ALREADY_SORTED = "--already-sorted";
       if (argc == 0) {
-        y_star_wrapper(ukpi, sol);
+        hbm_periodicity_impl::y_star_wrapper(ukpi, sol);
       } else if (argc == 1) {
-        if ("--already-sorted" == argv[0]) {
-          y_star_wrapper(ukpi, sol, true)
+        if (ALREADY_SORTED == argv[0]) {
+          hbm_periodicity_impl::y_star_wrapper(ukpi, sol, true);
         } else {
-          cerr << #__func__" (argc/argv overload): parameter error:"
-                  " The only allowed flag is --already-sorted."
-                  " The flag received was \"" << argv[0] << 
+          cerr << __func__ << " (argc/argv overload): parameter error:"
+                  " The only allowed flag is " << ALREADY_SORTED <<
+                  " The flag received was \"" << argv[0] <<
                   "\". Executing the algorithm as no"
                   " flags were given. " << endl;
-          y_star_wrapper(ukpi, sol)
+          hbm_periodicity_impl::y_star_wrapper(ukpi, sol);
         }
       } else {
-          cerr << #__func__"(argc/argv overload): parameter error: Only one"
-                  " flag is allowed. The allowed flag is "
-                  "--already-sorted. The first flag received was \""
+          cerr << __func__ << " (argc/argv overload): parameter error: "
+                  "Only one flag is allowed. The allowed flag is "
+                  << ALREADY_SORTED << ". The first flag received was \""
                   << argv[0] << "\". Executing the algorithm as no"
                   " flags were given. " << endl;
-          y_star_wrapper(ukpi, sol)
+          hbm_periodicity_impl::y_star_wrapper(ukpi, sol);
       }
     }
-  }
   }
 
   /* Assumes that ukpi has at least two items */
@@ -104,19 +104,19 @@ namespace hbm {
   W y_star(instance_t<W, P> &ukpi, bool already_sorted = false) {
     hbm_periodicity_impl::y_star(ukpi, already_sorted);
   }
-  template <typename W, typename P, typename I>
+  template <typename W, typename P, typename I = size_t>
   W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool),
     instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
     hbm_periodicity_impl::run_with_y_star(ukp_solver, ukpi, sol, already_sorted);
   }
-  template <typename W, typename P, typename I>
+  template <typename W, typename P, typename I = size_t>
   void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
     hbm_periodicity_impl::y_star_wrapper(ukpi, sol, already_sorted);
   }
 
   template<typename W, typename P, typename I = size_t>
   void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-    hbm_periodicity_impl::y_star_wrapper(ukpi, argc, argc, argv);
+    hbm_periodicity_impl::y_star_wrapper(ukpi, sol, argc, argv);
   }
 }
 

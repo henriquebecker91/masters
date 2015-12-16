@@ -1,4 +1,4 @@
-all: run_eduk.out test_eduk.out run_ukp5.out test_ukp5.out run_per.out test_per.out #run_bb.out test_bb.out
+all: run_eduk.out test_eduk.out run_ukp5.out test_ukp5.out run_per.out test_per.out
 
 CC=g++
 # The boost linkage is only needed if the macro HBM_PROFILE is defined...

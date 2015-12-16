@@ -270,7 +270,7 @@ namespace hbm {
   ///   PYAsUKP benchmark files aren't found at the hardcoded path.
   /// @exception ukp_read_error If the instance format is wrong.
   template <typename W, typename P, typename I>
-  int benchmark_pyasukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool)) {
+  int benchmark_pyasukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, int, char**)) {
     return hbm_test_common_impl::benchmark_pyasukp(ukp_solver);
   }
 

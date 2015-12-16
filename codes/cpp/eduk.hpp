@@ -295,7 +295,7 @@ namespace hbm {
     };
 
     template<typename W, typename P, typename I>
-    void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted/* = false*/) {
+    void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
       I n = ukpi.items.size();
       W c = ukpi.c;
       vector< item_t<W, P> > &items(ukpi.items);
@@ -314,26 +314,27 @@ namespace hbm {
     void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
       // This function don't call itself. It call its overloaded variant
       // where the third parameter is a bool.
+      static const string ALREADY_SORTED = "--already-sorted";
       if (argc == 0) {
-        eduk(ukpi, sol);
+        hbm::hbm_eduk_impl::eduk(ukpi, sol);
       } else if (argc == 1) {
-        if ("--already-sorted" == argv[0]) {
-          eduk(ukpi, sol, true)
+        if (ALREADY_SORTED == argv[0]) {
+          hbm::hbm_eduk_impl::eduk(ukpi, sol, true);
         } else {
-          cerr << #__func__"(argc/argv overload): parameter error:"
-                  " The only allowed flag is --already-sorted."
+          cerr << __func__ << " (argc/argv overload): parameter error:"
+                  " The only allowed flag is " << ALREADY_SORTED <<
                   " The flag received was \"" << argv[0] <<
                   "\". Executing the algorithm as no"
                   " flags were given. " << endl;
-          eduk(ukpi, sol)
+          hbm::hbm_eduk_impl::eduk(ukpi, sol);
         }
       } else {
-          cerr << #__func__"(argc/argv overload): parameter error: Only one"
-                  " flag is allowed. The allowed flag is "
-                  "--already-sorted. The first flag received was \""
+          cerr << __func__ << " (argc/argv overload): parameter error: "
+                  "Only one flag is allowed. The allowed flag is "
+                  << ALREADY_SORTED << ". The first flag received was \""
                   << argv[0] << "\". Executing the algorithm as no"
                   " flags were given. " << endl;
-          eduk(ukpi, sol)
+          hbm::hbm_eduk_impl::eduk(ukpi, sol);
       }
     }
   }

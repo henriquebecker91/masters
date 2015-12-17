@@ -2,26 +2,11 @@
 #define HBM_TEST_COMMON_HPP
 
 #include <chrono>
-#include <iostream>
 #include <fstream>
 #include <array>
-#include <iomanip>
+#include <iostream>
 
 #include "ukp_common.hpp"
-
-#if !defined(HBM_PROFILE) && defined(HBM_DUMP)
-  #error The HBM_DUMP flag can only be used with the HBM_PROFILE flag
-#endif
-
-#if defined(HBM_PROFILE) && defined(HBM_DUMP)
-  #include <boost/filesystem.hpp>
-#endif
-
-#ifdef HBM_PROFILE
-  #ifndef HBM_PROFILE_PRECISION
-    #define HBM_PROFILE_PRECISION 5
-  #endif
-#endif
 
 namespace hbm {
   /// @brief A type that contains a solution, and how much time was needed
@@ -148,81 +133,28 @@ namespace hbm {
       int status = hbm::hbm_test_common_impl::run_ukp(ukp_solver, argc-2, argv+2, spath, run);
 
       if (status == EXIT_FAILURE) {
-        cout << "There was some problem with this instance" << endl;
+        cout << "There was some problem with this instance. " << endl;
         return EXIT_FAILURE;
       }
 
       const auto &res = run.result;
 
-      #if defined(HBM_PROFILE) && defined(HBM_DUMP)
-      using namespace boost::filesystem;
-      path my_path(spath);
-      path filename = my_path.filename();
-      const string  gd_path = "./g_dump_" + filename.native() + ".dat",
-                    dd_path = "./d_dump_" + filename.native() + ".dat",
-                    nsd_path = "./nsd_dump_" + filename.native() + ".dat",
-                    dqt_path = "./dqt_dump_" + filename.native() + ".dat";
-      dump(gd_path, "y\tgy", res.g);
-      dump(dd_path, "y\tdy", res.d);
-      //dump(nsd_path, "y\tdy", res.non_skipped_d);
-      //dump(dqt_path, "i\tqt_in_d", res.qt_i_in_dy);
-      #endif
-
-      cout << "opt:    " << res.opt << endl;
-      cout << "y_opt:  " << res.y_opt << endl;
-      #ifdef HBM_CHECK_PERIODICITY
-      cout << "last_y_value_outer_loop: " << res.last_y_value_outer_loop << endl;
-      #endif
-      for (auto it = res.used_items.cbegin(); it != res.used_items.cend(); ++it) {
-        it->print();
+      if (!res.show_only_extra_info) {
+        // The printing of all the fields except extra_info should
+        // be inside this condition
+        cout << "opt:    " << res.opt << endl;
+        cout << "y_opt:  " << res.y_opt << endl;
+        for (auto it = res.used_items.cbegin(); it != res.used_items.cend(); ++it) {
+          it->print();
+        }
       }
-      #ifdef HBM_PROFILE
-      cout << "c: " << res.c << endl;
-      cout << "n: " << res.n << endl;
-      cout << "w_min: " << res.w_min << endl;
-      cout << "w_max: " << res.w_max << endl;
-      cout << "last_dy_non_zero_non_n: " << res.last_dy_non_zero_non_n << endl;
-      cout << "qt_non_skipped_ys: " << res.qt_non_skipped_ys << endl;
-      cout << "qt_gy_zeros: " << res.qt_gy_zeros << endl;
-      cout << "qt_inner_loop_executions: " << res.qt_inner_loop_executions << endl;
-      cout << "qt_inner_loop_executions/qt_non_skipped_ys: " << ((long double) res.qt_inner_loop_executions)/((long double) res.qt_non_skipped_ys) << endl;
-      cout << "qt_inner_loop_executions/c: " << ((long double) res.qt_inner_loop_executions)/((long double) res.c) << endl;
-      cout << "(qt_inner_loop_executions/qt_non_skipped_ys)/n: " << ((long double) res.qt_inner_loop_executions)/((long double) res.qt_non_skipped_ys)/((long double)res.n)  << endl;
-      cout << "(qt_inner_loop_executions/c)/n: " << ((long double) res.qt_inner_loop_executions)/((long double) res.c)/((long double)res.n) << endl;
 
-      const double &stime = res.sort_time, &vtime = res.vector_alloc_time,
-        &lctime = res.linear_comp_time, &p1time = res.phase1_time,
-        &p2time = res.phase2_time, &ttime = res.total_time;
-
-      streamsize old_precision = cout.precision(HBM_PROFILE_PRECISION);
-      const int two_first_digits_and_period = 3;
-      const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
-      ios_base::fmtflags old_flags = cout.setf(std::ios::fixed, std:: ios::floatfield);
-      char old_fill = cout.fill(' ');
-
-      cout << "Sort time: " << stime << "s (";
-      cout << setw(percent_size) << (stime/ttime)*100;
-      cout << "%)" << endl;
-      cout << "Vect time: " << vtime << "s (";
-      cout << setw(percent_size) << (vtime/ttime)*100;
-      cout << "%)" << endl;
-      cout << "O(n) time: " << lctime << "s (";
-      cout << setw(percent_size) << (lctime/ttime)*100;
-      cout << "%)" << endl;
-      cout << "pha1 time: " << p1time << "s (";
-      cout << setw(percent_size) << (p1time/ttime)*100;
-      cout << "%)" << endl;
-      cout << "pha2 time: " << p2time << "s (";
-      cout << setw(percent_size) << (p2time/ttime)*100;
-      cout << "%)" << endl;
-      cout << "Sum times: " << ttime << "s" << endl;
-
-      cout.fill(old_fill);
-      cout.setf(old_flags);
-      cout.precision(old_precision);
-      #endif
+      // The extra info and the timing are always shown
+      string extra_info = res.extra_info->gen_info();
+      if (!extra_info.empty()) cout << extra_info << endl;
       cout << "Seconds: " << run.time.count() << endl;
       cout << endl;
+
       return EXIT_SUCCESS;
     }
   }

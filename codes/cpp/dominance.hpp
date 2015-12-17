@@ -1,10 +1,29 @@
 #ifndef HBM_DOMINANCE_HPP
 #define HBM_DOMINANCE_HPP
 
+#include <memory> // For shared_ptr
+#include <string> // for to_string
+
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
 
 namespace hbm {
+
+  template <typename I>
+  struct dom_extra_info_t : extra_info_t {
+    std::string info;
+
+    dom_extra_info_t(I num_items, I num_not_sm_dominated_items) {
+      info = "Number of items: " + std::to_string(num_items) + "\n" +
+             "Number of not dominated items: " +
+             std::to_string(num_not_sm_dominated_items) + "\n";
+    }
+
+    virtual std::string gen_info(void) {
+      return info;
+    }
+  };
+  
   namespace hbm_dominance_impl {
     using namespace std;
 
@@ -48,9 +67,13 @@ namespace hbm {
     void sel_not_sm_dom_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
       vector< item_t<W, P> > undominated;
       hbm_dominance_impl::sel_not_sm_dom(ukpi.items, undominated, already_sorted);
-      sol.opt = undominated.size();
-      sol.y_opt = 0;
-      sol.last_y_value_outer_loop = 0;
+
+      sol.show_only_extra_info = true;
+      dom_extra_info_t<I>* ptr =
+        new dom_extra_info_t<I>(ukpi.items.size(), undominated.size());
+
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
+      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
     }
 
     template<typename W, typename P, typename I>
@@ -73,7 +96,7 @@ namespace hbm {
       simple_wrapper(sel_not_sm_dom_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
   }
-  
+
   /// @brief Copy the items that aren't simple or multiple dominated
   ///   from a vector to another.
   ///

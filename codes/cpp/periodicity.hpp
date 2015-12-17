@@ -7,6 +7,20 @@
 #include "wrapper.hpp"
 
 namespace hbm {
+  template <typename W>
+  struct per_extra_info_t : extra_info_t {
+    std::string info;
+
+    per_extra_info_t(W original_cap, W y_cap) {
+      info = "Original capacity: " + std::to_string(original_cap) + "\n"
+             + "y* capacity: " + std::to_string(y_cap) + "\n";
+    }
+
+    virtual std::string gen_info(void) {
+      return info;
+    }
+  };
+
   namespace hbm_periodicity_impl {
     using namespace std;
     using namespace boost;
@@ -19,7 +33,7 @@ namespace hbm {
                     "For now, y_star<W, P> only compiles if the W and P"
                     " types are the same integral type.");
       vector< item_t<W, P> > &items(ukpi.items);
-      if (!already_sorted) sort_by_eff(ukpi.items);
+      if (!already_sorted) sort_by_eff(ukpi.items, 2u);
 
       item_t<W, P> i1 = items[0], i2 = items[1];
       W w1 = i1.w, w2 = i2.w, p1 = i1.p, p2 = i2.p;
@@ -65,8 +79,14 @@ namespace hbm {
 
     template <typename W, typename P, typename I>
     void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
-      //(void) run_with_y_star(&ukp5, ukpi, sol, false);
-      sol.opt = hbm_periodicity_impl::y_star(ukpi, already_sorted);
+      sol.show_only_extra_info = true;
+      I y_star_cap = hbm_periodicity_impl::y_star(ukpi, already_sorted);
+
+      per_extra_info_t<W>* ptr =
+        new per_extra_info_t<W>(ukpi.c, y_star_cap);
+
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
+      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
 
       return;
     }

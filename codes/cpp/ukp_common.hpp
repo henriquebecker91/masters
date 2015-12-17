@@ -107,6 +107,27 @@ namespace hbm {
     }
   };
 
+  /// @brief You should subclass this class if you want to give
+  ///   the solution_t more info about your method execution.
+  ///
+  /// If your method generate extra statistics (time of individual
+  /// phases, state of data structures, and other miscellany) but
+  /// you don't want to do this inside the method to not affect the
+  /// measured time, then you should subclass this class.
+  struct extra_info_t {
+    /// This method should be redefined to examine your method data
+    /// and generate a pretty printing of the relevant stats. Your
+    /// method data will be stored in the fields you want in the
+    /// subclass.
+    virtual std::string gen_info(void) {
+      return "";
+    }
+    /// Your subclass will probably be destroyed by a shared_ptr<extra_info_t>.
+    /// So, if you don't redefine the destructor, the base class destructor
+    /// will be called instead.
+    virtual ~extra_info_t(void) { }
+  };
+
   /// Type that represents a solution of an UKP problem
   ///   (usually the optimal solution).
   ///
@@ -121,44 +142,35 @@ namespace hbm {
     /// The quantities of each item used in the solution.
     std::vector< itemqt_t<W, P, I> > used_items;
 
-    #ifdef HBM_CHECK_PERIODICITY
-    /// @attention The last_y_value_outer_loop field exists only if
-    /// HBM_CHECK_PERIODICITY is defined.
+    /// @brief If only extra_info should be outputted.
+    ///
+    /// If this flag is true, then procedures that pretty print solution_t
+    /// should ignore all the other fields and print only extra_info.
+    /// The default behavior should be print extra_info only after printing
+    /// all the other fields.
+    bool show_only_extra_info;
 
-    /// The last capacity computed before detecting periodicity and stoping.
-    W last_y_value_outer_loop;
-    #endif // HBM_CHECK_PERIODICITY
+    /// This pointer point to any extra data that you may want to 
+    /// output. It isn't a string because you may want to compute things
+    /// out of the main algorithm, to avoid measuring the time used to
+    /// process/format this this extra data.
+    std::shared_ptr<extra_info_t> extra_info;
 
-    #ifdef HBM_PROFILE
-    // Time of each phase
-    double sort_time;        ///< Time used sorting items.
-    double vector_alloc_time;///< Time used allocating vectors for DP.
-    double linear_comp_time; ///< Time used by linear time preprocessing.
-    double phase1_time;      ///< Time used by ukp5 phase1 (find optimal).
-    double phase2_time;      ///< Time used by ukp5 phase2 (assemble solution).
-    double total_time;       ///< Time used by all previous steps.
-    // Some data about instance
-    I n;   ///< Instance number of items.
-    W c,   ///< Instance capacity.
-    w_min, ///< Instance smallest item weight.
-    w_max; ///< Instance biggest item weight.
-    // Some data about structures manipulated by ukp5
-    std::vector<P> g; ///< The vector of size c+w_max+1 and profit values.
-    std::vector<I> d; ///< The vector of size c+w_max+1 and item index values.
-    // Some statistics
-    /// Number of items sized vector, with the quantity of each value i in dy.
-    std::vector<W> qt_i_in_dy;
-    /// Same as d, but without the positions skipped.
-    std::vector<I> non_skipped_d;
-    /// Last position of the d vector that wasn't zero or n (number of items).
-    W last_dy_non_zero_non_n;
-    /// Quantity of g positions that weren't skipped by ukp5.
-    W qt_non_skipped_ys;
-    /// Quantity of zeros in g.
-    W qt_gy_zeros;
-    /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
-    W qt_inner_loop_executions;
-    #endif // HBM_PROFILE
+    solution_t (void) {
+      opt = P(0);
+      y_opt = W(0);
+      extra_info = std::shared_ptr<extra_info_t>(new extra_info_t());
+      show_only_extra_info = false;
+    }
+
+    solution_t (P opt, W y_opt,
+                const std::vector< itemqt_t<W, P, I> > &used_items,
+                bool show_only_extra_info,
+                const std::shared_ptr<extra_info_t> &extra_info) : 
+                opt(opt), y_opt(y_opt),
+                used_items(used_items),
+                show_only_extra_info(show_only_extra_info),
+                extra_info(extra_info) { }
   };
 
   /// Exception type for UKP instance read errors.

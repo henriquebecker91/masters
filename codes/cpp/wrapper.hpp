@@ -10,11 +10,11 @@ namespace hbm {
     /// What your method do.
     virtual void operator()(instance_t<W, P> &, solution_t<W, P, I> &sol, bool) const {
       // To make easier to see that the operator was not redefined we set
-      // some variables as 42. If this appear the programmmer will search
-      // for 42 in the sources and find this line.
+      // some fields as 42. If this appear the programmmer will search
+      // for 42 in the sources and find this line. We don't use a macro
+      // for this magic number as we want the programmer to find this line.
       sol.opt = 42;
       sol.y_opt = 42;
-      sol.last_y_value_outer_loop = 42;
     }
     /// Its name.
     virtual const std::string& name(void) const {

@@ -28,8 +28,8 @@ namespace hbm {
     using namespace std;
 
     template < typename W, typename P, typename RAI >
-    void sel_not_sm_dom_sorted(RAI begin, RAI end,
-                               vector < item_t < W, P > >&undominated) {
+    void smdom_sort(RAI begin, RAI end,
+                    vector < item_t < W, P > >&undominated) {
       if (begin >= end) return;
       // the vector HAS TO BE sorted by non-increasing profitability first
       // AND non-decreasing weight after for this code work
@@ -42,7 +42,7 @@ namespace hbm {
       // i can dominate j, or not. If the reverse was always true then
       // every UKP problem could be reduced to the best item.)
       // The first statement only means that: if i is the index of an item
-      // and the items are ordered by non-decreasing efficiency, then it
+      // and the items are ordered by non-increasing efficiency, then it
       // can't be simple or multiple dominated by any item of index j
       // where j < i. This ordering guarantees that the most efficient
       // item is never dominated and that we never need to remove
@@ -63,7 +63,7 @@ namespace hbm {
     }
 
     template < typename W, typename P >
-    void sel_not_sm_dom(vector< item_t <W, P> > &items,
+    void smdom_sort(vector< item_t <W, P> > &items,
                         vector< item_t <W, P> > &undominated,
                         bool already_sorted) {
       // the vector HAS TO BE sorted by non-increasing profitability first
@@ -71,11 +71,11 @@ namespace hbm {
       if (!already_sorted) sort_by_eff(items);
       auto begin = items.begin(), end = items.end();
 
-      sel_not_sm_dom_sorted(begin, end, undominated);
+      smdom_sort(begin, end, undominated);
     }
 
-    template < typename P, typename W, typename RAI >
-    void sel_not_sm_dom(const RAI begin, const RAI end,
+    template < typename W, typename P, typename RAI >
+    void smdom_no_sort(const RAI begin, const RAI end,
                         vector < item_t<W, P> > &undominated) {
       if (begin >= end) return;
       // ucs -> Undominated CandidateS
@@ -111,9 +111,9 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
-    void sel_not_sm_dom_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       vector< item_t<W, P> > undominated;
-      hbm_dominance_impl::sel_not_sm_dom(ukpi.items, undominated, already_sorted);
+      hbm_dominance_impl::smdom_sort(ukpi.items, undominated, already_sorted);
 
       sol.show_only_extra_info = true;
       dom_extra_info_t<I>* ptr =
@@ -124,10 +124,10 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
-    void sel_not_sm_dom_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol) {
+    void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol) {
       vector< item_t<W, P> > undominated;
       auto begin = ukpi.items.begin(), end = ukpi.items.end();
-      hbm_dominance_impl::sel_not_sm_dom(begin, end, undominated);
+      hbm_dominance_impl::smdom_no_sort(begin, end, undominated);
 
       sol.show_only_extra_info = true;
       dom_extra_info_t<I>* ptr =
@@ -138,10 +138,10 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
-    struct sel_not_sm_dom_wrap : wrapper_t<W, P, I> {
+    struct smdom_sort_wrap : wrapper_t<W, P, I> {
       virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
         // Calls the overloaded version with the third argument as a bool
-        hbm_dominance_impl::sel_not_sm_dom_wrapper(ukpi, sol, already_sorted);
+        hbm_dominance_impl::smdom_sort_wrapper(ukpi, sol, already_sorted);
 
         return;
       }
@@ -153,13 +153,35 @@ namespace hbm {
     };
 
     template<typename W, typename P, typename I = size_t>
-    void sel_not_sm_dom_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-      simple_wrapper(sel_not_sm_dom_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+      simple_wrapper(smdom_sort_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
 
     template<typename W, typename P, typename I = size_t>
-    void sel_not_sm_dom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-      hbm_dominance_impl::sel_not_sm_dom_wrapper(ukpi, sol);
+    void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+      hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol);
+    }
+
+    template < typename P, typename W, typename I, typename RAI >
+    void smdom(const RAI begin, const RAI end,
+               vector< item_t < W, P > > &undominated,
+               I k,
+               bool k_already_sorted) {
+      if (!k_already_sorted) sort_by_eff(begin, end, k);
+      I size = static_cast<I>(end - begin);
+      if (k >= size) {
+        hbm_dominance_impl::smdom_sort(begin, end, undominated);
+      } else {
+        hbm_dominance_impl::smdom_no_sort(begin, end, undominated);
+      }
+    }
+
+    template < typename P, typename W, typename I >
+    void smdom(vector< item_t < W, P > > &items,
+               vector< item_t < W, P > > &undominated,
+               I k,
+               bool k_already_sorted) {
+      hbm_dominance_impl::smdom(items.begin(), items.end(), undominated, k, k_already_sorted);
     }
   }
 
@@ -186,10 +208,10 @@ namespace hbm {
   /// @param already_sorted If is false, the begin~end range is
   ///   modified (will be sorted by efficiency).
   template < typename P, typename W, typename RAI>
-  void sel_not_sm_dom(RAI begin, RAI end,
-                      std::vector < item_t < W, P > >&undominated,
-                      bool already_sorted) {
-    hbm_dominance_impl::sel_not_sm_dom(begin, end, undominated, already_sorted);
+  void smdom_sort(RAI begin, RAI end,
+                  std::vector < item_t < W, P > >&undominated,
+                  bool already_sorted) {
+    hbm_dominance_impl::smdom_sort(begin, end, undominated, already_sorted);
   }
 
   /// @brief Same as the documented overload but don't try to sort the
@@ -208,33 +230,73 @@ namespace hbm {
   /// sorting, if the undominated items are few and the range put them
   /// at beggining).
   ///
-  /// @see sel_not_sm_dom(RAI begin, RAI end,
+  /// @see smdom_sort(RAI begin, RAI end,
   ///   std::vector < item_t < W, P > >&undominated,
   ///   bool already_sorted)
   template < typename P, typename W, typename RAI >
-  void sel_not_sm_dom(const RAI begin, const RAI end,
-                      std::vector< item_t < W, P > > &undominated) {
-    hbm_dominance_impl::sel_not_sm_dom(begin, end, undominated);
+  void smdom_no_sort(const RAI begin, const RAI end,
+                     std::vector< item_t < W, P > > &undominated) {
+    hbm_dominance_impl::smdom_no_sort(begin, end, undominated);
+  }
+
+  /// @brief Copy the items that aren't simple or multiple dominated
+  ///   from a range to a vector.
+  ///
+  /// This version works the following way: If already_sorted is true,
+  /// it assumes that the first k elements of the range are ordered by
+  /// non-increasing efficiency, and that all elements after the k-1
+  /// position are of equal efficiency or less efficient than the
+  /// element at the k-1 position. If already_sorted is false, then
+  /// the procedure makes the assumption above true. If k is greater
+  /// than or equal to the range size, the smdom_sort version is used,
+  /// otherwise the smdom_no_sort version is used.
+  ///
+  /// @param begin Random Access Iterator to item values. The element
+  ///   pointed by it is used by the procedure.
+  /// @param begin Random Access Iterator to item values. The element
+  ///   pointed by it ISN'T used by the procedure. Only the values
+  ///   before it are used.
+  /// @param undominated The non-dominated items will be added at
+  ///   the end of this vector. If it is empty, the no problem. If
+  ///   it isn't empty read the smdom_sort and smdom_no_sort
+  ///   documentation to avoid being surprised by unexpected behavior.
+  /// @param sort_k_most_eff A integer between 0 and (end-begin).
+  /// @param already_sorted If is false, the begin to begin+k range is
+  ///   modified (will be sorted by non-increasing efficiency).
+  template < typename P, typename W, typename I, typename RAI >
+  void smdom(const RAI begin, const RAI end,
+             std::vector< item_t < W, P > > &undominated,
+             I k,
+             bool k_already_sorted) {
+    hbm_dominance_impl::smdom(begin, end, undominated, k, k_already_sorted);
+  }
+
+  template < typename P, typename W, typename I >
+  void smdom(std::vector< item_t < W, P > > &items,
+             std::vector< item_t < W, P > > &undominated,
+             I k,
+             bool k_already_sorted) {
+    hbm_dominance_impl::smdom(items, undominated, k, k_already_sorted);
   }
 
   template<typename W, typename P, typename I>
-  void sel_not_sm_dom_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
-    hbm_dominance_impl::sel_not_sm_dom_wrapper(ukpi, sol, already_sorted);
+  void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    hbm_dominance_impl::smdom_sort_wrapper(ukpi, sol, already_sorted);
   }
 
   template<typename W, typename P, typename I = size_t>
-  void sel_not_sm_dom_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-    hbm_dominance_impl::sel_not_sm_dom_wrapper(ukpi, sol, argc, argv);
+  void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    hbm_dominance_impl::smdom_sort_wrapper(ukpi, sol, argc, argv);
   }
 
   template<typename W, typename P, typename I>
-  void sel_not_sm_dom_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol) {
-    hbm_dominance_impl::sel_not_sm_dom_wrapper(ukpi, sol);
+  void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol) {
+    hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol);
   }
 
   template<typename W, typename P, typename I = size_t>
-  void sel_not_sm_dom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-    hbm_dominance_impl::sel_not_sm_dom_no_sort_wrapper(ukpi, sol, argc, argv);
+  void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol, argc, argv);
   }
 }
 

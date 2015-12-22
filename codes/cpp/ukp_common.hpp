@@ -368,20 +368,26 @@ namespace hbm {
       return;
     }
 
-    template<typename W, typename P, typename I>
-    void sort_by_eff(vector< item_t<W, P> > &items, I sort_k_most_eff) {
-      // Without this if the most efficient element was put first
+    template<typename I, typename RAI>
+    void sort_by_eff(RAI begin, RAI end, I sort_k_most_eff) {
+      // Without this the most efficient element was put first
       if (sort_k_most_eff == 0) return;
 
-      if (sort_k_most_eff >= items.size()) {
-        std::sort(items.begin(), items.end());
+      I size = static_cast<I>(end - begin);
+      if (sort_k_most_eff >= size) {
+        std::sort(begin, end);
         return;
       }
 
-      auto begin = items.begin();
-      auto middle = begin + sort_k_most_eff;
-      std::partial_sort(begin, middle, items.end());
+      RAI middle = begin + sort_k_most_eff;
+      std::partial_sort(begin, middle, end);
       return;
+    }
+
+    template<typename W, typename P, typename I>
+    void sort_by_eff(vector< item_t<W, P> > &items, I sort_k_most_eff) {
+      // Without this the most efficient element was put first
+      hbm_ukp_common_impl::sort_by_eff(items.begin(), items.end(), sort_k_most_eff);
     }
 
     template<typename W, typename P, typename I>
@@ -471,6 +477,12 @@ namespace hbm {
   template<typename W, typename P, typename I>
   void sort_by_eff(std::vector< item_t<W, P> > &items, I sort_k_most_eff) {
     hbm_ukp_common_impl::sort_by_eff(items, sort_k_most_eff);
+  }
+
+  /// Random Access Iterator overload version.
+  template<typename I, typename RAI>
+  void sort_by_eff(RAI begin, RAI end, I sort_k_most_eff) {
+    hbm_ukp_common_impl::sort_by_eff(begin, end, sort_k_most_eff);
   }
 
   /// @brief Sort the items by non-increasing efficiency and,

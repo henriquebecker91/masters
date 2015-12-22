@@ -5,7 +5,14 @@
 #include <iostream>
 #include <iomanip>  // For precision related routines
 
+// Includes for command-line arguments parsing
+// Not used yet. Will use in the future.
+//#include <boost/program_options/option.hpp>
+//#include <boost/program_options/options_description.hpp>
+//#include <boost/program_options/parsers.hpp>
+
 #include "ukp_common.hpp"
+#include "dominance.hpp"
 
 #ifdef HBM_PROFILE
   #include <chrono>
@@ -29,6 +36,11 @@ namespace hbm {
   namespace hbm_ukp5_impl {
     using namespace std;
 
+    #ifdef HBM_PROFILE
+    using namespace std::chrono;
+    #endif //HBM_PROFILE
+    //namespace po = boost::program_options;
+
     template <typename W, typename P, typename I>
     struct ukp5_extra_info_t : extra_info_t {
       #ifdef HBM_CHECK_PERIODICITY
@@ -42,6 +54,7 @@ namespace hbm {
       #ifdef HBM_PROFILE
       // Time of each phase
       double sort_time;        ///< Time used sorting items.
+      double smdom_time;       ///< Time used removing simple/multiple dominance.
       double vector_alloc_time;///< Time used allocating vectors for DP.
       double linear_comp_time; ///< Time used by linear time preprocessing.
       double phase1_time;      ///< Time used by ukp5 phase1 (find optimal).
@@ -85,6 +98,10 @@ namespace hbm {
         //dump(nsd_path, "y\tdy", non_skipped_d);
         //dump(dqt_path, "i\tqt_in_d", qt_i_in_dy);
         #endif*/
+        #ifdef HBM_PROFILE
+        ukp5_gen_stats();
+        #endif
+
         stringstream cout("");
         #ifdef HBM_CHECK_PERIODICITY
         cout << "last_y_value_outer_loop: " << last_y_value_outer_loop << endl;
@@ -103,9 +120,9 @@ namespace hbm {
         cout << "(qt_inner_loop_executions/qt_non_skipped_ys)/n: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys)/((long double)n)  << endl;
         cout << "(qt_inner_loop_executions/c)/n: " << ((long double) qt_inner_loop_executions)/((long double) c)/((long double)n) << endl;
 
-        const double &stime = sort_time, &vtime = vector_alloc_time,
-          &lctime = linear_comp_time, &p1time = phase1_time,
-          &p2time = phase2_time, &ttime = total_time;
+        const double &stime = sort_time, &dtime = smdom_time,
+          &vtime = vector_alloc_time, &lctime = linear_comp_time,
+          &p1time = phase1_time, &p2time = phase2_time, &ttime = total_time;
 
         streamsize old_precision = cout.precision(HBM_PROFILE_PRECISION);
         const int two_first_digits_and_period = 3;
@@ -114,19 +131,22 @@ namespace hbm {
         char old_fill = cout.fill(' ');
 
         cout << "Sort time: " << stime << "s (";
-        cout << setw(percent_size) << (stime/ttime)*100;
+        cout << setw(percent_size) << (stime/ttime)*100.0;
+        cout << "%)" << endl;
+        cout << "Dom  time: " << dtime << "s (";
+        cout << setw(percent_size) << (dtime/ttime)*100.0;
         cout << "%)" << endl;
         cout << "Vect time: " << vtime << "s (";
-        cout << setw(percent_size) << (vtime/ttime)*100;
+        cout << setw(percent_size) << (vtime/ttime)*100.0;
         cout << "%)" << endl;
         cout << "O(n) time: " << lctime << "s (";
-        cout << setw(percent_size) << (lctime/ttime)*100;
+        cout << setw(percent_size) << (lctime/ttime)*100.0;
         cout << "%)" << endl;
         cout << "pha1 time: " << p1time << "s (";
-        cout << setw(percent_size) << (p1time/ttime)*100;
+        cout << setw(percent_size) << (p1time/ttime)*100.0;
         cout << "%)" << endl;
         cout << "pha2 time: " << p2time << "s (";
-        cout << setw(percent_size) << (p2time/ttime)*100;
+        cout << setw(percent_size) << (p2time/ttime)*100.0;
         cout << "%)" << endl;
         cout << "Sum times: " << ttime << "s" << endl;
 
@@ -137,6 +157,35 @@ namespace hbm {
 
         return cout.str();
       }
+
+      #ifdef HBM_PROFILE
+      /// This method only works if the following variables are
+      /// set first: n, c, w_min, w_max, g and d.
+      void ukp5_gen_stats(void) {
+        non_skipped_d.assign(c-w_min + 1, n-1);
+
+        qt_i_in_dy.assign(n, 0);
+        qt_i_in_dy[n-1] = w_min;
+
+        qt_gy_zeros = w_min;
+        P opt = 0;
+        qt_non_skipped_ys = 0;
+        qt_inner_loop_executions = 0;
+
+        for (W y = w_min; y <= c-w_min; ++y) {
+          ++(qt_i_in_dy[d[y]]);
+          if (g[y] > opt) {
+            ++(qt_non_skipped_ys);
+            qt_inner_loop_executions += d[y];
+            non_skipped_d[y] = d[y];
+            opt = g[y];
+          }
+          if (g[y] == 0) ++(qt_gy_zeros);
+          if (d[y] != 0 && d[y] != (n-1)) last_dy_non_zero_non_n = y;
+        }
+        return;
+      }
+      #endif //HBM_PROFILE
     };
 
     template<typename W, typename P>
@@ -304,44 +353,10 @@ namespace hbm {
     }
 
     #ifdef HBM_PROFILE
-    using namespace std::chrono;
-
-    template<typename W, typename P, typename I>
-    void ukp5_gen_stats(W c, I n, W w_min, W w_max, const vector<P> &g, const vector<I> &d, ukp5_extra_info_t<W, P, I>* &info) {
-      info->g = g;
-      info->d = d;
-      info->c = c;
-      info->n = n;
-      info->w_min = w_min;
-      info->w_max = w_max;
-
-      info->non_skipped_d.assign(c-w_min + 1, n-1);
-
-      info->qt_i_in_dy.assign(n, 0);
-      info->qt_i_in_dy[n-1] = w_min;
-
-      info->qt_gy_zeros = w_min;
-      P opt = 0;
-      info->qt_non_skipped_ys = 0;
-      info->qt_inner_loop_executions = 0;
-
-      for (W y = w_min; y <= c-w_min; ++y) {
-        ++(info->qt_i_in_dy[d[y]]);
-        if (g[y] > opt) {
-          ++(info->qt_non_skipped_ys);
-          info->qt_inner_loop_executions += d[y];
-          info->non_skipped_d[y] = d[y];
-          opt = g[y];
-        }
-        if (g[y] == 0) ++(info->qt_gy_zeros);
-        if (d[y] != 0 && d[y] != (n-1)) info->last_dy_non_zero_non_n = y;
-      }
-      return;
-    }
     #endif //HBM_PROFILE
     
     template<typename W, typename P, typename I>
-    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, I sort_k_most_eff) {
+    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, I sort_k_most_eff, bool apply_smdom) {
       // This pointer stores all the extra info that the UKP5
       // generate when HBM_PROFILE is defined
       ukp5_extra_info_t<W, P, I>* ptr = new ukp5_extra_info_t<W, P, I>();
@@ -357,21 +372,38 @@ namespace hbm {
       ptr->sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
       #endif
 
+      if (apply_smdom) { 
+        #ifdef HBM_PROFILE
+        begin = steady_clock::now();
+        #endif
+        vector< item_t<W, P> > undominated;
+        smdom(ukpi.items, undominated, sort_k_most_eff, true);
+        if (undominated.size() < ukpi.items.size()) {
+          ukpi.items = undominated;
+        }
+        #ifdef HBM_PROFILE
+        ptr->smdom_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+        #endif
+      }
+
       #ifdef HBM_PROFILE
       begin = steady_clock::now();
       #endif
       W c = ukpi.c;
       I n = ukpi.items.size();
-      auto minw_max = minmax_item_weight(ukpi.items);
-      W w_min = minw_max.first, w_max = minw_max.second;
+      auto min_max_w = minmax_item_weight(ukpi.items);
+      W w_min = min_max_w.first, w_max = min_max_w.second;
       #ifdef HBM_PROFILE
       ptr->linear_comp_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+      ptr->c = c;
+      ptr->n = n;
+      ptr->w_min = w_min;
+      ptr->w_max = w_max;
       #endif
 
       #ifdef HBM_PROFILE
       begin = steady_clock::now();
       #endif
-
       #ifdef HBM_PROFILE
       /* Use the solution fields instead of local variables to propagate
        * the array values. The arrays will be dumped to files, making possible
@@ -384,7 +416,6 @@ namespace hbm {
       vector<P> g(c+1+(w_max-w_min), 0);
       vector<I> d(c+1+(w_max-w_min), n-1);
       #endif
-
       #ifdef HBM_PROFILE
       ptr->vector_alloc_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
       #endif
@@ -401,10 +432,6 @@ namespace hbm {
       #ifdef HBM_PROFILE
       ptr->phase2_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
       ptr->total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
-      #endif
-
-      #ifdef HBM_PROFILE
-      ukp5_gen_stats(c, n, w_min, w_max, g, d, ptr);
       #endif
 
       #ifdef HBM_CHECK_PERIODICITY
@@ -426,36 +453,47 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
-    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, double sort_k_most_eff) {
+    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, double sort_k_most_eff, bool apply_smdom) {
       /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
        * overloaded version. */
+      I k;
       if (sort_k_most_eff < 0.0 || sort_k_most_eff > 1.0) {
         cerr << "WARNING: ukp5 (double sort_k_most_eff overloaded version): "
                 "the value of sort_k_most_eff must be between 0 and 1. "
                 "The sort_k_most_eff value was: " << sort_k_most_eff << ". "
                 "Will execute ukp5 with sort_k_most_eff = 1."
         << endl;
-        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+        k =  static_cast<I>(ukpi.items.size());
       } else {
         double dsize = static_cast<double>(ukpi.items.size());
-        I k = static_cast<I>(dsize*sort_k_most_eff);
-        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, k);
+        k = static_cast<I>(dsize*sort_k_most_eff);
       }
+      hbm::hbm_ukp5_impl::ukp5(ukpi, sol, k, apply_smdom);
+
+      return;
     }
 
     template<typename W, typename P, typename I>
     void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
       /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
        * or the "double sort_k_most_eff" overloaded versions. */
+      const I items_size = static_cast<I>(ukpi.items.size());
       if (argc == 0) {
-        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+        // If no arguments, we always sort and never apply sm dominance
+        hbm_ukp5_impl::ukp5(ukpi, sol, items_size, false);
       } else if (argc == 1) {
         double percent;
         from_string(argv[0], percent);
-        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, percent);
-      } else if (argc > 1) {
-        cout << "WARNING: more than one extra parameter to ukp5." << endl;
-        cout << "usage: a.out data.ukp [k]" << endl;
+        hbm_ukp5_impl::ukp5(ukpi, sol, percent, false);
+      } else if (argc == 2) {
+        double percent;
+        bool apply_smdom;
+        from_string(argv[0], percent);
+        from_string(argv[1], apply_smdom);
+        hbm_ukp5_impl::ukp5(ukpi, sol, percent, apply_smdom);
+      } else if (argc > 2) {
+        cout << "WARNING: more than two extra parameters to ukp5." << endl;
+        cout << "usage: ./a.out data.ukp [k apply_dom]" << endl;
         cout << "       k: A real number between 0 and 1. The items will be"
                 " reordered before ukp5 is called, as std::partial_sort"
                 " was called with the 'middle' argument being position k*"
@@ -464,7 +502,16 @@ namespace hbm {
                 " items are already ordered by efficiency in the instance"
                 " file, or you don't want to sort the items by efficiency."
                 << endl;
-        hbm::hbm_ukp5_impl::ukp5(ukpi, sol, static_cast<I>(ukpi.items.size()));
+        cout << "       apply_dom: A boolean value ('true' or 'false')."
+                " If it's true, simple/multiple dominance is applied to"
+                " the items before executing ukp5. The default value is"
+                " false (UKP5 already removes dominance on its own way,"
+                " if the items are sorted by non-increasing efficiency)."
+                << endl;
+        cout << "NOTE: the arguments are taken by position, if you want to"
+                " specify the second argument value, you need to specify the"
+                " first one too." << endl;
+        hbm_ukp5_impl::ukp5(ukpi, sol, items_size, false);
       }
     }
   }

@@ -22,8 +22,8 @@ If you want to use the the hbm library on your own programs you don't need to pa
 #### HBM_PROFILE
 A macro you define if you want extra info about the UKP5 execution.
 If this macro is defined:
-* The solution_t type will get a lot of extra fields.
-* The ukp5 procedure will compute and set these extra fields. It will execute
+* The ukp5_extra_info_t type will get a lot of extra fields.
+* The ukp5 procedure will set these extra fields. It will execute
   a little slower, but this will not be shown by the output, as the computation
   needed to obtain this extra info is not measured.
 * The main_take_path function will print many of this extra fields, and some

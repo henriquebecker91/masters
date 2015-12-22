@@ -482,6 +482,18 @@ namespace hbm {
   template<typename W, typename P>
   void sort_by_eff(std::vector< item_t<W, P> > &items) {
     std::sort(items.begin(), items.end());
+
+    return;
+  }
+
+  /// @brief Sort the items in the range by non-increasing efficiency
+  ///   and if tied, by non-decreasing weight.
+  ///
+  /// Is not guaranteed to be stable.
+  ///
+  template<typename RAI>
+  void sort_by_eff(RAI begin, RAI end) {
+    std::sort(begin, end);
     return;
   }
 }

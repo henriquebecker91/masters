@@ -4,9 +4,9 @@ CC=g++
 # The boost linkage is only needed if the macro HBM_PROFILE is defined...
 # The best would be only use it if the macro is defined. But this would need
 # some control.
-CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -O3 -lboost_filesystem -lboost_system
+CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -lboost_filesystem -lboost_system -O3 
 H_DEPS=ukp_common.hpp test_common.hpp
-DEFS=-DHBM_XOR_SWAP -DHBM_PROFILE
+DEFS=-DHBM_CHECK_PERIODICITY -DHBM_XOR_SWAP -DHBM_PROFILE
 
 run_eduk.out: run_eduk.cpp eduk.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_eduk.cpp $(CFLAGS) $(DEFS)

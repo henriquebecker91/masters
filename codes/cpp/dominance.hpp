@@ -249,7 +249,9 @@ namespace hbm {
   /// element at the k-1 position. If already_sorted is false, then
   /// the procedure makes the assumption above true. If k is greater
   /// than or equal to the range size, the smdom_sort version is used,
-  /// otherwise the smdom_no_sort version is used.
+  /// otherwise the smdom_no_sort version is used. Pass k as zero
+  /// to denote unambiguously that you want to use the no_sort version
+  /// (k_already_sorted can be anything in this case).
   ///
   /// @param begin Random Access Iterator to item values. The element
   ///   pointed by it is used by the procedure.
@@ -261,8 +263,8 @@ namespace hbm {
   ///   it isn't empty read the smdom_sort and smdom_no_sort
   ///   documentation to avoid being surprised by unexpected behavior.
   /// @param sort_k_most_eff A integer between 0 and (end-begin).
-  /// @param already_sorted If is false, the begin to begin+k range is
-  ///   modified (will be sorted by non-increasing efficiency).
+  /// @param k_already_sorted If is false, the begin to begin+k range
+  ///   is modified (will be sorted by non-increasing efficiency).
   template < typename P, typename W, typename I, typename RAI >
   void smdom(const RAI begin, const RAI end,
              std::vector< item_t < W, P > > &undominated,

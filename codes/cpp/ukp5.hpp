@@ -33,6 +33,23 @@
 #endif
 
 namespace hbm {
+  template <typename I>
+  struct ukp5_conf_t {
+    bool apply_smdom;
+    bool apply_smdom_before_sort;
+    bool use_percent;
+    union {
+      double sort_percent;
+      I sort_k_most_eff;
+    };
+
+    ukp5_conf_t(void) {
+      apply_smdom = apply_smdom_before_sort = false;
+      use_percent = true;
+      sort_percent = 1.0;
+    }
+  };
+
   namespace hbm_ukp5_impl {
     using namespace std;
 
@@ -356,28 +373,66 @@ namespace hbm {
     #endif //HBM_PROFILE
     
     template<typename W, typename P, typename I>
-    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, I sort_k_most_eff, bool apply_smdom) {
+    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, const ukp5_conf_t<I> &conf) {
+      #ifdef HBM_PROFILE
+      steady_clock::time_point all_ukp5_begin = steady_clock::now();
+      steady_clock::time_point begin; // Only declare
+      #endif
+
       // This pointer stores all the extra info that the UKP5
       // generate when HBM_PROFILE is defined
       ukp5_extra_info_t<W, P, I>* ptr = new ukp5_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
       sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
 
-      #ifdef HBM_PROFILE
-      steady_clock::time_point all_ukp5_begin = steady_clock::now();
-      steady_clock::time_point begin = steady_clock::now();
-      #endif
-      sort_by_eff(ukpi.items, sort_k_most_eff);
-      #ifdef HBM_PROFILE
-      ptr->sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
-      #endif
-
-      if (apply_smdom) { 
+      if (conf.apply_smdom && conf.apply_smdom_before_sort) { 
         #ifdef HBM_PROFILE
         begin = steady_clock::now();
         #endif
         vector< item_t<W, P> > undominated;
-        smdom(ukpi.items, undominated, sort_k_most_eff, true);
+        smdom(ukpi.items, undominated, 0, true);
+        if (undominated.size() < ukpi.items.size()) {
+          ukpi.items = undominated;
+        }
+        #ifdef HBM_PROFILE
+        ptr->smdom_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+        #endif
+      }
+
+      // How many elements we will partially sort
+      I k;
+      if (conf.use_percent) {
+        // If the conf says we sort a fraction of the list, we compute
+        // how many elements make that fraction.
+        if (conf.sort_percent < 0.0 || conf.sort_percent > 1.0) {
+          cerr << "WARNING: " << __func__ << ": "
+                  "the value of conf.sort_percent must be between 0 and 1. "
+                  "The conf.sort_percent value was: " << conf.sort_percent <<
+                  ". Will execute ukp5 with conf.sort_percent = 1."
+          << endl;
+          k =  static_cast<I>(ukpi.items.size());
+        } else {
+          double dsize = static_cast<double>(ukpi.items.size());
+          k = static_cast<I>(dsize*conf.sort_percent);
+        }
+      } else {
+        k = conf.sort_k_most_eff;
+      }
+
+      #ifdef HBM_PROFILE
+      begin = steady_clock::now();
+      #endif
+      sort_by_eff(ukpi.items, k);
+      #ifdef HBM_PROFILE
+      ptr->sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+      #endif
+
+      if (conf.apply_smdom && !conf.apply_smdom_before_sort) { 
+        #ifdef HBM_PROFILE
+        begin = steady_clock::now();
+        #endif
+        vector< item_t<W, P> > undominated;
+        smdom(ukpi.items, undominated, k, true);
         if (undominated.size() < ukpi.items.size()) {
           ukpi.items = undominated;
         }
@@ -431,7 +486,6 @@ namespace hbm {
       ukp5_phase2(ukpi.items, d, sol);
       #ifdef HBM_PROFILE
       ptr->phase2_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
-      ptr->total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
       #endif
 
       #ifdef HBM_CHECK_PERIODICITY
@@ -449,51 +503,36 @@ namespace hbm {
       sol.used_items[0].qt += qt_best_item_inserted_by_per;
       #endif
 
-      return;
-    }
-
-    template<typename W, typename P, typename I>
-    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, double sort_k_most_eff, bool apply_smdom) {
-      /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
-       * overloaded version. */
-      I k;
-      if (sort_k_most_eff < 0.0 || sort_k_most_eff > 1.0) {
-        cerr << "WARNING: ukp5 (double sort_k_most_eff overloaded version): "
-                "the value of sort_k_most_eff must be between 0 and 1. "
-                "The sort_k_most_eff value was: " << sort_k_most_eff << ". "
-                "Will execute ukp5 with sort_k_most_eff = 1."
-        << endl;
-        k =  static_cast<I>(ukpi.items.size());
-      } else {
-        double dsize = static_cast<double>(ukpi.items.size());
-        k = static_cast<I>(dsize*sort_k_most_eff);
-      }
-      hbm::hbm_ukp5_impl::ukp5(ukpi, sol, k, apply_smdom);
+      #ifdef HBM_PROFILE
+      ptr->total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
+      #endif
 
       return;
     }
 
     template<typename W, typename P, typename I>
     void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
-      /* This procedure doesn't call itself. It calls the "I sort_k_most_eff"
-       * or the "double sort_k_most_eff" overloaded versions. */
-      const I items_size = static_cast<I>(ukpi.items.size());
-      if (argc == 0) {
-        // If no arguments, we always sort and never apply sm dominance
-        hbm_ukp5_impl::ukp5(ukpi, sol, items_size, false);
-      } else if (argc == 1) {
-        double percent;
-        from_string(argv[0], percent);
-        hbm_ukp5_impl::ukp5(ukpi, sol, percent, false);
-      } else if (argc == 2) {
-        double percent;
-        bool apply_smdom;
-        from_string(argv[0], percent);
-        from_string(argv[1], apply_smdom);
-        hbm_ukp5_impl::ukp5(ukpi, sol, percent, apply_smdom);
-      } else if (argc > 2) {
-        cout << "WARNING: more than two extra parameters to ukp5." << endl;
-        cout << "usage: ./a.out data.ukp [k apply_dom]" << endl;
+      // The empty constructor already has default values for the fields
+      // below we only change what was explicited by command-line
+      ukp5_conf_t<I> conf;
+
+      switch (argc) {
+        case 3:
+        from_string(argv[2], conf.apply_smdom_before_sort);
+        case 2:
+        from_string(argv[1], conf.apply_smdom);
+        case 1:
+        from_string(argv[0], conf.sort_percent);
+        case 0:
+        // exists only to argc == 0 don't get into default
+        break;
+
+        default:
+        cout << "WARNING: more than " << argc << " extra parameters to ukp5."
+                " Will execute with the default values."
+                << endl;
+        cout << "usage: ./a.out data.ukp [k apply_dom apply_dom_before_sort]"
+                << endl;
         cout << "       k: A real number between 0 and 1. The items will be"
                 " reordered before ukp5 is called, as std::partial_sort"
                 " was called with the 'middle' argument being position k*"
@@ -502,28 +541,33 @@ namespace hbm {
                 " items are already ordered by efficiency in the instance"
                 " file, or you don't want to sort the items by efficiency."
                 << endl;
-        cout << "       apply_dom: A boolean value ('true' or 'false')."
-                " If it's true, simple/multiple dominance is applied to"
+        cout << "       apply_dom: A boolean value (0 or 1)."
+                " If it's one, simple/multiple dominance is applied to"
                 " the items before executing ukp5. The default value is"
-                " false (UKP5 already removes dominance on its own way,"
+                " zero (UKP5 already removes dominance on its own way,"
                 " if the items are sorted by non-increasing efficiency)."
+                << endl;
+        cout << "       apply_dom_before_sort: A boolean value (0 or 1)."
+                " Apply dominance before or after sorting. Dominance after"
+                " sort is useful only if you will sort all the items ("
+                " k = 1), because in this case a faster version of dominance"
+                " can be used. But: if there was few dominated items, would"
+                " be better to not use dominance, and if there's a lot, the"
+                " sorting cost could be reduced by applying dominance first."
                 << endl;
         cout << "NOTE: the arguments are taken by position, if you want to"
                 " specify the second argument value, you need to specify the"
                 " first one too." << endl;
-        hbm_ukp5_impl::ukp5(ukpi, sol, items_size, false);
+        break;
       }
+
+      hbm_ukp5_impl::ukp5(ukpi, sol, conf);
     }
   }
 
   template<typename W, typename P, typename I>
-  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, I sort_k_most_eff) {
-    hbm_ukp5_impl::ukp5(ukpi, sol, sort_k_most_eff);
-  }
-
-  template<typename W, typename P, typename I>
-  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, double sort_k_most_eff) {
-    hbm_ukp5_impl::ukp5(ukpi, sol, sort_k_most_eff);
+  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, const ukp5_conf_t<I> &conf) {
+    hbm_ukp5_impl::ukp5(ukpi, sol, conf);
   }
 
   template<typename W, typename P, typename I>

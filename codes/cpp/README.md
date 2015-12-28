@@ -5,6 +5,7 @@ This is the README of the HBM library.
 All .cpp files in the same directory that this README are sample programs. Calling the "make" command in this directory will compile them. The test_<method>.out binaries will try to execute the <method> over all PYAsUKP bencmark instances (they should be in ../../data/ukp/), the run_<method>.out takes an instance filename as first parameter and execute the <method> over it (other additional parameters will be repassed to the method).
 
 If you don't have the boost library (http://www.boost.org/) installed:
+  UPDATE NOW WE NEED BOOST ALWAYS, IF YOU DONT WANT YOU CAN COMMENT THE CODE BY HAND
   * You can't compile run_per.out and test_per.out or use the periodicity.hpp header.
   * You can compile the other sample programs, but you need to NOT DEFINE the HBM_PROFILE flag (and maybe edit the Makefile to remove the -lboost_* flags).
 
@@ -19,19 +20,7 @@ If you want to use the the hbm library on your own programs you don't need to pa
 
 ### Macros explanation
 
-#### HBM_PROFILE
-A macro you define if you want extra info about the UKP5 execution.
-If this macro is defined:
-* The ukp5_extra_info_t type will get a lot of extra fields.
-* The ukp5 procedure will set these extra fields. It will execute
-  a little slower, but this will not be shown by the output, as the computation
-  needed to obtain this extra info is not measured.
-* The main_take_path function will print many of this extra fields, and some
-  more. If the main_take_path is used with other function that not
-  ukp5 it will print garbage instead of the extra info, as other functions
-  don't set the extra fields at solution_t.
-
-#### HBM_DUMP
+#### HBM_DUMP -- THIS MACRO DOESNT EXIST ANYMORE, BUT THE COMMAND-LINE OPTION CREATE DUMPS DO THIS
 A macro you define if you want to know how the arrays used by UKP5
 were after the algorithm execution.
 This macro can only be defined if HBM_PROFILE macro is defined. This

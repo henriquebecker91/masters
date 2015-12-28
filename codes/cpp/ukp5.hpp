@@ -2,9 +2,12 @@
 #define HBM_UKP5_HPP
 
 #include <sstream>  // For stringstream
+#include <fstream>  // ofstream for dump
 #include <iostream>
 #include <iomanip>  // For precision related routines
 #include <regex>    // For command-line argument handmade verification
+#include <chrono>
+#include <boost/filesystem.hpp>
 
 // Includes for command-line arguments parsing
 // Not used yet. Will use in the future.
@@ -15,25 +18,15 @@
 #include "ukp_common.hpp"
 #include "dominance.hpp"
 
-#ifdef HBM_PROFILE
-  #include <chrono>
-#endif
-
-#if !defined(HBM_PROFILE) && defined(HBM_DUMP)
-  #error The HBM_DUMP flag can only be used with the HBM_PROFILE flag
-#endif
-
-#if defined(HBM_PROFILE) && defined(HBM_DUMP)
-  #include <boost/filesystem.hpp>
-#endif
-
-#ifdef HBM_PROFILE
-  #ifndef HBM_PROFILE_PRECISION
-    #define HBM_PROFILE_PRECISION 5
-  #endif
+#ifndef HBM_PROFILE_PRECISION
+  #define HBM_PROFILE_PRECISION 5
 #endif
 
 namespace hbm {
+
+  /// Class with the UKP5 extra parameters.
+  /// It's initialized with the default values. You only need
+  /// to touch it if you want to tweak the UKP5 inner workings.
   template <typename I>
   struct ukp5_conf_t {
     bool apply_smdom;
@@ -43,21 +36,22 @@ namespace hbm {
       double sort_percent;
       I sort_k_most_eff;
     };
+    bool create_dumps;
+    /// Dump paths, if empty they are set by ukp5 (argc/argv version).
+    std::string gd_path, dd_path/*, nsd_path, dqt_path*/;
 
     ukp5_conf_t(void) {
       apply_smdom = apply_smdom_before_sort = false;
       use_percent = true;
       sort_percent = 1.0;
+      create_dumps = false;
     }
   };
 
   namespace hbm_ukp5_impl {
     using namespace std;
     using namespace std::regex_constants;
-
-    #ifdef HBM_PROFILE
     using namespace std::chrono;
-    #endif //HBM_PROFILE
     //namespace po = boost::program_options;
 
     template <typename W, typename P, typename I>
@@ -70,7 +64,6 @@ namespace hbm {
       W last_y_value_outer_loop;
       #endif // HBM_CHECK_PERIODICITY
 
-      #ifdef HBM_PROFILE
       // Time of each phase
       double sort_time;        ///< Time used sorting items.
       double smdom_time;       ///< Time used removing simple/multiple dominance.
@@ -100,32 +93,35 @@ namespace hbm {
       W qt_gy_zeros;
       /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
       W qt_inner_loop_executions;
-      #endif // HBM_PROFILE
+
+      /// If true, will try to create dump files on gd_path and dd_path.
+      bool create_dumps;
+      string gd_path, ///< Path where the g vector will be dumped.
+                  dd_path; ///< Path where the d vector will be dumped.
+
+      template <typename W_OR_P>
+      static void dump(const string &path,
+                       const string &header,
+                       const vector<W_OR_P> &v) {
+        ofstream f(path, ofstream::out|ofstream::trunc);
+        if (f.is_open())
+        {
+          f << header << endl;
+          for (size_t y = 0; y < v.size(); ++y) {
+            f << y << "\t" << v[y] << endl;
+          }
+        } else {
+          cerr << "Couldn't open file: " << path << endl;
+        }
+      }
 
       virtual string gen_info(void) {
-        /* TEMPORARY DISABLE UNTIL FIND WAY TO USE THIS AGAIN
-        #if defined(HBM_PROFILE) && defined(HBM_DUMP)
-        using namespace boost::filesystem;
-        path my_path(spath);
-        path filename = my_path.filename();
-        const string  gd_path = "./g_dump_" + filename.native() + ".dat",
-                      dd_path = "./d_dump_" + filename.native() + ".dat",
-                      nsd_path = "./nsd_dump_" + filename.native() + ".dat",
-                      dqt_path = "./dqt_dump_" + filename.native() + ".dat";
-        dump(gd_path, "y\tgy", g);
-        dump(dd_path, "y\tdy", d);
-        //dump(nsd_path, "y\tdy", non_skipped_d);
-        //dump(dqt_path, "i\tqt_in_d", qt_i_in_dy);
-        #endif*/
-        #ifdef HBM_PROFILE
         ukp5_gen_stats();
-        #endif
 
         stringstream cout("");
         #ifdef HBM_CHECK_PERIODICITY
         cout << "last_y_value_outer_loop: " << last_y_value_outer_loop << endl;
         #endif
-        #ifdef HBM_PROFILE
         cout << "c: " << c << endl;
         cout << "n: " << n << endl;
         cout << "w_min: " << w_min << endl;
@@ -172,12 +168,17 @@ namespace hbm {
         cout.fill(old_fill);
         cout.setf(old_flags);
         cout.precision(old_precision);
-        #endif
+
+        if (create_dumps) {
+          dump(gd_path, "y\tgy", g);
+          dump(dd_path, "y\tdy", d);
+          //dump(nsd_path, "y\tdy", non_skipped_d);
+          //dump(dqt_path, "i\tqt_in_d", qt_i_in_dy);
+        }
 
         return cout.str();
       }
 
-      #ifdef HBM_PROFILE
       /// This method only works if the following variables are
       /// set first: n, c, w_min, w_max, g and d.
       void ukp5_gen_stats(void) {
@@ -204,7 +205,6 @@ namespace hbm {
         }
         return;
       }
-      #endif //HBM_PROFILE
     };
 
     template<typename W, typename P>
@@ -356,11 +356,10 @@ namespace hbm {
         opt = opts.first;
         y_opt = opts.second;
       }
-      #ifdef HBM_PROFILE
+
       shared_ptr< ukp5_extra_info_t<W, P, I> > info =
         dynamic_pointer_cast<ukp5_extra_info_t<W, P, I> >(sol.extra_info);
       info->last_y_value_outer_loop = last_y_where_nonbest_item_was_used+1;
-      #endif
 
       #else //HBM_CHECK_PERIODICITY
       auto opts = get_opts(c, g, w_min);
@@ -370,35 +369,31 @@ namespace hbm {
 
       return;
     }
-
-    #ifdef HBM_PROFILE
-    #endif //HBM_PROFILE
     
     template<typename W, typename P, typename I>
     void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, const ukp5_conf_t<I> &conf) {
-      #ifdef HBM_PROFILE
       steady_clock::time_point all_ukp5_begin = steady_clock::now();
       steady_clock::time_point begin; // Only declare
-      #endif
 
-      // This pointer stores all the extra info that the UKP5
-      // generate when HBM_PROFILE is defined
+      // This pointer stores all the extra info that the UKP5 will print after.
       ukp5_extra_info_t<W, P, I>* ptr = new ukp5_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
       sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
 
+      if (conf.create_dumps) {
+        ptr->create_dumps = conf.create_dumps;
+        ptr->gd_path = conf.gd_path;
+        ptr->dd_path = conf.dd_path;
+      }
+
       if (conf.apply_smdom && conf.apply_smdom_before_sort) { 
-        #ifdef HBM_PROFILE
         begin = steady_clock::now();
-        #endif
         vector< item_t<W, P> > undominated;
         smdom(ukpi.items, undominated, 0, true);
         if (undominated.size() < ukpi.items.size()) {
           ukpi.items = undominated;
         }
-        #ifdef HBM_PROFILE
         ptr->smdom_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
-        #endif
       }
 
       // How many elements we will partially sort
@@ -421,47 +416,32 @@ namespace hbm {
         k = conf.sort_k_most_eff;
       }
 
-      #ifdef HBM_PROFILE
       begin = steady_clock::now();
-      #endif
       sort_by_eff(ukpi.items, k);
-      #ifdef HBM_PROFILE
       ptr->sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
-      #endif
 
       if (conf.apply_smdom && !conf.apply_smdom_before_sort) { 
-        #ifdef HBM_PROFILE
         begin = steady_clock::now();
-        #endif
         vector< item_t<W, P> > undominated;
         smdom(ukpi.items, undominated, k, true);
         if (undominated.size() < ukpi.items.size()) {
           ukpi.items = undominated;
         }
-        #ifdef HBM_PROFILE
         ptr->smdom_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
-        #endif
       }
 
-      #ifdef HBM_PROFILE
       begin = steady_clock::now();
-      #endif
       W c = ukpi.c;
       I n = ukpi.items.size();
       auto min_max_w = minmax_item_weight(ukpi.items);
       W w_min = min_max_w.first, w_max = min_max_w.second;
-      #ifdef HBM_PROFILE
       ptr->linear_comp_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
       ptr->c = c;
       ptr->n = n;
       ptr->w_min = w_min;
       ptr->w_max = w_max;
-      #endif
 
-      #ifdef HBM_PROFILE
       begin = steady_clock::now();
-      #endif
-      #ifdef HBM_PROFILE
       /* Use the solution fields instead of local variables to propagate
        * the array values. The arrays will be dumped to files, making possible
        * study them with R or other tool. */
@@ -469,26 +449,15 @@ namespace hbm {
       vector<I> &d = ptr->d;
       g.assign(c+1+(w_max-w_min), 0);
       d.assign(c+1+(w_max-w_min), n-1);
-      #else
-      vector<P> g(c+1+(w_max-w_min), 0);
-      vector<I> d(c+1+(w_max-w_min), n-1);
-      #endif
-      #ifdef HBM_PROFILE
       ptr->vector_alloc_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
-      #endif
 
-      #ifdef HBM_PROFILE
       begin = steady_clock::now();
-      #endif
       ukp5_phase1(ukpi, g, d, sol, w_min, w_max);
-      #ifdef HBM_PROFILE
       ptr->phase1_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+
       begin = steady_clock::now();
-      #endif
       ukp5_phase2(ukpi.items, d, sol);
-      #ifdef HBM_PROFILE
       ptr->phase2_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
-      #endif
 
       #ifdef HBM_CHECK_PERIODICITY
       // If we use our periodicity check the sol.used_items constructed by
@@ -506,16 +475,15 @@ namespace hbm {
       sol.used_items[0].qt += qt_best_item_inserted_by_per;
       #endif
 
-      #ifdef HBM_PROFILE
       ptr->total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
-      #endif
 
       return;
     }
 
     void usage(const char *func_name) {
       cout << "Usage info from: " << func_name << "." << endl;
-      cout << "usage: ./a.out data.ukp [k apply_dom apply_dom_before_sort]"
+      cout << "usage: ./a.out data.ukp [k apply_dom apply_dom_before_sort"
+              "create_dumps]"
               << endl;
       cout << "       k: A real number between 0 and 1. The items will be"
               " reordered before ukp5 is called, as std::partial_sort"
@@ -539,6 +507,11 @@ namespace hbm {
               " be better to not use dominance, and if there's a lot, the"
               " sorting cost could be reduced by applying dominance first."
               << endl;
+      cout << "       create_dumps: A boolean value (0 or 1). If true will"
+              " set the solution_t.extra_info field to save the value of"
+              " the g and d vectors on a format that can be easily read"
+              " by R. Can create very big files."
+              << endl;
       cout << "NOTE: the arguments are taken by position, if you want to"
               " specify the second argument value, you need to specify the"
               " first one too." << endl;
@@ -554,6 +527,16 @@ namespace hbm {
                   bool_0_1("[01]", nosubs);
 
       switch (argc) {
+        case 6:
+        if (!regex_match(argv[5], bool_0_1)) {
+          cerr << "Parameter create_dumps isn't valid. "
+                  "It's '" << argv[5] << "' when the valid values "
+                  "are 0 or 1."
+          << endl;
+          usage(__func__);
+        } else {
+          from_string(argv[5], conf.create_dumps);
+        }
         case 5:
         if (!regex_match(argv[4], bool_0_1)) {
           cerr << "Parameter apply_dom_before_sort isn't valid. "
@@ -602,6 +585,20 @@ namespace hbm {
         << endl;
         usage(__func__);
         break;
+      }
+
+      if (conf.create_dumps) {
+        using namespace boost::filesystem;
+        path my_path = path(string(argv[1]));
+        path fname = my_path.filename();
+        if (conf.gd_path.empty()) {
+          conf.gd_path = "./g_dump_" + fname.native() + ".dat";
+        }
+        if (conf.gd_path.empty()) {
+          conf.dd_path = "./d_dump_" + fname.native() + ".dat";
+        }
+        //conf.nsd_path = "./nsd_dump_" + filename.native() + ".dat";
+        //conf.dqt_path = "./dqt_dump_" + filename.native() + ".dat";
       }
 
       hbm_ukp5_impl::ukp5(ukpi, sol, conf);

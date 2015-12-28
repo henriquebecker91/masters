@@ -11,7 +11,6 @@
 // is inside their own namespace (std and hbm) so this should
 // be an OK thing to do.
 #include <regex>            // for regex, regex_match
-#include <iostream>         // for cout
 #include <algorithm>        // for sort
 #include "workarounds.hpp"  // for from_string
 
@@ -130,10 +129,6 @@ namespace hbm {
 
   /// Type that represents a solution of an UKP problem
   ///   (usually the optimal solution).
-  ///
-  /// @attention If HBM_PROFILE is NOT defined the only fields that exist are
-  /// opt, y_opt, used_items and last_y_value_outer_loop (this last only
-  /// exists if HBM_CHECK_PERIODICITY is defined).
   template <typename W, typename P, typename I>
   struct solution_t {
     P opt;   ///< The solution value (solution items profit sum).

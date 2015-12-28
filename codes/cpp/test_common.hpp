@@ -2,7 +2,7 @@
 #define HBM_TEST_COMMON_HPP
 
 #include <chrono>
-#include <fstream>
+#include <fstream>  // ifstream for reading UKP files
 #include <array>
 #include <iostream>
 
@@ -108,22 +108,6 @@ namespace hbm {
 
       return EXIT_SUCCESS;
     }
-
-    #if defined(HBM_PROFILE) && defined(HBM_DUMP)
-    template <typename W_OR_P>
-    void dump(const string &path, const string &header, const vector<W_OR_P> &v) {
-      ofstream f(path, ofstream::out|ofstream::trunc);
-      if (f.is_open())
-      {
-        f << header << endl;
-        for (size_t y = 0; y < v.size(); ++y) {
-          f << y << "\t" << v[y] << endl;
-        }
-      } else {
-        cerr << "Couldn't open file: " << path << endl;
-      }
-    }
-    #endif
 
     template <typename W, typename P, typename I>
     int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, argv_t argv) {

@@ -129,7 +129,7 @@ namespace hbm {
     };
 
     template<typename W, typename P, typename I = size_t>
-    void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
       simple_wrapper(y_star_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
   }
@@ -150,7 +150,7 @@ namespace hbm {
   }
 
   template<typename W, typename P, typename I = size_t>
-  void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+  void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_periodicity_impl::y_star_wrapper(ukpi, sol, argc, argv);
   }
 }

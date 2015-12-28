@@ -179,13 +179,17 @@ namespace hbm {
     explicit ukp_read_error (const char* s) noexcept : runtime_error(s) {};
   };
 
+  /// The argv type, a const pointer to const pointers that point to
+  /// const chars.
+  typedef const char * const * const argv_t;
+
   /// Alias for generic ukp solver pointer type. Functions that take an
   /// ukp solving procedure should use this type. Any ukp solving procedure
   /// can easily be wrapped around a procedure with this signature.
   template <typename W, typename P, typename I>
   using ukp_solver_t = void (*)(instance_t<W, P> &,
                                 solution_t<W, P, I> &,
-                                int argc, char **argv);
+                                int argc, argv_t argv);
 
   /// Inner ukp_common implementations. Do not depend.
   namespace hbm_ukp_common_impl {
@@ -274,7 +278,7 @@ namespace hbm {
       static const string item_s        = bs + nb + bp + nb + comm_s;
       static const string end_data_s    = bs + "end" + bp + "data" + comm_s;
 
-      static const regex mline      (mline_s, icase );
+      static const regex mline      (mline_s, icase);
       static const regex cline      (cline_s, icase);
       static const regex begin_data (begin_data_s, extended | icase | nosubs);
       static const regex item       (item_s, icase | optimize);

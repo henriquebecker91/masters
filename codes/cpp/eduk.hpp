@@ -329,7 +329,7 @@ namespace hbm {
     };
 
     template<typename W, typename P, typename I = size_t>
-    void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
       simple_wrapper(eduk_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
   }
@@ -348,7 +348,7 @@ namespace hbm {
   /// @see main_take_path
   /// @see eduk(instance_t<W, P> &, solution_t<W, P, I> &, bool)
   template<typename W, typename P, typename I = size_t>
-  void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+  void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_eduk_impl::eduk(ukpi, sol, argc, argv);
   }
 }

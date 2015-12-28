@@ -153,12 +153,12 @@ namespace hbm {
     };
 
     template<typename W, typename P, typename I = size_t>
-    void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
       simple_wrapper(smdom_sort_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
 
     template<typename W, typename P, typename I = size_t>
-    void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
       hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol);
     }
 
@@ -273,6 +273,9 @@ namespace hbm {
     hbm_dominance_impl::smdom(begin, end, undominated, k, k_already_sorted);
   }
 
+  /// Overloaded vector version.
+  ///
+  /// @see void smdom(const RAI begin, const RAI end, std::vector< item_t < W, P > > &undominated, I k, bool k_already_sorted)
   template < typename P, typename W, typename I >
   void smdom(std::vector< item_t < W, P > > &items,
              std::vector< item_t < W, P > > &undominated,
@@ -281,23 +284,29 @@ namespace hbm {
     hbm_dominance_impl::smdom(items, undominated, k, k_already_sorted);
   }
 
+  /// Execute smdom_sort over ukpi.items. Save result to solution_t.extra_info.
   template<typename W, typename P, typename I>
   void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
     hbm_dominance_impl::smdom_sort_wrapper(ukpi, sol, already_sorted);
   }
 
+  /// Execute smdom_sort over ukpi.items. Save result to solution_t.extra_info.
+  /// If argc < 3, already_sorted = false, else already_sorted = argv[2].
   template<typename W, typename P, typename I = size_t>
-  void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+  void smdom_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_dominance_impl::smdom_sort_wrapper(ukpi, sol, argc, argv);
   }
 
+  /// Execute smdom_no_sort over ukpi.items. Save result to solution_t.extra_info.
   template<typename W, typename P, typename I>
   void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol) {
     hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol);
   }
 
+  /// Execute smdom_no_sort over ukpi.items. Save result to solution_t.extra_info.
+  /// Don't do anything with the parameters.
   template<typename W, typename P, typename I = size_t>
-  void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+  void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol, argc, argv);
   }
 }

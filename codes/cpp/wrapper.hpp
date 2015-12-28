@@ -29,23 +29,23 @@ namespace hbm {
     using namespace std;
 
     template<typename W, typename P, typename I = size_t>
-    void simple_wrapper(const wrapper_t<W, P, I> &wp, instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    void simple_wrapper(const wrapper_t<W, P, I> &wp, instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
       static const string ALREADY_SORTED = "--already-sorted";
-      if (argc == 0) {
+      if (argc < 3) {
         wp(ukpi, sol, false);
-      } else if (argc >= 1) {
-        if (argc > 1) {
+      } else if (argc >= 3) {
+        if (argc > 3) {
           cerr << wp.name() << " (simple_wrapper): parameter warning: "
                   "Only one flag is allowed, but argc is " << argc
                   << ". " << endl;
         }
 
-        if (ALREADY_SORTED == argv[0]) {
+        if (ALREADY_SORTED == argv[2]) {
           wp(ukpi, sol, true);
         } else {
           cerr << wp.name() << " (simple_wrapper): parameter warning:"
                   " The only allowed flag is '" << ALREADY_SORTED <<
-                  "'. The first flag received was \"" << argv[0] <<
+                  "'. The first flag received was \"" << argv[2] <<
                   "\". Executing the algorithm as no"
                   " flags were given. " << endl;
           wp(ukpi, sol, false);
@@ -63,21 +63,21 @@ namespace hbm {
   ///   argument, otherwise the last argument will be false.
   ///
   /// It is necessary to stress that the procedure expect "--already-sorted"
-  /// to be the argv[0], therefore the program name and previous parameters
-  /// should be skipped first. The procedure writes warning and error
+  /// to be the argv[2], therefore the program name and the instance file
+  /// should NOT be skipped/removed. The procedure writes warning and error
   /// messages on cerr.
   ///
   /// @param wp A subclass of wrapper_t with operator() and name redefined.
   /// @param ukpi An UKP instance.
   /// @param sol Where the results will be written.
-  /// @param argc The number of arguments, expected to be 0 or 1.
+  /// @param argc The number of arguments, expected to be 2 or 3.
   /// @param argv The arguments, expected to be ["--already-sorted"]
-  ///   if argc is 1.
+  ///   if argc is 3.
   template<typename W, typename P, typename I = size_t>
   void simple_wrapper(const wrapper_t<W, P, I> &wp,
                       instance_t<W, P> &ukpi,
                       solution_t<W, P, I> &sol,
-                      int argc, char** argv) {
+                      int argc, argv_t argv) {
     hbm_wrapper_impl::simple_wrapper(wp, ukpi, sol, argc, argv);
   }
 }

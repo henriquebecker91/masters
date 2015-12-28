@@ -4,6 +4,7 @@
 #include <sstream>  // For stringstream
 #include <iostream>
 #include <iomanip>  // For precision related routines
+#include <regex>    // For command-line argument handmade verification
 
 // Includes for command-line arguments parsing
 // Not used yet. Will use in the future.
@@ -52,6 +53,7 @@ namespace hbm {
 
   namespace hbm_ukp5_impl {
     using namespace std;
+    using namespace std::regex_constants;
 
     #ifdef HBM_PROFILE
     using namespace std::chrono;
@@ -511,54 +513,94 @@ namespace hbm {
       return;
     }
 
+    void usage(const char *func_name) {
+      cout << "Usage info from: " << func_name << "." << endl;
+      cout << "usage: ./a.out data.ukp [k apply_dom apply_dom_before_sort]"
+              << endl;
+      cout << "       k: A real number between 0 and 1. The items will be"
+              " reordered before ukp5 is called, as std::partial_sort"
+              " was called with the 'middle' argument being position k*"
+              "<number of items>. If k is not provided we assume 1 (the"
+              " entire vector will be ordered by efficiency). Use 0 if the"
+              " items are already ordered by efficiency in the instance"
+              " file, or you don't want to sort the items by efficiency."
+              << endl;
+      cout << "       apply_dom: A boolean value (0 or 1)."
+              " If it's one, simple/multiple dominance is applied to"
+              " the items before executing ukp5. The default value is"
+              " zero (UKP5 already removes dominance on its own way,"
+              " if the items are sorted by non-increasing efficiency)."
+              << endl;
+      cout << "       apply_dom_before_sort: A boolean value (0 or 1)."
+              " Apply dominance before or after sorting. Dominance after"
+              " sort is useful only if you will sort all the items ("
+              " k = 1), because in this case a faster version of dominance"
+              " can be used. But: if there was few dominated items, would"
+              " be better to not use dominance, and if there's a lot, the"
+              " sorting cost could be reduced by applying dominance first."
+              << endl;
+      cout << "NOTE: the arguments are taken by position, if you want to"
+              " specify the second argument value, you need to specify the"
+              " first one too." << endl;
+    }
+
     template<typename W, typename P, typename I>
-    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+    void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
       // The empty constructor already has default values for the fields
       // below we only change what was explicited by command-line
       ukp5_conf_t<I> conf;
 
+      const regex float_0_1("(0|1|0\\.[0-9]*[1-9])", nosubs),
+                  bool_0_1("[01]", nosubs);
+
       switch (argc) {
+        case 5:
+        if (!regex_match(argv[4], bool_0_1)) {
+          cerr << "Parameter apply_dom_before_sort isn't valid. "
+                  "It's '" << argv[4] << "' when the valid values "
+                  "are 0 or 1."
+          << endl;
+          usage(__func__);
+        } else {
+          from_string(argv[4], conf.apply_smdom_before_sort);
+        }
+        case 4:
+        if (!regex_match(argv[3], bool_0_1)) {
+          cerr << "Parameter apply_dom isn't valid. "
+                  "It's '" << argv[3] << "' when the valid values "
+                  "are 0 or 1."
+          << endl;
+          usage(__func__);
+        } else {
+          from_string(argv[3], conf.apply_smdom);
+        }
         case 3:
-        from_string(argv[2], conf.apply_smdom_before_sort);
+        if (!regex_match(argv[2], float_0_1)) {
+          cerr << "Parameter k isn't valid. "
+                  "It's '" << argv[2] << "' when the valid values "
+                  "are real numbers between 0.0 and 1.0."
+          << endl;
+          usage(__func__);
+        } else {
+          from_string(argv[2], conf.sort_percent);
+        }
         case 2:
-        from_string(argv[1], conf.apply_smdom);
+        // exists only to avoid giving waning if the method was called
+        // without parameters
+        break;
+
         case 1:
-        from_string(argv[0], conf.sort_percent);
         case 0:
-        // exists only to argc == 0 don't get into default
+        cerr << "WARNING: " << __func__ << ": argc < 2?! Executing method"
+                " with default parameter values."
+        << endl;
         break;
 
         default:
-        cout << "WARNING: more than " << argc << " extra parameters to ukp5."
-                " Will execute with the default values."
-                << endl;
-        cout << "usage: ./a.out data.ukp [k apply_dom apply_dom_before_sort]"
-                << endl;
-        cout << "       k: A real number between 0 and 1. The items will be"
-                " reordered before ukp5 is called, as std::partial_sort"
-                " was called with the 'middle' argument being position k*"
-                "<number of items>. If k is not provided we assume 1 (the"
-                " entire vector will be ordered by efficiency). Use 0 if the"
-                " items are already ordered by efficiency in the instance"
-                " file, or you don't want to sort the items by efficiency."
-                << endl;
-        cout << "       apply_dom: A boolean value (0 or 1)."
-                " If it's one, simple/multiple dominance is applied to"
-                " the items before executing ukp5. The default value is"
-                " zero (UKP5 already removes dominance on its own way,"
-                " if the items are sorted by non-increasing efficiency)."
-                << endl;
-        cout << "       apply_dom_before_sort: A boolean value (0 or 1)."
-                " Apply dominance before or after sorting. Dominance after"
-                " sort is useful only if you will sort all the items ("
-                " k = 1), because in this case a faster version of dominance"
-                " can be used. But: if there was few dominated items, would"
-                " be better to not use dominance, and if there's a lot, the"
-                " sorting cost could be reduced by applying dominance first."
-                << endl;
-        cout << "NOTE: the arguments are taken by position, if you want to"
-                " specify the second argument value, you need to specify the"
-                " first one too." << endl;
+        cout << "WARNING: " << __func__ << ": more than " << argc << " "
+              "parameters to ukp5. Will execute with the default values."
+        << endl;
+        usage(__func__);
         break;
       }
 
@@ -572,7 +614,7 @@ namespace hbm {
   }
 
   template<typename W, typename P, typename I>
-  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, char** argv) {
+  void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_ukp5_impl::ukp5(ukpi, sol, argc, argv);
   }
 }

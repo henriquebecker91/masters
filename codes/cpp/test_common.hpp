@@ -25,8 +25,8 @@ namespace hbm {
     using namespace std::chrono;
 
     template <typename W, typename P, typename I>
-    int run_ukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char ** argv, const string& path, run_t<W, P, I> &run) {
-      ifstream f(path);
+    int run_ukp(ukp_solver_t<W, P, I> ukp_solver, int argc, argv_t argv, run_t<W, P, I> &run) {
+      ifstream f(argv[1]);
 
       if (f.is_open())
       {
@@ -40,7 +40,7 @@ namespace hbm {
         steady_clock::time_point t2 = steady_clock::now();
         run.time = duration_cast<duration<double>>(t2 - t1);
       } else {
-        cout << "Couldn't open file: " << path << endl;
+        cout << "Couldn't open file: " << argv[1] << endl;
         return EXIT_FAILURE;
       }
 
@@ -56,7 +56,7 @@ namespace hbm {
     };
 
     template <typename W, typename P, typename I>
-    int benchmark_pyasukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char **argv) {
+    int benchmark_pyasukp(ukp_solver_t<W, P, I> ukp_solver, int argc, argv_t argv) {
       array<instance_data_t<P>, 8> instances_data = {{
         { "exnsd16", 1029680 },
         { "exnsd18", 1112131 },
@@ -73,10 +73,18 @@ namespace hbm {
         const string path = "../../data/ukp/" + instances_data[i].name + ".ukp";
         cout << path << endl;
 
-        run_t<W, P, I> run;
-        // Call the function without any flags (argc = 0, argv = NULL)
-        int status = hbm::hbm_test_common_impl::run_ukp(ukp_solver, argc-1, argv+1, path, run);
+        // Insert the path as the second argument. The second argument is
+        // expected to be the instance name by all the ukp_solver_t methods.
+        const char ** hijacked_argv = new const char *[argc+1];
+        hijacked_argv[0] = argv[0];
+        hijacked_argv[1] = path.c_str();
+        copy_n(&argv[1], argc - 1, &hijacked_argv[2]);
+        int hijacked_argc = argc + 1;
 
+        run_t<W, P, I> run;
+        int status = hbm_test_common_impl::run_ukp(ukp_solver, hijacked_argc, &hijacked_argv[0], run);
+
+        delete hijacked_argv;
         if (status == EXIT_SUCCESS) {
           P expected = instances_data[i].expected_opt;
           P obtained = run.result.opt;
@@ -118,7 +126,7 @@ namespace hbm {
     #endif
 
     template <typename W, typename P, typename I>
-    int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, char** argv) {
+    int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, argv_t argv) {
       if (argc < 2) {
         cout << "usage: a.out data.ukp [extra specific method params]" << endl;
         return EXIT_FAILURE;
@@ -130,7 +138,7 @@ namespace hbm {
       run_t<W, P, I> run;
 
       // Call the function without giving the program name or instance filename
-      int status = hbm::hbm_test_common_impl::run_ukp(ukp_solver, argc-2, argv+2, spath, run);
+      int status = hbm::hbm_test_common_impl::run_ukp(ukp_solver, argc, argv, run);
 
       if (status == EXIT_FAILURE) {
         cout << "There was some problem with this instance. " << endl;
@@ -159,7 +167,7 @@ namespace hbm {
     }
   }
 
-  /// Run a custom procedure over the ukp instance file at path.
+  /// Run a custom procedure over the ukp instance file at argv[1].
   ///
   /// The time for reading the instance isn't measured, only the time taken
   /// by the ukp_solver is measured.
@@ -167,20 +175,22 @@ namespace hbm {
   /// @param ukp_solver A procedure that takes an instance_t, some
   ///   extra parameters coded as argc/argv and writes the result
   ///   on a solution_t.
-  /// @param argc Number of extra parameters of ukp_solver.
-  /// @param argv Extra parameters given without change to ukp_solver.
-  /// @param path A string with the path to an instance on the UPK format.
+  /// @param argc Number of arguments stored on argv.
+  /// @param argv Arguments passed by command-line. It's expected that the
+  ///   argv[0] will be a program name, and the argv[1] will be the instance
+  ///   filename. The instance data will be read from argv[1], and the argc
+  ///   and argv will be passed to ukp_solver without change.
   /// @param run Where the solution_t written by ukp_solver and the time
   ///   used by the the ukp_solver will be stored.
   ///
   /// @return EXIT_SUCCESS or EXIT_FAILURE. It's a failure if the file
-  ///   at path can't be opened.
+  ///   at argv[1] can't be opened.
   ///
   /// @exception ukp_read_error If the instance format is wrong.
   /// @see read_ukp_instance For the ukp format.
   template <typename W, typename P, typename I>
-  int run_ukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char **argv, const std::string& path, run_t<W, P, I> &run) {
-    return hbm_test_common_impl::run_ukp(ukp_solver, argc, argv, path, run);
+  int run_ukp(ukp_solver_t<W, P, I> ukp_solver, int argc, hbm::argv_t argv, run_t<W, P, I> &run) {
+    return hbm_test_common_impl::run_ukp(ukp_solver, argc, argv, run);
   }
 
   /// Procedure used to test if a solver procedure is working.
@@ -192,29 +202,43 @@ namespace hbm {
   /// empirical test to check if the ukp_solver solver function
   /// remains working after a change. Used in the development
   /// of the solver functions.
+  /// 28/12/2015: Now updated to receive and repass command-line
+  /// arguments.
   ///
   /// @param ukp_solver A procedure that takes an instance_t, some
   ///   extra parameters coded as argc/argv and writes the result
   ///   on a solution_t.
+  /// @param argc The number of arguments stored on argv. The argc passed
+  ///   to ukp_solver is argc+1. See reasononig below (in argv parameter
+  ///   explanation).
+  /// @param argv The command-line arguments. It's expected that
+  ///   argv[0] is the program name. The argv passed to the
+  ///   ukp_solver parameter isn't this argv. It's a copy of this argv
+  ///   with the instance filename inserted as argv[1] (old
+  ///   parameter argv[1] will become argv[2] and so on).
   ///
   /// @return EXIT_SUCCESS or EXIT_FAILURE. It's a failure if the
   ///   PYAsUKP benchmark files aren't found at the hardcoded path.
   /// @exception ukp_read_error If the instance format is wrong.
   template <typename W, typename P, typename I>
-  int benchmark_pyasukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char** argv) {
+  int benchmark_pyasukp(ukp_solver_t<W, P, I> ukp_solver, int argc, hbm::argv_t argv) {
     return hbm_test_common_impl::benchmark_pyasukp(ukp_solver, argc, argv);
   }
 
   /// @brief Takes the first argument (argv[1]) as the instance file and
   ///   gives the remaining arguments to the custom procedure.
   ///
-  /// The custom procedure receive argc as argc-2 and argv as argv+2
-  ///   (the executable filename and the instance filename are skipped).
-  /// 
+  /// The position argv[0] is expected to have the executable name.
+  /// The first argument is argv[1] (it's expected to be the instance
+  /// filename). The custom procedure receive argc and argv as they are
+  /// passed (the executable filename and the instance filename are NOT
+  /// skipped). The instance_t passed to the ukp_solver is read from
+  /// argv[1]. It's NOT expected from the ukp_solver to try reading the
+  /// file itself (ukp_solver should probably ignore argv[1]).
+  ///
   /// @param ukp_solver A procedure that takes an instance_t, some
-  ///   extra parameters coded as argc/argv and writes the result
-  ///   on a solution_t. Remember that the argc and argv given to
-  ///   the ukp_solver are a subset of the ones given to main_take_path.
+  ///   parameters coded as argc/argv and writes the result on a
+  ///   solution_t.
   /// @param argc The command-line arguments number. This is expected
   ///   to be greater than two (at least one argument has to exist,
   ///   the instance filename).
@@ -228,7 +252,7 @@ namespace hbm {
   /// @exception ukp_read_error If the instance format is wrong.
   /// @see read_ukp_instance For the ukp format.
   template <typename W, typename P, typename I>
-  int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, char** argv) {
+  int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, hbm::argv_t argv) {
     return hbm_test_common_impl::main_take_path(ukp_solver, argc, argv);
   }
 }

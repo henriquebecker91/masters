@@ -25,7 +25,7 @@ namespace hbm {
     using namespace std::chrono;
 
     template <typename W, typename P, typename I>
-    int run_ukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, int, char **), int argc, char ** argv, const string& path, run_t<W, P, I> &run) {
+    int run_ukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char ** argv, const string& path, run_t<W, P, I> &run) {
       ifstream f(path);
 
       if (f.is_open())
@@ -56,7 +56,7 @@ namespace hbm {
     };
 
     template <typename W, typename P, typename I>
-    int benchmark_pyasukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, int argc, char **argv)) {
+    int benchmark_pyasukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char **argv) {
       array<instance_data_t<P>, 8> instances_data = {{
         { "exnsd16", 1029680 },
         { "exnsd18", 1112131 },
@@ -75,7 +75,7 @@ namespace hbm {
 
         run_t<W, P, I> run;
         // Call the function without any flags (argc = 0, argv = NULL)
-        int status = hbm::hbm_test_common_impl::run_ukp(ukp_solver, 0, NULL, path, run);
+        int status = hbm::hbm_test_common_impl::run_ukp(ukp_solver, argc-1, argv+1, path, run);
 
         if (status == EXIT_SUCCESS) {
           P expected = instances_data[i].expected_opt;
@@ -118,7 +118,7 @@ namespace hbm {
     #endif
 
     template <typename W, typename P, typename I>
-    int main_take_path(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, int, char**), int argc, char** argv) {
+    int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, char** argv) {
       if (argc < 2) {
         cout << "usage: a.out data.ukp [extra specific method params]" << endl;
         return EXIT_FAILURE;
@@ -179,8 +179,8 @@ namespace hbm {
   /// @exception ukp_read_error If the instance format is wrong.
   /// @see read_ukp_instance For the ukp format.
   template <typename W, typename P, typename I>
-  int run_ukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, int, char **), int, char **, const std::string& path, run_t<W, P, I> &run) {
-    return hbm_test_common_impl::run_ukp(ukp_solver, path, run);
+  int run_ukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char **argv, const std::string& path, run_t<W, P, I> &run) {
+    return hbm_test_common_impl::run_ukp(ukp_solver, argc, argv, path, run);
   }
 
   /// Procedure used to test if a solver procedure is working.
@@ -201,8 +201,8 @@ namespace hbm {
   ///   PYAsUKP benchmark files aren't found at the hardcoded path.
   /// @exception ukp_read_error If the instance format is wrong.
   template <typename W, typename P, typename I>
-  int benchmark_pyasukp(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, int, char**)) {
-    return hbm_test_common_impl::benchmark_pyasukp(ukp_solver);
+  int benchmark_pyasukp(ukp_solver_t<W, P, I> ukp_solver, int argc, char** argv) {
+    return hbm_test_common_impl::benchmark_pyasukp(ukp_solver, argc, argv);
   }
 
   /// @brief Takes the first argument (argv[1]) as the instance file and
@@ -228,7 +228,7 @@ namespace hbm {
   /// @exception ukp_read_error If the instance format is wrong.
   /// @see read_ukp_instance For the ukp format.
   template <typename W, typename P, typename I>
-  int main_take_path(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, int, char **), int argc, char** argv) {
+  int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, char** argv) {
     return hbm_test_common_impl::main_take_path(ukp_solver, argc, argv);
   }
 }

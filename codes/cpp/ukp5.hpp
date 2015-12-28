@@ -489,17 +489,18 @@ namespace hbm {
       #endif
 
       #ifdef HBM_CHECK_PERIODICITY
-      /* If we use our periodicity check the sol.used_items constructed by
-       * ukp5_phase2 doesn't include the copies of the best item used to
-       * fill all the extra_capacity. This solves it. */
+      // If we use our periodicity check the sol.used_items constructed by
+      // ukp5_phase2 doesn't include the copies of the best item used to
+      // fill all the extra_capacity. This solves it.
+      // NOTE: this works even if the array isn't sorted
       W qt_best_item_inserted_by_per = (c - sol.y_opt)/ukpi.items[0].w;
       sol.opt += static_cast<P>(qt_best_item_inserted_by_per)*ukpi.items[0].p;
       sol.y_opt+= qt_best_item_inserted_by_per*ukpi.items[0].w;
-      /* Our periodicity check will always get a partial solution that have at
-       * least one of the best item. And ukp5_phase2 will populate the
-       * sol.used_items in the same order the sol.items are, this way we
-       * have the guarantee that the first element of sol.used_items
-       * exist and it's the best item. */
+      // Our periodicity check will always get a partial solution that have at
+      // least one of the best item. And ukp5_phase2 will populate the
+      // sol.used_items in the same order the sol.items are, this way we
+      // have the guarantee that the first element of sol.used_items
+      // exist and it's the best item.
       sol.used_items[0].qt += qt_best_item_inserted_by_per;
       #endif
 

@@ -179,6 +179,14 @@ namespace hbm {
     explicit ukp_read_error (const char* s) noexcept : runtime_error(s) {};
   };
 
+  /// Alias for generic ukp solver pointer type. Functions that take an
+  /// ukp solving procedure should use this type. Any ukp solving procedure
+  /// can easily be wrapped around a procedure with this signature.
+  template <typename W, typename P, typename I>
+  using ukp_solver_t = void (*)(instance_t<W, P> &,
+                                solution_t<W, P, I> &,
+                                int argc, char **argv);
+
   /// Inner ukp_common implementations. Do not depend.
   namespace hbm_ukp_common_impl {
     using namespace std;

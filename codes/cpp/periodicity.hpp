@@ -26,37 +26,59 @@ namespace hbm {
     using namespace boost;
 
     template <typename W, typename P>
+    W y_star(item_t<W, P> b, item_t<W, P> b2) {
+      if (std::is_integral<W>::value && std::is_integral<P>::value &&
+          std::is_same<W, P>::value) {
+        // Without the pragma, the compiler gives conversion warnings
+        // that don't will ever happen. If P is a floating point number
+        // this 'if' never executes.
+        #pragma GCC diagnostic ignored "-Wfloat-conversion"
+        W w1 = b.w, w2 = b2.w, p1 = b.p, p2 = b2.p;
+        
+        rational<W> r_p1(b.p);
+        rational<W> r1(p1, w1);
+        rational<W> r2(p2, w2);
+
+        return rational_cast<W>(r_p1/(r1 - r2)) + 1;
+        // Return diagnostic to normal
+        #pragma GCC diagnostic warning "-Wfloat-conversion"
+      } else if (std::is_floating_point<P>::value) {
+        W w1 = b.w, w2 = b2.w;
+        P p1 = b.p, p2 = b2.p;
+
+        P e1 = p1 / static_cast<P>(w1);
+        P e2 = p2 / static_cast<P>(w2);
+
+        return static_cast<W>(p1/(e1 - e2)) + 1;
+      } else {
+        cerr << __func__ << ": W and P aren't valid types. " << endl;
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    template <typename W, typename P>
+    W y_star(vector< item_t<W, P> > &items, bool already_sorted = false) {
+      if (!already_sorted) sort_by_eff(items, 2u);
+
+      return y_star(items[0], items[1]);
+    }
+
+    template <typename W, typename P>
     W y_star(instance_t<W, P> &ukpi, bool already_sorted = false) {
-      static_assert(std::is_integral<W>::value &&
-                    std::is_integral<P>::value &&
-                    std::is_same<W, P>::value,
-                    "For now, y_star<W, P> only compiles if the W and P"
-                    " types are the same integral type.");
-      vector< item_t<W, P> > &items(ukpi.items);
-      if (!already_sorted) sort_by_eff(ukpi.items, 2u);
-
-      item_t<W, P> i1 = items[0], i2 = items[1];
-      W w1 = i1.w, w2 = i2.w, p1 = i1.p, p2 = i2.p;
-      
-      rational<W> r_p1(i1.p);
-      rational<W> r1(p1, w1);
-      rational<W> r2(p2, w2);
-
-      return rational_cast<W>(r_p1/(r1 - r2)) + 1;
+      return y_star(ukpi.items, already_sorted);
     }
 
     template <typename W, typename P, typename I>
-    W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool),
-      instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
-      vector< item_t<W, P> > &items(ukpi.items);
-      if (!already_sorted) sort_by_eff(ukpi.items);
-
-      W y_ = y_star(ukpi, already_sorted);
+    W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, void*),
+      instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, void* ukp_solver_extra_params) {
+      W y_ = y_star(ukpi, false);
 
       if (y_ >= ukpi.c) {
-        (*ukp_solver)(ukpi, sol, true);
+        (*ukp_solver)(ukpi, sol, ukp_solver_extra_params);
         return y_;
       }
+
+      vector< item_t<W, P> > &items(ukpi.items);
 
       W old_c = ukpi.c;
 

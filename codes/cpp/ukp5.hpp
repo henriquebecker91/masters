@@ -23,7 +23,6 @@
 #endif
 
 namespace hbm {
-
   /// Class with the UKP5 extra parameters.
   /// It's initialized with the default values. You only need
   /// to touch it if you want to tweak the UKP5 inner workings.
@@ -594,7 +593,7 @@ namespace hbm {
         if (conf.gd_path.empty()) {
           conf.gd_path = "./g_dump_" + fname.native() + ".dat";
         }
-        if (conf.gd_path.empty()) {
+        if (conf.dd_path.empty()) {
           conf.dd_path = "./d_dump_" + fname.native() + ".dat";
         }
         //conf.nsd_path = "./nsd_dump_" + filename.native() + ".dat";

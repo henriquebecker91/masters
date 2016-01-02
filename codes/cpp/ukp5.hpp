@@ -37,7 +37,7 @@ namespace hbm {
     };
     bool create_dumps{false};
     /// Dump paths, if empty they are set by ukp5 (argc/argv version).
-    std::string gd_path, dd_path/*, nsd_path, dqt_path*/;
+    std::string gd_path, dd_path, nsd_path, dqt_path;
   };
 
   namespace hbm_ukp5_impl {
@@ -89,7 +89,9 @@ namespace hbm {
       /// If true, will try to create dump files on gd_path and dd_path.
       bool create_dumps;
       string gd_path, ///< Path where the g vector will be dumped.
-                  dd_path; ///< Path where the d vector will be dumped.
+             dd_path, ///< Path where the d vector will be dumped.
+             nsd_path, ///< Path where non_skipped_d will be dumped.
+             dqt_path; ///< Path where qt_i_in_dy will be dumped.
 
       template <typename W_OR_P>
       static void dump(const string &path,
@@ -164,8 +166,8 @@ namespace hbm {
         if (create_dumps) {
           dump(gd_path, "y\tgy", g);
           dump(dd_path, "y\tdy", d);
-          //dump(nsd_path, "y\tdy", non_skipped_d);
-          //dump(dqt_path, "i\tqt_in_d", qt_i_in_dy);
+          dump(nsd_path, "y\tdy", non_skipped_d);
+          dump(dqt_path, "i\tqt_in_d", qt_i_in_dy);
         }
 
         return cout.str();
@@ -362,12 +364,18 @@ namespace hbm {
       return;
     }
     
+    double difftime_between_now_and(const steady_clock::time_point &begin) {
+      return duration_cast< duration<double> >(steady_clock::now() - begin)
+             .count();
+    }
+
     template<typename W, typename P, typename I>
     void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, const ukp5_conf_t<I> &conf) {
       steady_clock::time_point all_ukp5_begin = steady_clock::now();
       steady_clock::time_point begin; // Only declare
 
-      // This pointer stores all the extra info that the UKP5 will print after.
+      // This pointer stores all the extra info that the UKP5 will print or
+      // dump after.
       ukp5_extra_info_t<W, P, I>* ptr = new ukp5_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
       sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
@@ -376,6 +384,8 @@ namespace hbm {
         ptr->create_dumps = conf.create_dumps;
         ptr->gd_path = conf.gd_path;
         ptr->dd_path = conf.dd_path;
+        ptr->nsd_path = conf.nsd_path;
+        ptr->dqt_path = conf.dqt_path;
       }
 
       if (conf.apply_smdom && conf.apply_smdom_before_sort) { 
@@ -385,10 +395,11 @@ namespace hbm {
         if (undominated.size() < ukpi.items.size()) {
           ukpi.items = undominated;
         }
-        ptr->smdom_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+        ptr->smdom_time = difftime_between_now_and(begin);
       }
 
-      // How many elements we will partially sort
+      // Compute ow many elements we will partially sort (this if
+      // doesn't sort anything)
       I k;
       if (conf.use_percent) {
         // If the conf says we sort a fraction of the list, we compute
@@ -410,7 +421,7 @@ namespace hbm {
 
       begin = steady_clock::now();
       sort_by_eff(ukpi.items, k);
-      ptr->sort_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+      ptr->sort_time = difftime_between_now_and(begin);
 
       if (conf.apply_smdom && !conf.apply_smdom_before_sort) { 
         begin = steady_clock::now();
@@ -419,7 +430,7 @@ namespace hbm {
         if (undominated.size() < ukpi.items.size()) {
           ukpi.items = undominated;
         }
-        ptr->smdom_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+        ptr->smdom_time = difftime_between_now_and(begin);
       }
 
       begin = steady_clock::now();
@@ -427,29 +438,31 @@ namespace hbm {
       I n = ukpi.items.size();
       auto min_max_w = minmax_item_weight(ukpi.items);
       W w_min = min_max_w.first, w_max = min_max_w.second;
-      ptr->linear_comp_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+      ptr->linear_comp_time = difftime_between_now_and(begin);
+
+      // Set some variables for post printing
       ptr->c = c;
       ptr->n = n;
       ptr->w_min = w_min;
       ptr->w_max = w_max;
 
       begin = steady_clock::now();
-      /* Use the solution fields instead of local variables to propagate
-       * the array values. The arrays will be dumped to files, making possible
-       * study them with R or other tool. */
+      /* Use solution_t.extra_info fields instead of local variables to
+       * propagate the array values. The arrays will be dumped to files,
+       * making possible study them with R or other tool. */
       vector<P> &g = ptr->g;
       vector<I> &d = ptr->d;
       g.assign(c+1+(w_max-w_min), 0);
       d.assign(c+1+(w_max-w_min), n-1);
-      ptr->vector_alloc_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+      ptr->vector_alloc_time = difftime_between_now_and(begin);
 
       begin = steady_clock::now();
       ukp5_phase1(ukpi, g, d, sol, w_min, w_max);
-      ptr->phase1_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+      ptr->phase1_time = difftime_between_now_and(begin);
 
       begin = steady_clock::now();
       ukp5_phase2(ukpi.items, d, sol);
-      ptr->phase2_time = duration_cast<duration<double>>(steady_clock::now() - begin).count();
+      ptr->phase2_time = difftime_between_now_and(begin);
 
       #ifdef HBM_CHECK_PERIODICITY
       // If we use our periodicity check the sol.used_items constructed by
@@ -467,7 +480,7 @@ namespace hbm {
       sol.used_items[0].qt += qt_best_item_inserted_by_per;
       #endif
 
-      ptr->total_time = duration_cast<duration<double>>(steady_clock::now() - all_ukp5_begin).count();
+      ptr->total_time = difftime_between_now_and(all_ukp5_begin);
 
       return;
     }
@@ -589,8 +602,12 @@ namespace hbm {
         if (conf.dd_path.empty()) {
           conf.dd_path = "./d_dump_" + fname.native() + ".dat";
         }
-        //conf.nsd_path = "./nsd_dump_" + filename.native() + ".dat";
-        //conf.dqt_path = "./dqt_dump_" + filename.native() + ".dat";
+        if (conf.nsd_path.empty()) {
+          conf.nsd_path = "./nsd_dump_" + fname.native() + ".dat";
+        }
+        if (conf.dqt_path.empty()) {
+          conf.dqt_path = "./dqt_dump_" + fname.native() + ".dat";
+        }
       }
 
       hbm_ukp5_impl::ukp5(ukpi, sol, conf);

@@ -43,7 +43,24 @@ dupsBetweenGroups <- function (df, idcol) {
 	return(dupBetween)
 }
 
-instances = list(list("corepb",1000000), list("exnsd16",889304), list("exnsd18", 933367), list("exnsd20", 914968), list("exnsd26", 934160), list("exnsdbis10", 894645), list("exnsdbis18", 917598), list("exnsds12", 1624196))
+#instances = list(list("corepb",1000000), list("exnsd16",889304), list("exnsd18", 933367), list("exnsd20", 914968), list("exnsd26", 934160), list("exnsdbis10", 894645), list("exnsdbis18", 917598), list("exnsds12", 1624196))
+
+instances = list(
+	list("fc_1000000", 5000000),
+	list("fc_c_1000000_wmin_1_wmax_c", 5000000),
+	list("fhd_1000000", 5000000),
+	list("fhd_c_1000000_wmin_1_wmax_c", 5000000),
+	list("frh_1000000", 5000000),
+	list("frh_c_1000000_wmin_1_wmax_c", 5000000),
+	list("fs_1000000", 5000000),
+	list("fsaw_1000000", 5000000),
+	list("fsaw_c_1000000_wmin_1_wmax_c", 5000000),
+	list("fs_c_1000000_wmin_1_wmax_c", 5000000),
+	list("fu_1000000", 5000000),
+	list("fu_c_1000000_wmin_1_wmax_c", 5000000),
+	list("fw_1000000", 5000000),
+	list("fw_c_1000000_wmin_1_wmax_c", 5000000)
+)
 
 #args = commandArgs(trailingOnly = TRUE);
 for (inst in instances) {
@@ -65,6 +82,7 @@ for (inst in instances) {
 	#plot(te)
 	#dev.off()
 
+	# CHARTS THAT NEED THE SOLUTION POINTS
 	# Simple profit and weight chart (with opt solution items in green)
 	t <- read.table(paste(inst[[1]], ".tukp", sep=""), header=T, sep="\t")
 	tr <- read.table(paste(inst[[1]], ".res.tukp", sep=""), header=T, sep="\t")

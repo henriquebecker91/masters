@@ -28,23 +28,16 @@ namespace hbm {
   /// to touch it if you want to tweak the UKP5 inner workings.
   template <typename I>
   struct ukp5_conf_t {
-    bool apply_smdom;
-    bool apply_smdom_before_sort;
-    bool use_percent;
+    bool apply_smdom{false};
+    bool apply_smdom_before_sort{true};
+    bool use_percent{true};
     union {
-      double sort_percent;
+      double sort_percent{1.0};
       I sort_k_most_eff;
     };
-    bool create_dumps;
+    bool create_dumps{false};
     /// Dump paths, if empty they are set by ukp5 (argc/argv version).
     std::string gd_path, dd_path/*, nsd_path, dqt_path*/;
-
-    ukp5_conf_t(void) {
-      apply_smdom = apply_smdom_before_sort = false;
-      use_percent = true;
-      sort_percent = 1.0;
-      create_dumps = false;
-    }
   };
 
   namespace hbm_ukp5_impl {

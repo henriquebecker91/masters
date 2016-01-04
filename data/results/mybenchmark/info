@@ -1,0 +1,370 @@
+../../../data/ukp/myinst/fc_1000000.ukp
+opt:    7500000
+y_opt:  5000000
+last_y_value_outer_loop: 100100
+ix: 0 qt: 50000 w: 100 p: 150
+c: 5000000
+n: 100000
+w_min: 100
+w_max: 100099
+last_dy_non_zero_non_n: 9999
+qt_non_skipped_ys: 100100
+qt_gy_zeros: 4899801
+qt_inner_loop_executions: 21321
+qt_inner_loop_executions/qt_non_skipped_ys: 0.212997
+qt_inner_loop_executions/c: 0.0042642
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 2.12997e-06
+(qt_inner_loop_executions/c)/n: 4.2642e-08
+Sort time: 0.00770s (44.27292%)
+Vect time: 0.00849s (48.82601%)
+O(n) time: 0.00015s ( 0.84912%)
+pha1 time: 0.00069s ( 3.96517%)
+pha2 time: 0.00036s ( 2.08323%)
+Sum times: 0.01738s
+Seconds: 0.032726
+
+../../../data/ukp/myinst/fc_c_1000000_wmin_1_wmax_c.ukp
+opt:    255000000
+y_opt:  5000000
+last_y_value_outer_loop: 100001
+ix: 0 qt: 5000000 w: 1 p: 51
+c: 5000000
+n: 100000
+w_min: 1
+w_max: 100000
+last_dy_non_zero_non_n: 21413432
+qt_non_skipped_ys: 100001
+qt_gy_zeros: 4899999
+qt_inner_loop_executions: 0
+qt_inner_loop_executions/qt_non_skipped_ys: 0
+qt_inner_loop_executions/c: 0
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0
+(qt_inner_loop_executions/c)/n: 0
+Sort time: 0.00760s (43.29014%)
+Vect time: 0.00823s (46.86942%)
+O(n) time: 0.00015s ( 0.84034%)
+pha1 time: 0.00068s ( 3.89982%)
+pha2 time: 0.00090s ( 5.09748%)
+Sum times: 0.01756s
+Seconds: 0.031990
+
+../../../data/ukp/myinst/fhd_1000000.ukp
+opt:    130436250000
+y_opt:  5000000
+last_y_value_outer_loop: 951909
+ix: 0 qt: 50000 w: 100 p: 2608725
+c: 5000000
+n: 100000
+w_min: 100
+w_max: 951908
+last_dy_non_zero_non_n: 1542
+qt_non_skipped_ys: 951740
+qt_gy_zeros: 4048161
+qt_inner_loop_executions: 849
+qt_inner_loop_executions/qt_non_skipped_ys: 0.00089205
+qt_inner_loop_executions/c: 0.0001698
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 8.9205e-09
+(qt_inner_loop_executions/c)/n: 1.698e-09
+Sort time: 0.00789s (33.23629%)
+Vect time: 0.00998s (42.03430%)
+O(n) time: 0.00015s ( 0.62187%)
+pha1 time: 0.00497s (20.92482%)
+pha2 time: 0.00075s ( 3.18049%)
+Sum times: 0.02374s
+Seconds: 0.040258
+
+../../../data/ukp/myinst/fhd_c_1000000_wmin_1_wmax_c.ukp
+opt:    24071100004008
+y_opt:  5000000
+last_y_value_outer_loop: 4999999
+ix: 11 qt: 3 w: 380390 p: 1831281146105
+ix: 12 qt: 1 w: 379155 p: 1825335584404
+ix: 14 qt: 8 w: 379173 p: 1825422240364
+ix: 111 qt: 1 w: 216039 p: 1040059274753
+ix: 398 qt: 1 w: 230250 p: 1108474155184
+ix: 99385 qt: 2 w: 1 p: 4814220
+c: 5000000
+n: 100000
+w_min: 1
+w_max: 961967
+last_dy_non_zero_non_n: 4999999
+qt_non_skipped_ys: 4999999
+qt_gy_zeros: 1
+qt_inner_loop_executions: 22279562128
+qt_inner_loop_executions/qt_non_skipped_ys: 4455.91
+qt_inner_loop_executions/c: 4455.91
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0445591
+(qt_inner_loop_executions/c)/n: 0.0445591
+Sort time: 0.00836s ( 0.00952%)
+Vect time: 0.00954s ( 0.01086%)
+O(n) time: 0.00015s ( 0.00017%)
+pha1 time: 87.81999s (99.97904%)
+pha2 time: 0.00036s ( 0.00041%)
+Sum times: 87.83840s
+Seconds: 87.857386
+
+../../../data/ukp/myinst/frh_1000000.ukp
+opt:    5531963
+y_opt:  5000000
+last_y_value_outer_loop: 2742887
+ix: 0 qt: 29 w: 144394 p: 159759
+ix: 233 qt: 1 w: 136227 p: 150709
+ix: 272 qt: 4 w: 135267 p: 149646
+ix: 293 qt: 1 w: 135279 p: 149659
+c: 5000000
+n: 100000
+w_min: 104
+w_max: 951908
+last_dy_non_zero_non_n: 2742886
+qt_non_skipped_ys: 2404608
+qt_gy_zeros: 2325082
+qt_inner_loop_executions: 5252446317
+qt_inner_loop_executions/qt_non_skipped_ys: 2184.33
+qt_inner_loop_executions/c: 1050.49
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0218433
+(qt_inner_loop_executions/c)/n: 0.0105049
+Sort time: 0.00829s ( 0.03764%)
+Vect time: 0.00983s ( 0.04462%)
+O(n) time: 0.00016s ( 0.00072%)
+pha1 time: 22.01039s (99.91544%)
+pha2 time: 0.00035s ( 0.00158%)
+Sum times: 22.02901s
+Seconds: 22.048796
+
+../../../data/ukp/myinst/frh_c_1000000_wmin_1_wmax_c.ukp
+opt:    6428570
+y_opt:  5000000
+last_y_value_outer_loop: 961968
+ix: 0 qt: 714284 w: 7 p: 9
+ix: 6 qt: 2 w: 6 p: 7
+c: 5000000
+n: 100000
+w_min: 6
+w_max: 961967
+last_dy_non_zero_non_n: 956895
+qt_non_skipped_ys: 687118
+qt_gy_zeros: 4284507
+qt_inner_loop_executions: 24
+qt_inner_loop_executions/qt_non_skipped_ys: 3.49285e-05
+qt_inner_loop_executions/c: 4.8e-06
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 3.49285e-10
+(qt_inner_loop_executions/c)/n: 4.8e-11
+Sort time: 0.00829s (33.72779%)
+Vect time: 0.00998s (40.61908%)
+O(n) time: 0.00015s ( 0.60089%)
+pha1 time: 0.00475s (19.33375%)
+pha2 time: 0.00140s ( 5.71674%)
+Sum times: 0.02456s
+Seconds: 0.039804
+
+../../../data/ukp/myinst/fs_1000000.ukp
+opt:    7293548
+y_opt:  4999998
+last_y_value_outer_loop: 1000097
+ix: 0 qt: 45869 w: 109 p: 159
+ix: 2 qt: 1 w: 126 p: 176
+ix: 6 qt: 1 w: 151 p: 201
+c: 5000000
+n: 100000
+w_min: 109
+w_max: 1000096
+last_dy_non_zero_non_n: 1000095
+qt_non_skipped_ys: 596302
+qt_gy_zeros: 4364959
+qt_inner_loop_executions: 388
+qt_inner_loop_executions/qt_non_skipped_ys: 0.000650677
+qt_inner_loop_executions/c: 7.76e-05
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 6.50677e-09
+(qt_inner_loop_executions/c)/n: 7.76e-10
+Sort time: 0.00790s (33.55385%)
+Vect time: 0.00996s (42.34893%)
+O(n) time: 0.00015s ( 0.62722%)
+pha1 time: 0.00483s (20.52616%)
+pha2 time: 0.00069s ( 2.94136%)
+Sum times: 0.02353s
+Seconds: 0.039479
+
+../../../data/ukp/myinst/fsaw_1000000.ukp
+opt:    7403799
+y_opt:  5000000
+last_y_value_outer_loop: 1899027
+ix: 0 qt: 39324 w: 104 p: 154
+ix: 26255 qt: 1 w: 910304 p: 1347903
+c: 5000000
+n: 100000
+w_min: 104
+w_max: 951908
+last_dy_non_zero_non_n: 1898417
+qt_non_skipped_ys: 1870236
+qt_gy_zeros: 3101171
+qt_inner_loop_executions: 352687617
+qt_inner_loop_executions/qt_non_skipped_ys: 188.579
+qt_inner_loop_executions/c: 70.5375
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00188579
+(qt_inner_loop_executions/c)/n: 0.000705375
+Sort time: 0.00886s ( 0.51672%)
+Vect time: 0.01002s ( 0.58490%)
+O(n) time: 0.00015s ( 0.00861%)
+pha1 time: 1.69404s (98.84704%)
+pha2 time: 0.00073s ( 0.04268%)
+Sum times: 1.71380s
+Seconds: 1.729948
+
+../../../data/ukp/myinst/fsaw_c_1000000_wmin_1_wmax_c.ukp
+opt:    46666649
+y_opt:  5000000
+last_y_value_outer_loop: 1897697
+ix: 0 qt: 675860 w: 6 p: 56
+ix: 1311 qt: 1 w: 944840 p: 8818489
+c: 5000000
+n: 100000
+w_min: 6
+w_max: 961967
+last_dy_non_zero_non_n: 1897183
+qt_non_skipped_ys: 1580688
+qt_gy_zeros: 3118738
+qt_inner_loop_executions: 26922614
+qt_inner_loop_executions/qt_non_skipped_ys: 17.0322
+qt_inner_loop_executions/c: 5.38452
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.000170322
+(qt_inner_loop_executions/c)/n: 5.38452e-05
+Sort time: 0.00866s ( 3.50836%)
+Vect time: 0.01086s ( 4.40140%)
+O(n) time: 0.00015s ( 0.06270%)
+pha1 time: 0.22576s (91.48390%)
+pha2 time: 0.00134s ( 0.54329%)
+Sum times: 0.24678s
+Seconds: 0.263531
+
+../../../data/ukp/myinst/fs_c_1000000_wmin_1_wmax_c.ukp
+opt:    46666648
+y_opt:  4999998
+last_y_value_outer_loop: 999998
+ix: 0 qt: 833333 w: 6 p: 56
+c: 5000000
+n: 100000
+w_min: 6
+w_max: 999997
+last_dy_non_zero_non_n: 999986
+qt_non_skipped_ys: 166667
+qt_gy_zeros: 4754121
+qt_inner_loop_executions: 0
+qt_inner_loop_executions/qt_non_skipped_ys: 0
+qt_inner_loop_executions/c: 0
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0
+(qt_inner_loop_executions/c)/n: 0
+Sort time: 0.00780s (32.88768%)
+Vect time: 0.00966s (40.73137%)
+O(n) time: 0.00015s ( 0.62219%)
+pha1 time: 0.00463s (19.51574%)
+pha2 time: 0.00148s ( 6.24023%)
+Sum times: 0.02372s
+Seconds: 0.040358
+
+../../../data/ukp/myinst/fu_1000000.ukp
+opt:    53297693
+y_opt:  5000000
+last_y_value_outer_loop: 4999926
+ix: 0 qt: 4 w: 452445 p: 4823259
+ix: 2 qt: 1 w: 452431 p: 4823084
+ix: 3 qt: 1 w: 452449 p: 4823273
+ix: 16 qt: 4 w: 450358 p: 4800665
+ix: 59 qt: 1 w: 450799 p: 4805020
+ix: 44894 qt: 1 w: 33109 p: 350620
+c: 5000000
+n: 100000
+w_min: 74
+w_max: 951908
+last_dy_non_zero_non_n: 4999920
+qt_non_skipped_ys: 2306149
+qt_gy_zeros: 904548
+qt_inner_loop_executions: 1971646767
+qt_inner_loop_executions/qt_non_skipped_ys: 854.952
+qt_inner_loop_executions/c: 394.329
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00854952
+(qt_inner_loop_executions/c)/n: 0.00394329
+Sort time: 0.00823s ( 0.11848%)
+Vect time: 0.01018s ( 0.14647%)
+O(n) time: 0.00015s ( 0.00212%)
+pha1 time: 6.92972s (99.72718%)
+pha2 time: 0.00040s ( 0.00574%)
+Sum times: 6.94868s
+Seconds: 6.977137
+
+../../../data/ukp/myinst/fu_c_1000000_wmin_1_wmax_c.ukp
+opt:    119761794
+y_opt:  4999999
+last_y_value_outer_loop: 961988
+ix: 0 qt: 238095 w: 21 p: 503
+ix: 99997 qt: 1 w: 4 p: 9
+c: 5000000
+n: 100000
+w_min: 4
+w_max: 961967
+last_dy_non_zero_non_n: 961987
+qt_non_skipped_ys: 366481
+qt_gy_zeros: 4243686
+qt_inner_loop_executions: 899553
+qt_inner_loop_executions/qt_non_skipped_ys: 2.45457
+qt_inner_loop_executions/c: 0.179911
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 2.45457e-05
+(qt_inner_loop_executions/c)/n: 1.79911e-06
+Sort time: 0.00935s (23.36943%)
+Vect time: 0.01010s (25.25261%)
+O(n) time: 0.00015s ( 0.37293%)
+pha1 time: 0.01843s (46.07355%)
+pha2 time: 0.00197s ( 4.92877%)
+Sum times: 0.04000s
+Seconds: 0.059980
+
+../../../data/ukp/myinst/fw_1000000.ukp
+opt:    7018326
+y_opt:  4999990
+last_y_value_outer_loop: 1000204
+ix: 0 qt: 45868 w: 109 p: 153
+ix: 1 qt: 3 w: 126 p: 174
+c: 5000000
+n: 100000
+w_min: 108
+w_max: 1000095
+last_dy_non_zero_non_n: 1000203
+qt_non_skipped_ys: 119276
+qt_gy_zeros: 4720923
+qt_inner_loop_executions: 100062
+qt_inner_loop_executions/qt_non_skipped_ys: 0.838911
+qt_inner_loop_executions/c: 0.0200124
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 8.38911e-06
+(qt_inner_loop_executions/c)/n: 2.00124e-07
+Sort time: 0.00858s (31.61186%)
+Vect time: 0.01055s (38.88377%)
+O(n) time: 0.00015s ( 0.56040%)
+pha1 time: 0.00714s (26.29922%)
+pha2 time: 0.00072s ( 2.64115%)
+Sum times: 0.02714s
+Seconds: 0.044255
+
+../../../data/ukp/myinst/fw_c_1000000_wmin_1_wmax_c.ukp
+opt:    18055505
+y_opt:  4999986
+last_y_value_outer_loop: 999986
+ix: 0 qt: 277777 w: 18 p: 65
+c: 5000000
+n: 100000
+w_min: 15
+w_max: 999985
+last_dy_non_zero_non_n: 999985
+qt_non_skipped_ys: 111110
+qt_gy_zeros: 4804226
+qt_inner_loop_executions: 1
+qt_inner_loop_executions/qt_non_skipped_ys: 9.00009e-06
+qt_inner_loop_executions/c: 2e-07
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 9.00009e-11
+(qt_inner_loop_executions/c)/n: 2e-12
+Sort time: 0.00826s (29.70031%)
+Vect time: 0.01162s (41.81049%)
+O(n) time: 0.00015s ( 0.53104%)
+pha1 time: 0.00568s (20.42512%)
+pha2 time: 0.00209s ( 7.53060%)
+Sum times: 0.02780s
+Seconds: 0.045902
+

@@ -6,10 +6,8 @@ All .cpp files in the same directory that this README are sample programs. Calli
 
 If you don't have the boost library (http://www.boost.org/) installed:
   UPDATE NOW WE NEED BOOST ALWAYS, IF YOU DONT WANT YOU CAN COMMENT THE CODE BY HAND
-  * You can't compile run_per.out and test_per.out or use the periodicity.hpp header.
-  * You can compile the other sample programs, but you need to NOT DEFINE the HBM_PROFILE flag (and maybe edit the Makefile to remove the -lboost_* flags).
 
-If you want to use the the hbm library on your own programs you don't need to pass any extra argument to the linker (this library tries to be header-only), you only need to include the right header. The only exception is if you include test_common.hpp with the HBM_PROFILE macro defined, then you need to link the boost fileystem library (-lboost_filesystem -lboost_system). The code was written in valid C++11.
+If you want to use the the hbm library on your own programs you don't need to pass any extra argument to the linker (this library tries to be header-only), you only need to include the right header. The only exception is that you can need to link the boost fileystem library (-lboost_filesystem -lboost_system). The code was written in valid C++11.
 
 ## Namespace and macros
 
@@ -17,6 +15,7 @@ If you want to use the the hbm library on your own programs you don't need to pa
   * All macros are prefixed with "HBM_".
   * All C++ guard macros are prefixed by HBM_ and followed by the filename with all the letters in caps and all the periods replaced by underscores (i.e.: ukp5.hpp -> HBM_UKP5_HPP). This should suffice to avoid conflicts between the project files, and allow other people to include the files in their own projects without too much risk. All files are inside codes/cpp so the directory name isn't necessary.
   * Everything is inside the hbm namespace (except the macros, obviously).
+  * All the implementation details in a file (except the types) are inside a hbm_<filename without extension>_impl namespace inside hbm. Functions with the same name are defined inside hbm namespace but outside the hbm_*_impl namespace and simply call the function of same name inside the implementation namespace. The implementation namespace is used to allow the use of "using XXX" or "using namespace XXX" without polluting the hbm namespace.
 
 ### Macros explanation
 

@@ -2,6 +2,7 @@
 #define HBM_PERIODICITY_HPP
 
 #include <type_traits>
+#include <limits>       // for numeric_limits
 #include <boost/rational.hpp>
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
@@ -26,28 +27,32 @@ namespace hbm {
     using namespace boost;
 
     template <typename W, typename P>
-    W y_star(item_t<W, P> b, item_t<W, P> b2) {
+    W y_star(const item_t<W, P> &b, const item_t<W, P> &b2) {
       if (std::is_integral<W>::value && std::is_integral<P>::value &&
           std::is_same<W, P>::value) {
-        // Without the pragma, the compiler gives conversion warnings
+        // Without the castings, the compiler gives conversion warnings
         // that don't will ever happen. If P is a floating point number
-        // this 'if' never executes.
-        #pragma GCC diagnostic ignored "-Wfloat-conversion"
-        W w1 = b.w, w2 = b2.w, p1 = b.p, p2 = b2.p;
-        
-        rational<W> r_p1(b.p);
+        // this 'if' never executes. The castings have literally no
+        // effect since inside this if W and P are the same type.
+        W w1 = b.w, w2 = b2.w;
+        W p1 = static_cast<W>(b.p), p2 = static_cast<W>(b2.p);
+
+        rational<W> r_p1(static_cast<W>(b.p));
         rational<W> r1(p1, w1);
         rational<W> r2(p2, w2);
 
+        if (r1 == r2) return numeric_limits<W>::max();
+
         return rational_cast<W>(r_p1/(r1 - r2)) + 1;
-        // Return diagnostic to normal
-        #pragma GCC diagnostic warning "-Wfloat-conversion"
       } else if (std::is_floating_point<P>::value) {
         W w1 = b.w, w2 = b2.w;
         P p1 = b.p, p2 = b2.p;
 
         P e1 = p1 / static_cast<P>(w1);
         P e2 = p2 / static_cast<P>(w2);
+
+        if (e1 - e2 < numeric_limits<P>::epsilon())
+          return numeric_limits<W>::max();
 
         return static_cast<W>(p1/(e1 - e2)) + 1;
       } else {
@@ -56,11 +61,18 @@ namespace hbm {
       }
     }
 
+    template <typename W>
+    W refine_y_star(W y_, W c, W w_b) {
+      if (y_ > c) return c;
+      W qt_b = ((c - y_) % w_b) + 1;
+      return c - qt_b*w_b;
+    }
+
     template <typename W, typename P>
     W y_star(vector< item_t<W, P> > &items, bool already_sorted = false) {
       if (!already_sorted) sort_by_eff(items, 2u);
 
-      return y_star(items[0], items[1]);
+      return hbm_periodicity_impl::y_star(items[0], items[1]);
     }
 
     template <typename W, typename P>
@@ -108,11 +120,11 @@ namespace hbm {
         new per_extra_info_t<W>(ukpi.c, y_star_cap);
 
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
-      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
       return;
     }
-    
+
     template<typename W, typename P, typename I>
     struct y_star_wrap : wrapper_t<W, P, I> {
       virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
@@ -134,15 +146,57 @@ namespace hbm {
     }
   }
 
+  /// Computes the y* periodicity bound. It's guaranteed that
+  /// any optimal solution for a capacity bigger than this bound
+  /// have at least one copy of the best item.
+  ///
+  /// @param b The best item, i.e. the most efficient one.
+  /// @param b2 The second best item, i.e. the second
+  ///   most efficient one.
+  ///
+  /// @return The first capacity where is guaranteed that any
+  ///   optimal solution will contain a copy of the best item.
+  template <typename W, typename P>
+  W y_star(const item_t<W, P> &b, const item_t<W, P> &b2) {
+    return hbm_periodicity_impl::y_star(b, b2);
+  }
+
+  /// Based on the y* bound, gives you the capacity for what you
+  /// should compute the UKP solution, to after fill with remaining
+  /// space with copies of the best item.
+  ///
+  /// Don't use the y* bound as capacity. Use the value
+  /// returned by this function. This value is guaranteed to be
+  /// equal to or smaller than y*, and the difference between it
+  /// and c is always a multiple of w_b (if y_ > c it will be c,
+  /// and the difference will be zero, that is a multiple of any
+  /// number). This way, to know how many copies of the best item
+  /// you should add to the solution you only need to compute this
+  /// value divided by w_b.
+  ///
+  /// @param y_ The value obtained by y_star.
+  /// @param c The capacity real value of the instance.
+  /// @param w_b The weight of the best item, i.e the most
+  ///   efficient one.
+  ///
+  /// @return A safe capacity to compute the result, and then
+  ///   fill the remaining space with exactly
+  ///   (c - <this return value>)/best_item.w copies of the best
+  ///   item.
+  template <typename W>
+  W refine_y_star(W y_, W c, W w_b) {
+    return hbm_periodicity_impl::refine_y_star(y_, c, w_b);
+  }
+
   /* Assumes that ukpi has at least two items */
   template <typename W, typename P>
   W y_star(instance_t<W, P> &ukpi, bool already_sorted = false) {
-    hbm_periodicity_impl::y_star(ukpi, already_sorted);
+    return hbm_periodicity_impl::y_star(ukpi, already_sorted);
   }
   template <typename W, typename P, typename I = size_t>
   W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool),
     instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
-    hbm_periodicity_impl::run_with_y_star(ukp_solver, ukpi, sol, already_sorted);
+    return hbm_periodicity_impl::run_with_y_star(ukp_solver, ukpi, sol, already_sorted);
   }
   template <typename W, typename P, typename I = size_t>
   void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {

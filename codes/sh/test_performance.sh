@@ -71,15 +71,15 @@ echo "If there were no errors the results should be at the $PATH_R folder (from 
 
 # Almost gone insane trying to pass lists to functions in bash, see
 # http://stackoverflow.com/questions/1063347/passing-arrays-as-parameters-in-bash
-pyasukp_bench_folder='../../data/ukp/'
-pyasukp_bench_files=(exnsd16.ukp exnsd18.ukp exnsd20.ukp exnsd26.ukp exnsdbis18.ukp exnsds12.ukp)
+#pyasukp_bench_folder='../../data/ukp/'
+#pyasukp_bench_files=(exnsd16.ukp exnsd18.ukp exnsd20.ukp exnsd26.ukp exnsdbis18.ukp exnsds12.ukp)
 #test_performance 1000 3 "$pyasukp_bench_folder" pyasukp_bench_files[@]
 
 buriol_bench_folder='../../data/ukp/buriol/'
 buriol_bench_files=($(ls ${buriol_bench_folder}))
-#test_performance 1 3 "$buriol_bench_folder" buriol_bench_files[@]
+test_performance 1 3 "$buriol_bench_folder" buriol_bench_files[@]
 
-myinst_bench_folder='../../data/ukp/myinst/'
-myinst_bench_files=($(ls ${myinst_bench_folder}))
-test_performance 1 3 "$myinst_bench_folder" myinst_bench_files[@]
+#myinst_bench_folder='../../data/ukp/myinst/'
+#myinst_bench_files=($(ls ${myinst_bench_folder}))
+#test_performance 1 3 "$myinst_bench_folder" myinst_bench_files[@]
 

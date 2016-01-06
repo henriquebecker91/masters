@@ -1,0 +1,1823 @@
+USED REVISION YET NOT CREATED THAT WILL BE AFTER REV fe40187 2016-01-06
+BENCHMARK MADE WITH HYPERTREADING DISABLED AND ON A SINGLE EXCLUSIVE USE CORE
+../../data/ukp/buriol/n10000wmin1000.ukp
+opt:    396226198
+y_opt:  200000000
+ix: 0 qt: 1951 w: 100281 p: 198670 e: 1.98113
+ix: 1 qt: 4 w: 100277 p: 198660 e: 1.98111
+ix: 2 qt: 36 w: 98748 p: 195625 e: 1.98105
+ix: 6 qt: 1 w: 100230 p: 198543 e: 1.98087
+ix: 8 qt: 3 w: 98501 p: 195115 e: 1.98084
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 8930133
+y_bound: 200000000
+c: 200000000
+n: 10000
+w_min: 1007
+w_max: 100998
+last_dy_non_zero_non_n: 8930132
+qt_non_skipped_ys: 2713676
+qt_gy_zeros: 196460171
+qt_inner_loop_executions: 61221238
+qt_inner_loop_executions/qt_non_skipped_ys: 22.5603
+qt_inner_loop_executions/c: 0.306106
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00225603
+(qt_inner_loop_executions/c)/n: 3.06106e-05
+Sort time: 0.00114s ( 0.23718%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.33455s (69.43403%)
+O(n) time: 0.00003s ( 0.00646%)
+pha1 time: 0.14605s (30.31270%)
+pha2 time: 0.00004s ( 0.00933%)
+Sum  time: 0.48182s (99.99969%)
+All  time: 0.48182s
+
+Seconds: 0.482068
+
+../../data/ukp/buriol/n10000wmin100.ukp
+opt:    401426478
+y_opt:  200000000
+ix: 0 qt: 142558 w: 1402 p: 2814 e: 2.00713
+ix: 3 qt: 2 w: 66842 p: 134133 e: 2.00672
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 640877
+y_bound: 10359872
+c: 200000000
+n: 10000
+w_min: 122
+w_max: 100090
+last_dy_non_zero_non_n: 640876
+qt_non_skipped_ys: 131507
+qt_gy_zeros: 10119938
+qt_inner_loop_executions: 4161629
+qt_inner_loop_executions/qt_non_skipped_ys: 31.6457
+qt_inner_loop_executions/c: 0.0208081
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00316457
+(qt_inner_loop_executions/c)/n: 2.08081e-06
+Sort time: 0.00070s ( 2.00198%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.01817s (52.23848%)
+O(n) time: 0.00002s ( 0.05408%)
+pha1 time: 0.01585s (45.55771%)
+pha2 time: 0.00005s ( 0.14436%)
+Sum  time: 0.03479s (99.99662%)
+All  time: 0.03479s
+
+Seconds: 0.0349474
+
+../../data/ukp/buriol/n10000wmin10.ukp
+opt:    558139495
+y_opt:  199999995
+ix: 0 qt: 1162785 w: 172 p: 480 e: 2.7907
+ix: 1 qt: 5 w: 195 p: 539 e: 2.7641
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100176
+y_bound: 18008
+c: 200000000
+n: 10000
+w_min: 28
+w_max: 100008
+last_dy_non_zero_non_n: 17977
+qt_non_skipped_ys: 3320
+qt_gy_zeros: 2919
+qt_inner_loop_executions: 159580
+qt_inner_loop_executions/qt_non_skipped_ys: 48.0663
+qt_inner_loop_executions/c: 0.0007979
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00480663
+(qt_inner_loop_executions/c)/n: 7.979e-08
+Sort time: 0.00074s (27.12812%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00047s (17.15891%)
+O(n) time: 0.00002s ( 0.70332%)
+pha1 time: 0.00147s (53.63435%)
+pha2 time: 0.00004s ( 1.33463%)
+Sum  time: 0.00274s (99.95933%)
+All  time: 0.00274s
+
+Seconds: 0.00290608
+
+../../data/ukp/buriol/n10000wmin1.ukp
+opt:    3400000000
+y_opt:  200000000
+ix: 0 qt: 100000000 w: 2 p: 34 e: 17
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 99991
+y_bound: 16
+c: 200000000
+n: 10000
+w_min: 1
+w_max: 99990
+last_dy_non_zero_non_n: 1
+qt_non_skipped_ys: 15
+qt_gy_zeros: 1
+qt_inner_loop_executions: 1
+qt_inner_loop_executions/qt_non_skipped_ys: 0.0666667
+qt_inner_loop_executions/c: 5e-09
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 6.66667e-06
+(qt_inner_loop_executions/c)/n: 5e-13
+Sort time: 0.00067s (57.35050%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00037s (31.30875%)
+O(n) time: 0.00002s ( 1.46384%)
+pha1 time: 0.00008s ( 7.19228%)
+pha2 time: 0.00003s ( 2.60345%)
+Sum  time: 0.00117s (99.91881%)
+All  time: 0.00117s
+
+Seconds: 0.00131478
+
+../../data/ukp/buriol/n10000wmin3000.ukp
+opt:    392348789
+y_opt:  200000000
+ix: 0 qt: 2488 w: 80176 p: 157285 e: 1.96175
+ix: 8 qt: 4 w: 77907 p: 152790 e: 1.96118
+ix: 14 qt: 1 w: 77901 p: 152765 e: 1.96101
+ix: 182 qt: 1 w: 66330 p: 129972 e: 1.95948
+ix: 202 qt: 1 w: 66253 p: 129812 e: 1.95934
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 44984908
+y_bound: 200000000
+c: 200000000
+n: 10000
+w_min: 3009
+w_max: 102998
+last_dy_non_zero_non_n: 44904720
+qt_non_skipped_ys: 17772213
+qt_gy_zeros: 181794660
+qt_inner_loop_executions: 56715501
+qt_inner_loop_executions/qt_non_skipped_ys: 3.19125
+qt_inner_loop_executions/c: 0.283578
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.000319125
+(qt_inner_loop_executions/c)/n: 2.83578e-05
+Sort time: 0.00061s ( 0.10578%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30447s (52.90863%)
+O(n) time: 0.00002s ( 0.00286%)
+pha1 time: 0.27028s (46.96774%)
+pha2 time: 0.00009s ( 0.01485%)
+Sum  time: 0.57547s (99.99986%)
+All  time: 0.57547s
+
+Seconds: 0.575598
+
+../../data/ukp/buriol/n10000wmin300.ukp
+opt:    399695900
+y_opt:  200000000
+ix: 0 qt: 2014 w: 99114 p: 198078 e: 1.99849
+ix: 89 qt: 2 w: 95893 p: 191292 e: 1.99485
+ix: 109 qt: 2 w: 96309 p: 192112 e: 1.99475
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 3766224
+y_bound: 200000000
+c: 200000000
+n: 10000
+w_min: 315
+w_max: 100296
+last_dy_non_zero_non_n: 3766223
+qt_non_skipped_ys: 1058765
+qt_gy_zeros: 198593680
+qt_inner_loop_executions: 61206648
+qt_inner_loop_executions/qt_non_skipped_ys: 57.8095
+qt_inner_loop_executions/c: 0.306033
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00578095
+(qt_inner_loop_executions/c)/n: 3.06033e-05
+Sort time: 0.00061s ( 0.14275%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30284s (70.55292%)
+O(n) time: 0.00002s ( 0.00380%)
+pha1 time: 0.12573s (29.29063%)
+pha2 time: 0.00004s ( 0.00968%)
+Sum  time: 0.42924s (99.99978%)
+All  time: 0.42924s
+
+Seconds: 0.429375
+
+../../data/ukp/buriol/n10000wmin30.ukp
+opt:    626086899
+y_opt:  199999995
+ix: 0 qt: 2898547 w: 69 p: 216 e: 3.13043
+ix: 1 qt: 3 w: 84 p: 249 e: 2.96429
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100081
+y_bound: 1292
+c: 200000000
+n: 10000
+w_min: 43
+w_max: 100023
+last_dy_non_zero_non_n: 1248
+qt_non_skipped_ys: 231
+qt_gy_zeros: 641
+qt_inner_loop_executions: 39873
+qt_inner_loop_executions/qt_non_skipped_ys: 172.61
+qt_inner_loop_executions/c: 0.000199365
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.017261
+(qt_inner_loop_executions/c)/n: 1.99365e-08
+Sort time: 0.00068s (43.92723%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00038s (24.64257%)
+O(n) time: 0.00002s ( 1.15373%)
+pha1 time: 0.00044s (28.15217%)
+pha2 time: 0.00003s ( 2.05777%)
+Sum  time: 0.00155s (99.93348%)
+All  time: 0.00156s
+
+Seconds: 0.0017081
+
+../../data/ukp/buriol/n10000wmin3.ukp
+opt:    4499999955
+y_opt:  199999998
+ix: 0 qt: 33333333 w: 6 p: 135 e: 22.5
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 99977
+y_bound: 8
+c: 200000000
+n: 10000
+w_min: 6
+w_max: 99976
+last_dy_non_zero_non_n: 0
+qt_non_skipped_ys: 0
+qt_gy_zeros: 6
+qt_inner_loop_executions: 0
+qt_inner_loop_executions/qt_non_skipped_ys: -nan
+qt_inner_loop_executions/c: 0
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: -nan
+(qt_inner_loop_executions/c)/n: 0
+Sort time: 0.00067s (57.53226%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00035s (30.43474%)
+O(n) time: 0.00002s ( 1.47947%)
+pha1 time: 0.00009s ( 7.95034%)
+pha2 time: 0.00003s ( 2.52929%)
+Sum  time: 0.00116s (99.92610%)
+All  time: 0.00116s
+
+Seconds: 0.00131399
+
+../../data/ukp/buriol/n15000wmin1000.ukp
+opt:    397622633
+y_opt:  199999996
+ix: 0 qt: 2924 w: 68325 p: 135838 e: 1.98812
+ix: 32 qt: 1 w: 67668 p: 134463 e: 1.9871
+ix: 36 qt: 1 w: 67071 p: 133264 e: 1.98691
+ix: 491 qt: 1 w: 82957 p: 164594 e: 1.98409
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 2072268
+y_bound: 200000000
+c: 200000000
+n: 15000
+w_min: 1010
+w_max: 100996
+last_dy_non_zero_non_n: 2025301
+qt_non_skipped_ys: 776178
+qt_gy_zeros: 198892294
+qt_inner_loop_executions: 116567867
+qt_inner_loop_executions/qt_non_skipped_ys: 150.182
+qt_inner_loop_executions/c: 0.582839
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0100121
+(qt_inner_loop_executions/c)/n: 3.8856e-05
+Sort time: 0.00097s ( 0.18321%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30250s (57.00736%)
+O(n) time: 0.00003s ( 0.00475%)
+pha1 time: 0.22707s (42.79286%)
+pha2 time: 0.00006s ( 0.01166%)
+Sum  time: 0.53064s (99.99984%)
+All  time: 0.53064s
+
+Seconds: 0.530773
+
+../../data/ukp/buriol/n15000wmin100.ukp
+opt:    468656487
+y_opt:  200000000
+ix: 0 qt: 271369 w: 737 p: 1727 e: 2.34328
+ix: 1 qt: 1 w: 736 p: 1705 e: 2.31658
+ix: 14958 qt: 1 w: 311 p: 519 e: 1.66881
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100631
+y_bound: 64429
+c: 200000000
+n: 15000
+w_min: 107
+w_max: 100095
+last_dy_non_zero_non_n: 64322
+qt_non_skipped_ys: 13883
+qt_gy_zeros: 219
+qt_inner_loop_executions: 939555
+qt_inner_loop_executions/qt_non_skipped_ys: 67.6767
+qt_inner_loop_executions/c: 0.00469778
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00451178
+(qt_inner_loop_executions/c)/n: 3.13185e-07
+Sort time: 0.00103s (14.36114%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00059s ( 8.29711%)
+O(n) time: 0.00003s ( 0.36034%)
+pha1 time: 0.00546s (76.26011%)
+pha2 time: 0.00005s ( 0.70648%)
+Sum  time: 0.00716s (99.98518%)
+All  time: 0.00716s
+
+Seconds: 0.00730809
+
+../../data/ukp/buriol/n15000wmin10.ukp
+opt:    779660990
+y_opt:  200000000
+ix: 0 qt: 3389800 w: 59 p: 230 e: 3.89831
+ix: 1 qt: 30 w: 60 p: 233 e: 3.88333
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100037
+y_bound: 15311
+c: 200000000
+n: 15000
+w_min: 11
+w_max: 100003
+last_dy_non_zero_non_n: 2220
+qt_non_skipped_ys: 14783
+qt_gy_zeros: 203
+qt_inner_loop_executions: 60150
+qt_inner_loop_executions/qt_non_skipped_ys: 4.06886
+qt_inner_loop_executions/c: 0.00030075
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.000271258
+(qt_inner_loop_executions/c)/n: 2.005e-08
+Sort time: 0.00094s (49.80497%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00038s (19.94098%)
+O(n) time: 0.00002s ( 1.23954%)
+pha1 time: 0.00050s (26.56542%)
+pha2 time: 0.00005s ( 2.40179%)
+Sum  time: 0.00188s (99.95270%)
+All  time: 0.00188s
+
+Seconds: 0.00201427
+
+../../data/ukp/buriol/n15000wmin1.ukp
+opt:    600000000
+y_opt:  200000000
+ix: 0 qt: 25000000 w: 8 p: 24 e: 3
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100001
+y_bound: 80
+c: 200000000
+n: 15000
+w_min: 3
+w_max: 100000
+last_dy_non_zero_non_n: 71
+qt_non_skipped_ys: 28
+qt_gy_zeros: 45
+qt_inner_loop_executions: 4
+qt_inner_loop_executions/qt_non_skipped_ys: 0.142857
+qt_inner_loop_executions/c: 2e-08
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 9.52381e-06
+(qt_inner_loop_executions/c)/n: 1.33333e-12
+Sort time: 0.00093s (64.78519%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00033s (23.15837%)
+O(n) time: 0.00002s ( 1.62534%)
+pha1 time: 0.00010s ( 7.22801%)
+pha2 time: 0.00005s ( 3.14166%)
+Sum  time: 0.00144s (99.93857%)
+All  time: 0.00144s
+
+Seconds: 0.00157463
+
+../../data/ukp/buriol/n15000wmin3000.ukp
+opt:    389452929
+y_opt:  199999998
+ix: 0 qt: 2034 w: 98197 p: 191217 e: 1.94728
+ix: 1161 qt: 1 w: 90798 p: 176040 e: 1.93881
+ix: 1978 qt: 1 w: 87956 p: 170204 e: 1.9351
+ix: 2009 qt: 1 w: 88546 p: 171307 e: 1.93467
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 2033621
+y_bound: 200000000
+c: 200000000
+n: 15000
+w_min: 3011
+w_max: 102988
+last_dy_non_zero_non_n: 2033620
+qt_non_skipped_ys: 560005
+qt_gy_zeros: 198995659
+qt_inner_loop_executions: 121949695
+qt_inner_loop_executions/qt_non_skipped_ys: 217.765
+qt_inner_loop_executions/c: 0.609748
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0145177
+(qt_inner_loop_executions/c)/n: 4.06499e-05
+Sort time: 0.00093s ( 0.17251%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30590s (56.49106%)
+O(n) time: 0.00002s ( 0.00444%)
+pha1 time: 0.23458s (43.32024%)
+pha2 time: 0.00006s ( 0.01157%)
+Sum  time: 0.54150s (99.99983%)
+All  time: 0.54150s
+
+Seconds: 0.541631
+
+../../data/ukp/buriol/n15000wmin300.ukp
+opt:    405328627
+y_opt:  200000000
+ix: 0 qt: 4946 w: 40269 p: 81611 e: 2.02665
+ix: 1 qt: 19 w: 40267 p: 81604 e: 2.02657
+ix: 105 qt: 1 w: 38312 p: 77483 e: 2.02242
+ix: 1055 qt: 1 w: 26141 p: 52662 e: 2.01454
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 1094269
+y_bound: 200000000
+c: 200000000
+n: 15000
+w_min: 306
+w_max: 100297
+last_dy_non_zero_non_n: 1094268
+qt_non_skipped_ys: 447336
+qt_gy_zeros: 199409169
+qt_inner_loop_executions: 53763236
+qt_inner_loop_executions/qt_non_skipped_ys: 120.185
+qt_inner_loop_executions/c: 0.268816
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00801236
+(qt_inner_loop_executions/c)/n: 1.79211e-05
+Sort time: 0.00099s ( 0.23557%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.31032s (73.47442%)
+O(n) time: 0.00003s ( 0.00614%)
+pha1 time: 0.11095s (26.26935%)
+pha2 time: 0.00006s ( 0.01432%)
+Sum  time: 0.42235s (99.99980%)
+All  time: 0.42235s
+
+Seconds: 0.4225
+
+../../data/ukp/buriol/n15000wmin30.ukp
+opt:    502222202
+y_opt:  200000000
+ix: 0 qt: 4444442 w: 45 p: 113 e: 2.51111
+ix: 1 qt: 1 w: 110 p: 256 e: 2.32727
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100115
+y_bound: 605
+c: 200000000
+n: 15000
+w_min: 42
+w_max: 100029
+last_dy_non_zero_non_n: 563
+qt_non_skipped_ys: 133
+qt_gy_zeros: 198
+qt_inner_loop_executions: 95724
+qt_inner_loop_executions/qt_non_skipped_ys: 719.729
+qt_inner_loop_executions/c: 0.00047862
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.047982
+(qt_inner_loop_executions/c)/n: 3.1908e-08
+Sort time: 0.00109s (45.62950%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00040s (16.78759%)
+O(n) time: 0.00003s ( 1.14810%)
+pha1 time: 0.00081s (34.15597%)
+pha2 time: 0.00005s ( 2.23508%)
+Sum  time: 0.00238s (99.95624%)
+All  time: 0.00239s
+
+Seconds: 0.00254516
+
+../../data/ukp/buriol/n15000wmin3.ukp
+opt:    700000000
+y_opt:  200000000
+ix: 0 qt: 25000000 w: 8 p: 28 e: 3.5
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 99998
+y_bound: 24
+c: 200000000
+n: 15000
+w_min: 8
+w_max: 99997
+last_dy_non_zero_non_n: 0
+qt_non_skipped_ys: 2
+qt_gy_zeros: 15
+qt_inner_loop_executions: 0
+qt_inner_loop_executions/qt_non_skipped_ys: 0
+qt_inner_loop_executions/c: 0
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0
+(qt_inner_loop_executions/c)/n: 0
+Sort time: 0.00100s (64.56451%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00034s (22.30370%)
+O(n) time: 0.00002s ( 1.54303%)
+pha1 time: 0.00012s ( 8.05661%)
+pha2 time: 0.00005s ( 3.44507%)
+Sum  time: 0.00154s (99.91291%)
+All  time: 0.00155s
+
+Seconds: 0.00169047
+
+../../data/ukp/buriol/n20000wmin1000.ukp
+opt:    396084603
+y_opt:  200000000
+ix: 0 qt: 1969 w: 100971 p: 199966 e: 1.98043
+ix: 1 qt: 2 w: 100977 p: 199973 e: 1.98038
+ix: 3 qt: 5 w: 100994 p: 200000 e: 1.98032
+ix: 50 qt: 1 w: 100449 p: 198819 e: 1.9793
+ix: 417 qt: 4 w: 95182 p: 188196 e: 1.97722
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 10907302
+y_bound: 200000000
+c: 200000000
+n: 20000
+w_min: 1012
+w_max: 100994
+last_dy_non_zero_non_n: 10907301
+qt_non_skipped_ys: 5637751
+qt_gy_zeros: 194021527
+qt_inner_loop_executions: 204922844
+qt_inner_loop_executions/qt_non_skipped_ys: 36.3483
+qt_inner_loop_executions/c: 1.02461
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00181742
+(qt_inner_loop_executions/c)/n: 5.12307e-05
+Sort time: 0.00127s ( 0.19042%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30316s (45.40148%)
+O(n) time: 0.00003s ( 0.00477%)
+pha1 time: 0.36318s (54.38924%)
+pha2 time: 0.00009s ( 0.01394%)
+Sum  time: 0.66773s (99.99984%)
+All  time: 0.66773s
+
+Seconds: 0.667865
+
+../../data/ukp/buriol/n20000wmin100.ukp
+opt:    424051761
+y_opt:  199999998
+ix: 0 qt: 29507 w: 6777 p: 14369 e: 2.12026
+ix: 3 qt: 2 w: 6785 p: 14375 e: 2.11864
+ix: 4 qt: 2 w: 6788 p: 14380 e: 2.11844
+ix: 561 qt: 1 w: 3913 p: 8168 e: 2.0874
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 102973
+y_bound: 16553387
+c: 200000000
+n: 20000
+w_min: 100
+w_max: 100078
+last_dy_non_zero_non_n: 102969
+qt_non_skipped_ys: 52617
+qt_gy_zeros: 16447042
+qt_inner_loop_executions: 11845789
+qt_inner_loop_executions/qt_non_skipped_ys: 225.132
+qt_inner_loop_executions/c: 0.0592289
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0112566
+(qt_inner_loop_executions/c)/n: 2.96145e-06
+Sort time: 0.00131s ( 2.26848%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.02542s (44.12341%)
+O(n) time: 0.00003s ( 0.05495%)
+pha1 time: 0.03078s (53.42065%)
+pha2 time: 0.00008s ( 0.13086%)
+Sum  time: 0.05761s (99.99836%)
+All  time: 0.05761s
+
+Seconds: 0.0577501
+
+../../data/ukp/buriol/n20000wmin10.ukp
+opt:    426822651
+y_opt:  200000000
+ix: 0 qt: 35478 w: 5637 p: 12030 e: 2.13411
+ix: 21 qt: 1 w: 5479 p: 11647 e: 2.12575
+ix: 87 qt: 1 w: 2510 p: 5317 e: 2.11833
+ix: 95 qt: 1 w: 2525 p: 5347 e: 2.11762
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 153823
+y_bound: 14954201
+c: 200000000
+n: 20000
+w_min: 18
+w_max: 100007
+last_dy_non_zero_non_n: 148181
+qt_non_skipped_ys: 73637
+qt_gy_zeros: 14823137
+qt_inner_loop_executions: 9230661
+qt_inner_loop_executions/qt_non_skipped_ys: 125.354
+qt_inner_loop_executions/c: 0.0461533
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00626768
+(qt_inner_loop_executions/c)/n: 2.30767e-06
+Sort time: 0.00141s ( 2.81488%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.02478s (49.35061%)
+O(n) time: 0.00003s ( 0.06856%)
+pha1 time: 0.02391s (47.61339%)
+pha2 time: 0.00008s ( 0.15037%)
+Sum  time: 0.05022s (99.99783%)
+All  time: 0.05022s
+
+Seconds: 0.0503689
+
+../../data/ukp/buriol/n20000wmin1.ukp
+opt:    700000000
+y_opt:  200000000
+ix: 0 qt: 25000000 w: 8 p: 28 e: 3.5
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100004
+y_bound: 504
+c: 200000000
+n: 20000
+w_min: 2
+w_max: 99997
+last_dy_non_zero_non_n: 63
+qt_non_skipped_ys: 486
+qt_gy_zeros: 5
+qt_inner_loop_executions: 60002
+qt_inner_loop_executions/qt_non_skipped_ys: 123.461
+qt_inner_loop_executions/c: 0.00030001
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00617305
+(qt_inner_loop_executions/c)/n: 1.50005e-08
+Sort time: 0.00145s (60.21044%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00038s (15.61871%)
+O(n) time: 0.00003s ( 1.44752%)
+pha1 time: 0.00047s (19.62717%)
+pha2 time: 0.00007s ( 3.05275%)
+Sum  time: 0.00242s (99.95659%)
+All  time: 0.00242s
+
+Seconds: 0.00258971
+
+../../data/ukp/buriol/n20000wmin3000.ukp
+opt:    388969443
+y_opt:  200000000
+ix: 0 qt: 2147 w: 92827 p: 180535 e: 1.94485
+ix: 4 qt: 2 w: 92842 p: 180553 e: 1.94473
+ix: 440 qt: 1 w: 102935 p: 199916 e: 1.94216
+ix: 453 qt: 4 w: 102953 p: 199944 e: 1.94209
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 15584017
+y_bound: 200000000
+c: 200000000
+n: 20000
+w_min: 3010
+w_max: 102996
+last_dy_non_zero_non_n: 15584016
+qt_non_skipped_ys: 6315644
+qt_gy_zeros: 193226244
+qt_inner_loop_executions: 227875813
+qt_inner_loop_executions/qt_non_skipped_ys: 36.0812
+qt_inner_loop_executions/c: 1.13938
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00180406
+(qt_inner_loop_executions/c)/n: 5.6969e-05
+Sort time: 0.00127s ( 0.16645%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30314s (39.61240%)
+O(n) time: 0.00003s ( 0.00410%)
+pha1 time: 0.46072s (60.20472%)
+pha2 time: 0.00009s ( 0.01220%)
+Sum  time: 0.76526s (99.99987%)
+All  time: 0.76526s
+
+Seconds: 0.76539
+
+../../data/ukp/buriol/n20000wmin300.ukp
+opt:    399916061
+y_opt:  199999999
+ix: 0 qt: 2132 w: 93707 p: 187375 e: 1.99958
+ix: 124 qt: 1 w: 97482 p: 194803 e: 1.99835
+ix: 128 qt: 1 w: 97477 p: 194792 e: 1.99834
+ix: 9267 qt: 1 w: 21716 p: 42966 e: 1.97854
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 2058862
+y_bound: 200000000
+c: 200000000
+n: 20000
+w_min: 300
+w_max: 100297
+last_dy_non_zero_non_n: 2058861
+qt_non_skipped_ys: 1197616
+qt_gy_zeros: 198442590
+qt_inner_loop_executions: 197214894
+qt_inner_loop_executions/qt_non_skipped_ys: 164.673
+qt_inner_loop_executions/c: 0.986074
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00823364
+(qt_inner_loop_executions/c)/n: 4.93037e-05
+Sort time: 0.00129s ( 0.20272%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30330s (47.81585%)
+O(n) time: 0.00003s ( 0.00501%)
+pha1 time: 0.32961s (51.96298%)
+pha2 time: 0.00008s ( 0.01329%)
+Sum  time: 0.63431s (99.99985%)
+All  time: 0.63431s
+
+Seconds: 0.634446
+
+../../data/ukp/buriol/n20000wmin30.ukp
+opt:    431795735
+y_opt:  199999999
+ix: 0 qt: 44765 w: 4466 p: 9642 e: 2.15898
+ix: 1 qt: 16 w: 4685 p: 10113 e: 2.15859
+ix: 16 qt: 1 w: 4549 p: 9797 e: 2.15366
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 111840
+y_bound: 24865810
+c: 200000000
+n: 20000
+w_min: 35
+w_max: 100027
+last_dy_non_zero_non_n: 111839
+qt_non_skipped_ys: 42709
+qt_gy_zeros: 24759252
+qt_inner_loop_executions: 5412456
+qt_inner_loop_executions/qt_non_skipped_ys: 126.729
+qt_inner_loop_executions/c: 0.0270623
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00633643
+(qt_inner_loop_executions/c)/n: 1.35311e-06
+Sort time: 0.00148s ( 2.50614%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.04053s (68.55308%)
+O(n) time: 0.00004s ( 0.06017%)
+pha1 time: 0.01700s (28.74731%)
+pha2 time: 0.00008s ( 0.13141%)
+Sum  time: 0.05912s (99.99811%)
+All  time: 0.05912s
+
+Seconds: 0.0592751
+
+../../data/ukp/buriol/n20000wmin3.ukp
+opt:    472340417
+y_opt:  199999997
+ix: 0 qt: 4255319 w: 47 p: 111 e: 2.3617
+ix: 17476 qt: 1 w: 4 p: 8 e: 2
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100002
+y_bound: 336
+c: 200000000
+n: 20000
+w_min: 4
+w_max: 100001
+last_dy_non_zero_non_n: 330
+qt_non_skipped_ys: 84
+qt_gy_zeros: 204
+qt_inner_loop_executions: 192236
+qt_inner_loop_executions/qt_non_skipped_ys: 2288.52
+qt_inner_loop_executions/c: 0.00096118
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.114426
+(qt_inner_loop_executions/c)/n: 4.8059e-08
+Sort time: 0.00151s (46.58838%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00034s (10.47598%)
+O(n) time: 0.00003s ( 0.95955%)
+pha1 time: 0.00129s (39.88695%)
+pha2 time: 0.00007s ( 2.05203%)
+Sum  time: 0.00324s (99.96289%)
+All  time: 0.00324s
+
+Seconds: 0.00344704
+
+../../data/ukp/buriol/n25000wmin1000.ukp
+opt:    396747041
+y_opt:  199999999
+ix: 0 qt: 2187 w: 91241 p: 180998 e: 1.98374
+ix: 1 qt: 3 w: 91135 p: 180786 e: 1.98372
+ix: 2 qt: 1 w: 91244 p: 181001 e: 1.9837
+ix: 16 qt: 1 w: 91283 p: 181056 e: 1.98346
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 7017941
+y_bound: 200000000
+c: 200000000
+n: 25000
+w_min: 1006
+w_max: 100999
+last_dy_non_zero_non_n: 7017940
+qt_non_skipped_ys: 3465269
+qt_gy_zeros: 196192452
+qt_inner_loop_executions: 217441472
+qt_inner_loop_executions/qt_non_skipped_ys: 62.7488
+qt_inner_loop_executions/c: 1.08721
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00250995
+(qt_inner_loop_executions/c)/n: 4.34883e-05
+Sort time: 0.00187s ( 0.26537%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30308s (42.90191%)
+O(n) time: 0.00004s ( 0.00612%)
+pha1 time: 0.40135s (56.81217%)
+pha2 time: 0.00010s ( 0.01426%)
+Sum  time: 0.70644s (99.99984%)
+All  time: 0.70645s
+
+Seconds: 0.7066
+
+../../data/ukp/buriol/n25000wmin100.ukp
+opt:    411393374
+y_opt:  199999999
+ix: 0 qt: 61254 w: 3265 p: 6716 e: 2.05697
+ix: 48 qt: 1 w: 3192 p: 6490 e: 2.03321
+ix: 5737 qt: 1 w: 2497 p: 5020 e: 2.01041
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 104410
+y_bound: 2189975
+c: 200000000
+n: 25000
+w_min: 102
+w_max: 100094
+last_dy_non_zero_non_n: 104405
+qt_non_skipped_ys: 47191
+qt_gy_zeros: 2084585
+qt_inner_loop_executions: 17890998
+qt_inner_loop_executions/qt_non_skipped_ys: 379.119
+qt_inner_loop_executions/c: 0.089455
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0151648
+(qt_inner_loop_executions/c)/n: 3.5782e-06
+Sort time: 0.00178s ( 3.75534%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00425s ( 8.97060%)
+O(n) time: 0.00004s ( 0.08702%)
+pha1 time: 0.04124s (86.99955%)
+pha2 time: 0.00009s ( 0.18532%)
+Sum  time: 0.04740s (99.99783%)
+All  time: 0.04740s
+
+Seconds: 0.0475515
+
+../../data/ukp/buriol/n25000wmin10.ukp
+opt:    623529410
+y_opt:  200000000
+ix: 0 qt: 11764690 w: 17 p: 53 e: 3.11765
+ix: 1 qt: 15 w: 18 p: 56 e: 3.11111
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100021
+y_bound: 8107
+c: 200000000
+n: 25000
+w_min: 11
+w_max: 100006
+last_dy_non_zero_non_n: 288
+qt_non_skipped_ys: 8046
+qt_gy_zeros: 26
+qt_inner_loop_executions: 75029
+qt_inner_loop_executions/qt_non_skipped_ys: 9.32501
+qt_inner_loop_executions/c: 0.000375145
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.000373
+(qt_inner_loop_executions/c)/n: 1.50058e-08
+Sort time: 0.00166s (61.70980%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00036s (13.41756%)
+O(n) time: 0.00004s ( 1.43839%)
+pha1 time: 0.00055s (20.35880%)
+pha2 time: 0.00008s ( 3.03958%)
+Sum  time: 0.00269s (99.96413%)
+All  time: 0.00269s
+
+Seconds: 0.00282346
+
+../../data/ukp/buriol/n25000wmin1.ukp
+opt:    937500000
+y_opt:  200000000
+ix: 0 qt: 12500000 w: 16 p: 75 e: 4.6875
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100000
+y_bound: 208
+c: 200000000
+n: 25000
+w_min: 1
+w_max: 99991
+last_dy_non_zero_non_n: 39
+qt_non_skipped_ys: 207
+qt_gy_zeros: 1
+qt_inner_loop_executions: 200031
+qt_inner_loop_executions/qt_non_skipped_ys: 966.333
+qt_inner_loop_executions/c: 0.00100015
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0386533
+(qt_inner_loop_executions/c)/n: 4.00062e-08
+Sort time: 0.00164s (50.53132%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00032s (10.01718%)
+O(n) time: 0.00004s ( 1.19035%)
+pha1 time: 0.00116s (35.92124%)
+pha2 time: 0.00007s ( 2.31459%)
+Sum  time: 0.00324s (99.97469%)
+All  time: 0.00324s
+
+Seconds: 0.00337
+
+../../data/ukp/buriol/n25000wmin3000.ukp
+opt:    388487135
+y_opt:  200000000
+ix: 0 qt: 1959 w: 101105 p: 196390 e: 1.94244
+ix: 1 qt: 6 w: 101104 p: 196386 e: 1.94242
+ix: 3 qt: 11 w: 102150 p: 198417 e: 1.94241
+ix: 8 qt: 1 w: 102530 p: 199142 e: 1.94228
+ix: 15 qt: 1 w: 102501 p: 199080 e: 1.94222
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 11826693
+y_bound: 200000000
+c: 200000000
+n: 25000
+w_min: 3000
+w_max: 102998
+last_dy_non_zero_non_n: 11826692
+qt_non_skipped_ys: 6665516
+qt_gy_zeros: 191517842
+qt_inner_loop_executions: 329952685
+qt_inner_loop_executions/qt_non_skipped_ys: 49.5014
+qt_inner_loop_executions/c: 1.64976
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00198006
+(qt_inner_loop_executions/c)/n: 6.59905e-05
+Sort time: 0.00163s ( 0.18690%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30423s (34.81060%)
+O(n) time: 0.00004s ( 0.00446%)
+pha1 time: 0.56795s (64.98559%)
+pha2 time: 0.00011s ( 0.01235%)
+Sum  time: 0.87396s (99.99990%)
+All  time: 0.87396s
+
+Seconds: 0.87409
+
+../../data/ukp/buriol/n25000wmin300.ukp
+opt:    404414067
+y_opt:  200000000
+ix: 0 qt: 21010 w: 9515 p: 19240 e: 2.02207
+ix: 1 qt: 7 w: 10034 p: 20289 e: 2.02203
+ix: 2 qt: 1 w: 9516 p: 19241 e: 2.02196
+ix: 7 qt: 1 w: 10096 p: 20403 e: 2.0209
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 676221
+y_bound: 200000000
+c: 200000000
+n: 25000
+w_min: 304
+w_max: 100298
+last_dy_non_zero_non_n: 666186
+qt_non_skipped_ys: 612962
+qt_gy_zeros: 199332909
+qt_inner_loop_executions: 42489515
+qt_inner_loop_executions/qt_non_skipped_ys: 69.3184
+qt_inner_loop_executions/c: 0.212448
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00277273
+(qt_inner_loop_executions/c)/n: 8.4979e-06
+Sort time: 0.00186s ( 0.46780%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30711s (77.24565%)
+O(n) time: 0.00004s ( 0.01110%)
+pha1 time: 0.08846s (22.25057%)
+pha2 time: 0.00010s ( 0.02457%)
+Sum  time: 0.39758s (99.99969%)
+All  time: 0.39758s
+
+Seconds: 0.397735
+
+../../data/ukp/buriol/n25000wmin30.ukp
+opt:    433377601
+y_opt:  199999996
+ix: 0 qt: 132969 w: 1504 p: 3259 e: 2.16689
+ix: 1 qt: 10 w: 1462 p: 3163 e: 2.16347
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100687
+y_bound: 954624
+c: 200000000
+n: 25000
+w_min: 30
+w_max: 100026
+last_dy_non_zero_non_n: 100686
+qt_non_skipped_ys: 39957
+qt_gy_zeros: 853419
+qt_inner_loop_executions: 3419363
+qt_inner_loop_executions/qt_non_skipped_ys: 85.5761
+qt_inner_loop_executions/c: 0.0170968
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00342304
+(qt_inner_loop_executions/c)/n: 6.83873e-07
+Sort time: 0.00175s (10.81819%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00196s (12.11158%)
+O(n) time: 0.00005s ( 0.27993%)
+pha1 time: 0.01235s (76.22302%)
+pha2 time: 0.00009s ( 0.55977%)
+Sum  time: 0.01621s (99.99249%)
+All  time: 0.01621s
+
+Seconds: 0.016354
+
+../../data/ukp/buriol/n25000wmin3.ukp
+opt:    412909030
+y_opt:  199999999
+ix: 0 qt: 45107 w: 4431 p: 9148 e: 2.06455
+ix: 1 qt: 28 w: 4516 p: 9323 e: 2.06444
+ix: 4 qt: 1 w: 4434 p: 9150 e: 2.0636
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 243687
+y_bound: 84940223
+c: 200000000
+n: 25000
+w_min: 9
+w_max: 100000
+last_dy_non_zero_non_n: 239170
+qt_non_skipped_ys: 172452
+qt_gy_zeros: 84731833
+qt_inner_loop_executions: 25004984
+qt_inner_loop_executions/qt_non_skipped_ys: 144.997
+qt_inner_loop_executions/c: 0.125025
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00579987
+(qt_inner_loop_executions/c)/n: 5.001e-06
+Sort time: 0.00216s ( 0.99988%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.15735s (72.67512%)
+O(n) time: 0.00005s ( 0.02358%)
+pha1 time: 0.05685s (26.25708%)
+pha2 time: 0.00009s ( 0.04367%)
+Sum  time: 0.21651s (99.99934%)
+All  time: 0.21651s
+
+Seconds: 0.21669
+
+../../data/ukp/buriol/n30000wmin1000.ukp
+opt:    396689566
+y_opt:  199999998
+ix: 0 qt: 2000 w: 97717 p: 193817 e: 1.98345
+ix: 17 qt: 46 w: 97156 p: 192686 e: 1.98326
+ix: 36 qt: 1 w: 96822 p: 192010 e: 1.98312
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 7872512
+y_bound: 200000000
+c: 200000000
+n: 30000
+w_min: 1001
+w_max: 100996
+last_dy_non_zero_non_n: 7872511
+qt_non_skipped_ys: 4744056
+qt_gy_zeros: 194346855
+qt_inner_loop_executions: 412125285
+qt_inner_loop_executions/qt_non_skipped_ys: 86.8719
+qt_inner_loop_executions/c: 2.06063
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00289573
+(qt_inner_loop_executions/c)/n: 6.86875e-05
+Sort time: 0.00201s ( 0.20701%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30272s (31.16868%)
+O(n) time: 0.00005s ( 0.00484%)
+pha1 time: 0.66635s (68.60734%)
+pha2 time: 0.00012s ( 0.01204%)
+Sum  time: 0.97125s (99.99991%)
+All  time: 0.97125s
+
+Seconds: 0.971378
+
+../../data/ukp/buriol/n30000wmin100.ukp
+opt:    403883049
+y_opt:  199999998
+ix: 0 qt: 7150 w: 27966 p: 56475 e: 2.01942
+ix: 56 qt: 1 w: 28235 p: 56976 e: 2.01792
+ix: 311 qt: 1 w: 6060 p: 12205 e: 2.01403
+ix: 782 qt: 1 w: 6142 p: 12361 e: 2.01254
+ix: 25106 qt: 1 w: 2661 p: 5257 e: 1.97557
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 332735
+y_bound: 78907220
+c: 200000000
+n: 30000
+w_min: 104
+w_max: 100098
+last_dy_non_zero_non_n: 332734
+qt_non_skipped_ys: 187399
+qt_gy_zeros: 78656428
+qt_inner_loop_executions: 59056155
+qt_inner_loop_executions/qt_non_skipped_ys: 315.136
+qt_inner_loop_executions/c: 0.295281
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0105045
+(qt_inner_loop_executions/c)/n: 9.84269e-06
+Sort time: 0.00203s ( 0.88899%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.12026s (52.70858%)
+O(n) time: 0.00005s ( 0.02051%)
+pha1 time: 0.10571s (46.33471%)
+pha2 time: 0.00011s ( 0.04677%)
+Sum  time: 0.22815s (99.99956%)
+All  time: 0.22815s
+
+Seconds: 0.22829
+
+../../data/ukp/buriol/n30000wmin10.ukp
+opt:    480952303
+y_opt:  200000000
+ix: 0 qt: 476184 w: 420 p: 1010 e: 2.40476
+ix: 1 qt: 6 w: 422 p: 1011 e: 2.39573
+ix: 340 qt: 1 w: 188 p: 397 e: 2.1117
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100231
+y_bound: 111500
+c: 200000000
+n: 30000
+w_min: 18
+w_max: 100009
+last_dy_non_zero_non_n: 100209
+qt_non_skipped_ys: 62102
+qt_gy_zeros: 11054
+qt_inner_loop_executions: 1200189
+qt_inner_loop_executions/qt_non_skipped_ys: 19.3261
+qt_inner_loop_executions/c: 0.00600094
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.000644203
+(qt_inner_loop_executions/c)/n: 2.00031e-07
+Sort time: 0.00203s (25.41586%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00070s ( 8.73304%)
+O(n) time: 0.00005s ( 0.58040%)
+pha1 time: 0.00511s (64.05492%)
+pha2 time: 0.00010s ( 1.20461%)
+Sum  time: 0.00797s (99.98883%)
+All  time: 0.00797s
+
+Seconds: 0.00810875
+
+../../data/ukp/buriol/n30000wmin1.ukp
+opt:    899999997
+y_opt:  200000000
+ix: 0 qt: 33333332 w: 6 p: 27 e: 4.5
+ix: 2 qt: 1 w: 8 p: 33 e: 4.125
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 99993
+y_bound: 80
+c: 200000000
+n: 30000
+w_min: 1
+w_max: 99990
+last_dy_non_zero_non_n: 17
+qt_non_skipped_ys: 79
+qt_gy_zeros: 1
+qt_inner_loop_executions: 41254
+qt_inner_loop_executions/qt_non_skipped_ys: 522.203
+qt_inner_loop_executions/c: 0.00020627
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0174068
+(qt_inner_loop_executions/c)/n: 6.87567e-09
+Sort time: 0.00201s (70.05701%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00033s (11.43079%)
+O(n) time: 0.00005s ( 1.60261%)
+pha1 time: 0.00040s (13.77279%)
+pha2 time: 0.00009s ( 3.10484%)
+Sum  time: 0.00287s (99.96804%)
+All  time: 0.00287s
+
+Seconds: 0.00299771
+
+../../data/ukp/buriol/n30000wmin3000.ukp
+opt:    388360331
+y_opt:  200000000
+ix: 0 qt: 1932 w: 102996 p: 199998 e: 1.9418
+ix: 10 qt: 8 w: 101074 p: 196237 e: 1.94152
+ix: 52 qt: 1 w: 101786 p: 197576 e: 1.94109
+ix: 74 qt: 1 w: 101350 p: 196723 e: 1.94103
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 5563618
+y_bound: 200000000
+c: 200000000
+n: 30000
+w_min: 3006
+w_max: 102996
+last_dy_non_zero_non_n: 5563617
+qt_non_skipped_ys: 3212194
+qt_gy_zeros: 196124115
+qt_inner_loop_executions: 673107034
+qt_inner_loop_executions/qt_non_skipped_ys: 209.547
+qt_inner_loop_executions/c: 3.36554
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00698491
+(qt_inner_loop_executions/c)/n: 0.000112185
+Sort time: 0.00202s ( 0.15303%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30423s (23.06012%)
+O(n) time: 0.00005s ( 0.00356%)
+pha1 time: 1.01287s (76.77477%)
+pha2 time: 0.00011s ( 0.00845%)
+Sum  time: 1.31927s (99.99993%)
+All  time: 1.31927s
+
+Seconds: 1.31941
+
+../../data/ukp/buriol/n30000wmin300.ukp
+opt:    400136215
+y_opt:  199999999
+ix: 0 qt: 2004 w: 86621 p: 173301 e: 2.00068
+ix: 1 qt: 295 w: 86626 p: 173311 e: 2.00068
+ix: 2 qt: 9 w: 95205 p: 190474 e: 2.00067
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 149593688
+y_bound: 200000000
+c: 200000000
+n: 30000
+w_min: 301
+w_max: 100299
+last_dy_non_zero_non_n: 149593687
+qt_non_skipped_ys: 118458248
+qt_gy_zeros: 80777998
+qt_inner_loop_executions: 101619727
+qt_inner_loop_executions/qt_non_skipped_ys: 0.857853
+qt_inner_loop_executions/c: 0.508099
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 2.85951e-05
+(qt_inner_loop_executions/c)/n: 1.69366e-05
+Sort time: 0.00204s ( 0.23607%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30547s (35.41138%)
+O(n) time: 0.00005s ( 0.00544%)
+pha1 time: 0.55483s (64.31872%)
+pha2 time: 0.00024s ( 0.02829%)
+Sum  time: 0.86263s (99.99990%)
+All  time: 0.86263s
+
+Seconds: 0.862765
+
+../../data/ukp/buriol/n30000wmin30.ukp
+opt:    407273045
+y_opt:  199999999
+ix: 0 qt: 22787 w: 8772 p: 17863 e: 2.03637
+ix: 2 qt: 12 w: 8718 p: 17749 e: 2.0359
+ix: 65 qt: 1 w: 7819 p: 15876 e: 2.03044
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 163332
+y_bound: 50998808
+c: 200000000
+n: 30000
+w_min: 44
+w_max: 100022
+last_dy_non_zero_non_n: 163331
+qt_non_skipped_ys: 99444
+qt_gy_zeros: 50849509
+qt_inner_loop_executions: 49114576
+qt_inner_loop_executions/qt_non_skipped_ys: 493.892
+qt_inner_loop_executions/c: 0.245573
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0164631
+(qt_inner_loop_executions/c)/n: 8.18576e-06
+Sort time: 0.00200s ( 1.19248%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.07802s (46.52382%)
+O(n) time: 0.00005s ( 0.02784%)
+pha1 time: 0.08753s (52.19430%)
+pha2 time: 0.00010s ( 0.06075%)
+Sum  time: 0.16770s (99.99918%)
+All  time: 0.16770s
+
+Seconds: 0.167838
+
+../../data/ukp/buriol/n30000wmin3.ukp
+opt:    437854840
+y_opt:  199999998
+ix: 0 qt: 630913 w: 317 p: 694 e: 2.18927
+ix: 1 qt: 1 w: 310 p: 669 e: 2.15806
+ix: 92 qt: 1 w: 267 p: 549 e: 2.05618
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100258
+y_bound: 22135
+c: 200000000
+n: 30000
+w_min: 4
+w_max: 99996
+last_dy_non_zero_non_n: 22130
+qt_non_skipped_ys: 9582
+qt_gy_zeros: 26
+qt_inner_loop_executions: 3724018
+qt_inner_loop_executions/qt_non_skipped_ys: 388.647
+qt_inner_loop_executions/c: 0.0186201
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.0129549
+(qt_inner_loop_executions/c)/n: 6.2067e-07
+Sort time: 0.00198s (14.62421%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00041s ( 3.01764%)
+O(n) time: 0.00005s ( 0.34303%)
+pha1 time: 0.01099s (81.32872%)
+pha2 time: 0.00009s ( 0.67893%)
+Sum  time: 0.01352s (99.99253%)
+All  time: 0.01352s
+
+Seconds: 0.0136509
+
+../../data/ukp/buriol/n5000wmin1000.ukp
+opt:    397827695
+y_opt:  199999999
+ix: 0 qt: 2020 w: 98612 p: 196153 e: 1.98914
+ix: 1 qt: 5 w: 98608 p: 196141 e: 1.9891
+ix: 2 qt: 2 w: 94150 p: 187267 e: 1.98903
+ix: 13 qt: 1 w: 99267 p: 197378 e: 1.98835
+ix: 26 qt: 2 w: 11576 p: 23009 e: 1.98765
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 5696975
+y_bound: 200000000
+c: 200000000
+n: 5000
+w_min: 1035
+w_max: 100919
+last_dy_non_zero_non_n: 5696974
+qt_non_skipped_ys: 1429115
+qt_gy_zeros: 198296466
+qt_inner_loop_executions: 4215662
+qt_inner_loop_executions/qt_non_skipped_ys: 2.94984
+qt_inner_loop_executions/c: 0.0210783
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.000589968
+(qt_inner_loop_executions/c)/n: 4.21566e-06
+Sort time: 0.00029s ( 0.08684%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30357s (90.46413%)
+O(n) time: 0.00001s ( 0.00281%)
+pha1 time: 0.03166s ( 9.43456%)
+pha2 time: 0.00004s ( 0.01139%)
+Sum  time: 0.33557s (99.99973%)
+All  time: 0.33557s
+
+Seconds: 0.335708
+
+../../data/ukp/buriol/n5000wmin100.ukp
+opt:    418866870
+y_opt:  199999999
+ix: 0 qt: 49257 w: 4060 p: 8503 e: 2.09433
+ix: 2 qt: 3 w: 4030 p: 8432 e: 2.09231
+ix: 14 qt: 1 w: 4489 p: 9303 e: 2.0724
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 118930
+y_bound: 5022560
+c: 200000000
+n: 5000
+w_min: 111
+w_max: 100051
+last_dy_non_zero_non_n: 118929
+qt_non_skipped_ys: 31929
+qt_gy_zeros: 4915662
+qt_inner_loop_executions: 625762
+qt_inner_loop_executions/qt_non_skipped_ys: 19.5985
+qt_inner_loop_executions/c: 0.00312881
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00391971
+(qt_inner_loop_executions/c)/n: 6.25762e-07
+Sort time: 0.00036s ( 2.26160%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.01034s (64.13343%)
+O(n) time: 0.00001s ( 0.07025%)
+pha1 time: 0.00537s (33.31027%)
+pha2 time: 0.00003s ( 0.21672%)
+Sum  time: 0.01612s (99.99226%)
+All  time: 0.01612s
+
+Seconds: 0.0162965
+
+../../data/ukp/buriol/n5000wmin10.ukp
+opt:    575384601
+y_opt:  199999995
+ix: 0 qt: 3076923 w: 65 p: 187 e: 2.87692
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100116
+y_bound: 850
+c: 200000000
+n: 5000
+w_min: 61
+w_max: 99998
+last_dy_non_zero_non_n: 789
+qt_non_skipped_ys: 46
+qt_gy_zeros: 649
+qt_inner_loop_executions: 11250
+qt_inner_loop_executions/qt_non_skipped_ys: 244.565
+qt_inner_loop_executions/c: 5.625e-05
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.048913
+(qt_inner_loop_executions/c)/n: 1.125e-08
+Sort time: 0.00029s (36.03655%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00033s (41.61535%)
+O(n) time: 0.00001s ( 1.08166%)
+pha1 time: 0.00015s (18.90856%)
+pha2 time: 0.00002s ( 2.25748%)
+Sum  time: 0.00080s (99.89960%)
+All  time: 0.00080s
+
+Seconds: 0.000933085
+
+../../data/ukp/buriol/n5000wmin1.ukp
+opt:    918181720
+y_opt:  200000000
+ix: 0 qt: 1818181 w: 110 p: 505 e: 4.59091
+ix: 5 qt: 15 w: 6 p: 21 e: 3.5
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 99948
+y_bound: 1520
+c: 200000000
+n: 5000
+w_min: 6
+w_max: 99947
+last_dy_non_zero_non_n: 1447
+qt_non_skipped_ys: 274
+qt_gy_zeros: 1151
+qt_inner_loop_executions: 93
+qt_inner_loop_executions/qt_non_skipped_ys: 0.339416
+qt_inner_loop_executions/c: 4.65e-07
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 6.78832e-05
+(qt_inner_loop_executions/c)/n: 9.3e-11
+Sort time: 0.00031s (43.60481%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00032s (45.46323%)
+O(n) time: 0.00001s ( 1.17649%)
+pha1 time: 0.00005s ( 7.12820%)
+pha2 time: 0.00002s ( 2.50988%)
+Sum  time: 0.00071s (99.88261%)
+All  time: 0.00071s
+
+Seconds: 0.000836835
+
+../../data/ukp/buriol/n5000wmin3000.ukp
+opt:    391772556
+y_opt:  199999990
+ix: 0 qt: 2117 w: 94079 p: 184288 e: 1.95886
+ix: 1 qt: 1 w: 94039 p: 184194 e: 1.9587
+ix: 3 qt: 1 w: 94797 p: 185668 e: 1.95859
+ix: 4 qt: 7 w: 92273 p: 180714 e: 1.95847
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 5968074
+y_bound: 200000000
+c: 200000000
+n: 5000
+w_min: 3001
+w_max: 102989
+last_dy_non_zero_non_n: 5968073
+qt_non_skipped_ys: 878356
+qt_gy_zeros: 198256311
+qt_inner_loop_executions: 15357693
+qt_inner_loop_executions/qt_non_skipped_ys: 17.4846
+qt_inner_loop_executions/c: 0.0767885
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00349692
+(qt_inner_loop_executions/c)/n: 1.53577e-05
+Sort time: 0.00029s ( 0.07901%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.30716s (82.64280%)
+O(n) time: 0.00001s ( 0.00247%)
+pha1 time: 0.06417s (17.26384%)
+pha2 time: 0.00004s ( 0.01163%)
+Sum  time: 0.37167s (99.99975%)
+All  time: 0.37167s
+
+Seconds: 0.371807
+
+../../data/ukp/buriol/n5000wmin300.ukp
+opt:    428885778
+y_opt:  199999999
+ix: 0 qt: 275097 w: 727 p: 1559 e: 2.14443
+ix: 1 qt: 5 w: 896 p: 1911 e: 2.13281
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 101380
+y_bound: 133887
+c: 200000000
+n: 5000
+w_min: 324
+w_max: 100294
+last_dy_non_zero_non_n: 101379
+qt_non_skipped_ys: 19041
+qt_gy_zeros: 48565
+qt_inner_loop_executions: 165199
+qt_inner_loop_executions/qt_non_skipped_ys: 8.67596
+qt_inner_loop_executions/c: 0.000825995
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.00173519
+(qt_inner_loop_executions/c)/n: 1.65199e-07
+Sort time: 0.00030s (10.22241%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00085s (28.84002%)
+O(n) time: 0.00001s ( 0.31670%)
+pha1 time: 0.00177s (59.77086%)
+pha2 time: 0.00002s ( 0.81577%)
+Sum  time: 0.00296s (99.96576%)
+All  time: 0.00296s
+
+Seconds: 0.00311088
+
+../../data/ukp/buriol/n5000wmin30.ukp
+opt:    505302982
+y_opt:  199999991
+ix: 0 qt: 757573 w: 264 p: 667 e: 2.52652
+ix: 1 qt: 1 w: 411 p: 1037 e: 2.52311
+ix: 3 qt: 1 w: 308 p: 754 e: 2.44805
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100200
+y_bound: 196088
+c: 200000000
+n: 5000
+w_min: 72
+w_max: 100013
+last_dy_non_zero_non_n: 100199
+qt_non_skipped_ys: 12884
+qt_gy_zeros: 148796
+qt_inner_loop_executions: 45118
+qt_inner_loop_executions/qt_non_skipped_ys: 3.50186
+qt_inner_loop_executions/c: 0.00022559
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 0.000700373
+(qt_inner_loop_executions/c)/n: 4.5118e-08
+Sort time: 0.00031s (14.41774%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00107s (49.97556%)
+O(n) time: 0.00001s ( 0.42124%)
+pha1 time: 0.00072s (33.66092%)
+pha2 time: 0.00003s ( 1.47972%)
+Sum  time: 0.00214s (99.95519%)
+All  time: 0.00214s
+
+Seconds: 0.00227954
+
+../../data/ukp/buriol/n5000wmin3.ukp
+opt:    675280876
+y_opt:  200000000
+ix: 0 qt: 1123588 w: 178 p: 601 e: 3.3764
+ix: 2 qt: 4 w: 334 p: 1122 e: 3.35928
+ukp5 used conf follows:
+apply_smdom: 0
+use_percent: 1
+sort_percent: 1
+create_dumps: 0
+use_y_star_per: 1
+end of ukp5 conf
+last_y_value_outer_loop: 100022
+y_bound: 84106
+c: 200000000
+n: 5000
+w_min: 23
+w_max: 99998
+last_dy_non_zero_non_n: 84066
+qt_non_skipped_ys: 18263
+qt_gy_zeros: 59016
+qt_inner_loop_executions: 5864
+qt_inner_loop_executions/qt_non_skipped_ys: 0.321086
+qt_inner_loop_executions/c: 2.932e-05
+(qt_inner_loop_executions/qt_non_skipped_ys)/n: 6.42173e-05
+(qt_inner_loop_executions/c)/n: 5.864e-09
+Sort time: 0.00029s (24.78963%)
+Dom  time: 0.00000s ( 0.00000%)
+Vect time: 0.00063s (53.22525%)
+O(n) time: 0.00001s ( 0.74716%)
+pha1 time: 0.00022s (18.95804%)
+pha2 time: 0.00003s ( 2.20448%)
+Sum  time: 0.00117s (99.92456%)
+All  time: 0.00118s
+
+Seconds: 0.00130735
+

@@ -1,7 +1,7 @@
 all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out
 
 CC=g++
-CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -lboost_filesystem -lboost_system -O3 
+CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -lboost_filesystem -lboost_system -O3 #-g
 H_DEPS=ukp_common.hpp test_common.hpp
 DEFS=-DHBM_CHECK_PERIODICITY -DHBM_XOR_SWAP
 

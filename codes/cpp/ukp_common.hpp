@@ -97,9 +97,14 @@ namespace hbm {
 
     /// Write human-readable object representation to a stream.
     ///
+    /// We take an stream as a parameter to allow people changing
+    /// the precision the numbers should be shown.
+    ///
     /// @param out An ostream where the object representation will be
     ///   outputed.
     void print(std::ostream &out = std::cout) const {
+      // TODO: create a to_string overloaded funtion for this object
+      // and use this function with an stringstream as implementation.
       double e = static_cast<double>(it.p)/static_cast<double>(it.w);
 
       out << "ix: " << ix << " qt: " << qt << " w: " << it.w << " p: " << it.p << " e: " << e << std::endl;

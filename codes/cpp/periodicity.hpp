@@ -64,7 +64,7 @@ namespace hbm {
     template <typename W>
     W refine_y_star(W y_, W c, W w_b) {
       if (y_ > c) return c;
-      W qt_b = ((c - y_) % w_b) + 1;
+      W qt_b = ((c - y_) / w_b) + 1;
       return c - qt_b*w_b;
     }
 

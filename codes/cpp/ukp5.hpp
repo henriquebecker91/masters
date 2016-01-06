@@ -37,10 +37,50 @@ namespace hbm {
       double sort_percent{1.0};
       I sort_k_most_eff;
     };
+    /// If true, will try to create dump files on the paths.
+    /// The ukp5 (argc/argv version) function set this paths,
+    /// if they are empty.
     bool create_dumps{false};
-    /// Dump paths, if empty they are set by ukp5 (argc/argv version).
-    std::string gd_path, dd_path, nsd_path, dqt_path;
+    
+    std::string
+      gd_path, ///< Path where the g vector will be dumped.
+      dd_path, ///< Path where the d vector will be dumped.
+      nsd_path, ///< Path where non_skipped_d will be dumped.
+      dqt_path; ///< Path where qt_i_in_dy will be dumped.
+
     bool use_y_star_per{true};
+
+    /// Write human-readable object representation to a stream.
+    ///
+    /// We take an stream as a parameter to allow people changing
+    /// the precision the numbers should be shown.
+    ///
+    /// @param out An ostream where the object representation will be
+    ///   outputed.
+    void print(std::ostream &out = std::cout) const {
+      // TODO: create a to_string overloaded funtion for this object
+      // and use this function with an stringstream as implementation.
+      #define HBM_PRINT_VAR(var) out << #var ": " << var << std::endl
+      HBM_PRINT_VAR(apply_smdom);
+      if (apply_smdom) HBM_PRINT_VAR(apply_smdom_before_sort);
+
+      HBM_PRINT_VAR(use_percent);
+      if (use_percent) {
+        HBM_PRINT_VAR(sort_percent);
+      } else {
+        HBM_PRINT_VAR(sort_k_most_eff);
+      }
+
+      HBM_PRINT_VAR(create_dumps);
+      if (create_dumps) {
+        HBM_PRINT_VAR(gd_path);
+        HBM_PRINT_VAR(dd_path);
+        HBM_PRINT_VAR(nsd_path);
+        HBM_PRINT_VAR(dqt_path);
+      }
+
+      HBM_PRINT_VAR(use_y_star_per);
+    }
   };
 
   namespace hbm_ukp5_impl {
@@ -59,6 +99,9 @@ namespace hbm {
       W last_y_value_outer_loop;
       #endif // HBM_CHECK_PERIODICITY
 
+      /// The UKP5 used config.
+      ukp5_conf_t<I> conf;
+
       // Time of each phase
       double sort_time;        ///< Time used sorting items.
       double smdom_time;       ///< Time used removing simple/multiple dominance.
@@ -68,10 +111,11 @@ namespace hbm {
       double phase2_time;      ///< Time used by ukp5 phase2 (assemble solution).
       double total_time;       ///< Time used by all previous steps.
       // Some data about instance
-      I n;   ///< Instance number of items.
-      W c,   ///< Instance capacity.
-      w_min, ///< Instance smallest item weight.
-      w_max; ///< Instance biggest item weight.
+      I n;      ///< Instance number of items.
+      W c,      ///< Instance capacity.
+      y_bound,  ///< Capacity used if use_y_star_per is true.
+      w_min,    ///< Instance smallest item weight.
+      w_max;    ///< Instance biggest item weight.
       // Some data about structures manipulated by ukp5
       std::vector<P> g; ///< The vector of size c+w_max+1 and profit values.
       std::vector<I> d; ///< The vector of size c+w_max+1 and item index values.
@@ -88,13 +132,6 @@ namespace hbm {
       W qt_gy_zeros;
       /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
       W qt_inner_loop_executions;
-
-      /// If true, will try to create dump files on gd_path and dd_path.
-      bool create_dumps;
-      string gd_path, ///< Path where the g vector will be dumped.
-             dd_path, ///< Path where the d vector will be dumped.
-             nsd_path, ///< Path where non_skipped_d will be dumped.
-             dqt_path; ///< Path where qt_i_in_dy will be dumped.
 
       template <typename W_OR_P>
       static void dump(const string &path,
@@ -116,9 +153,14 @@ namespace hbm {
         ukp5_gen_stats();
 
         stringstream out("");
+        out << "ukp5 used conf follows:" << endl;
+        conf.print(out);
+        out << "end of ukp5 conf" << endl;
+
         #ifdef HBM_CHECK_PERIODICITY
         out << "last_y_value_outer_loop: " << last_y_value_outer_loop << endl;
         #endif
+        out << "y_bound: " << y_bound << endl;
         out << "c: " << c << endl;
         out << "n: " << n << endl;
         out << "w_min: " << w_min << endl;
@@ -135,6 +177,8 @@ namespace hbm {
         const double &stime = sort_time, &dtime = smdom_time,
           &vtime = vector_alloc_time, &lctime = linear_comp_time,
           &p1time = phase1_time, &p2time = phase2_time, &ttime = total_time;
+        const double sum_time =
+          stime + dtime + vtime + lctime + p1time + p2time;
 
         streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
         const int two_first_digits_and_period = 3;
@@ -160,29 +204,33 @@ namespace hbm {
         out << "pha2 time: " << p2time << "s (";
         out << setw(percent_size) << (p2time/ttime)*100.0;
         out << "%)" << endl;
-        out << "Sum times: " << ttime << "s" << endl;
+        out << "Sum  time: " << sum_time << "s (";
+        out << setw(percent_size) << (sum_time/ttime)*100.0;
+        out << "%)" << endl;
+        out << "All  time: " << ttime << "s" << endl;
 
         out.fill(old_fill);
         out.setf(old_flags);
         out.precision(old_precision);
 
-        if (create_dumps) {
-          dump(gd_path, "y\tgy", g);
-          dump(dd_path, "y\tdy", d);
-          dump(nsd_path, "y\tdy", non_skipped_d);
-          dump(dqt_path, "i\tqt_in_d", qt_i_in_dy);
+        if (conf.create_dumps) {
+          dump(conf.gd_path, "y\tgy", g);
+          dump(conf.dd_path, "y\tdy", d);
+          dump(conf.nsd_path, "y\tdy", non_skipped_d);
+          dump(conf.dqt_path, "i\tqt_in_d", qt_i_in_dy);
         }
 
         return out.str();
       }
 
       /// This method only works if the following variables are
-      /// set first: n, c, w_min, w_max, g and d. It can't receive
-      /// this values by constructor as g and d are initialized
-      /// empty and changed by UKP5 (they aren't a copy of the
-      /// vectors UKP5 used, they are the vectors UKP5 used).
+      /// set first: n, c, y_bound, w_min, w_max, g and d. It
+      /// can't receive this values by constructor as g and d
+      /// are initialized empty and changed by UKP5 (they aren't
+      /// a copy of the vectors UKP5 used, they are the vectors
+      /// UKP5 used).
       void ukp5_gen_stats(void) {
-        non_skipped_d.assign(c-w_min + 1, n-1);
+        non_skipped_d.assign(y_bound-w_min + 1, n-1);
 
         qt_i_in_dy.assign(n, 0);
         qt_i_in_dy[n-1] = w_min;
@@ -192,7 +240,7 @@ namespace hbm {
         qt_non_skipped_ys = 0;
         qt_inner_loop_executions = 0;
 
-        for (W y = w_min; y <= c-w_min; ++y) {
+        for (W y = w_min; y <= y_bound-w_min; ++y) {
           ++(qt_i_in_dy[d[y]]);
           if (g[y] > opt) {
             ++(qt_non_skipped_ys);
@@ -402,7 +450,7 @@ namespace hbm {
       return;
     }
 
-    double difftime_between_now_and(const steady_clock::time_point &begin) {
+    double inline difftime_between_now_and(const steady_clock::time_point &begin) {
       return duration_cast< duration<double> >(steady_clock::now() - begin)
              .count();
     }
@@ -422,13 +470,8 @@ namespace hbm {
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
       sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
 
-      if (conf.create_dumps) {
-        ptr->create_dumps = conf.create_dumps;
-        ptr->gd_path = conf.gd_path;
-        ptr->dd_path = conf.dd_path;
-        ptr->nsd_path = conf.nsd_path;
-        ptr->dqt_path = conf.dqt_path;
-      }
+      // We print the configuration used later.
+      ptr->conf = conf;
 
       if (conf.apply_smdom && conf.apply_smdom_before_sort) {
         begin = steady_clock::now();
@@ -511,8 +554,9 @@ namespace hbm {
       ptr->linear_comp_time = difftime_between_now_and(begin);
 
       // Set some variables for post printing
-      ptr->c = c;
       ptr->n = n;
+      ptr->c = c;
+      ptr->y_bound = y_bound;
       ptr->w_min = w_min;
       ptr->w_max = w_max;
 
@@ -522,8 +566,8 @@ namespace hbm {
       // making possible study them with R or other tool.
       vector<P> &g = ptr->g;
       vector<I> &d = ptr->d;
-      g.assign(c+1+(w_max-w_min), 0);
-      d.assign(c+1+(w_max-w_min), n-1);
+      g.assign(y_bound+1+(w_max-w_min), 0);
+      d.assign(y_bound+1+(w_max-w_min), n-1);
       ptr->vector_alloc_time = difftime_between_now_and(begin);
 
       begin = steady_clock::now();

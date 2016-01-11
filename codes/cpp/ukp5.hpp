@@ -396,7 +396,7 @@ namespace hbm {
         W next_y = y + wb;
         P old_gny = g[next_y];
         P new_gny = gy + pb;
-        if (old_gny < new_gny) {
+        if (old_gny <= new_gny) {
           g[next_y] = new_gny;
           d[next_y] = 0;
         }
@@ -414,6 +414,9 @@ namespace hbm {
             #ifdef HBM_CHECK_PERIODICITY
             if (ny > last_y_where_nonbest_item_was_used) last_y_where_nonbest_item_was_used = ny;
             #endif
+          } else if (ogny == ngny && d[ny] > ix) {
+            g[ny] = ngny;
+            d[ny] = ix;
           }
         }
       }

@@ -11,10 +11,14 @@
 
 # material with copyrights
 papers/
+codes/third_party_code/
 
 # instances that are too big for the repository
-data/sukp/big_instances/
-data/ukp/big_instances/
+data/sukp/too_big_instances/
+data/ukp/too_big_instances/
+
+# folder used by sh scripts for temporary or final storage
+data/results/tmp/
 
 # latex
 *.aux

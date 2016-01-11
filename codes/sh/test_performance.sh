@@ -83,7 +83,10 @@ echo "If there were no errors the results should be at the $PATH_R folder (from 
 #myinst_bench_files=($(ls ${myinst_bench_folder}))
 #test_performance 1 3 "$myinst_bench_folder" myinst_bench_files[@]
 
-ss_folder='../../data/ukp/ss/'
-ss_files=($(ls ${ss_folder}))
-test_performance 1 3 "$ss_folder" ss_files[@]
+#sc_folder='../../data/ukp/sc/'
+#sc_files=($(ls ${sc_folder}))
+#test_performance 1 3 "$sc_folder" sc_files[@]
 
+wcd_folder='../../data/ukp/wcd/'
+wcd_files=($(ls ${wcd_folder} | grep 'hi_.*\.ukp'))
+test_performance 1 2 "$wcd_folder" wcd_files[@]

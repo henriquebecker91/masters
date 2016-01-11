@@ -4,7 +4,7 @@
 # article "A hybrid algorithm for the unbounded knapsack problem"
 
 wmins="100 500 1000 5000 10000"
-wmaxs="50000 1000000"
+wmaxs="50000 100000"
 ns="1000 2000 5000 10000"
 # Generated with random.org (most close to true random numbers possible)
 # 400 values, just the necessay amount for ten instances of every combination
@@ -15,6 +15,7 @@ cs=(771721 507170 700591 737429 919878 904309 546518 921854 660065 935549 555456
 # 10^9 (one billion, the max allowed by random.org)
 seeds=(827183242 843367405 528806317 780179313 721215008 110877071 227708629 177710744 991580855 126456688)
 
+counter=0
 for wmin in $wmins; do
 	for wmax in $wmaxs; do
 		for n in $ns; do

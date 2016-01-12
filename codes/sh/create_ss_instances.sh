@@ -20,7 +20,7 @@ for wmin in $wmins; do
 	for wmax in $wmaxs; do
 		for n in $ns; do
 			for i in `seq 0 9`; do
-				pyasukp -nosolve -form ss -save "wmin${wmin}wmax${wmax}n${n}-${i}-s${seeds[i]}c${cs[$counter]}" -seed ${seeds[$i]} -cap ${cs[$counter]} -wmin $wmin -wmax $wmax -n $n
+				pyasukp -nosolve -form ss -save "ss_wmin${wmin}wmax${wmax}n${n}-${i}-s${seeds[i]}c${cs[$counter]}.ukp" -seed ${seeds[$i]} -cap ${cs[$counter]} -wmin $wmin -wmax $wmax -n $n
 				counter=$counter+1
 			done
 		done

@@ -150,10 +150,10 @@ namespace hbm {
       }
 
       virtual string gen_info(void) {
-        ukp5_gen_stats();
+        //ukp5_gen_stats();
 
         stringstream out("");
-        out << "ukp5 used conf follows:" << endl;
+        /*out << "ukp5 used conf follows:" << endl;
         conf.print(out);
         out << "end of ukp5 conf" << endl;
 
@@ -218,7 +218,7 @@ namespace hbm {
           dump(conf.dd_path, "y\tdy", d);
           dump(conf.nsd_path, "y\tdy", non_skipped_d);
           dump(conf.dqt_path, "i\tqt_in_d", qt_i_in_dy);
-        }
+        }*/
 
         return out.str();
       }

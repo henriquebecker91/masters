@@ -3,7 +3,7 @@
 
 #include <type_traits>
 #include <limits>       // for numeric_limits
-#include <boost/rational.hpp>
+#include <boost/multiprecision/cpp_int.hpp> // Infinite precision boost rational
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
 
@@ -25,11 +25,19 @@ namespace hbm {
   namespace hbm_periodicity_impl {
     using namespace std;
     using namespace boost;
+    using namespace boost::multiprecision;
+
+
+    // Only valid for unsigned integers that define
+    // numeric_limits<W>::max().
+    template <typename T>
+    bool mult_will_overflow(const T &a, const T &b) {
+      return a > 0 && (numeric_limits<T>::max() / a) < b;
+    }
 
     template <typename W, typename P>
     W y_star(const item_t<W, P> &b, const item_t<W, P> &b2) {
-      if (std::is_integral<W>::value && std::is_integral<P>::value &&
-          std::is_same<W, P>::value) {
+      if (std::is_integral<W>::value && std::is_same<W, P>::value) {
         // Without the castings, the compiler gives conversion warnings
         // that don't will ever happen. If P is a floating point number
         // this 'if' never executes. The castings have literally no
@@ -37,13 +45,22 @@ namespace hbm {
         W w1 = b.w, w2 = b2.w;
         W p1 = static_cast<W>(b.p), p2 = static_cast<W>(b2.p);
 
-        rational<W> r_p1(static_cast<W>(b.p));
-        rational<W> r1(p1, w1);
-        rational<W> r2(p2, w2);
+        cpp_rational r_p1 = static_cast<W>(b.p);
+        cpp_rational r1(p1, w1);
+        cpp_rational r2(p2, w2);
 
+        // If the two numbers are equal we would divide by
+        // zero later. The closest value we have to infinity
+        // is the best return.
         if (r1 == r2) return numeric_limits<W>::max();
 
-        return rational_cast<W>(r_p1/(r1 - r2)) + 1;
+        // Always positive: the r1 efficiency is bigger than the r2 efficiency
+        cpp_rational d = r1 - r2;
+        // Final value, the "plus one" is to avoid getting 1 less
+        // than the real value when we cast back to W
+        cpp_rational y = (r_p1 / d) + 1;
+
+        return y <= numeric_limits<W>::max() ? static_cast<W>(y) : numeric_limits<W>::max();
       } else if (std::is_floating_point<P>::value) {
         W w1 = b.w, w2 = b2.w;
         P p1 = b.p, p2 = b2.p;

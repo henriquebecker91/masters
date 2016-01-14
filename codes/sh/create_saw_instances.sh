@@ -186,7 +186,7 @@ for l in 0 1 2 3; do
 		# flag, we get the modulo five of the random numbers
 		alpha=`expr \( ${seeds[$i]} % 5 \) + 1`
 		c=${cs2[$i]}
-		pyasukp -nosolve -form UnrSaw -save "saw_n${n}wmin${wmin}-$i-s${seeds[$i]}c$c.ukp" -step $alpha -seed ${seeds[$i]} -cap $c -wmin $wmin -wmax $wmax -pmax $pmax -n $n
+		pyasukp -nosolve -form saw -save "saw_n${n}wmin${wmin}-$i-s${seeds[$i]}c$c.ukp" -step $alpha -seed ${seeds[$i]} -cap $c -wmin $wmin -wmax $wmax -pmax $pmax -n $n
 	done
 done
 

@@ -51,18 +51,18 @@ c_n10c=0
 for alpha in ${alphas[@]}; do
 	for n in ${ns[@]}; do
 		if (($n == 5000)); then
-			c=${c_n5[c_n5c]}
 			for wmin in ${wmins_1[@]}; do
 				for i in `seq 0 19`; do
+					c=${c_n5[c_n5c]}
 					pyasukp -nosolve -form chung -save "sc_a${alpha}n${n}wmin${wmin}-${i}-c${c}.ukp" -step $alpha -n $n -wmin $wmin -cap $c
 					c_n5c=`expr $c_n5c + 1`
 				done
 			done
 		fi
 		if (($n == 10000)); then
-			c=${c_n10[c_n10c]}
 			for wmin in ${wmins_2[@]}; do
 				for i in `seq 0 19`; do
+					c=${c_n10[c_n10c]}
 					pyasukp -nosolve -form chung -save "sc_a${alpha}n${n}wmin${wmin}-${i}-c${c}.ukp" -step $alpha -n $n -wmin $wmin -cap $c
 					c_n10c=`expr $c_n10c + 1`
 				done

@@ -1,0 +1,189 @@
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+
+\usepackage{url}
+\urldef{\mail}\path|{hbecker, buriol}@inf.ufrgs.br|
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+% first the title is needed
+\title{UKP5: a simple imperative algorithm for the unbounded knapsack problem}
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{UKP5: a simple imperative algorithm for the UKP}
+
+% the name(s) of the author(s) follow(s) next
+%
+% NB: Chinese authors should write their first names(s) in front of
+% their surnames. This ensures that the names appear correctly in
+% the running heads and the author index.
+%
+\author{Henrique Becker \and Luciana Salete Buriol}
+%
+\authorrunning{UKP5: a simple imperative algorithm for the UKP}
+% (feature abused for this document to repeat the title also on left hand pages)
+
+% the affiliations are given next; don't give your e-mail address
+% unless you accept that it will be published
+\institute{Federal University of Rio Grande do Sul,\\
+Paulo Gama. 110, 90040-060, Porto Alegre, RS, Brazil\\
+\mail\\
+\url{http://ppgc.inf.ufrgs.br/}}
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+\toctitle{Lecture Notes in Computer Science}
+\tocauthor{Authors' Instructions}
+\maketitle
+
+% NOTE: IMPORTANT: The abstract need to be between 70 and 150 words. Always check this before editing.
+\begin{abstract}
+In this paper we present a novel imperative algorithm for solving the unbounded knapsack problem. This algorithm has the following advantages over Eduk2 (algorithm that until now claimed to be the "state of art" solution): it's much simpler; can be easily implemented on an imperative programming language (Eduk2 uses concepts of functional programming that undermine this goal); and for the hard instances proposed by the authors of Eduk2 as benchmark, in average, is many times faster. Our algorithm applies the concepts of sparsity, dominance, and periodicity integrated on an imperative "dynamic programming"-like fashion.
+\keywords{unbounded knapsack problem, ukp, imperative programming, dynamic programming}
+\end{abstract}
+
+\section{Introduction}
+\subsection{The problem}
+COPY WHAT WAS CREATED FOR THE UKP5 EXPLANATION
+\subsection{Motivation}
+IS NP-COMPLETE, solutions using bb are prefered, but their worst case is very bad, the DP approach is stable (pseudo-polynomial), but its average time is bad, we use the pseudo-polynomial approach combined with a set of integrated techniques that make it much faster than a naive DP approach
+THE BPP/CSP PROBLEM BEST KNOW SOLVING METHOD USE IT AS A STEP (cite SURVEY, and say that the winner use the technique described)
+\subsection{Bibliographic Revision}
+% Garfinkel, PYAsUKP
+\subsection{Contributions}
+% Copy what already used on abstract? One contribution is the algorithm itself.
+% The experiments results are other contribution.
+
+\section{The proposed algorithm: UKP5}
+
+% Idea
+% Alg
+% Dominance
+% Periodicity
+% Sparsity
+% Correctness
+
+\section{Experiments}
+% Describe all instance datasets.
+% Describe the environment (computer, isolated cores, disabled hyperthreading)
+% Only used internal time, internal time of PYAsUKP was strange
+% external time not used because HD data reading race conditions, and different reading methods
+% TABLE WITH RESULTS
+In this section we describe the experiments environment, instance sets and results. We compare our ukp5 implementation and the eduk2 implementation made by CPYA (called PYAsUKP). The exact versions of the source codes used can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{The ukp5 implementation is at \textbf{codes/cpp/} and the two eduk2 implementations are at \textbf{codes/ocaml/}. The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html} by this paper writing date. The site version had bugs on the eduk2 UKP solver, so a version without those bugs was obtained thanks to Vincent Poirriez. This version is called \emph{pyasukp\_mail.tgz} and was the one used to solve the instances (i.e. make the CTABLE1).}. The times reported were given by the tools themselves and are supposed to not count the instance loading time (i.e. reading the instance from disk to memory). The runs external time\footnote{Given by the \textit{time} application, available at \url{https://www.archlinux.org/packages/extra/x86_64/time/}. The bash internal command was \emph{not} used.} were also captured and no significative discrepancy was perceived. Therefore, we have chosen to use the tools reported times (as is the common practice).
+
+\subsection{Environment}
+
+The computer used on the experiments was an ASUS R552JK-CN159H. This model has four physical cores\footnote{Intel Core i7-4700HQ Processor, 6M Cache, up to 3.40 GHz.}. The operating system used was Linux nymeria 4.3.3-2-ARCH x86\_64 GNU/Linux (i.e. Arch linux). Three of the four cores were isolated using the \emph{isolcpus} kernel flag. The \emph{taskset} utility was used to execute ukp5 and pyasukp on the isolated cores. The computer memory was never completely used (no swapping was done).
+
+\subsection{Instance Sets}
+The instance sets used aim to reproduce the ones described in CPYA. The same tool was used to generate the datasets (pyasukp), and the same parameters were used, otherwise noted the contrary. In CPYA, section 5.1.1 \emph{Known ``hard'' instances}, some sets of easy instances are used to allow comparison with MTU2 (that had integer overflow problems with harder instances). With exception of the subset-sum one, all have a similar harder set (CPYA, section 5.2.1 \emph{New hard UKP instances}), so we ommited the easy sets and used only the harder ones. Each instance has a random capacity value within an interval, this interval is shown at CTABLE1.
+
+\subsubsection{Subset-Sum}
+\label{sec:subsetsum}
+
+Instances with \(\forall i \in I.~w_i = p_i\) (CHECK NOTATION). The ones used at CPYA were so easily solved that we had measuring problems (many instances solved on less than 0.01 seconds). Because of this, in this paper, we use a dataset similar to the one used at CPYA, but with each parameter multiplied by ten. Therefore, we generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\), \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\). Totalizing 400 instances. We do not discriminate each combination at CTABLE1 for brevity. The item weights and profits are generated randomly on the \([w_{min}; w_{max}]\) interval. The pyasukp \emph{-form ss} parameter was used.
+
+\subsubsection{Strong Correlation}
+Instances generated using the following formula:
+\begin{equation}\label{eq:sc}
+w_i = w_{min} + i - 1 \mbox{ and } p_i = w_i + \alpha \mbox{ with } w_{min} \mbox{ and } \alpha \mbox{ given }.
+\end{equation}
+Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\) and \(w_{min}\) combination are equal. The formula don't rely on random numbers. The pyasukp \emph{-form nsds2 -step 500} parameters were used.
+
+\subsubsection{Postponed Periodicity}
+
+
+
+\subsubsection{No Collective Dominance}
+\subsubsection{SAW}
+
+\subsection{Results}
+
+\begin{table}
+\caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by ukp5 or eduk2, then the meaning of the columns \textbf{avg}, \textbf{sd}, \textbf{min} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the minimal value of \(T\) and the maximal value of \(T\). The time unit of the table values is seconds.}
+\def\arraystretch{1.1}
+\setlength\tabcolsep{4px}
+
+\begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrr@{}}
+
+\hline
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{4}{l}{UKP5} & \multicolumn{4}{l}{PYAsUKP}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+
+\multicolumn{3}{l}{400 inst. per line} & \multicolumn{8}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
+\cline{1-3}\cline{4-11}
+
+& \textbf{n} & \(w_{min}\)  & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+
+\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & 0.08 & 0.20 & 0.01 & 1.42 & 6.39 & 55.33 & 0.00 & 726.34\\
+\hline
+
+\multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+\textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+ 5 & 5  & 10 & 0.05 & 0.00 & 0.05 & 0.05 & 2.46 & 2.81 & 0.00 & 6.13\\
+   &    & 15 & 0.07 & 0.00 & 0.07 & 0.09 & 5.84 & 2.43 & 0.00 & 8.82\\
+   &    & 50 & 0.20 & 0.06 & 0.08 & 0.24 & 18.35 & 12.64 & 0.00 & 50.58\\
+ 5 & 10 & 10 & 0.11 & 0.01 & 0.10 & 0.14 & 0.00 & 0.00 & 0.00 & 0.01\\
+   &    & 50 & 0.49 & 0.03 & 0.47 & 0.60 & 41.97 & 33.97 & 0.00 & 93.18\\
+   &    & 110 & 1.07 & 0.02 & 1.05 & 1.13 & 147.60 & 114.39 & 0.00 & 342.86\\
+-5 & 5  & 10 & 0.06 & 0.00 & 0.06 & 0.07 & 5.98 & 4.02 & 0.00 & 11.99\\
+   &    & 15 & 0.09 & 0.00 & 0.08 & 0.10 & 10.37 & 6.73 & 0.00 & 21.00\\
+   &    & 50 & 0.21 & 0.05 & 0.09 & 0.24 & 39.31 & 30.16 & 0.00 & 89.44\\
+-5 & 10 & 10 & 0.19 & 0.01 & 0.17 & 0.21 & 13.13 & 12.61 & 0.00 & 33.00\\
+   &    & 50 & 0.54 & 0.02 & 0.52 & 0.59 & 82.97 & 71.22 & 0.00 & 206.74\\
+   &    & 110& 1.08 & 0.02 & 1.07 & 1.13 & 261.61 & 246.21 & 0.00 & 721.89\\
+\hline
+
+\multicolumn{3}{l}{200 inst. per line} & \multicolumn{8}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
+\cline{1-3}\cline{4-11}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+& 20 & 20 & 1.42 & 0.31 & 0.55 & 2.77 & 17.00 & 17.05 & 0.01 & 63.96\\
+& 50 & 20 & 10.20 & 1.28 & 7.91 & 14.98 & 208.61 & 210.72 & 0.03 & 828.89\\
+& 20 & 50 & 1.59 & 0.32 & 0.96 & 2.99 & 27.68 & 22.79 & 0.02 & 100.96\\
+& 50 & 50 & 6.86 & 1.23 & 4.46 & 11.78 & 233.58 & 187.91 & 2.65 & 682.95\\
+\hline
+
+\multicolumn{3}{l}{500 inst. per line} & \multicolumn{8}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+&  5 & n & 0.05 & 0.01 & 0.03 & 0.10 & 0.78 & 0.59 & 0.00 & 2.66\\
+& 10 & n & 0.49 & 0.15 & 0.21 & 1.10 & 3.38 & 2.80 & 0.00 & 12.31\\
+& 20 & n & 0.99 & 0.19 & 0.63 & 2.02 & 13.08 & 12.80 & 0.01 & 62.12\\
+& 50 & n & 4.69 & 1.22 & 3.51 & 13.18 & 119.18 & 131.22 & 0.04 & 667.42\\
+\hline
+
+\multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{8}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+\textbf{qtd} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+~200 &  10 & 10 & 0.11 & 0.01 & 0.10 & 0.16 & 1.88 & 1.24 & 0.01 & 4.73\\
+~500 &  50 &  5 & 0.74 & 0.08 & 0.66 & 1.98 & 4.79 & 4.22 & 0.02 & 17.78\\
+~200 &  50 & 10 & 1.01 & 0.03 & 0.97 & 1.27 & 10.44 & 9.02 & 0.03 & 38.69\\
+~200 & 100 & 10 & 14.13 & 2.96 & 9.95 & 21.94 & 60.58 & 54.08 & 0.05 & 192.04\\
+\hline
+
+\end{tabular}
+\end{table}
+
+\section{Conclusions}
+
+\bibliography{ukp5.bib}
+
+\end{document}

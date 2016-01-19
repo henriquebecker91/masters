@@ -1,6 +1,9 @@
 \documentclass[runningheads,a4paper]{llncs}
 
 \usepackage{amssymb}
+%\usepackage{mathtools}
+%DeclarePairedDelimiter\floor{\lfloor}{\rfloor} 
+
 \setcounter{tocdepth}{3}
 \usepackage{graphicx}
 
@@ -49,8 +52,18 @@ Paulo Gama. 110, 90040-060, Porto Alegre, RS, Brazil\\
 \maketitle
 
 % NOTE: IMPORTANT: The abstract need to be between 70 and 150 words. Always check this before editing.
+% Info used in the average time:
+% ss=639/8
+% sc=(246+584+1835+0+4197+14760+598+1037+3931+1313+8297+26161)/(5+7+20+11+49+107+6+9+21+19+54+108)
+% per=(1700+20861+2768+23358)/(142+1020+159+686)
+% wcd=(78+338+1308+11918)/(5+49+99+469)
+% saw500=479/74
+% saw600=(188+1044+6058)/(11+101+1413)
+% saw=saw=((saw500*500)+(saw600*600))/1100
+% avg=((ss*400)+(sc*240)+(per*800)+(wcd*2000)+(saw*1100))/(400+240+800+2000+1100)
+% avg ~= 30
 \begin{abstract}
-In this paper we present a novel imperative algorithm for solving the unbounded knapsack problem. This algorithm has the following advantages over Eduk2 (algorithm that until now claimed to be the "state of art" solution): it's much simpler; can be easily implemented on an imperative programming language (Eduk2 uses concepts of functional programming that undermine this goal); and for the hard instances proposed by the authors of Eduk2 as benchmark, in average, is many times faster. Our algorithm applies the concepts of sparsity, dominance, and periodicity integrated on an imperative "dynamic programming"-like fashion.
+In this paper we present a novel imperative algorithm for solving the unbounded knapsack problem. We call this algorithm \emph{ukp5}. This algorithm has the following advantages over eduk2 (algorithm that until now claimed to be the ``state of art''): it's much simpler; can be easily implemented on an imperative programming language (Eduk2 uses concepts of functional programming that undermine this goal); and our implementation is, in average, about thirty times faster than the only known eduk2 implementation (pyasukp), using as benchmark the family of hard instances proposed by the authors of eduk2. Our algorithm applies the concepts of sparsity, dominance, and periodicity integrated on an imperative ``dynamic programming''-like algorithm.
 \keywords{unbounded knapsack problem, ukp, imperative programming, dynamic programming}
 \end{abstract}
 
@@ -83,31 +96,29 @@ THE BPP/CSP PROBLEM BEST KNOW SOLVING METHOD USE IT AS A STEP (cite SURVEY, and 
 % TABLE WITH RESULTS
 In this section we describe the experiments environment, instance sets and results. We compare our ukp5 implementation and the eduk2 implementation made by CPYA (called PYAsUKP). The exact versions of the source codes used can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{The ukp5 implementation is at \textbf{codes/cpp/} and the two eduk2 implementations are at \textbf{codes/ocaml/}. The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html} by this paper writing date. The site version had bugs on the eduk2 UKP solver, so a version without those bugs was obtained thanks to Vincent Poirriez. This version is called \emph{pyasukp\_mail.tgz} and was the one used to solve the instances (i.e. make the CTABLE1).}. The times reported were given by the tools themselves and are supposed to not count the instance loading time (i.e. reading the instance from disk to memory). The runs external time\footnote{Given by the \textit{time} application, available at \url{https://www.archlinux.org/packages/extra/x86_64/time/}. The bash internal command was \emph{not} used.} were also captured and no significative discrepancy was perceived. Therefore, we have chosen to use the tools reported times (as is the common practice).
 
+We use the following non-standard notations at this section: \(rand(x, y)\) means a random integer between \(x\) and \(y\) (both inclusive)\footnote{We could not determine if the methods used by pyasukp to generate random integer sets results in an uniform distribution. We advice checking the source code for more information on the exact method used for obtaining random integer sets.}; \(x\overline{n}\) means \(x\) as digits followed by the value of variable \(n\) as digits, for example: if \(n = 5000\) then \(10\overline{n} = 105000\).
+
 \subsection{Environment}
 
 The computer used on the experiments was an ASUS R552JK-CN159H. This model has four physical cores\footnote{Intel Core i7-4700HQ Processor, 6M Cache, up to 3.40 GHz.}. The operating system used was Linux nymeria 4.3.3-2-ARCH x86\_64 GNU/Linux (i.e. Arch linux). Three of the four cores were isolated using the \emph{isolcpus} kernel flag. The \emph{taskset} utility was used to execute ukp5 and pyasukp on the isolated cores. The computer memory was never completely used (no swapping was done).
 
 \subsection{Instance Sets}
-The instance sets used aim to reproduce the ones described in CPYA. The same tool was used to generate the datasets (pyasukp), and the same parameters were used, otherwise noted the contrary. In CPYA, section 5.1.1 \emph{Known ``hard'' instances}, some sets of easy instances are used to allow comparison with MTU2 (that had integer overflow problems with harder instances). With exception of the subset-sum one, all have a similar harder set (CPYA, section 5.2.1 \emph{New hard UKP instances}), so we ommited the easy sets and used only the harder ones. Each instance has a random capacity value within an interval, this interval is shown at CTABLE1.
+The instance sets aim to reproduce the ones described in CPYA. The same tool was used to generate the datasets (pyasukp), and the same parameters were used, otherwise noted the contrary. In CPYA, section 5.1.1 \emph{Known ``hard'' instances}, some sets of easy instances are used to allow comparison with MTU2 (that had integer overflow problems with harder instances). With exception of the subset-sum dataset, all datasets have a similar harder set (CPYA, section 5.2.1 \emph{New hard UKP instances}), so we ommited the easy sets and used only the harder ones. Each instance has a random capacity value within an interval, this interval is shown at CTABLE1. The pyasukp parameters \emph{-wmin \(w_{min}\) -cap c -n \textbf{n}} were used in all instances generation.
 
-\subsubsection{Subset-Sum}
-\label{sec:subsetsum}
-
-Instances with \(\forall i \in I.~w_i = p_i\) (CHECK NOTATION). The ones used at CPYA were so easily solved that we had measuring problems (many instances solved on less than 0.01 seconds). Because of this, in this paper, we use a dataset similar to the one used at CPYA, but with each parameter multiplied by ten. Therefore, we generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\), \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\). Totalizing 400 instances. We do not discriminate each combination at CTABLE1 for brevity. The item weights and profits are generated randomly on the \([w_{min}; w_{max}]\) interval. The pyasukp \emph{-form ss} parameter was used.
+\subsubsection{Subset-Sum}\label{sec:subsetsum}
+Instances where \(p_i = w_i = rand(w_{min}, w_{max})\). The ones used at CPYA were so easily solved that we had measuring problems (many instances solved on less than 0.01 seconds). Because of this, in this paper, we use a dataset similar to the one used at CPYA, but with each parameter multiplied by ten. Therefore, we generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\), \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\). Totalizing 400 instances. We do not discriminate each combination at CTABLE1 for brevity. The pyasukp \emph{-form ss -wmax \(w_{max}\)} parameters were used.
 
 \subsubsection{Strong Correlation}
-Instances generated using the following formula:
-\begin{equation}\label{eq:sc}
-w_i = w_{min} + i - 1 \mbox{ and } p_i = w_i + \alpha \mbox{ with } w_{min} \mbox{ and } \alpha \mbox{ given }.
-\end{equation}
-Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\) and \(w_{min}\) combination are equal. The formula don't rely on random numbers. The pyasukp \emph{-form nsds2 -step 500} parameters were used.
+Instances generated using the following formula: \(w_i = w_{min} + i - 1\) and \(p_i = w_i + \alpha\), for a given \(w_{min}\) and \(\alpha\).  Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\) and \(w_{min}\) combination are equal. The formula don't rely on random numbers. The pyasukp \emph{-form chung -step \(\alpha\) } parameters were used.
 
 \subsubsection{Postponed Periodicity}
-
-
+This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order (duplicates removed); \(p_1 = w_1 + rand(1, 500)\); and \(\forall i \in [2, n].~p_i = p_{i-1} + rand(1, 125)\). The pyasukp \emph{-form nsds2 -step 500 -wmax \(w_{max}\)} parameters were used.
 
 \subsubsection{No Collective Dominance}
+This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order (duplicates removed); \(p_1 = p_{min} + rand(0, 49)\); and \(\forall i \in [2, n].~p_i = \lfloor w_i \times ((p_{i-1}/w_{i-1}) + 0.01)\rfloor + rand(1, 10)\). The given values are: \(w_{min} = p_{min} = \mathbf{n}\) and \(w_{max} = 10\overline{n}\). The pyasukp \emph{-form hi -pmin \(p_{min}\) -wmax \(w_{max}\)} parameters were used.
+
 \subsubsection{SAW}
+This family of instances is generated by the following method: generate \textbf{n} random weights between \(w_{min}\) and \(w_{max} = 1\overline{n}\), sorted by increasing order, with the following property: \(\forall i \in [2, n].~w_i~mod~w_1 > 0\) (\(w_1\) is the smallest weight); then \(p_1 = w_1 + \alpha\) where \(\alpha = rand(1,5)\), and \(\forall i \in [2, n].~p_i = rand(l_i, u_i)\) where \(l_i = max(p_{i-1}, q_i)\), \(u_i = q_i + m_i\), \(q_i = p_1 \times \lfloor w_i / w_1 \rfloor \), and \(m_i = w_i~mod~w_1\). The pyasukp \emph{-form saw -step \(\alpha\) -wmax \(w_{max}\)} parameters were used.
 
 \subsection{Results}
 

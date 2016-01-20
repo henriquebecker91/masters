@@ -63,7 +63,7 @@ Paulo Gama. 110, 90040-060, Porto Alegre, RS, Brazil\\
 % avg=((ss*400)+(sc*240)+(per*800)+(wcd*2000)+(saw*1100))/(400+240+800+2000+1100)
 % avg ~= 30
 \begin{abstract}
-In this paper we present a novel imperative algorithm for solving the unbounded knapsack problem. We call this algorithm \emph{ukp5}. This algorithm has the following advantages over eduk2 (algorithm that until now claimed to be the ``state of art''): it's much simpler; can be easily implemented on an imperative programming language (Eduk2 uses concepts of functional programming that undermine this goal); and our implementation is, in average, about thirty times faster than the only known eduk2 implementation (pyasukp), using as benchmark the family of hard instances proposed by the authors of eduk2. Our algorithm applies the concepts of sparsity, dominance, and periodicity integrated on an imperative ``dynamic programming''-like algorithm.
+In this paper we present a novel imperative algorithm for solving the unbounded knapsack problem. We call this algorithm \emph{ukp5}. This algorithm has the following advantages over eduk2 (algorithm that until now claimed to be the state of art): it's much simpler; can be easily implemented on an imperative programming language (eduk2 uses concepts of functional programming that undermine this goal); and our implementation is, in average, about thirty times faster than the only known eduk2 implementation (pyasukp), using as benchmark the family of hard instances proposed by the authors of eduk2. Our algorithm applies the concepts of sparsity, dominance, and periodicity integrated on an imperative ``dynamic programming''-like algorithm.
 \keywords{unbounded knapsack problem, ukp, imperative programming, dynamic programming}
 \end{abstract}
 
@@ -94,7 +94,7 @@ THE BPP/CSP PROBLEM BEST KNOW SOLVING METHOD USE IT AS A STEP (cite SURVEY, and 
 % Only used internal time, internal time of PYAsUKP was strange
 % external time not used because HD data reading race conditions, and different reading methods
 % TABLE WITH RESULTS
-In this section we describe the experiments environment, instance sets and results. We compare our ukp5 implementation and the eduk2 implementation made by CPYA (called PYAsUKP). The exact versions of the source codes used can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{The ukp5 implementation is at \textbf{codes/cpp/} and the two eduk2 implementations are at \textbf{codes/ocaml/}. The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html} by this paper writing date. The site version had bugs on the eduk2 UKP solver, so a version without those bugs was obtained thanks to Vincent Poirriez. This version is called \emph{pyasukp\_mail.tgz} and was the one used to solve the instances (i.e. make the CTABLE1).}. The times reported were given by the tools themselves and are supposed to not count the instance loading time (i.e. reading the instance from disk to memory). The runs external time\footnote{Given by the \textit{time} application, available at \url{https://www.archlinux.org/packages/extra/x86_64/time/}. The bash internal command was \emph{not} used.} were also captured and no significative discrepancy was perceived. Therefore, we have chosen to use the tools reported times (as is the common practice).
+In this section we describe the experiments environment, instance sets and results. We compare our ukp5 implementation and the eduk2 implementation made by CPYA (called PYAsUKP). The exact versions of the source codes used can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{The ukp5 implementation is at \textbf{codes/cpp/} and the two eduk2 implementations are at \textbf{codes/ocaml/}. The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html} by this paper writing date. The site version had bugs on the eduk2 UKP solver, so a version without those bugs was obtained thanks to Vincent Poirriez. This version is called \emph{pyasukp\_mail.tgz} and was the one used to solve the instances (i.e. make the CTABLE1). The \emph{create\_*\_instances.sh} scripts insides \textbf{codes/sh/} were used to generate the instance datasets.}. The times reported were given by the tools themselves and are supposed to not count the instance loading time (i.e. reading the instance from disk to memory). The runs external time\footnote{Given by the \textit{time} application, available at \url{https://www.archlinux.org/packages/extra/x86_64/time/}. The bash internal command was \emph{not} used.} were also captured and no significative discrepancy was perceived. Therefore, we have chosen to use the tools reported times (as is the common practice).
 
 We use the following non-standard notations at this section: \(rand(x, y)\) means a random integer between \(x\) and \(y\) (both inclusive)\footnote{We could not determine if the methods used by pyasukp to generate random integer sets results in an uniform distribution. We advice checking the source code for more information on the exact method used for obtaining random integer sets.}; \(x\overline{n}\) means \(x\) as digits followed by the value of variable \(n\) as digits, for example: if \(n = 5000\) then \(10\overline{n} = 105000\).
 
@@ -103,7 +103,7 @@ We use the following non-standard notations at this section: \(rand(x, y)\) mean
 The computer used on the experiments was an ASUS R552JK-CN159H. This model has four physical cores\footnote{Intel Core i7-4700HQ Processor, 6M Cache, up to 3.40 GHz.}. The operating system used was Linux nymeria 4.3.3-2-ARCH x86\_64 GNU/Linux (i.e. Arch linux). Three of the four cores were isolated using the \emph{isolcpus} kernel flag. The \emph{taskset} utility was used to execute ukp5 and pyasukp on the isolated cores. The computer memory was never completely used (no swapping was done).
 
 \subsection{Instance Sets}
-The instance sets aim to reproduce the ones described in CPYA. The same tool was used to generate the datasets (pyasukp), and the same parameters were used, otherwise noted the contrary. In CPYA, section 5.1.1 \emph{Known ``hard'' instances}, some sets of easy instances are used to allow comparison with MTU2 (that had integer overflow problems with harder instances). With exception of the subset-sum dataset, all datasets have a similar harder set (CPYA, section 5.2.1 \emph{New hard UKP instances}), so we ommited the easy sets and used only the harder ones. Each instance has a random capacity value within an interval, this interval is shown at CTABLE1. The pyasukp parameters \emph{-wmin \(w_{min}\) -cap c -n \textbf{n}} were used in all instances generation.
+The instance sets aim to reproduce the ones described in CPYA. The same tool was used to generate the datasets (pyasukp), and the same parameters were used, otherwise noted the contrary. In CPYA, section 5.1.1 \emph{Known ``hard'' instances}, some sets of easy instances are used to allow comparison with MTU2 (that had integer overflow problems with harder instances). With exception of the subset-sum dataset, all datasets have a similar harder set (CPYA, section 5.2.1 \emph{New hard UKP instances}), so we ommited the easy sets and used only the harder ones. Each instance has a random capacity value within an interval, this interval is shown at CTABLE1. The pyasukp parameters \emph{-wmin \(w_{min}\) -cap c -n \textbf{n}} were used in all instances generation. When we found a discrepancy between the formula presented in CPYA and the pyasukp code, or generated instances, we opted for changing the formula based on the observed behaviour\footnote{As the pyasukp code can be hard to follow, we cannot guarantee that the formula presented here is a perfect match for the code; but, based by the generated instances, we believe it to be correct to a good extent.}.
 
 \subsubsection{Subset-Sum}\label{sec:subsetsum}
 Instances where \(p_i = w_i = rand(w_{min}, w_{max})\). The ones used at CPYA were so easily solved that we had measuring problems (many instances solved on less than 0.01 seconds). Because of this, in this paper, we use a dataset similar to the one used at CPYA, but with each parameter multiplied by ten. Therefore, we generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\), \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\). Totalizing 400 instances. We do not discriminate each combination at CTABLE1 for brevity. The pyasukp \emph{-form ss -wmax \(w_{max}\)} parameters were used.
@@ -112,15 +112,26 @@ Instances where \(p_i = w_i = rand(w_{min}, w_{max})\). The ones used at CPYA we
 Instances generated using the following formula: \(w_i = w_{min} + i - 1\) and \(p_i = w_i + \alpha\), for a given \(w_{min}\) and \(\alpha\).  Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\) and \(w_{min}\) combination are equal. The formula don't rely on random numbers. The pyasukp \emph{-form chung -step \(\alpha\) } parameters were used.
 
 \subsubsection{Postponed Periodicity}
-This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order (duplicates removed); \(p_1 = w_1 + rand(1, 500)\); and \(\forall i \in [2, n].~p_i = p_{i-1} + rand(1, 125)\). The pyasukp \emph{-form nsds2 -step 500 -wmax \(w_{max}\)} parameters were used.
+This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order; \(p_1 = w_1 + rand(1, 500)\); and \(\forall i \in [2, n].~p_i = p_{i-1} + rand(1, 125)\). The pyasukp \emph{-form nsds2 -step 500 -wmax \(w_{max}\)} parameters were used.
 
 \subsubsection{No Collective Dominance}
-This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order (duplicates removed); \(p_1 = p_{min} + rand(0, 49)\); and \(\forall i \in [2, n].~p_i = \lfloor w_i \times ((p_{i-1}/w_{i-1}) + 0.01)\rfloor + rand(1, 10)\). The given values are: \(w_{min} = p_{min} = \mathbf{n}\) and \(w_{max} = 10\overline{n}\). The pyasukp \emph{-form hi -pmin \(p_{min}\) -wmax \(w_{max}\)} parameters were used.
+This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order; \(p_1 = p_{min} + rand(0, 49)\); and \(\forall i \in [2, n].~p_i = \lfloor w_i \times ((p_{i-1}/w_{i-1}) + 0.01)\rfloor + rand(1, 10)\). The given values are: \(w_{min} = p_{min} = \mathbf{n}\) and \(w_{max} = 10\overline{n}\). The pyasukp \emph{-form hi -pmin \(p_{min}\) -wmax \(w_{max}\)} parameters were used.
 
 \subsubsection{SAW}
 This family of instances is generated by the following method: generate \textbf{n} random weights between \(w_{min}\) and \(w_{max} = 1\overline{n}\), sorted by increasing order, with the following property: \(\forall i \in [2, n].~w_i~mod~w_1 > 0\) (\(w_1\) is the smallest weight); then \(p_1 = w_1 + \alpha\) where \(\alpha = rand(1,5)\), and \(\forall i \in [2, n].~p_i = rand(l_i, u_i)\) where \(l_i = max(p_{i-1}, q_i)\), \(u_i = q_i + m_i\), \(q_i = p_1 \times \lfloor w_i / w_1 \rfloor \), and \(m_i = w_i~mod~w_1\). The pyasukp \emph{-form saw -step \(\alpha\) -wmax \(w_{max}\)} parameters were used.
 
-\subsection{Results}
+\subsection{Results and Analysis}
+
+Based on CTABLE1, except by one instance set that we will talk about later, we can make two statements: 1) the average time, standard deviation, and maximal time of ukp5 are always smaller than the pyasukp ones; 2) the minimal pyasukp time is always smaller than the ukp5 one.
+
+Let's begin with the second statement (about the minimal), as eduk2 uses a branch-and-bound (B\&B) algorithm before resorting to dynamic programming (DP), this is an expected result. Instances with big capacities and solutions that are composed by a large quantity of the best item, and a few of the non-best most efficient items, can be solved by B\&B very fast, in a way that no dynamic programming algorithm can be competitive against. Our exception dataset (Strong Correlation, \(\alpha = 5\), \(n = 10\) and \(w_{min} = 10\)) is exactly the case. As said before, the strong correlation formula don't make use of random numbers, so all twenty instances of that dataset have the same items. The only thing that changes is the capacity. All solutions of this dataset are composed by hundreds of the best item (that is also the smallest item, making the dataset even easier) and exactly one non-best item for making better use of the residual capacity (\(c~mod~w_1\)). All other datasets have instances that present the same characteristics\footnote{The number of instances where pyasukp was faster than ukp5 by formula are: Subset-sum: 264 (\~65\%); Strong correlation: 60 (25\%); Postponed periodicity: 105 (\~13\%); No collective dominance: 259 (\~13\%); SAW: 219 (\~20\%).}, and because of that, the pyasukp minimal is always very low\footnote{The observant reader will see that, on the dataset ``Postponed periodicity'', \(n = 50\), \(w_{min} = 50\), pyasukp has a anomalous minimal time. On this dataset, the solution of the easiest instance is composed only by two items, the best one, and the 5317 most efficient one.}.
+
+As it's already well known, DP is not competitive against a B\&B approach for easy UKP instances. The ukp5 can't compete with pyasukp on easy datasets, as only the time for initializing an array of size \(c\) is already greater than the B\&B time\footnote{A problem that will be tackled in newer versions by using heaps or array slices.}. Nonetheless, for hard instances, B\&B is known to shows a very bad worst case (exponencial time). As eduk2 combine B\&B and DP with the intent of getting the strenghts of both, and none of its weaknesses, we found strange that this typical B\&B behavior is present at pyasukp. We executed pyasukp with the \emph{-nobb} flag, that disables the use of B\&B. The results show that any time under XXX seconds disappear, now taking at least XXX seconds, and times over this limit stay the same. Based on this evidence, we conclude that the pyasukp implementation of the eduk2 DP phase is responsible for the big maximal pyasukp times (the time seems exponential but it is instead pseudo-polynomial with a big constant). For future research, it is interesting to verify if an implementation of ukp5 that executed B\&B for a small amount of time before resorting to DP could have better results than pyasukp, without the complexity that is integrating B\&B with DP in the way is done by eduk2.
+
+%Based on the first statement, and the discovery that the eduk2 DP phase was responsible for the 
+Looking back at the first statement of this section, we can now conclude that for instances that are hard for B\&B, ukp5 clearly surpass the DP solution by a big constant factor. Even considering the instances that pyasukp solves almost instantly (because of B\&B), ukp5 is about thirty times faster than pyasukp, in average. If we disconsidered the advantage given by B\&B (giving ukp5 a B\&B phase, or removing the one used on eduk2) this gap would be even bigger.
+
+Our ukp5 implementation consumed, in average, more memory than pyasukp\footnote{This is another problem that will be tackled in newer versions by the use of heaps or array slices.}. The complete data can be found at CTABLE2 at the Appendix. Note that the ukp5 memory use is linear on \(c + w_{max} - w_{min}\). It's easy to see the similarity between the average of instances with a similar capacity interval. The pyasukp memory use is too bound by \(c\) (or the slice size), but because the way it handles sparsity it's, in practice, much lower than this bound (even if its structures, i.e. lazy lists, have a much bigger memory overhead than arrays).
 
 \begin{table}
 \caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by ukp5 or eduk2, then the meaning of the columns \textbf{avg}, \textbf{sd}, \textbf{min} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the minimal value of \(T\) and the maximal value of \(T\). The time unit of the table values is seconds.}
@@ -194,6 +205,84 @@ This family of instances is generated by the following method: generate \textbf{
 \end{table}
 
 \section{Conclusions}
+
+\section{Appendix}
+
+\begin{table}
+\caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the maximal memory used by ukp5 or eduk2 as reported by the \emph{time} tool, then the meaning of the columns \textbf{avg}, \textbf{sd}, \textbf{min} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the minimal value of \(T\) and the maximal value of \(T\). The time unit of the table values is Mb (megabytes, not mibibytes).}
+\def\arraystretch{1.1}
+\setlength\tabcolsep{4px}
+
+\begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrr@{}}
+
+\hline
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{4}{l}{UKP5} & \multicolumn{4}{l}{PYAsUKP}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+
+\multicolumn{3}{l}{400 inst. per line} & \multicolumn{8}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
+\cline{1-3}\cline{4-11}
+
+& \textbf{n} & \(w_{min}\)  & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+
+\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & 133.96 & 22.85 & 89.85 & 175.67 & 13.28 & 6.71 & 6.28 & 53.28\\
+
+\hline
+
+\multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+\textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+ 5 & 5  & 10 & 12.82 & 3.78 & 7.30 & 18.59 & 9.01 & 3.24 & 5.81 & 12.51\\
+   &    & 15 & 12.38 & 3.42 & 7.70 & 19.40 & 12.93 & 2.68 & 5.86 & 14.99\\
+   &    & 50 & 13.61 & 3.30 & 7.91 & 18.26 & 20.01 & 6.66 & 7.60 & 30.62\\
+ 5 & 10 & 10 & 105.57 & 36.90 & 36.13 & 153.65 & 7.13 & 0.82 & 6.25 & 8.40\\
+   &    & 50 & 106.10 & 39.68 & 36.54 & 159.28 & 21.05 & 10.53 & 6.28 & 33.97\\
+   &    & 110 & 103.18 & 34.99 & 37.68 & 149.38 & 41.56 & 22.93 & 6.35 & 78.19\\
+-5 & 5  & 10 & 13.06 & 4.27 & 6.88 & 18.99 & 12.81 & 3.67 & 5.85 & 16.23\\
+   &    & 15 & 13.81 & 3.43 & 8.56 & 19.30 & 14.33 & 3.81 & 5.85 & 17.92\\
+   &    & 50 & 14.61 & 3.22 & 8.33 & 18.76 & 23.17 & 10.39 & 5.86 & 42.08\\
+-5 & 10 & 10 & 109.12 & 36.36 & 37.02 & 159.60 & 13.91 & 4.37 & 6.28 & 18.51\\
+   &    & 50 & 115.43 & 38.81 & 36.23 & 160.05 & 26.97 & 13.64 & 6.35 & 45.19\\
+   &    & 110& 97.20 & 33.97 & 39.73 & 151.94 & 49.22 & 29.02 & 7.94 & 98.78\\
+\hline
+
+\multicolumn{3}{l}{200 inst. per line} & \multicolumn{8}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
+\cline{1-3}\cline{4-11}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+%42.80 & 3.98 & 35.65 & 50.54 & 16.12 & 4.70 & 7.84 & 25.20\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+& 20 & 20 & 42.80 & 3.98 & 35.65 & 50.54 & 16.12 & 4.70 & 7.84 & 25.20\\
+& 50 & 20 & 44.76 & 4.12 & 36.82 & 51.72 & 33.60 & 14.51 & 12.12 & 65.98\\
+& 20 & 50 & 42.28 & 4.53 & 34.92 & 50.24 & 18.37 & 4.88 & 8.04 & 29.83\\
+& 50 & 50 & 44.34 & 4.48 & 36.67 & 51.39 & 39.05 & 13.15 & 14.45 & 63.64\\
+
+\hline
+
+\multicolumn{3}{l}{500 inst. per line} & \multicolumn{8}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+&  5 & n & 83.39 & 44.10 & 7.54 & 161.35 & 12.44 & 5.00 & 5.91 & 36.65\\
+& 10 & n & 826.66 & 440.19 & 35.86 & 1580.66 & 23.54 & 16.45 & 7.84 & 136.56\\
+& 20 & n & 810.90 & 433.39 & 37.86 & 1578.22 & 46.89 & 34.39 & 8.24 & 205.98\\
+& 50 & n & 798.77 & 451.91 & 40.37 & 1582.24 & 120.17 & 87.97 & 13.19 & 569.85\\
+
+\hline
+
+\multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{8}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+\textbf{qtd} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{min} & \textbf{max}\\
+\cline{1-3}\cline{4-7}\cline{8-11}
+~200 &  10 & 10 & 14.02 & 4.08 & 6.93 & 20.79 & 14.58 & 4.41 & 6.68 & 23.58\\
+~500 &  50 &  5 & 15.89 & 3.92 & 8.72 & 23.16 & 17.39 & 3.55 & 11.96 & 27.54\\
+~200 &  50 & 10 & 15.99 & 3.98 & 8.62 & 22.86 & 18.72 & 4.05 & 12.26 & 29.46\\
+~200 & 100 & 10 & 111.93 & 42.44 & 39.58 & 179.31 & 60.98 & 33.91 & 20.85 & 140.52\\
+\hline
+
+\end{tabular}
+\end{table}
+
 
 \bibliography{ukp5.bib}
 

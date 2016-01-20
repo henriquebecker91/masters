@@ -42,7 +42,7 @@ do
 	for ((i=0; i < N; ++i))
 	do
 		taskset -c "$CPU_FOR_USE" time -f "$TIME_FORMAT" ./run_ukp5.out "$PATH_I$f" >> "$ukp5_res" 2>&1
-		taskset -c "$CPU_FOR_USE" time -f "$TIME_FORMAT" pyasukpt -src "$PATH_I$f" >> "$pya_res" 2>&1
+		taskset -c "$CPU_FOR_USE" time -f "$TIME_FORMAT" pyasukpt -nobb -src "$PATH_I$f" >> "$pya_res" 2>&1
 	done
 
 	grep -E '^Seconds: .*' "$ukp5_res" | cut -d ' ' -f2 > "${ukp5_res}.itime"

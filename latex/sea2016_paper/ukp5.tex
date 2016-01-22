@@ -7,6 +7,10 @@
 \setcounter{tocdepth}{3}
 \usepackage{graphicx}
 
+% ADD THOSE LIBS AT THE PACKAGE FOR THE JOURNAL
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 \usepackage{url}
 \urldef{\mail}\path|{hbecker, buriol}@inf.ufrgs.br|
 \newcommand{\keywords}[1]{\par\addvspace\baselineskip
@@ -81,12 +85,82 @@ THE BPP/CSP PROBLEM BEST KNOW SOLVING METHOD USE IT AS A STEP (cite SURVEY, and 
 
 \section{The proposed algorithm: UKP5}
 
+\begin{algorithm}
+\caption{First Phase -- Computation of $opt$ and $y_{opt}$}\label{alg:ukp6_write_phase}
+\begin{algorithmic}[1]
+\Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
+  \State \(g \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(0\)\label{create_g}
+  \State \(d \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(n\)\label{create_d}
+  
+  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \(d[w_i] \gets i\)
+    \EndIf
+  \EndFor\label{end_trivial_bounds}
+
+  \State \(opt \gets 0\)\label{init_opt}
+
+  \For{\(y \gets w_{min}, c-w_{min}\)}\label{main_ext_loop_begin}
+    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}
+    	\State \textbf{continue}
+    \EndIf\label{if_less_than_opt_end}
+    
+    \State \(opt \gets g[y]\)\label{update_opt}
+    
+    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
+        \State \(g[y + w_i] \gets g[y] + p_i\)
+        \State \(d[y + w_i] \gets i\)
+      \ElsIf{\(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\)}
+        \State \(d[y + w_i] \gets i\)
+      \EndIf\label{if_new_lower_bound_end}
+    \EndFor\label{main_inner_loop_end}
+  \EndFor\label{main_ext_loop_end}
+
+  \For{\(y \gets c-w_{min}+1, c\)}\label{get_y_opt_loop_begin}
+    \If{\(g[y] > opt\)}\label{last_loop_inner_if}
+      \State \(opt \gets g[y]\)
+      \State \(y_{opt} \gets y\)
+    \EndIf
+  \EndFor\label{get_y_opt_loop_end}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+explain the arrays
+	g - sparse vector where we store solutions profit, if \(g[y] > 0\) then there's a non-empty solution \(s\) with \(w_s = y\) and \(g[y] = p_s\)
+	d - last item used on solution - if \(d[y] = i \land g[y] > 0\) then the solution \(s\) with \(w_s = y\) and \(p_s = g[y]\) has an copy of item \(i\) - makes trivial find the solution (\(j = d[y_{opt}]\) is the index of the last item used, \(d[y_{opt} - w_j]\) is the index of the penultimate item used, and so on) - and is used to drastically speed-up the computation of the optimal.
+
+explain the first loop (create all solution with one of some item)
+
+For a moment, let's ignore lines (IF SKIP) and replace d[y] at line XXX by \(n\). We could then say that what our loop between lines XXX and YYY do is: iterate g and when it find a solution (g[y] > 0) test \(n\) new solutions, combining the current solution with every item, and substite older solutions with the same weight if the profit of the old solution is lower. This is basically what our algorithm do, but those two small code changes make two drastic performance changes, specially when combined. 
+
+When we add the lines (IF SKIP) the algorithm will stop creating new solutions from dominated solutions. If a solution \(s\) with a lesser weight (\(w_s < y\)) has a bigger profit (\(p_s = opt > p_t\), where \(p_t = g[y] \land w_t = y\)), then \(s\) dominates \(t\). New solutions created from \(t\) are guaranteed to be no better than solutions created from \(s\). A whole set of solutions that have \(t\) as subset can be discarded this way.
+
+The change from \(n\) to \(d[y]\) is inheritance from the algorithm we based ukp5, the Garfinkel DP method presented at CGAR. It's a generic optmization trick that can be used at any problem where the solution is a set (as opposed to a sequence). If the item set \(\{1, 2, 3\}\) is an optimal solution for an UKP instance, then every permutation of it is also an optimal solution. To avoid computing every solution in many different orders, we enforce decreasing order. Any item inserted on a solution \(s\) has to have an index that is equal or lesser than the index of the last item inserted on \(s\). 
+
+When the two changes are combined, and the items are ordered by non-decreasing efficiency, ukp5 applies all dominances implicity. The non-dominated solutions (that will generate descendents) are efficient (they have to be to not be dominated), consequently they need to be made of efficient items, that will have the lowest index values, and reduce the processing done at INNERLOOOP greatly.
+
+The solution is guaranteed to between X and Y
+
 % Idea
 % Alg
 % Dominance
 % Periodicity
 % Sparsity
 % Correctness
+
+THREE THINGS OMMITED
+What was ommited: we compute the \(y*\) periodicity bound described in CGAR before running the algorithm to reduce the \(c\) value; and we use our own periodicity check that is integrated in the code above (isn't computed before but during the algorithm).
+
+Our periodicity check is based on the following stop condition: let \(y\) be the value of the variable \(y\) at line \ref{main_ext_loop_begin}; let \(y'\) be the biggest capacity where \(g[y'] \neq 0 \land d[y'] > 1\); if \(y > y'\) then we can stop the computation and fill the remaining capacity with the copies of the lowest index item (item of index \(1\)).%In other words, if all solutions \(s\) with \(w_s > y\) contain at least one copy of the lowest indexed item (item of index \(1\)), then the only item we can add to them is the lowest indexed item (the inner loop at \ref{main_inner_loop_begin} iterates only until \(d[y]\), that will be \(1\)).
+
+%if for all \(y' > y\) (where \(y\) is the loop control variable defined at line \ref{main_inner_loop_begin}) any \(g[y'] \neq 0\) has \(d[y'] = 0\), then we can stop at \(y\) as we know that any remaining capacity will be filled by copies of the item of lowest index (item of index \(0\)).
+
+This periodicity check works only if the best item is the lowest index item. If this assumption is false, then the described condition will never happen, and the algorithm will iterate until \(y = c - w_{min}\) as usual. When the described condition happens, this means that the best item has threshold dominated any item that wasn't already collective dominated.
+
+THERE IS AN ELSEIF AT THE IF AT LINE WHERE WE UPDATE d[y] = i IF \(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\). THIS IF IS RELEVANT ONLY FOR SUBSET-SUM INSTANCES (SEE SECTION) WHERE ALL SOLUTIONS WITH THE SAME WEIGHT HAVE EXACTLY THE SAME PROFIT. WITHOUT THIS elseif OUR CODE IS ABOUT 1800 (one thousand and eight hundred) times slower than the values presented at CTABLE1 for the subset-sum instances.
 
 \section{Experiments}
 % Describe all instance datasets.

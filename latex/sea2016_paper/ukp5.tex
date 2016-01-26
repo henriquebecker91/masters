@@ -1,3 +1,12 @@
+% Aumentar a introdução antes da notação formal do problema
+% Rever todos rodapés
+% Sparsivity um ou dois parágrafos
+% Remover advérbios e trivial
+% Remover subseção do ukp5
+% "were so easily solved"
+% Remover dos experimentos - Início dos resultados: em tempos, comparar com pyasukp, 
+% parte do paralelismo, colocar contribuição do artigo, considerar remover parte da 
+
 \documentclass[runningheads,a4paper]{llncs}
 
 \usepackage{amssymb}
@@ -21,10 +30,10 @@
 \mainmatter  % start of an individual contribution
 
 % first the title is needed
-\title{UKP5: a simple imperative algorithm for the unbounded knapsack problem}
+\title{UKP5: a new algorithm for the unbounded knapsack problem}
 
 % a short form should be given in case it is too long for the running head
-\titlerunning{UKP5: a simple imperative algorithm for the UKP}
+\titlerunning{UKP5: a new algorithm for the UKP}
 
 % the name(s) of the author(s) follow(s) next
 %
@@ -34,7 +43,7 @@
 %
 \author{Henrique Becker \and Luciana Salete Buriol}
 %
-\authorrunning{UKP5: a simple imperative algorithm for the UKP}
+\authorrunning{UKP5: a new algorithm for the UKP}
 % (feature abused for this document to repeat the title also on left hand pages)
 
 % the affiliations are given next; don't give your e-mail address
@@ -63,19 +72,19 @@ Paulo Gama. 110, 90040-060, Porto Alegre, RS, Brazil\\
 % wcd=(78+338+1308+11918)/(5+49+99+469)
 % saw500=479/74
 % saw600=(188+1044+6058)/(11+101+1413)
-% saw=saw=((saw500*500)+(saw600*600))/1100
+% saw=((saw500*500)+(saw600*600))/1100
 % avg=((ss*400)+(sc*240)+(per*800)+(wcd*2000)+(saw*1100))/(400+240+800+2000+1100)
 % avg ~= 30
 \begin{abstract}
-In this paper we present a novel imperative algorithm for solving the unbounded knapsack problem. We call this algorithm \emph{ukp5}. This algorithm has the following advantages over eduk2 (algorithm that until now claimed to be the state of art): it's much simpler; can be easily implemented on an imperative programming language (eduk2 uses concepts of functional programming that undermine this goal); and our implementation is, in average, about thirty times faster than the only known eduk2 implementation (pyasukp), using as benchmark the family of hard instances proposed by the authors of eduk2. Our algorithm applies the concepts of sparsity, dominance, and periodicity integrated on an imperative ``dynamic programming''-like algorithm.
-\keywords{unbounded knapsack problem, ukp, imperative programming, dynamic programming}
+In this paper we present UKP5, a novel algorithm for solving the unbounded knapsack problem. UKP5 is based on dynamic programming, but implemented in a non traditional way: instead of looking backwards for stored values of subproblems, it stores incremental lower bounds forward. UKP5 uses sparsivity, periodicity, and dominance for speeding up computation. UKP5 is considerably simpler than EDUK2, the state-of-the-art algorithm for solving the problem. Moreover, it is naturally implemented using the imperative paradigma, differently from EDUK2. We run UKP5 and EDUK2 on a benchmark of hard instances proposed by the authors of EDUK2. The benchmark is composed by 4540 instances, divided into five classes, with instances ranging from small to large inside each class. Speedups were calculated for each class, and the overall speedup was calculated as the classes speedups average. The experimental results reveal that UKP5 outperforms EDUK2, being 47 times faster on the overall average.
+\keywords{unbounded knapsack problem, optimization, dynamic programming, NP-hard}
 \end{abstract}
 
 \section{Introduction}
 
 The unbounded knapsack problem (UKP) is a variation of the well-known bounded knapsack problem (BKP), where there's an unbounded quantity of each item type available.
 
-The following formal notation of the UKP will be used for the rest of the article: an UKP instance is composed of a capacity \(c\), and a list of \(n\) items\footnote{The order of the items doesn't change the optimal solution value. Nonetheless, the order of the items is relevant for some algorithms performance, and we will refer to items by its position in the item list. For these reasons we will refer to the input items as a list, and not as a set.}; each item can be referenced by its index in the item list \(i \in \{1\dots n\}\); each item \(i\) has a weight value, denoted by \(w_i\), and a profit value, denoted by \(p_i\); a solution is an item multiset\footnote{A multiset is a set that allows multiple copies of the same element.}; the sum of the items weight or profit of a solution \(s\) will be denoted by \(w_s\) and \(p_s\), repectively; a valid solution is solution \(s\) where \(w_s \leq c\); an optimal solution \(s*\) is a valid solution with the greatest \(p_{s*}\); we will refer to the profit value shared between all optimal solutions for a capacity \(y\) as \(opt(y)\), if we ommit the capacity then \(c\) is implied; the UKP objective is to find an optimal solution for the given UKP instance. In linear programming notation, we could write:
+The following formal notation of the UKP will be used for the rest of the article: an UKP instance is composed of a capacity \(c\), and a list of \(n\) items\footnote{The order of the items doesn't change the optimal solution value. Nonetheless, the order of the items is relevant for some algorithms performance, and we will refer to items by its position in the item list. For these reasons we will refer to the input items as a list, and not as a set.}; each item can be referenced by its index in the item list \(i \in \{1\dots n\}\); each item \(i\) has a weight value, denoted by \(w_i\), and a profit value, denoted by \(p_i\); a solution is an item multiset\footnote{A multiset is a set that allows multiple copies of the same element.}; the sum of the items weight or profit of a solution \(s\) will be denoted by \(w_s\) and \(p_s\), repectively; a valid solution is solution \(s\) where \(w_s \leq c\); an optimal solution \(s*\) is a valid solution with the greatest profit between all valid solutions; we will refer to the profit value shared between all optimal solutions for a capacity \(y\) as \(opt(y)\), if we ommit the capacity then \(c\) is implied; the UKP objective is to find an optimal solution for the given UKP instance. In linear programming notation, we could write:
 
 \begin{align}
   maximize: &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
@@ -83,7 +92,7 @@ subject~to: &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
             &x_i \in \mathbb{N}_0\label{eq:x_integer}
 \end{align}
 
-In this article, we assume that the capacity \(c\), the quantity \(n\) and the weights of the items \(w_i\) are all positive integers. The quantities of each item \(i\) in an optimal solution are denoted by \(x_i\), and are restricted to the non-negative integers\footnote{If the quantities weren't restricted to the integers the problem wouldn't be NP-Hard.}, as shown in \eqref{eq:x_integer}. The profits of the items \(p_i\) are all positive real numbers.
+In this article, we assume that the capacity \(c\), the quantity of items \(n\) and the weights of the items \(w_i\) are all positive integers. The quantities of each item \(i\) in an optimal solution are denoted by \(x_i\), and are restricted to the non-negative integers\footnote{If the quantities weren't restricted to the integers the problem wouldn't be NP-Hard.}, as shown in \eqref{eq:x_integer}. The profits of the items \(p_i\) are all positive real numbers.
 
 The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\), and will be denoted as \(e_i\). We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight and the biggest item weight, respectively. Also, we refer to the item with the greatest efficiency as the \emph{best item}\footnote{If the efficiencies tie the best item is the item with the lowest weight between the tied items.}, and the item with the lowest weight as the \emph{smallest item}. If two or more items have the same weight we consider only the one with the best profit (the other can be ignored without loss to the optimal solution value), if they have the same weight and profit we consider them the same item.
 
@@ -91,7 +100,7 @@ The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\), and will be
 
 The UKP it's NP-Hard, so it's always positive to have efficient algorithms for solving it. It arises in real world problems mainly as a subproblem of the Bin Packing Problems (BPP) and Cutting Stock Problem (CSP). Both BPP and CSP are similar and of importance for the industry \cite{CSURVEY} \cite{CGG} \cite{CGG2}. The currently fastest known solver for BPP/CSP\footnote{This statement is based on the results of a recent survey on BPP/CSP solvers with plenty of experimental results, see \cite{CSURVEY}.} uses a technique (introduced in \cite{CGG}) that needs to solve an instance of the UKP at each iteration. The need for efficient algorithms that solve UKP is clear.
 
-Two techniques are often used for solving UKP: Dynamic Programming (DP) \cite{CGAR} CGAR CTCHU and Branch and Bound (B\&B) CMTU2. The DP approach have a stable pseudo-polynomial time \(O(c n)\). The B\&B approach is less stable. It can be much faster than DP on instances with some characteristics, as the rest of division between the weight of the best item and the capacity being small; or the items having a big efficiency variance. Nonetheless, B\&B has always the risk of an exponential time worst case.
+Two techniques are often used for solving UKP: Dynamic Programming (DP) \cite{CGAR}\cite{CEDUK}\cite{CTCHU} and Branch and Bound (B\&B) \cite{CMTU2}. The DP approach have a stable pseudo-polynomial time \(O(c n)\). The B\&B approach is less stable. It can be much faster than DP on instances with some characteristics, as the rest of division between the weight of the best item and the capacity being small; or the items having a big efficiency variance. Nonetheless, B\&B has always the risk of an exponential time worst case.
 
 The state of art solver on UKP, introduced on \cite{CPYA}, is a hybrid solver that combines both approaches. It tries solving the problem by B\&B, and if this aproach fails to solve the problem fast, then it switches to DP using some data gathered by B\&B to speed-up the process. The solver's name is pyasukp, and it's an implementation of the eduk2 algorithm. We have found that the DP used by pyasukp is very slow when compared to our algorithm. Even solving some instances in less than a centisecond using B\&B, the solver is yet about thirty times slower than our method, in average. Also, our algorithm is much less complex, and can be easily implemented on a imperative language\footnote{The eduk2 algorithm that is the base of the pyasukp solver use concepts of functional programming that make it harder to implement on imperative languages. The own authors of eduk2 admit that implemented pyasukp in OCaml because of this difficulty.}. The periodicity stop condition, and the solution dominance concept, used on ukp5 are algorithm specific. So we don't count them as individual contributions.
 
@@ -114,7 +123,7 @@ The specifics of those four dominance relations are very well described at \cite
 
 \subsection{Periodicity}
 
-A periodicity bound \(y*\) is an upper capacity bound for the existence of optimal solutions without the best item. In another words, it's a guarantee that any solution for an instance where \(y* \leq c\) will have at least one copy of the best item. The periodicity bound is specially usefull because it can be applied repeatedly. For example, let \(c = 1000\), \(y* = 800\) and \(w_b = 25\) where \(b\) is the best item; because of \(y* \leq c\) we know that any optimal solution will have a copy of \(b\), so we can add one \(b\) to the solution and combine with an optimal solution for \(c = 975\); but \(975\) is yet bigger than \(800\), so we can repeat the process until \(c = 775\). This way, for any \(y* \leq c\) we can reduce the UKP instance capacity by \(max(1, \lceil(c-y*)/w_b\rceil\times w_b)\) and add to a reduced instance optimal solution \(max(1, \lceil(c-y*)/w_b\rceil)\) copies of \(b\).
+A periodicity bound \(y*\) is an upper capacity bound for the existence of optimal solutions without the best item. In another words, it's a guarantee that any solution for an instance where \(y* \leq c\) will have at least one copy of the best item. The periodicity bound is specially usefull because it can be applied repeatedly. For example, let \(c = 1000\), \(y* = 800\) and \(w_b = 25\) where \(b\) is the best item; because of \(y* \leq c\) we know that any optimal solution will have a copy of \(b\), so we can add one \(b\) to the solution and combine with an optimal solution for \(c = 975\); but \(975\) is yet bigger than \(800\), so we can repeat the process until \(c = 775\). This way, for any \(y* \leq c\) we can reduce the UKP instance capacity by \(max(1, \lceil(c-y*)/w_b\rceil)\times w_b\) and add to a reduced instance optimal solution \(max(1, \lceil(c-y*)/w_b\rceil)\) copies of \(b\).
 
 There exists many proposed periodicity bounds, but some have undesired complexities over \(n\) (as \(O(n^2)\)\cite{CBADBOUND}), others depend on specific instance characteristics (as \cite{BADBOUND2}\cite{CPYA}), so we opted by using only a ukp5-specific periodicity bound described later and the \(y*\) bound described on \cite[p. 223]{CGAR} (that is \(O(1)\) on an item list ordered by non-decreasing efficiency and is generic).
 
@@ -130,13 +139,13 @@ When the algorithm ends, the \(opt\) variable holds the optimal solution value, 
 
 Our first loop (lines \ref{begin_trivial_bounds} to \ref{end_trivial_bounds}) simply stores all solutions made of one item at the arrays \(g\) and \(d\). Now, for a moment, let's ignore lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end} and replace \(d[y]\) at line \ref{main_inner_loop_begin} by \(n\). After these changes, we could say that what our second loop (between lines \ref{main_ext_loop_begin} and \ref{main_ext_loop_end}) do is: iterate \(g\) and when it finds a stored solution (\(g[y] > 0\)) it tests \(n\) new solutions (the combinations of the current solution with every item); then it substite solutions already stored if exists a new solution with the same weight and a greater profit. This is basically what our algorithm do, but those two small code changes make two drastic performance changes.%, specially when combined. 
 
-When we add the lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end} the algorithm will stop creating new solutions from dominated solutions. If a solution \(s\) with a lesser weight (\(w_s < y\)) has a bigger profit (\(p_s = opt > p_t\), where \(w_t = y \land p_t = g[y]\)), then \(s\) dominates \(t\). New solutions created from \(t\) are guaranteed to be dominated by the solutions created from \(s\)\footnote{The proof is trivial. For any item \(i\) the \(s \cap \{i\}\) solution will dominate the \(t \cap \{i\}\) solution.}. A whole set of solutions that have \(t\) as subset could be discarded.
+When we add the lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end} the algorithm will stop creating new solutions from dominated solutions. If a solution \(s\) with a lesser weight (\(w_s < y\)) has a bigger profit (\(p_s = opt > p_t\), where \(w_t = y \land p_t = g[y]\)), then \(s\) dominates \(t\). New solutions created from \(t\) are guaranteed to be dominated by the solutions created from \(s\)\footnote{The proof is trivial. If solution \(s\) dominates \(t\), then for any item \(i\) the \(s \cap \{i\}\) solution will dominate the \(t \cap \{i\}\) solution.}. A whole set of solutions that have \(t\) as subset could be discarded.
 
 The change from \(n\) to \(d[y]\) is inherited from the algorithm we based ukp5. It's a generic optimization trick that can be used at any problem where the solution is a set (as opposed to a sequence). If the item multiset \(\{1, 1, 2, 3\}\) is a solution, then every permutation of it is reached in a different moment, wasting processing\footnote{The algorithm would computate \(\{1, 2, 3\} \cap \{1\}\) and \(\{1, 1, 2\} \cap \{3\}\), for example.}. To avoid computing every solution in many different orders, we enforce decreasing order. Any item inserted on a solution \(s\) has to have an index that is equal to or lower than the index of the last item inserted on \(s\). 
 
 When the two changes are combined, and the items are ordered by non-decreasing efficiency, ukp5 gets a big performance improvement. The non-dominated solutions (solutions that weren't skipped) are efficient (they have to be to not be dominated), consequently they need to be made of efficient items, that will have the lowest index values, and reduce the processing done at ukp5 inner loop greatly.
 
-The third loop (lines \ref{get_y_opt_loop_begin} to \ref{get_y_opt_loop_end}) gets the optimal solution value and minimal weight. Any non-excluded optimal solution\footnote{If an optimal solution has an bigger weight than another it can be never generated, as consequence of the test at lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end}. The optimal solution with the lowest weight is guaranteed to be generated.} is guaranteed to be between \(c - w_{min} + 1\) and \(c\) (both inclusive). The proof is simple. A valid solution can't weight more than \(c\), and for any solution \(s\) that weights less than \(c - w_{min} + 1\), we can obtain a solution with a bigger profit inserting a copy of \(i\) to \(s\), where \(w_i = w_min\).
+The third loop (lines \ref{get_y_opt_loop_begin} to \ref{get_y_opt_loop_end}) gets the optimal solution value and minimal weight. Any non-excluded optimal solution\footnote{If an optimal solution has an bigger weight than another it can be never generated, as consequence of the test at lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end}. The optimal solution with the lowest weight is guaranteed to be generated.} is guaranteed to be between \(c - w_{min} + 1\) and \(c\) (both inclusive). The proof is simple. A valid solution can't weight more than \(c\), and for any solution \(s\) that weights less than \(c - w_{min} + 1\), we can obtain a solution with a bigger profit inserting a copy of \(i\) to \(s\), where \(w_i = w_{min}\).
 
 \subsection{Solution Dominance}
 

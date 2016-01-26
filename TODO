@@ -1,3 +1,5 @@
+Algorithm For Knapsack Problems Pisinger p. 153 implement algorithm PMIN to test dominance
+
 RANDOMIZE ITEM ORDER ON .UKP FILES, AND THEN EXECUTE PYASUKP AND UKP5 OVER THEM
 
 CHANGE UKP5 l. 491 TO DON'T ASSUME THAT THE ITEMS ARE SORTED

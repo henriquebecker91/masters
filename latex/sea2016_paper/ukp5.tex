@@ -1,7 +1,7 @@
 \documentclass[runningheads,a4paper]{llncs}
 
 \usepackage{amssymb}
-%\usepackage{mathtools}
+\usepackage{mathtools}
 %DeclarePairedDelimiter\floor{\lfloor}{\rfloor} 
 
 \setcounter{tocdepth}{3}
@@ -72,95 +72,91 @@ In this paper we present a novel imperative algorithm for solving the unbounded 
 \end{abstract}
 
 \section{Introduction}
-\subsection{The problem}
-COPY WHAT WAS CREATED FOR THE UKP5 EXPLANATION
-\subsection{Motivation}
-IS NP-COMPLETE, solutions using bb are prefered, but their worst case is very bad, the DP approach is stable (pseudo-polynomial), but its average time is bad, we use the pseudo-polynomial approach combined with a set of integrated techniques that make it much faster than a naive DP approach
-THE BPP/CSP PROBLEM BEST KNOW SOLVING METHOD USE IT AS A STEP (cite SURVEY, and say that the winner use the technique described)
-\subsection{Bibliographic Revision}
+
+The unbounded knapsack problem (UKP) is a variation of the well-known bounded knapsack problem (BKP), where there's an unbounded quantity of each item type available.
+
+The following formal notation of the UKP will be used for the rest of the article: an UKP instance is composed of a capacity \(c\), and a list of \(n\) items\footnote{The order of the items doesn't change the optimal solution value. Nonetheless, the order of the items is relevant for some algorithms performance, and we will refer to items by its position in the item list. For these reasons we will refer to the input items as a list, and not as a set.}; each item can be referenced by its index in the item list \(i \in \{1\dots n\}\); each item \(i\) has a weight value, denoted by \(w_i\), and a profit value, denoted by \(p_i\); a solution is an item multiset\footnote{A multiset is a set that allows multiple copies of the same element.}; the sum of the items weight or profit of a solution \(s\) will be denoted by \(w_s\) and \(p_s\), repectively; a valid solution is solution \(s\) where \(w_s \leq c\); an optimal solution \(s*\) is a valid solution with the greatest \(p_{s*}\); we will refer to the profit value shared between all optimal solutions for a capacity \(y\) as \(opt(y)\), if we ommit the capacity then \(c\) is implied; the UKP objective is to find an optimal solution for the given UKP instance. In linear programming notation, we could write:
+
+\begin{align}
+  maximize: &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
+subject~to: &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
+            &x_i \in \mathbb{N}_0\label{eq:x_integer}
+\end{align}
+
+In this article, we assume that the capacity \(c\), the quantity \(n\) and the weights of the items \(w_i\) are all positive integers. The quantities of each item \(i\) in an optimal solution are denoted by \(x_i\), and are restricted to the non-negative integers\footnote{If the quantities weren't restricted to the integers the problem wouldn't be NP-Hard.}, as shown in \eqref{eq:x_integer}. The profits of the items \(p_i\) are all positive real numbers.
+
+The efficiency of an item \(i\) is the value of \(\frac{p_i}{w_i}\), and will be denoted as \(e_i\). We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight and the biggest item weight, respectively. Also, we refer to the item with the greatest efficiency as the \emph{best item}\footnote{If the efficiencies tie the best item is the item with the lowest weight between the tied items.}, and the item with the lowest weight as the \emph{smallest item}. If two or more items have the same weight we consider only the one with the best profit (the other can be ignored without loss to the optimal solution value), if they have the same weight and profit we consider them the same item.
+
+\subsection{Bibliographic Research, Motivation and Contribution}
+
+The UKP it's NP-Hard, so it's always positive to have efficient algorithms for solving it. It arises in real world problems mainly as a subproblem of the Bin Packing Problems (BPP) and Cutting Stock Problem (CSP). Both BPP and CSP are similar and of importance for the industry \cite{CSURVEY} \cite{CGG} \cite{CGG2}. The currently fastest known solver for BPP/CSP\footnote{This statement is based on the results of a recent survey on BPP/CSP solvers with plenty of experimental results, see \cite{CSURVEY}.} uses a technique (introduced in \cite{CGG}) that needs to solve an instance of the UKP at each iteration. The need for efficient algorithms that solve UKP is clear.
+
+Two techniques are often used for solving UKP: Dynamic Programming (DP) \cite{CGAR} CGAR CTCHU and Branch and Bound (B\&B) CMTU2. The DP approach have a stable pseudo-polynomial time \(O(c n)\). The B\&B approach is less stable. It can be much faster than DP on instances with some characteristics, as the rest of division between the weight of the best item and the capacity being small; or the items having a big efficiency variance. Nonetheless, B\&B has always the risk of an exponential time worst case.
+
+The state of art solver on UKP, introduced on \cite{CPYA}, is a hybrid solver that combines both approaches. It tries solving the problem by B\&B, and if this aproach fails to solve the problem fast, then it switches to DP using some data gathered by B\&B to speed-up the process. The solver's name is pyasukp, and it's an implementation of the eduk2 algorithm. We have found that the DP used by pyasukp is very slow when compared to our algorithm. Even solving some instances in less than a centisecond using B\&B, the solver is yet about thirty times slower than our method, in average. Also, our algorithm is much less complex, and can be easily implemented on a imperative language\footnote{The eduk2 algorithm that is the base of the pyasukp solver use concepts of functional programming that make it harder to implement on imperative languages. The own authors of eduk2 admit that implemented pyasukp in OCaml because of this difficulty.}. The periodicity stop condition, and the solution dominance concept, used on ukp5 are algorithm specific. So we don't count them as individual contributions.
+
+We don't take in account the results of the recent paper \cite{CMUL}, because its focus is parallel algorithms, what go beyond the scope of this paper. Yet, regarding to pyasukp, \cite{CMUL} states that ``The algorithm (pyasukp) significantly outperforms all existing algorithms for solving the problem.''.
+
+% AlgorithmsForKnapsackProblemsPsinger -- p. 148, cita 53 (Martello and Toth) to explain why do not transform unbounded knapsack instances in bounded (we could simply say that the lack of restrictions gives more opportunity for optimization) AND 
 % Garfinkel, PYAsUKP
-\subsection{Contributions}
-% Copy what already used on abstract? One contribution is the algorithm itself.
-% The experiments results are other contribution.
+
+\subsection{Dominance}
+
+Dominance, in the UKP context, is a set of techniques for reducing the size of the item list without affecting \(opt\). Clearly, in this conditions, every item that isn't used in an optimal solution could be discarded, but this would need the knowledge of the solution beforehand. This way, a dominance, or a dominance relation, was born as a property that can usually be verified in polynomial time over \(n\), and allows to exclude items without affecting \(opt\). It's easy to see that any polynomial-time algorithm that can be used to reduce the input of an exponential time algorithm is promising. Instances where many items can be excluded by the two simplest dominances (simple dominance and multiple dominance) became known as ``easy'' data instances. So much research about these two dominances was done, that, at the year of 1995, after enumerating the research done until the moment on UKP, Pisinger says ``Seen in this light, perhaps too much effort has been previously been used on the solution of easy data instances.'' \cite[p. 20]{CPISINGER}.
+
+Other two important dominance relations are collective dominance and threshold dominance \cite{CGAR} \cite{CPYA}. These two dominances are too expensive to be done at a preprocessing phase (as simple and multiple dominance). This way, they are integrated on the UKP solving method, and remove items while the algorithm executes. The collective dominance needs to known the \(opt(y)\) to exclude an item \(i\) with \(w_i = y\). The threshold dominance needs to know the \(opt(\alpha\times w_i)\) to exclude the item \(i\) from capacity \(y = \alpha\times w_i\) onwards, where \(\alpha\) is any positive integer.
+
+The specifics of those four dominance relations are very well described at \cite{CPYA}. The ukp5 don't make use of any of those four dominances. It uses a ``solution dominance'' approach that is implicit in the algorithm and achives results similar to the four dominances. The decision to not use the known dominances is based on two main points: ukp5 was made to solve hard data instances, applying the dominance over hard data instances don't always pay off; our ``solution dominance'' already excludes items, so any benefits of the dominances would be diminushed, but the cost would be the same. For the rest of the article, when we say that an specific item is dominated, we are saying that it could be excluded without changing \(opt\).
+
+% CITE ``'' p. 20, Pisinger
+
+% In \cite{\cite{CPISINGER}}, a complete analysis of the simplest dominance type (simple/multiple dominace) is given. 
+
+\subsection{Periodicity}
+
+A periodicity bound \(y*\) is an upper capacity bound for the existence of optimal solutions without the best item. In another words, it's a guarantee that any solution for an instance where \(y* \leq c\) will have at least one copy of the best item. The periodicity bound is specially usefull because it can be applied repeatedly. For example, let \(c = 1000\), \(y* = 800\) and \(w_b = 25\) where \(b\) is the best item; because of \(y* \leq c\) we know that any optimal solution will have a copy of \(b\), so we can add one \(b\) to the solution and combine with an optimal solution for \(c = 975\); but \(975\) is yet bigger than \(800\), so we can repeat the process until \(c = 775\). This way, for any \(y* \leq c\) we can reduce the UKP instance capacity by \(max(1, \lceil(c-y*)/w_b\rceil\times w_b)\) and add to a reduced instance optimal solution \(max(1, \lceil(c-y*)/w_b\rceil)\) copies of \(b\).
+
+There exists many proposed periodicity bounds, but some have undesired complexities over \(n\) (as \(O(n^2)\)\cite{CBADBOUND}), others depend on specific instance characteristics (as \cite{BADBOUND2}\cite{CPYA}), so we opted by using only a ukp5-specific periodicity bound described later and the \(y*\) bound described on \cite[p. 223]{CGAR} (that is \(O(1)\) on an item list ordered by non-decreasing efficiency and is generic).
 
 \section{The proposed algorithm: UKP5}
 
-\begin{algorithm}
-\caption{First Phase -- Computation of $opt$ and $y_{opt}$}\label{alg:ukp6_write_phase}
-\begin{algorithmic}[1]
-\Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
-  \State \(g \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(0\)\label{create_g}
-  \State \(d \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(n\)\label{create_d}
-  
-  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}
-    \If{\(g[w_i] < p_i\)}
-      \State \(g[w_i] \gets p_i\)
-      \State \(d[w_i] \gets i\)
-    \EndIf
-  \EndFor\label{end_trivial_bounds}
+The ukp5 is inspired by the DP algorithm described in \cite[p. 221]{CGAR}. The name ``ukp5'' comes from its five improvements over the \cite{CGAR} DP algorithm: improved solution symmetry pruning performance (caused by the reversal of the solution generation direction); removal of the \(w_i \leq y\) test (substituted by the use of a bigger array); sparsity (no concept of ``solutions with remaining space''); pruning dominated solutions (this concept will be addressed in more detail later); an algorithm-specific periodicity stop condition (idea mentionated on \cite{CGAR}, but not integrated on the algorithm). We do not intend to discuss every of those changes in detail, as this is outside the scope of this paper. We will discuss the algorithm born from all those changes, and focus on the most interesting of them.
 
-  \State \(opt \gets 0\)\label{init_opt}
+\section{Explanation of the core algorithm ideia}
 
-  \For{\(y \gets w_{min}, c-w_{min}\)}\label{main_ext_loop_begin}
-    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}
-    	\State \textbf{continue}
-    \EndIf\label{if_less_than_opt_end}
-    
-    \State \(opt \gets g[y]\)\label{update_opt}
-    
-    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}
-      \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
-        \State \(g[y + w_i] \gets g[y] + p_i\)
-        \State \(d[y + w_i] \gets i\)
-      \ElsIf{\(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\)}
-        \State \(d[y + w_i] \gets i\)
-      \EndIf\label{if_new_lower_bound_end}
-    \EndFor\label{main_inner_loop_end}
-  \EndFor\label{main_ext_loop_end}
+This section is better read with a copy of the Algorithm \ref{alg:ukp5} at hand. We use the \textbf{continue} keyword at line \ref{alg:continue} to mean that the loop ends its current iteration and begin the next iteration (as is common in C-like programming languages).
 
-  \For{\(y \gets c-w_{min}+1, c\)}\label{get_y_opt_loop_begin}
-    \If{\(g[y] > opt\)}\label{last_loop_inner_if}
-      \State \(opt \gets g[y]\)
-      \State \(y_{opt} \gets y\)
-    \EndIf
-  \EndFor\label{get_y_opt_loop_end}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+When the algorithm ends, the \(opt\) variable holds the optimal solution value, and \(y_{opt}\) holds the lowest weight of an optimal solution. We have two main data structures, the arrays \(g\) and \(d\). The \(g\) is a sparse array where we store solutions profit. If \(g[y] > 0\) then there exists a non-empty solution \(s\) with \(w_s = y\) and \(p_s = g[y]\). The \(d\) array stores the index of the last item used on the solution. If \(g[y] > 0 \land d[y] = i\) then the solution \(s\) with \(w_s = y\) and \(p_s = g[y]\) has an copy of item \(i\). This array makes trivial assemble the solution\footnote{Note that \(j = d[y_{opt}]\) is the index of the last item used, \(d[y_{opt} - w_j]\) is the index of the penultimate item used, and so on, until \(d[0]\).}, but its main utility is to to drastically speed-up the optimal computation.
 
-explain the arrays
-	g - sparse vector where we store solutions profit, if \(g[y] > 0\) then there's a non-empty solution \(s\) with \(w_s = y\) and \(g[y] = p_s\)
-	d - last item used on solution - if \(d[y] = i \land g[y] > 0\) then the solution \(s\) with \(w_s = y\) and \(p_s = g[y]\) has an copy of item \(i\) - makes trivial find the solution (\(j = d[y_{opt}]\) is the index of the last item used, \(d[y_{opt} - w_j]\) is the index of the penultimate item used, and so on) - and is used to drastically speed-up the computation of the optimal.
+Our first loop (lines \ref{begin_trivial_bounds} to \ref{end_trivial_bounds}) simply stores all solutions made of one item at the arrays \(g\) and \(d\). Now, for a moment, let's ignore lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end} and replace \(d[y]\) at line \ref{main_inner_loop_begin} by \(n\). After these changes, we could say that what our second loop (between lines \ref{main_ext_loop_begin} and \ref{main_ext_loop_end}) do is: iterate \(g\) and when it finds a stored solution (\(g[y] > 0\)) it tests \(n\) new solutions (the combinations of the current solution with every item); then it substite solutions already stored if exists a new solution with the same weight and a greater profit. This is basically what our algorithm do, but those two small code changes make two drastic performance changes.%, specially when combined. 
 
-explain the first loop (create all solution with one of some item)
+When we add the lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end} the algorithm will stop creating new solutions from dominated solutions. If a solution \(s\) with a lesser weight (\(w_s < y\)) has a bigger profit (\(p_s = opt > p_t\), where \(w_t = y \land p_t = g[y]\)), then \(s\) dominates \(t\). New solutions created from \(t\) are guaranteed to be dominated by the solutions created from \(s\)\footnote{The proof is trivial. For any item \(i\) the \(s \cap \{i\}\) solution will dominate the \(t \cap \{i\}\) solution.}. A whole set of solutions that have \(t\) as subset could be discarded.
 
-For a moment, let's ignore lines (IF SKIP) and replace d[y] at line XXX by \(n\). We could then say that what our loop between lines XXX and YYY do is: iterate g and when it find a solution (g[y] > 0) test \(n\) new solutions, combining the current solution with every item, and substite older solutions with the same weight if the profit of the old solution is lower. This is basically what our algorithm do, but those two small code changes make two drastic performance changes, specially when combined. 
+The change from \(n\) to \(d[y]\) is inherited from the algorithm we based ukp5. It's a generic optimization trick that can be used at any problem where the solution is a set (as opposed to a sequence). If the item multiset \(\{1, 1, 2, 3\}\) is a solution, then every permutation of it is reached in a different moment, wasting processing\footnote{The algorithm would computate \(\{1, 2, 3\} \cap \{1\}\) and \(\{1, 1, 2\} \cap \{3\}\), for example.}. To avoid computing every solution in many different orders, we enforce decreasing order. Any item inserted on a solution \(s\) has to have an index that is equal to or lower than the index of the last item inserted on \(s\). 
 
-When we add the lines (IF SKIP) the algorithm will stop creating new solutions from dominated solutions. If a solution \(s\) with a lesser weight (\(w_s < y\)) has a bigger profit (\(p_s = opt > p_t\), where \(p_t = g[y] \land w_t = y\)), then \(s\) dominates \(t\). New solutions created from \(t\) are guaranteed to be no better than solutions created from \(s\). A whole set of solutions that have \(t\) as subset can be discarded this way.
+When the two changes are combined, and the items are ordered by non-decreasing efficiency, ukp5 gets a big performance improvement. The non-dominated solutions (solutions that weren't skipped) are efficient (they have to be to not be dominated), consequently they need to be made of efficient items, that will have the lowest index values, and reduce the processing done at ukp5 inner loop greatly.
 
-The change from \(n\) to \(d[y]\) is inheritance from the algorithm we based ukp5, the Garfinkel DP method presented at CGAR. It's a generic optmization trick that can be used at any problem where the solution is a set (as opposed to a sequence). If the item set \(\{1, 2, 3\}\) is an optimal solution for an UKP instance, then every permutation of it is also an optimal solution. To avoid computing every solution in many different orders, we enforce decreasing order. Any item inserted on a solution \(s\) has to have an index that is equal or lesser than the index of the last item inserted on \(s\). 
+The third loop (lines \ref{get_y_opt_loop_begin} to \ref{get_y_opt_loop_end}) gets the optimal solution value and minimal weight. Any non-excluded optimal solution\footnote{If an optimal solution has an bigger weight than another it can be never generated, as consequence of the test at lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end}. The optimal solution with the lowest weight is guaranteed to be generated.} is guaranteed to be between \(c - w_{min} + 1\) and \(c\) (both inclusive). The proof is simple. A valid solution can't weight more than \(c\), and for any solution \(s\) that weights less than \(c - w_{min} + 1\), we can obtain a solution with a bigger profit inserting a copy of \(i\) to \(s\), where \(w_i = w_min\).
 
-When the two changes are combined, and the items are ordered by non-decreasing efficiency, ukp5 applies all dominances implicity. The non-dominated solutions (that will generate descendents) are efficient (they have to be to not be dominated), consequently they need to be made of efficient items, that will have the lowest index values, and reduce the processing done at INNERLOOOP greatly.
+\subsection{Solution Dominance}
 
-The solution is guaranteed to between X and Y
+In this section we give a closer look at how the solution dominance speeds-up ukp5. We will use the \(min_{ix}(s)\) notation to refer to the lowest index between the items that compose the \(s\) solution\footnote{Note that, on ukp5, the lowest index of an item in a solution is also the index of the last item inserted in the solution (and consequently the value stored at \(d[y]\) where \(y\) is the solution weight).}. The \(max_{ix}(s)\) notation has an analogue meaning.
 
-% Idea
-% Alg
-% Dominance
-% Periodicity
-% Sparsity
-% Correctness
+When a solution \(t\) is skipped because \(s\) dominates \(t\) (lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end}), some solutions \(u\), where \(t \subset u\), will not be generated. If \(s~dominates~t \land t \subset u \land max_{ix}(u - t) \leq min_{ix}(t)\) then \(u\) will not be generated by ukp5. In other words, if \(\{3, 2\}\) is dominated, then \(\{3, 2, 2\}\), \(\{3, 2, 1\}\) and any solution \(\{3, 2\} \cap u\), where \(u\) has only indexes lower than or equal to \(2\) will not be generated. Ideally, any \(u\) where \(t \subset u\) should not be generated as it will be dominated by a solution \(v\) where \(s \subset v\) anyway. It's interesting to note that this will happen eventually, as any \(t \cap {i}\) where \(i > min_{ix}(t)\) will be dominated by \(s \cap \{i\}\) (or by a solution that dominates \(s \cap \{i\}\)), and at some point no solution that is a superset of \(t\) will be generated anymore.
 
-THREE THINGS OMMITED
-What was ommited: we compute the \(y*\) periodicity bound described in CGAR before running the algorithm to reduce the \(c\) value; and we use our own periodicity check that is integrated in the code above (isn't computed before but during the algorithm).
+\subsection{Non Essential Steps}
 
-Our periodicity check is based on the following stop condition: let \(y\) be the value of the variable \(y\) at line \ref{main_ext_loop_begin}; let \(y'\) be the biggest capacity where \(g[y'] \neq 0 \land d[y'] > 1\); if \(y > y'\) then we can stop the computation and fill the remaining capacity with the copies of the lowest index item (item of index \(1\)).%In other words, if all solutions \(s\) with \(w_s > y\) contain at least one copy of the lowest indexed item (item of index \(1\)), then the only item we can add to them is the lowest indexed item (the inner loop at \ref{main_inner_loop_begin} iterates only until \(d[y]\), that will be \(1\)).
+With the purpose of making the initial explanation simpler, we have ommited some steps that are relevant to the algorithm performance, but not essential for accessing its correctness and core idea. A complete overview of the ommited steps is presented at this section.
+
+All the items are sorted by non-decreasing efficiency\footnote{If they have the same efficiency they are sorted by increasing weight.}. The simple/multiple, collective or threshold dominances aren't used by UKP5, as this is often counterproductive for hard instances\footnote{Where the undominated-to-all-items ratio is very close to one.} and superseeded by our implicit solution dominance. The \(y*\) periodicity bound is computed\cite[p. 223]{CGAR}, and used to reduce the \(c\) value, if possible.
+
+An ukp5-specific periodicity check is also used. This periodicity check isn't used to reduce the \(c\) capacity before starting ukp5, as \(y*\). The periodicity check is a stop condition inside ukp5 main loop (LINES). The stop condition follows: let \(y\) be the value of the variable \(y\) at line \ref{main_ext_loop_begin}; let \(y'\) be the biggest capacity where \(g[y'] \neq 0 \land d[y'] > 1\); if, at some moment, \(y > y'\), then we can stop the computation and fill the remaining capacity with copies of the first item (item of index \(1\)).%In other words, if all solutions \(s\) with \(w_s > y\) contain at least one copy of the lowest indexed item (item of index \(1\)), then the only item we can add to them is the lowest indexed item (the inner loop at \ref{main_inner_loop_begin} iterates only until \(d[y]\), that will be \(1\)).
 
 %if for all \(y' > y\) (where \(y\) is the loop control variable defined at line \ref{main_inner_loop_begin}) any \(g[y'] \neq 0\) has \(d[y'] = 0\), then we can stop at \(y\) as we know that any remaining capacity will be filled by copies of the item of lowest index (item of index \(0\)).
 
-This periodicity check works only if the best item is the lowest index item. If this assumption is false, then the described condition will never happen, and the algorithm will iterate until \(y = c - w_{min}\) as usual. When the described condition happens, this means that the best item has threshold dominated any item that wasn't already collective dominated.
+This periodicity check works only if the best item is the first item. If this assumption is false, then the described condition will never happen\footnote{The only item that can dominate all other items by threshold is the best item.}, and the algorithm will iterate until \(y = c - w_{min}\) as usual.
 
-THERE IS AN ELSEIF AT THE IF AT LINE WHERE WE UPDATE d[y] = i IF \(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\). THIS IF IS RELEVANT ONLY FOR SUBSET-SUM INSTANCES (SEE SECTION) WHERE ALL SOLUTIONS WITH THE SAME WEIGHT HAVE EXACTLY THE SAME PROFIT. WITHOUT THIS elseif OUR CODE IS ABOUT 1800 (one thousand and eight hundred) times slower than the values presented at CTABLE1 for the subset-sum instances.
+There's and \emph{else if} construct at line \ref{if_new_lower_bound_end}. If \(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\) then \(d[y] \gets i\). This may seem unecessary, as appears to be an optimization of a very rare case, where two solutions have the same weight and profit. Nonetheless, without this test, the ukp5 was about 1800 (one thousand and eight hundreds) times slower on the subset-sum instances presented at CTABLE1.
 
 \section{Experiments}
 % Describe all instance datasets.
@@ -168,19 +164,20 @@ THERE IS AN ELSEIF AT THE IF AT LINE WHERE WE UPDATE d[y] = i IF \(g[y + w_i] = 
 % Only used internal time, internal time of PYAsUKP was strange
 % external time not used because HD data reading race conditions, and different reading methods
 % TABLE WITH RESULTS
-In this section we describe the experiments environment, instance sets and results. We compare our ukp5 implementation and the eduk2 implementation made by CPYA (called PYAsUKP). The exact versions of the source codes used can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{The ukp5 implementation is at \textbf{codes/cpp/} and the two eduk2 implementations are at \textbf{codes/ocaml/}. The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html} by this paper writing date. The site version had bugs on the eduk2 UKP solver, so a version without those bugs was obtained thanks to Vincent Poirriez. This version is called \emph{pyasukp\_mail.tgz} and was the one used to solve the instances (i.e. make the CTABLE1). The \emph{create\_*\_instances.sh} scripts insides \textbf{codes/sh/} were used to generate the instance datasets.}. The times reported were given by the tools themselves and are supposed to not count the instance loading time (i.e. reading the instance from disk to memory). The runs external time\footnote{Given by the \textit{time} application, available at \url{https://www.archlinux.org/packages/extra/x86_64/time/}. The bash internal command was \emph{not} used.} were also captured and no significative discrepancy was perceived. Therefore, we have chosen to use the tools reported times (as is the common practice).
+In this section we describe the experiments environment, instance sets and results. We compare our ukp5 implementation and the eduk2 implementation made by \cite{CPYA} (called PYAsUKP). The exact versions of the source codes used can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{The ukp5 implementation is at \textbf{codes/cpp/} and the two eduk2 implementations are at \textbf{codes/ocaml/}. The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html} by this paper writing date. The site version had bugs on the eduk2 UKP solver, so a version without those bugs was obtained thanks to Vincent Poirriez. This version is called \emph{pyasukp\_mail.tgz} and was the one used to solve the instances (i.e. make the CTABLE1). The \emph{create\_*\_instances.sh} scripts insides \textbf{codes/sh/} were used to generate the instance datasets.}. The times reported were given by the tools themselves and are supposed to not count the instance loading time (i.e. reading the instance from disk to memory). The runs external time\footnote{Given by the \textit{time} application, available at \url{https://www.archlinux.org/packages/extra/x86_64/time/}. The bash internal command was \emph{not} used.} were also captured and no significative discrepancy was perceived. Therefore, we have chosen to use the tools reported times (as is the common practice). For all instances, the weight, profit and capacity are integral.
 
 We use the following non-standard notations at this section: \(rand(x, y)\) means a random integer between \(x\) and \(y\) (both inclusive)\footnote{We could not determine if the methods used by pyasukp to generate random integer sets results in an uniform distribution. We advice checking the source code for more information on the exact method used for obtaining random integer sets.}; \(x\overline{n}\) means \(x\) as digits followed by the value of variable \(n\) as digits, for example: if \(n = 5000\) then \(10\overline{n} = 105000\).
 
 \subsection{Environment}
 
-The computer used on the experiments was an ASUS R552JK-CN159H. This model has four physical cores\footnote{Intel Core i7-4700HQ Processor, 6M Cache, up to 3.40 GHz.}. The operating system used was Linux nymeria 4.3.3-2-ARCH x86\_64 GNU/Linux (i.e. Arch linux). Three of the four cores were isolated using the \emph{isolcpus} kernel flag. The \emph{taskset} utility was used to execute ukp5 and pyasukp on the isolated cores. The computer memory was never completely used (no swapping was done).
+The computer used on the experiments was an ASUS R552JK-CN159H. This model has four physical cores\footnote{Intel Core i7-4700HQ Processor, 6M Cache, up to 3.40 GHz.}. The operating system used was Linux nymeria 4.3.3-2-ARCH x86\_64 GNU/Linux (i.e. Arch linux). Three of the four cores were isolated using the \emph{isolcpus} kernel flag. The \emph{taskset} utility was used to execute ukp5 and pyasukp on the isolated cores. The computer memory was never completely used (no swapping was done). The ukp5 code was compiled with gcc (g++) version 5.3.0 and the \emph{-O3 -std=c++11} flags enabled.
 
 \subsection{Instance Sets}
-The instance sets aim to reproduce the ones described in CPYA. The same tool was used to generate the datasets (pyasukp), and the same parameters were used, otherwise noted the contrary. In CPYA, section 5.1.1 \emph{Known ``hard'' instances}, some sets of easy instances are used to allow comparison with MTU2 (that had integer overflow problems with harder instances). With exception of the subset-sum dataset, all datasets have a similar harder set (CPYA, section 5.2.1 \emph{New hard UKP instances}), so we ommited the easy sets and used only the harder ones. Each instance has a random capacity value within an interval, this interval is shown at CTABLE1. The pyasukp parameters \emph{-wmin \(w_{min}\) -cap c -n \textbf{n}} were used in all instances generation. When we found a discrepancy between the formula presented in CPYA and the pyasukp code, or generated instances, we opted for changing the formula based on the observed behaviour\footnote{As the pyasukp code can be hard to follow, we cannot guarantee that the formula presented here is a perfect match for the code; but, based by the generated instances, we believe it to be correct to a good extent.}.
+
+The instance sets aim to reproduce the ones described in \cite{CPYA}. The same tool was used to generate the datasets (pyasukp), and the same parameters were used, otherwise noted the contrary. In \cite{CPYA}, section 5.1.1 \emph{Known ``hard'' instances}, some sets of easy instances are used to allow comparison with MTU2 (that had integer overflow problems with harder instances). With exception of the subset-sum dataset, all datasets have a similar harder set (\cite{CPYA}, section 5.2.1 \emph{New hard UKP instances}), so we ommited the easy sets and used only the harder ones. Each instance has a random capacity value within an interval, this interval is shown at CTABLE1. The pyasukp parameters \emph{-wmin \(w_{min}\) -cap c -n \textbf{n}} were used in all instances generation. When we found a discrepancy between the formula presented in \cite{CPYA} and the pyasukp code, or generated instances, we opted for changing the formula based on the observed behaviour\footnote{As the pyasukp code can be hard to follow, we cannot guarantee that the formula presented here is a perfect match for the code; but, based by the generated instances, we believe it to be correct to a good extent.}.
 
 \subsubsection{Subset-Sum}\label{sec:subsetsum}
-Instances where \(p_i = w_i = rand(w_{min}, w_{max})\). The ones used at CPYA were so easily solved that we had measuring problems (many instances solved on less than 0.01 seconds). Because of this, in this paper, we use a dataset similar to the one used at CPYA, but with each parameter multiplied by ten. Therefore, we generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\), \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\). Totalizing 400 instances. We do not discriminate each combination at CTABLE1 for brevity. The pyasukp \emph{-form ss -wmax \(w_{max}\)} parameters were used.
+Instances where \(p_i = w_i = rand(w_{min}, w_{max})\). The ones used at \cite{CPYA} were so easily solved that we had measuring problems (many instances solved on less than 0.01 seconds). Because of this, in this paper, we use a dataset similar to the one used at \cite{CPYA}, but with each parameter multiplied by ten. Therefore, we generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\), \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\). Totalizing 400 instances. We do not discriminate each combination at CTABLE1 for brevity. The pyasukp \emph{-form ss -wmax \(w_{max}\)} parameters were used.
 
 \subsubsection{Strong Correlation}
 Instances generated using the following formula: \(w_i = w_{min} + i - 1\) and \(p_i = w_i + \alpha\), for a given \(w_{min}\) and \(\alpha\).  Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\) and \(w_{min}\) combination are equal. The formula don't rely on random numbers. The pyasukp \emph{-form chung -step \(\alpha\) } parameters were used.
@@ -200,6 +197,8 @@ Based on CTABLE1, except by one instance set that we will talk about later, we c
 
 Let's begin with the second statement (about the minimal), as eduk2 uses a branch-and-bound (B\&B) algorithm before resorting to dynamic programming (DP), this is an expected result. Instances with big capacities and solutions that are composed by a large quantity of the best item, and a few of the non-best most efficient items, can be solved by B\&B very fast, in a way that no dynamic programming algorithm can be competitive against. Our exception dataset (Strong Correlation, \(\alpha = 5\), \(n = 10\) and \(w_{min} = 10\)) is exactly the case. As said before, the strong correlation formula don't make use of random numbers, so all twenty instances of that dataset have the same items. The only thing that changes is the capacity. All solutions of this dataset are composed by hundreds of the best item (that is also the smallest item, making the dataset even easier) and exactly one non-best item for making better use of the residual capacity (\(c~mod~w_1\)). All other datasets have instances that present the same characteristics\footnote{The number of instances where pyasukp was faster than ukp5 by formula are: Subset-sum: 264 (\~65\%); Strong correlation: 60 (25\%); Postponed periodicity: 105 (\~13\%); No collective dominance: 259 (\~13\%); SAW: 219 (\~20\%).}, and because of that, the pyasukp minimal is always very low\footnote{The observant reader will see that, on the dataset ``Postponed periodicity'', \(n = 50\), \(w_{min} = 50\), pyasukp has a anomalous minimal time. On this dataset, the solution of the easiest instance is composed only by two items, the best one, and the 5317 most efficient one.}.
 
+% Put the importance of solving hard instances as they can have exponential time
+
 As it's already well known, DP is not competitive against a B\&B approach for easy UKP instances. The ukp5 can't compete with pyasukp on easy datasets, as only the time for initializing an array of size \(c\) is already greater than the B\&B time\footnote{A problem that will be tackled in newer versions by using heaps or array slices.}. Nonetheless, for hard instances, B\&B is known to shows a very bad worst case (exponencial time). As eduk2 combine B\&B and DP with the intent of getting the strenghts of both, and none of its weaknesses, we found strange that this typical B\&B behavior is present at pyasukp. We executed pyasukp with the \emph{-nobb} flag, that disables the use of B\&B. The results show that any time under XXX seconds disappear, now taking at least XXX seconds, and times over this limit stay the same. Based on this evidence, we conclude that the pyasukp implementation of the eduk2 DP phase is responsible for the big maximal pyasukp times (the time seems exponential but it is instead pseudo-polynomial with a big constant). For future research, it is interesting to verify if an implementation of ukp5 that executed B\&B for a small amount of time before resorting to DP could have better results than pyasukp, without the complexity that is integrating B\&B with DP in the way is done by eduk2.
 
 %Based on the first statement, and the discovery that the eduk2 DP phase was responsible for the 
@@ -207,6 +206,57 @@ Looking back at the first statement of this section, we can now conclude that fo
 
 Our ukp5 implementation consumed, in average, more memory than pyasukp\footnote{This is another problem that will be tackled in newer versions by the use of heaps or array slices.}. The complete data can be found at CTABLE2 at the Appendix. Note that the ukp5 memory use is linear on \(c + w_{max} - w_{min}\). It's easy to see the similarity between the average of instances with a similar capacity interval. The pyasukp memory use is too bound by \(c\) (or the slice size), but because the way it handles sparsity it's, in practice, much lower than this bound (even if its structures, i.e. lazy lists, have a much bigger memory overhead than arrays).
 
+\section{Conclusions}
+
+\section{Appendix}
+\begin{centering}
+\begin{algorithm}
+\caption{First Phase -- Computation of $opt$ and $y_{opt}$}\label{alg:ukp5}
+\begin{algorithmic}[1]
+\Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
+  \State \(g \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(0\)\label{create_g}
+  \State \(d \gets\) array of \((c - w_{min}) + w_{max} + 1\) positions each one initialized with \(n\)\label{create_d}
+  
+  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \(d[w_i] \gets i\)
+    \EndIf
+  \EndFor\label{end_trivial_bounds}
+
+  \State \(opt \gets 0\)\label{init_opt}
+
+  \For{\(y \gets w_{min}, c-w_{min}\)}\label{main_ext_loop_begin}
+    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}
+    	\State \textbf{continue}\label{alg:continue}
+    \EndIf\label{if_less_than_opt_end}
+    
+    \State \(opt \gets g[y]\)\label{update_opt}
+    
+    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
+        \State \(g[y + w_i] \gets g[y] + p_i\)
+        \State \(d[y + w_i] \gets i\)
+%      \ElsIf{\(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\)}
+%        \State \(d[y + w_i] \gets i\)
+      \EndIf\label{if_new_lower_bound_end}
+    \EndFor\label{main_inner_loop_end}
+  \EndFor\label{main_ext_loop_end}
+
+  \For{\(y \gets c-w_{min}+1, c\)}\label{get_y_opt_loop_begin}
+    \If{\(g[y] > opt\)}\label{last_loop_inner_if}
+      \State \(opt \gets g[y]\)
+      \State \(y_{opt} \gets y\)
+    \EndIf
+  \EndFor\label{get_y_opt_loop_end}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{centering}
+
+
+
+\begin{centering}
 \begin{table}
 \caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by ukp5 or eduk2, then the meaning of the columns \textbf{avg}, \textbf{sd}, \textbf{min} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the minimal value of \(T\) and the maximal value of \(T\). The time unit of the table values is seconds.}
 \def\arraystretch{1.1}
@@ -277,10 +327,9 @@ Our ukp5 implementation consumed, in average, more memory than pyasukp\footnote{
 
 \end{tabular}
 \end{table}
+\end{centering}
 
-\section{Conclusions}
 
-\section{Appendix}
 
 \begin{table}
 \caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the maximal memory used by ukp5 or eduk2 as reported by the \emph{time} tool, then the meaning of the columns \textbf{avg}, \textbf{sd}, \textbf{min} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the minimal value of \(T\) and the maximal value of \(T\). The time unit of the table values is Mb (megabytes, not mibibytes).}
@@ -356,7 +405,6 @@ Our ukp5 implementation consumed, in average, more memory than pyasukp\footnote{
 
 \end{tabular}
 \end{table}
-
 
 \bibliography{ukp5.bib}
 

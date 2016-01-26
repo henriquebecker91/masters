@@ -110,17 +110,16 @@ function itest_performance {
 
 ##itest_performance 'wcd' 'hi_n5000-.*.ukp' 2 &
 ##itest_performance 'wcd' 'hi_n10000-.*.ukp' 2 &
-itest_performance 'wcd' 'hi_n20000-.*.ukp' 2 &
-#itest_performance 'wcd' 'hi_n50000-.*.ukp' 2
+##itest_performance 'wcd' 'hi_n20000-.*.ukp' 2 &
+##itest_performance 'wcd' 'hi_n50000-.*.ukp' 1 &
 ##itest_performance 'postponed_per' 'nsds2_n20000.*\.ukp' 3 &
-#itest_performance 'postponed_per' 'nsds2_n50000.*\.ukp' 3
-#itest_performance 'wcd' 'hi2_n5000-.*.ukp' 1
-#itest_performance 'wcd' 'hi2_n10000-.*.ukp' 1
-#itest_performance 'wcd' 'hi2_n20000-.*.ukp' 1
-#itest_performance 'wcd' 'hi2_n50000-.*.ukp' 2
+##itest_performance 'postponed_per' 'nsds2_n50000.*\.ukp' 3 &
+##itest_performance 'wcd' 'hi2_n5000-.*.ukp' 1
+##itest_performance 'wcd' 'hi2_n10000-.*.ukp' 1
+##itest_performance 'wcd' 'hi2_n20000-.*.ukp' 1
+##itest_performance 'wcd' 'hi2_n50000-.*.ukp' 2
 ##itest_performance 'saw' 'saw_n50000wmin5000.*\.ukp' 3 &
-#itest_performance 'saw' 'saw_n50000wmin10000.*\.ukp' 1
-#itest_performance 'saw' 'saw_n10000w.*\.ukp' 1
-#itest_performance 'saw' 'saw_n100000w.*\.ukp' 3
-#itest_performance 'postponed_per' 'nsds2_n50000wmin50000-\([7-9]\|79\|8[0-9]\|9[0-9]\)-.*\.ukp' 3
+##itest_performance 'saw' 'saw_n50000wmin10000.*\.ukp' 2 &
+##itest_performance 'saw' 'saw_n10000w.*\.ukp' 2 &
+##itest_performance 'saw' 'saw_n100000w.*\.ukp' 2 &
 

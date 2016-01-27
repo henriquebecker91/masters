@@ -2,8 +2,8 @@
 
 tex='ukp5.tex'
 pdflatex $tex
-bibtex "${tex%.*}.bib"
+bibtex "${tex%.*}"
 pdflatex $tex
 pdflatex $tex
-rm "${tex%.*}.aux"
+#rm "${tex%.*}.aux"
 

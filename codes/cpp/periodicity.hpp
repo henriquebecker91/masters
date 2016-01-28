@@ -27,14 +27,6 @@ namespace hbm {
     using namespace boost;
     using namespace boost::multiprecision;
 
-
-    // Only valid for unsigned integers that define
-    // numeric_limits<W>::max().
-    template <typename T>
-    bool mult_will_overflow(const T &a, const T &b) {
-      return a > 0 && (numeric_limits<T>::max() / a) < b;
-    }
-
     template <typename W, typename P>
     W y_star(const item_t<W, P> &b, const item_t<W, P> &b2) {
       if (std::is_integral<W>::value && std::is_same<W, P>::value) {

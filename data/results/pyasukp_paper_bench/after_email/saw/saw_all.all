@@ -1,4 +1,4 @@
-Filename;UKP5 Internal Time (seconds);UKP5 External Time (seconds);UKP5 Max Memory Use (Kb);UKP5 opt;Pyasukp Internal Time (seconds);Pyasukp External Time (seconds);Pyasukp Max Memory Use (Kb);PYAsUKP opt;
+filename;ukp5_time;ukp5_ext_time;ukp5_mem;ukp5_opt;pya_time;pya_ext_time;pya_mem;pya_opt
 saw_n100000wmin10000-0-s985850175c6792927.ukp;18.3199;18.56;128352;6793604;130.48999;130.46;86328;6793604
 saw_n100000wmin10000-100-s565370992c7030881.ukp;19.715;19.95;131756;7032986;78.78333;78.78;64760;7032986
 saw_n100000wmin10000-101-s165560274c9800050.ukp;19.3296;19.57;175172;9804949;0.06000;0.08;21376;9804949

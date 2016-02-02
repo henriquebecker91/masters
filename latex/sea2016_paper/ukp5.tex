@@ -186,16 +186,16 @@ The name ``UKP5'' is due to five improvements applied over that algorithm:
   \item Symmetry pruning: symmetric solutions are pruned in a more efficient fashion than in~\cite{gar72};
   \item Sparsity: not every position of the optimal solutions value array has to be computed;
   \item Dominated solutions pruning: dominated solutions are pruned;
-  \item Time/memory tradeoff: the test \(w_i \leq y\) from the algorithm in~~\cite{gar72} was removed in cost of more O($w_{max}-w_{min}$) memory;
+  \item Time/memory tradeoff: the test \(w_i \leq y\) from the algorithm in~~\cite{gar72} was removed in cost of more O($w_{max}$) memory;
   \item Periodicity: the periodicity check suggested in~\cite{gar72} (but not implemented there) was adapted and implemented.
 \end{enumerate}
 
 \begin{algorithm}[!t]
-\caption{UKP5 -- Computation of $opt$ and $y_{opt}$}\label{alg:ukp5}
+\caption{UKP5 -- Computation of $opt$}\label{alg:ukp5}
 \begin{algorithmic}[1]
 \Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
-  \State \(g \gets\) array of \(c - w_{min} + w_{max} + 1\) positions each one initialized with \(0\)\label{create_g}
-  \State \(d \gets\) array of \(c - w_{min} + w_{max} + 1\) positions each one initialized with \(n\)\label{create_d}
+  \State \(g \gets\) array of \(c + w_{max}\) positions each one initialized with \(0\)\label{create_g}
+  \State \(d \gets\) array of \(c + w_{max}\) positions each one initialized with \(n\)\label{create_d}
   
   \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
     \If{\(g[w_i] < p_i\)}
@@ -206,14 +206,14 @@ The name ``UKP5'' is due to five improvements applied over that algorithm:
 
   \State \(opt \gets 0\)\label{init_opt}
 
-  \For{\(y \gets w_{min}, c-w_{min}\)}\label{main_ext_loop_begin}\Comment{At \(c-w_{min}\), \(g[c]\) is refered for the last time}
-    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}\Comment{Pruning of dominated solutions}
+  \For{\(y \gets w_{min}, c\)}\label{main_ext_loop_begin}\Comment{Can end early because of periodicity check}
+    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}\Comment{Handles sparsity and pruning of dominated solutions}
     	\State \textbf{continue}\label{alg:continue}\Comment{Ends current iteration and begins the next}
     \EndIf\label{if_less_than_opt_end}
     
     \State \(opt \gets g[y]\)\label{update_opt}
     
-    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}\Comment{Creates new solutions (none symmetric)}
+    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}\Comment{Creates new solutions (never symmetric)}
       \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
         \State \(g[y + w_i] \gets g[y] + p_i\)
         \State \(d[y + w_i] \gets i\)
@@ -221,7 +221,8 @@ The name ``UKP5'' is due to five improvements applied over that algorithm:
 %        \State \(d[y + w_i] \gets i\)
       \EndIf\label{if_new_lower_bound_end}
     \EndFor\label{main_inner_loop_end}
-  \EndFor\label{main_ext_loop_end}\Comment{Can end early because periodicity check explained later}
+  \EndFor\label{main_ext_loop_end}
+  \State \textbf{return} \(opt\)
 
 %  \For{\(y \gets c-w_{min}+1, c\)}\label{get_y_opt_loop_begin}\Comment{Removal of dominated solutions}
 %    \If{\(g[y] > opt\)}\label{last_loop_inner_if}
@@ -247,7 +248,7 @@ iterates \(g\) and when it finds a stored solution (\(g[y] > 0\)) it tests \(n\)
 Then, it replaces solutions already stored if exists a new solution with the same weight and a greater profit.
 
 When we add the lines \ref{if_less_than_opt_begin} to \ref{if_less_than_opt_end} to the algorithm, it stops creating new solutions from dominated solutions. 
-We use the \textbf{continue} keyword at line \ref{alg:continue} meaning the current iteration ends, and the next iteration begins (as is common in C-like programming languages). 
+%We use the \textbf{continue} keyword at line \ref{alg:continue} meaning the current iteration ends, and the next iteration begins (as is common in C-like programming languages). 
 If a solution \(s\) with a smaller weight (\(w_s < y\)) has a bigger profit (\(p_s = opt > p_t\), where \(w_t = y \land p_t = g[y]\)), then \(s\) dominates \(t\). 
 If solution \(s\) dominates \(t\) then, for any item \(i\), the \(s \cap \{i\}\) solution will dominate the \(t \cap \{i\}\) solution. 
 This way, new solutions created from \(t\) are guaranteed to be dominated by the solutions created from \(s\). 
@@ -327,6 +328,8 @@ This may seem unnecessary, as appears to be an optimization of a rare case, wher
 Nonetheless, without this test, the UKP5 was about 1800 (one thousand and eight hundreds) times slower on some subset-sum instance datasets.
 %presented at Table~\ref{tab:times}.
 %For other instance classes, no significant speedup was observed.
+
+We iterate only until \(c-w_{min}\) (instead of \(c\), in line \ref{main_ext_loop_begin}), as it is the last \(y\) value that can affect \(g[c]\)). After this we search for a value greater than \(opt\) in the range \(g[c-w_{min}+1]\) to \(g[c]\) and update \(opt\).
 
 \section{Computational Results}
 % Describe all instance datasets.

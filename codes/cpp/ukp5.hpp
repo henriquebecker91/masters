@@ -133,6 +133,11 @@ namespace hbm {
       /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
       W qt_inner_loop_executions;
 
+      /// If an file existed in path, its content is dicarded.
+      /// The value of header is written in the file at path, then
+      /// two columns are written in the file. The first column is
+      /// composed from the vector indexes (will vary between 0 and
+      /// v.size()-1). The second column has the vector values.
       template <typename W_OR_P>
       static void dump(const string &path,
                        const string &header,
@@ -149,6 +154,9 @@ namespace hbm {
         }
       }
 
+      /// Generates a good number of stats about the UKP5 execution.
+      /// Probably there's no way of adptating this method if the
+      /// UKP5 arrays are changed to slices.
       virtual string gen_info(void) {
         //ukp5_gen_stats();
 
@@ -223,6 +231,10 @@ namespace hbm {
         return out.str();
       }
 
+      /// This method set the majority of the values of this
+      /// stats class. All the values set by it need extra computation,
+      /// and because of this they are computed here, after the UKP5
+      /// executed, and without affecting its time measurement.
       /// This method only works if the following variables are
       /// set first: n, c, y_bound, w_min, w_max, g and d. It
       /// can't receive this values by constructor as g and d
@@ -254,7 +266,8 @@ namespace hbm {
         return;
       }
     };
-
+  
+    /// Gets the minimal and maximal item weights and return them.
     template<typename W, typename P>
     pair<W, W> minmax_item_weight(const vector< item_t<W, P> > &items) {
       W min, max;
@@ -276,8 +289,13 @@ namespace hbm {
       I b1_ix;
     };
 
+    /// Gather the w_min, w_max, the two most efficient items
+    /// (b1 and b2, respectively) and the index of b1 in one 
+    /// pass by the items vector. Return all this info in the
+    /// bag struct.
     template<typename W, typename P, typename I>
     bag_t<W, P, I> minmax_w_and_two_best_items(const vector< item_t<W, P> > &items) {
+      assert 
       bag_t<W, P, I> b;
       b.w_min = b.w_max = items[0].w;
       b.b1 = b.b2 = items[0];
@@ -301,11 +319,22 @@ namespace hbm {
       return b;
     }
 
+    /// @brief Examine the range of the g vector where the
+    /// optimal solution value is guaranteed to be, and retrieve
+    /// it. Can only be used after ukp5_phase1 was run over g.
+    ///
+    /// @param c The knapsack capacity.
+    /// @param g The g vector used by UKP5, after ukp5_phase1
+    ///   was executed over it (i.e. after being populated with
+    ///   solutions profit values).
+    /// @param w_min The smallest item weight on the knapsack.
+    /// @return The optimal solution value and its weight,
+    ///   respectively.
     template<typename W, typename P>
     pair<P, W> get_opts(W c, const vector<P> &g, W w_min) {
       P opt = 0;
-      // Dont need to be initialized, but initializing to stop compiler
-      // warning messages
+      // Dont need to be initialized, but initializing to stop
+      // compiler warning messages
       W y_opt = 0;
 
       for (W y = (c-w_min)+1; y <= c; ++y) {
@@ -318,6 +347,27 @@ namespace hbm {
       return make_pair(opt, y_opt);
     }
 
+    /// Retrieves the optimal solution (as an item multiset). 
+    /// In other words, it sets sol.used_items.
+    /// 
+    /// Follows an explanation of this procedure. The ukp5_phase1
+    /// populates the "d" array with the index of items used in
+    /// solutions (including the optimal solutions). At d[y] rests
+    /// the index of an item present in a solution with weight equal
+    /// to y. The ukp5_phase1 also sets sol.y_opt to the weight of the
+    /// lightest optimal solution. Therefore, d[sol.y_opt] has the index
+    /// of an item used on the lightest optimal solution (between all
+    /// solutions with the same weight, d stores an item index used by the
+    /// best of them). After subtracting the weight of the item with index
+    /// d[sol.y_opt] we have the weight of the remaining part of the
+    /// solution. We repeat this process until we had found every item that
+    /// composes the lightest optimal solution.
+    /// 
+    /// @param items The same items, in the same order, that were passed
+    ///   to ukp5_phase1.
+    /// @param d The d vector set by ukp5_phase1.
+    /// @param sol The struct with the field used_items, that is set by this
+    ///   procedure.
     template<typename W, typename P, typename I>
     void ukp5_phase2(const vector< item_t<W, P> > &items, const vector<I> &d, solution_t<W, P, I> &sol) {
       I n = items.size();
@@ -341,6 +391,47 @@ namespace hbm {
       return;
     }
 
+    /// Retrieves the optimal solution (as a profit and weight value). 
+    /// In other words, it sets sol.opt and sol.y_opt. Also the g and d
+    /// vectors populated by it are used to get the optimal solution item
+    /// multiset (ukp5_phase2) and the ukp5 stats (ukp5_extra_info_t.gen_info)
+    /// THIS IS THE CORE OF THE ALGORITHM. Is in this phase that the optimal
+    /// solution value is obtained, and is in this phase that the ukp5 method
+    /// spends 99% of the processing time.
+    /// 
+    /// Follows an explanation of this procedure. The ideia is to store at g/d
+    /// all the solutions composed by one unique item (the weight is always
+    /// stored implicity as the g/d index). After this we iterate g and stop at 
+    /// the already stored solutions to create new solutions combining "all"
+    /// the items with the current solution. We don't combine all items, we
+    /// combine only the ones until d[y], because this prunes symmetry (all
+    /// solutions are yet generated but we avoid the same solution generated
+    /// in many different orders, i.e. instead of {1,2,3}, {2,1,3}, ..., and
+    /// {3,2,1} we have only {3,2,1}). Also we skip some inferior/dominated
+    /// solutions (if g[y] < opt then the solution in g[y] is less profitable
+    /// than a previous solution, and therefore can be discarded without loss
+    /// to the optimality). The periodicity check simply checks if between the
+    /// current position (y) and the last (c-w_min+w_max) there's a non-zero
+    /// non-one value. If not, then we know that the remaining capacity will
+    /// be filled with copies of the first item (index one). This is the gist
+    /// of it.
+    /// 
+    /// @param ukpi The UKP instance.
+    /// @param g This vector will be used to store the profit value of
+    ///   knapsack solutions. It can't have non-zero values, or the wrong
+    ///   size (less than c+w_max-w_min).
+    /// @param d This vector will be used to store the index of the last
+    ///   item used to compose a solution whose profit value is stored at g.
+    ///   The data of this vector makes reference to the order of ukpi.items.
+    ///   It can't have non-zero values, or the wrong size (less than
+    ///   c+w_max-w_min).
+    /// @param sol This procedure sets the fields opt and y_opt of the
+    ///   sol parameter. If HBM_CHECK_PERIODICITY is defined, the field
+    ///   extra_info is expect to be set (already point to a valid
+    ///   ukp5_extra_info_t<W, P, I> object), as the field
+    ///   sol.extra_info->last_y_value_outer_loop will be set by the procedure.
+    /// @param w_min The minimal item weight between the items in ukpi.items.
+    /// @param w_max The maximal item weight between the items in ukpi.items.
     template<typename W, typename P, typename I>
     void ukp5_phase1(const instance_t<W, P> &ukpi, vector<P> &g, vector<I> &d, solution_t<W, P, I> &sol, W w_min, W w_max) {
       const W &c = ukpi.c;

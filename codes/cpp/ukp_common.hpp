@@ -156,6 +156,7 @@ namespace hbm {
     /// process/format this this extra data.
     std::shared_ptr<extra_info_t> extra_info;
 
+    /// Empty constructor.
     solution_t (void) {
       opt = P(0);
       y_opt = W(0);
@@ -163,6 +164,7 @@ namespace hbm {
       show_only_extra_info = false;
     }
 
+    /// "Assemble all parameters in a class." constructor.
     solution_t (P opt, W y_opt,
                 const std::vector< itemqt_t<W, P, I> > &used_items,
                 bool show_only_extra_info,

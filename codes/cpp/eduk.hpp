@@ -2,16 +2,22 @@
 #define HBM_EDUK_HPP
 
 #include <algorithm>
-#include <memory>
+#include <memory> // for unique_ptr
 #include <forward_list>
+#include <vector>
 
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
 
 // The original version of the algorithm relies on the garbage collection of
 // functional languages, so nodes of lazy lists that are unreachable by the
-// code are silently and automatically dealocated. The imperative version has
-// to control this some way to avoid memory leaks.
+// code are silently and automatically dealocated. In the imperative version
+// the nodes don't become unreachable, but they are kept even if they aren't
+// needed anymore. This definition controls the maximum of unneeded nodes a
+// lazy list can have. If the list has more unneeded nodes than
+// HBM_MAX_MEMORY_WASTED_BY_S we copy the nodes that are yet needed into
+// another list and swap both lists.
+// (i.e. garbage collection by hand).
 #ifndef HBM_MAX_MEMORY_WASTED_BY_S
   #define HBM_MAX_MEMORY_WASTED_BY_S 10
 #endif
@@ -61,7 +67,7 @@ namespace hbm {
     template<typename W, typename P>
     struct LazyList {
       /// The main method. Computes only the next node of the list and returns
-      /// it.
+      /// it. Each lazy operation needs to redefine it.
       virtual bool get_next(item_t<W, P>& x) = 0;
     };
 
@@ -77,6 +83,7 @@ namespace hbm {
       }
     }
 
+    /// A simple wrapper class, makes a LazyList from a vector.
     template<typename W, typename P>
     struct Lazyfy : LazyList<W, P> {
       typename vector< item_t<W, P> >::const_iterator begin;
@@ -85,8 +92,8 @@ namespace hbm {
       Lazyfy(void) {
       }
 
-      // Makes reference to the v argument, v can't be freed before
-      // this struct. 
+      /// Makes reference to the v argument, v can't be freed before this
+      /// struct. 
       Lazyfy(const vector< item_t<W, P> > &v) {
         begin = v.cbegin();
         end = v.cend();
@@ -151,6 +158,8 @@ namespace hbm {
       }
     };
 
+    /// Merge two LazyLists, as in mergesort, always choose the smaller
+    /// between the front of the two list to go next.
     template<typename W, typename P>
     struct Merge : LazyList<W, P> {
       LazyList<W, P> * l1, * l2;
@@ -200,6 +209,8 @@ namespace hbm {
       }
     };
 
+    /// The first time get_next is called it returns the head parameter
+    /// any other call will simply return l->get_next.
     template<typename W, typename P>
     struct AddHead : LazyList<W, P> {
       item_t<W, P> original_head;
@@ -228,6 +239,8 @@ namespace hbm {
       }
     };
 
+    /// This empty reference is needed to allow the class to be
+    /// self-referential.
     template<typename W, typename P, typename I = size_t>
     struct S;
     template<typename W, typename P, typename I>
@@ -275,7 +288,9 @@ namespace hbm {
       S(I k, W c, const vector< item_t<W, P> > &items) {
         if (k > 0) {
           empty = false;
-
+          // Combine the lazy functions. This is the algorithm described at
+          // "Sparse knapsack algo-tech-cuit and its synthesis", all the rest
+          // is only implementation of the lazy evaluation in c++.
           s_pred_k = unique_ptr< S<W, P, I> >(new S<W, P, I>(k-1, c, items));
           l_items = Lazyfy<W, P>(items);
           item_t<W, P> zero = {0, 0};
@@ -317,7 +332,7 @@ namespace hbm {
           m = min(m, it->ix);
         }
 
-        /* Another possibility is to verify if (m > computed.size()/MAGIC_CONST) */
+        // Another possibility is to verify if (m > computed.size()/MAGIC_CONST)
         if (m > HBM_MAX_MEMORY_WASTED_BY_S) {
           vector< item_t<W, P> > new_v(computed.cbegin()+m, computed.cend());
           computed.swap(new_v);

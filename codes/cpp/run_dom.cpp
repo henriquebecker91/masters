@@ -4,6 +4,10 @@
 using namespace std;
 using namespace hbm;
 
+// We test two simple algorithms for removing simple/multiple dominated items
+// from a item set (UKP instance). Don't solve a UKP instance, only detect and
+// remove dominated items and show how many can't be removed. Takes an instance
+// filename in the ".ukp" format as first argument. 
 int main(int argc, char** argv) {
   int exit_code;
 

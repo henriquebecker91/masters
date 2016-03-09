@@ -9,6 +9,8 @@
 #include "wrapper.hpp"
 
 namespace hbm {
+  /// Class responsible for pretty printing the result from the wrapped
+  /// dominance procedures.
   template <typename I>
   struct dom_extra_info_t : extra_info_t {
     std::string info;
@@ -37,15 +39,14 @@ namespace hbm {
       undominated.reserve((end-begin) + undominated.size());
       undominated.push_back(*begin);
 
-      // If an item i dominate an item j, then pi/wi >= pj/wj.
-      // (Note that the reverse isn't always true, if pi/wi >= pj/wj then
-      // i can dominate j, or not. If the reverse was always true then
-      // every UKP problem could be reduced to the best item.)
-      // The first statement only means that: if i is the index of an item
-      // and the items are ordered by non-increasing efficiency, then it
-      // can't be simple or multiple dominated by any item of index j
-      // where j < i. This ordering guarantees that the most efficient
-      // item is never dominated and that we never need to remove
+      // If an item i dominate an item j, then pi/wi >= pj/wj.  (Note that the
+      // reverse isn't always true, if pi/wi >= pj/wj then i can dominate j, or
+      // not. If the reverse was always true then every UKP problem could be
+      // reduced to the best item.) The first statement only means that: if i
+      // is the index of an item and the items are ordered by non-increasing
+      // efficiency, then it can't be simple or multiple dominated by any item
+      // of index j where j < i. This ordering guarantees that the most
+      // efficient item is never dominated and that we never need to remove
       // items from our undominated items list.
       for (auto it = begin + 1; it < end; ++it) {
         bool i_is_dominated = false;
@@ -297,14 +298,15 @@ namespace hbm {
     hbm_dominance_impl::smdom_sort_wrapper(ukpi, sol, argc, argv);
   }
 
-  /// Execute smdom_no_sort over ukpi.items. Save result to solution_t.extra_info.
+  /// Execute smdom_no_sort over ukpi.items. Save result to
+  //solution_t.extra_info.
   template<typename W, typename P, typename I>
   void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol) {
     hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol);
   }
 
-  /// Execute smdom_no_sort over ukpi.items. Save result to solution_t.extra_info.
-  /// Don't do anything with the parameters.
+  /// Execute smdom_no_sort over ukpi.items. Save result to
+  //solution_t.extra_info.  / Don't do anything with the parameters.
   template<typename W, typename P, typename I = size_t>
   void smdom_no_sort_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_dominance_impl::smdom_no_sort_wrapper(ukpi, sol, argc, argv);

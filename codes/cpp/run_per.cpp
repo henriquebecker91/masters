@@ -1,6 +1,10 @@
 #include "periodicity.hpp"
 #include "test_common.hpp"
 
+// Computes the y* periodicity bound described by Garfinkel and Nemhauser
+// at "Integer Programming", p. 223. Don't solve the UKP instance, only
+// shows its periodicity bound (a knapsack capacity value). The integer
+// and fractional versions are differently implemented, so we test both.
 int main(int argc, char** argv) {
   int exit_code;
 

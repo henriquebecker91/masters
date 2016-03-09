@@ -8,11 +8,41 @@
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
 
+// The original version of the algorithm relies on the garbage collection of
+// functional languages, so nodes of lazy lists that are unreachable by the
+// code are silently and automatically dealocated. The imperative version has
+// to control this some way to avoid memory leaks.
 #ifndef HBM_MAX_MEMORY_WASTED_BY_S
   #define HBM_MAX_MEMORY_WASTED_BY_S 10
 #endif
 
 namespace hbm {
+  /// Implementation details. Do not depend.
+  ///
+  /// The basic ideia is to implement the lazy list concept as a class, and
+  /// create a specific subclass for every lazy function that was applied over
+  /// lazy lists in the original algorithm. A lazy list is basically a list
+  /// that only really compute its elements when they are requested by a
+  /// non-lazy function. So if you applies a lot of lazy functions over a lazy
+  /// list those data transformations don't really happen. The computation only
+  /// occurs when you ask with a non-lazy functions for the real list values.
+  /// You ask for the first node and then it will compute all that is needed to
+  /// know the value of that node, and the remaining nodes will remain
+  /// uncomputed. The consume function is our non-lazy function. We apply a
+  /// lot of lazy functions over a lazy list (describing a complex data flow
+  /// that is hard to denote on imperative languages), and then we call consume
+  /// to put this flow to work (it will ask the nodes one by one until all the
+  /// list is processed).
+  ///
+  /// We need to do the things this way because the main data structure of this
+  /// algorithm is a self-referential list (in truth, a bunch of
+  /// self-referential lists). In other words, the list uses nodes from many
+  /// auxiliar lists to compute new nodes to the main list, and every node of
+  /// the main list spawn a new auxiliar list to be used in this data flow.
+  /// Those auxiliar lists have a simple formula for generation, but depending
+  /// on its values we don't need to evaluate all of its values (it would be
+  /// even more memory consuming) so we only compute the nodes from those lists
+  /// when the main list really need them.
   namespace hbm_eduk_impl {
     using namespace std;
 
@@ -30,9 +60,13 @@ namespace hbm {
 
     template<typename W, typename P>
     struct LazyList {
-        virtual bool get_next(item_t<W, P>& x) = 0;
+      /// The main method. Computes only the next node of the list and returns
+      /// it.
+      virtual bool get_next(item_t<W, P>& x) = 0;
     };
 
+    /// Our non-lazy (i.e. strict) function. It forces a lazy list to compute
+    /// all its nodes.
     template<typename W, typename P>
     void consume(LazyList<W, P> * const l, vector< item_t<W, P> > &res) {
       item_t<W, P> i;
@@ -43,8 +77,6 @@ namespace hbm {
       }
     }
 
-    /* Makes reference to the v argument, v can't be freed before
-     * this struct */
     template<typename W, typename P>
     struct Lazyfy : LazyList<W, P> {
       typename vector< item_t<W, P> >::const_iterator begin;
@@ -53,6 +85,8 @@ namespace hbm {
       Lazyfy(void) {
       }
 
+      // Makes reference to the v argument, v can't be freed before
+      // this struct. 
       Lazyfy(const vector< item_t<W, P> > &v) {
         begin = v.cbegin();
         end = v.cend();

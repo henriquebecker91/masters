@@ -295,7 +295,6 @@ namespace hbm {
     /// bag struct.
     template<typename W, typename P, typename I>
     bag_t<W, P, I> minmax_w_and_two_best_items(const vector< item_t<W, P> > &items) {
-      assert 
       bag_t<W, P, I> b;
       b.w_min = b.w_max = items[0].w;
       b.b1 = b.b2 = items[0];

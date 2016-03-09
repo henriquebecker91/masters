@@ -1,9 +1,13 @@
 #ifndef HBM_PERIODICITY_HPP
 #define HBM_PERIODICITY_HPP
 
-#include <type_traits>
-#include <limits>       // for numeric_limits
-#include <boost/multiprecision/cpp_int.hpp> // Infinite precision boost rational
+#include <type_traits>  // For is_integral, is_same
+#include <limits> // for numeric_limits
+#include <boost/multiprecision/cpp_int.hpp> // For cpp_rational (infinite
+                                            // precision boost rational)
+                                            // used at y_star
+#include <boost/math/common_factor_rt.hpp>  // For boost::math::lcm used
+                                            // at huangtang
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
 
@@ -26,6 +30,29 @@ namespace hbm {
     using namespace std;
     using namespace boost;
     using namespace boost::multiprecision;
+
+    // From "A constructive periodicity bound for the unbounded
+    //  knapsack problem"
+    // Its complexity is bigger than O(n^2), and it seems worse than
+    // y*. The overall impression is that it is terrible.
+    template <typename W, typename P>
+    W huangtang(instance_t<W, P> &ukpi, bool already_sorted = false) {
+      auto &items = ukpi.items;
+      if (!already_sorted) sort_by_eff(items);
+
+      size_t n = items.size();
+      W h0 = 0;
+      for (size_t j = 1; j < n; ++j) {
+        W min = boost::math::lcm(items[0].w, items[j].w) - items[j].w;
+        for (size_t i = 1; i < j; ++i) {
+          W x = boost::math::lcm(items[i].w, items[j].w) - items[j].w;
+          if (x < min) min = x;
+        }
+        h0 += min;
+      }
+
+      return h0 + 1;
+    }
 
     template <typename W, typename P>
     W y_star(const item_t<W, P> &b, const item_t<W, P> &b2) {
@@ -195,6 +222,13 @@ namespace hbm {
   template <typename W>
   W refine_y_star(W y_, W c, W w_b) {
     return hbm_periodicity_impl::refine_y_star(y_, c, w_b);
+  }
+
+  /// A terrible bound only implemented to access that it is indeed
+  /// terrible. Kept only for comparison.
+  template <typename W, typename P>
+  W huangtang(instance_t<W, P> &ukpi, bool already_sorted = false) {
+    return hbm_periodicity_impl::huangtang(ukpi, already_sorted);
   }
 
   /* Assumes that ukpi has at least two items */

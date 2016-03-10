@@ -14,10 +14,10 @@
 // code are silently and automatically dealocated. In the imperative version
 // the nodes don't become unreachable, but they are kept even if they aren't
 // needed anymore. This definition controls the maximum of unneeded nodes a
-// lazy list can have. If the list has more unneeded nodes than
-// HBM_MAX_MEMORY_WASTED_BY_S we copy the nodes that are yet needed into
-// another list and swap both lists.
-// (i.e. garbage collection by hand).
+// lazy list can have. If the list (a vector in truth) has more unneeded
+// nodes/positions than HBM_MAX_MEMORY_WASTED_BY_S we copy the nodes that are
+// yet needed into another vector and swap both vectors (i.e. garbage
+// collection by hand).
 #ifndef HBM_MAX_MEMORY_WASTED_BY_S
   #define HBM_MAX_MEMORY_WASTED_BY_S 10
 #endif
@@ -110,6 +110,9 @@ namespace hbm {
       }
     };
 
+    /// Add g to every item of l (by adding items we mean: create an item where
+    /// the profit is the sum of the profit of the two items, and the weight is
+    /// analogue), and returns it if its weight is smaller than c.
     template<typename W, typename P>
     struct AddTest : LazyList<W, P> {
       item_t<W, P> g;
@@ -133,6 +136,7 @@ namespace hbm {
       }
     };
 
+    /// Gets the first item in the list l with a profit BIGGER than limit.
     template<typename W, typename P>
     struct Filter : LazyList<W, P> {
       LazyList<W, P> * l;
@@ -158,8 +162,9 @@ namespace hbm {
       }
     };
 
-    /// Merge two LazyLists, as in mergesort, always choose the smaller
-    /// between the front of the two list to go next.
+    /// Merge two LazyLists, as in mergesort, always choose the smaller between
+    /// the front of the two list to go next (in this case the smaller will be
+    /// the one of lowest weight).
     template<typename W, typename P>
     struct Merge : LazyList<W, P> {
       LazyList<W, P> * l1, * l2;
@@ -344,6 +349,9 @@ namespace hbm {
       }
     };
 
+    /// High level wrapper that makes eduk work with the instance_t and
+    /// solution_t types, calls S(I k, W c, const vector< item_t<W, P> >
+    /// &items).
     template<typename W, typename P, typename I>
     void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
       I n = ukpi.items.size();
@@ -383,6 +391,15 @@ namespace hbm {
     }
   }
 
+  /// Solves the UKP instance in ukpi and stores results at sol.
+  /// If already_sorted is false, then the item list will be sorted by weight.
+  /// If already_sorted is true, then the code will expect the items to be
+  /// ordered by weight (and will fail if they aren't).
+  ///
+  /// @param ukpi An UKP instance.
+  /// @param sol A object that will be overwritten to store the results.
+  /// @param already_sorted If the ukpi.items vector needs to be sorted by
+  ///   weight, or not.
   template<typename W, typename P, typename I = size_t>
   void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
     hbm_eduk_impl::eduk(ukpi, sol, already_sorted);

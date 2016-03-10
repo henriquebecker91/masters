@@ -69,7 +69,7 @@ namespace hbm {
   ///
   /// @param wp A subclass of wrapper_t with operator() and name redefined.
   /// @param ukpi An UKP instance.
-  /// @param sol Where the results will be written.
+  /// @param sol The object where the results will be written.
   /// @param argc The number of arguments, expected to be 2 or 3.
   /// @param argv The arguments, expected to be ["--already-sorted"]
   ///   if argc is 3.

@@ -1,15 +1,13 @@
 #ifndef HBM_UKP_COMMON_HPP
 #define HBM_UKP_COMMON_HPP
 
+// Includes for interface.
 #include <vector>    // for vector
 #include <iostream>  // for istream and ostream
 #include <stdexcept> // for runtime_error
 #include <utility>   // to specialize swap
 
-// Includes for the implementation code inside hbm::hbm_ukp_common_impl
-// namespace. They pollute the global namespace a little, but everything
-// is inside their own namespace (std and hbm) so this should
-// be an OK thing to do.
+// Includes for implementation.
 #include <regex>            // for regex, regex_match
 #include <algorithm>        // for sort
 #include "workarounds.hpp"  // for from_string

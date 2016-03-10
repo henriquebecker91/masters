@@ -153,12 +153,11 @@ namespace hbm {
 
   /// Run a custom procedure over the ukp instance file at argv[1].
   ///
-  /// The time for reading the instance isn't measured, only the time taken
-  /// by the ukp_solver is measured.
+  /// The time for reading the instance isn't measured, only the time taken by
+  /// the ukp_solver is measured.
   ///
-  /// @param ukp_solver A procedure that takes an instance_t, some
-  ///   extra parameters coded as argc/argv and writes the result
-  ///   on a solution_t.
+  /// @param ukp_solver A procedure that takes an instance_t, some extra
+  ///   parameters coded as argc/argv and writes the result on a solution_t.
   /// @param argc Number of arguments stored on argv.
   /// @param argv Arguments passed by command-line. It's expected that the
   ///   argv[0] will be a program name, and the argv[1] will be the instance

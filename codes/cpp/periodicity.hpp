@@ -116,36 +116,36 @@ namespace hbm {
       return y_star(ukpi.items, already_sorted);
     }
 
-    template <typename W, typename P, typename I>
-    W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, void*),
-      instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, void* ukp_solver_extra_params) {
-      W y_ = y_star(ukpi, false);
-
-      if (y_ >= ukpi.c) {
-        (*ukp_solver)(ukpi, sol, ukp_solver_extra_params);
-        return y_;
-      }
-
-      vector< item_t<W, P> > &items(ukpi.items);
-
-      W old_c = ukpi.c;
-
-      W w1, p1;
-      w1 = items[0].w;
-      p1 = items[0].p;
-
-      W qt_best_item_used = (old_c - y_)/w1;
-      P profit_generated_by_best_item = static_cast<P>(qt_best_item_used)*p1;
-      W space_used_by_best_item = qt_best_item_used*w1;
-
-      ukpi.c = old_c - space_used_by_best_item;
-
-      (*ukp_solver)(ukpi, sol, true);
-
-      sol.opt += profit_generated_by_best_item;
-
-      return y_;
-    }
+//    template <typename W, typename P, typename I>
+//    W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, void*),
+//      instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, void* ukp_solver_extra_params) {
+//      W y_ = y_star(ukpi, false);
+//
+//      if (y_ >= ukpi.c) {
+//        (*ukp_solver)(ukpi, sol, ukp_solver_extra_params);
+//        return y_;
+//      }
+//
+//      vector< item_t<W, P> > &items(ukpi.items);
+//
+//      W old_c = ukpi.c;
+//
+//      W w1, p1;
+//      w1 = items[0].w;
+//      p1 = items[0].p;
+//
+//      W qt_best_item_used = (old_c - y_)/w1;
+//      P profit_generated_by_best_item = static_cast<P>(qt_best_item_used)*p1;
+//      W space_used_by_best_item = qt_best_item_used*w1;
+//
+//      ukpi.c = old_c - space_used_by_best_item;
+//
+//      (*ukp_solver)(ukpi, sol, true);
+//
+//      sol.opt += profit_generated_by_best_item;
+//
+//      return y_;
+//    }
 
     template <typename W, typename P, typename I>
     void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
@@ -182,16 +182,17 @@ namespace hbm {
     }
   }
 
-  /// Computes the y* periodicity bound. It's guaranteed that
-  /// any optimal solution for a capacity bigger than this bound
-  /// have at least one copy of the best item.
+  /// Computes the y* periodicity bound. It's guaranteed that any optimal
+  /// solution for a capacity bigger than this bound have at least one copy of
+  /// the best item. Taken from Garfinkel and Nemhauser at "Integer
+  /// Programming", p. 223.
   ///
   /// @param b The best item, i.e. the most efficient one.
   /// @param b2 The second best item, i.e. the second
   ///   most efficient one.
   ///
-  /// @return The first capacity where is guaranteed that any
-  ///   optimal solution will contain a copy of the best item.
+  /// @return The first capacity value that have guarantee that any optimal
+  ///   solution will contain a copy of the best item.
   template <typename W, typename P>
   W y_star(const item_t<W, P> &b, const item_t<W, P> &b2) {
     return hbm_periodicity_impl::y_star(b, b2);
@@ -211,14 +212,13 @@ namespace hbm {
   /// value divided by w_b.
   ///
   /// @param y_ The value obtained by y_star.
-  /// @param c The capacity real value of the instance.
+  /// @param c The original capacity value of the instance.
   /// @param w_b The weight of the best item, i.e the most
   ///   efficient one.
   ///
-  /// @return A safe capacity to compute the result, and then
-  ///   fill the remaining space with exactly
-  ///   (c - <this return value>)/best_item.w copies of the best
-  ///   item.
+  /// @return A safe capacity to compute the result, and then fill the
+  ///   remaining space with exactly (c - <this return value>)/best_item.w
+  ///   copies of the best item.
   template <typename W>
   W refine_y_star(W y_, W c, W w_b) {
     return hbm_periodicity_impl::refine_y_star(y_, c, w_b);
@@ -231,21 +231,43 @@ namespace hbm {
     return hbm_periodicity_impl::huangtang(ukpi, already_sorted);
   }
 
-  /* Assumes that ukpi has at least two items */
+  /// Executes y_star over the two best items of ukpi.items. Assumes that ukpi
+  /// has at least two items, and that if already_sorted is true, the items are
+  /// ordered by non-increasing efficiency.
+  ///
+  /// @see y_star(const item_t<W, P> &b, const item_t<W, P> &b2)
   template <typename W, typename P>
   W y_star(instance_t<W, P> &ukpi, bool already_sorted = false) {
     return hbm_periodicity_impl::y_star(ukpi, already_sorted);
   }
-  template <typename W, typename P, typename I = size_t>
-  W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool),
-    instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
-    return hbm_periodicity_impl::run_with_y_star(ukp_solver, ukpi, sol, already_sorted);
-  }
+
+//  template <typename W, typename P, typename I = size_t>
+//  W run_with_y_star(void(*ukp_solver)(instance_t<W, P> &, solution_t<W, P, I> &, bool),
+//    instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
+//    return hbm_periodicity_impl::run_with_y_star(ukp_solver, ukpi, sol, already_sorted);
+//  }
+
+  /// Convenience overload, executes y_star over ukpi.items and saves the
+  /// "solution" (the result of y_star, not an optimal solution) to sol. A hack
+  /// used to allow y_star to make use of main_take_path and benchmark_pyasukp
+  /// procedures.
+  ///
+  /// @see main_take_path
+  /// @see benchmark_pyasukp
+  /// @see per_extra_info_t
   template <typename W, typename P, typename I = size_t>
   void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
     hbm_periodicity_impl::y_star_wrapper(ukpi, sol, already_sorted);
   }
 
+  /// Other convenience overload, executes y_star over ukpi.items and saves the
+  /// "solution" (the result of y_star, not an optimal solution) to sol. A hack
+  /// used to allow y_star to make use of main_take_path and benchmark_pyasukp
+  /// procedures.
+  ///
+  /// @see main_take_path
+  /// @see benchmark_pyasukp
+  /// @see per_extra_info_t
   template<typename W, typename P, typename I = size_t>
   void y_star_wrapper(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_periodicity_impl::y_star_wrapper(ukpi, sol, argc, argv);

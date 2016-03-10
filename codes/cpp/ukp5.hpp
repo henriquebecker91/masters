@@ -1,13 +1,13 @@
 #ifndef HBM_UKP5_HPP
 #define HBM_UKP5_HPP
 
-#include <sstream>   // For stringstream
-#include <fstream>   // ofstream for dump
+#include <sstream>  // For stringstream
+#include <fstream>  // ofstream for dump
 #include <iostream>
-#include <iomanip>   // For precision related routines
-#include <regex>     // For command-line argument handmade verification
-#include <algorithm> // For find
-#include <chrono>
+#include <iomanip>  // For precision related routines
+#include <regex>  // For command-line argument handmade verification
+#include <algorithm>  // For find
+#include <chrono>     
 #include <boost/filesystem.hpp>
 
 // Includes for command-line arguments parsing
@@ -117,14 +117,14 @@ namespace hbm {
       w_min,    ///< Instance smallest item weight.
       w_max;    ///< Instance biggest item weight.
       // Some data about structures manipulated by ukp5
-      std::vector<P> g; ///< The vector of size c+w_max+1 and profit values.
-      std::vector<I> d; ///< The vector of size c+w_max+1 and item index values.
+      std::vector<P> g; ///< The vector with profit values.
+      std::vector<I> d; ///< The vector with item index values.
       // Some statistics
       /// Number of items sized vector, with the quantity of each value i in dy.
       std::vector<W> qt_i_in_dy;
       /// Same as d, but without the positions skipped.
       std::vector<I> non_skipped_d;
-      /// Last position of the d vector that wasn't zero or n (number of items).
+      /// Last position of the d vector that wasn't zero or n (item indexes).
       W last_dy_non_zero_non_n;
       /// Quantity of g positions that weren't skipped by ukp5.
       W qt_non_skipped_ys;
@@ -158,10 +158,10 @@ namespace hbm {
       /// Probably there's no way of adptating this method if the
       /// UKP5 arrays are changed to slices.
       virtual string gen_info(void) {
-        //ukp5_gen_stats();
+        ukp5_gen_stats();
 
         stringstream out("");
-        /*out << "ukp5 used conf follows:" << endl;
+        out << "ukp5 used conf follows:" << endl;
         conf.print(out);
         out << "end of ukp5 conf" << endl;
 
@@ -226,21 +226,19 @@ namespace hbm {
           dump(conf.dd_path, "y\tdy", d);
           dump(conf.nsd_path, "y\tdy", non_skipped_d);
           dump(conf.dqt_path, "i\tqt_in_d", qt_i_in_dy);
-        }*/
+        }
 
         return out.str();
       }
 
-      /// This method set the majority of the values of this
-      /// stats class. All the values set by it need extra computation,
-      /// and because of this they are computed here, after the UKP5
-      /// executed, and without affecting its time measurement.
-      /// This method only works if the following variables are
-      /// set first: n, c, y_bound, w_min, w_max, g and d. It
-      /// can't receive this values by constructor as g and d
-      /// are initialized empty and changed by UKP5 (they aren't
-      /// a copy of the vectors UKP5 used, they are the vectors
-      /// UKP5 used).
+      /// This method set the majority of the values of this stats class. All
+      /// the values set by it need extra computation, and because of this they
+      /// are computed here, after the UKP5 executed, and without affecting its
+      /// time measurement.  This method only works if the following variables
+      /// are set first: n, c, y_bound, w_min, w_max, g and d. It can't receive
+      /// this values by constructor as g and d are initialized empty and
+      /// changed by UKP5 (they aren't a copy of the vectors used by ukp5, they
+      /// are the vectors used by ukp5).
       void ukp5_gen_stats(void) {
         non_skipped_d.assign(y_bound-w_min + 1, n-1);
 
@@ -320,7 +318,7 @@ namespace hbm {
 
     /// @brief Examine the range of the g vector where the
     /// optimal solution value is guaranteed to be, and retrieve
-    /// it. Can only be used after ukp5_phase1 was run over g.
+    /// it. Can only be used after ukp5_phase1 executed over g.
     ///
     /// @param c The knapsack capacity.
     /// @param g The g vector used by UKP5, after ukp5_phase1
@@ -390,30 +388,30 @@ namespace hbm {
       return;
     }
 
-    /// Retrieves the optimal solution (as a profit and weight value). 
-    /// In other words, it sets sol.opt and sol.y_opt. Also the g and d
-    /// vectors populated by it are used to get the optimal solution item
-    /// multiset (ukp5_phase2) and the ukp5 stats (ukp5_extra_info_t.gen_info)
-    /// THIS IS THE CORE OF THE ALGORITHM. Is in this phase that the optimal
+    /// Retrieves the optimal solution (as a profit and weight value).
+    /// In other words, it sets sol.opt and sol.y_opt. Also the g and d vectors
+    /// populated by it are used to get the optimal solution item multiset
+    /// (ukp5_phase2) and the ukp5 stats (ukp5_extra_info_t.gen_info) THIS IS
+    /// THE CORE OF THE UKP5 ALGORITHM. Is in this phase that the optimal
     /// solution value is obtained, and is in this phase that the ukp5 method
     /// spends 99% of the processing time.
     /// 
     /// Follows an explanation of this procedure. The ideia is to store at g/d
     /// all the solutions composed by one unique item (the weight is always
-    /// stored implicity as the g/d index). After this we iterate g and stop at 
+    /// stored implicity as the g/d index). After this we iterate g and stop at
     /// the already stored solutions to create new solutions combining "all"
     /// the items with the current solution. We don't combine all items, we
     /// combine only the ones until d[y], because this prunes symmetry (all
-    /// solutions are yet generated but we avoid the same solution generated
-    /// in many different orders, i.e. instead of {1,2,3}, {2,1,3}, ..., and
+    /// solutions are yet generated but we avoid the same solution generated in
+    /// many different orders, i.e. instead of {1,2,3}, {2,1,3}, ..., and
     /// {3,2,1} we have only {3,2,1}). Also we skip some inferior/dominated
     /// solutions (if g[y] < opt then the solution in g[y] is less profitable
     /// than a previous solution, and therefore can be discarded without loss
     /// to the optimality). The periodicity check simply checks if between the
-    /// current position (y) and the last (c-w_min+w_max) there's a non-zero
-    /// non-one value. If not, then we know that the remaining capacity will
-    /// be filled with copies of the first item (index one). This is the gist
-    /// of it.
+    /// current position (y) and the last (c-w_min+w_max) we will add an item
+    /// that is not the best item (g[y] > 0 && d[y] > 0). If not, then we know
+    /// that the remaining capacity will be filled with copies of the first
+    /// item (index zero). This is the gist of it.
     /// 
     /// @param ukpi The UKP instance.
     /// @param g This vector will be used to store the profit value of
@@ -446,13 +444,14 @@ namespace hbm {
       W last_y_where_nonbest_item_was_used = 0;
       #endif
 
-      // this block is a copy-past of the loop bellow only for the best item
-      // its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
+      // This block is a copy-past of the loop below, but only for the best
+      // item. Its utility is to simplify the code when HBM_CHECK_PERIODICITY
+      // is defined.
       W wb = items[0].w;
       g[wb] = items[0].p;;
       d[wb] = 0;
 
-      for (W i = 0; i < n; ++i) {
+      for (I i = 1; i < n; ++i) {
         P pi = items[i].p;
         W wi = items[i].w;
         if (g[wi] < pi) {
@@ -478,8 +477,9 @@ namespace hbm {
         opt = gy = g[y];
         dy = d[y];
 
-        // this block is a copy-past of the loop bellow only for the best item
-        // its utility is to simplify the code when HBM_CHECK_PERIODICITY is defined
+        // This block is a copy-past of the loop below, but only for the best
+        // item. Its utility is to simplify the code when HBM_CHECK_PERIODICITY
+        // is defined.
         item_t<W, P> bi = items[0];
         W wb = bi.w;
         P pb = bi.p;
@@ -566,6 +566,7 @@ namespace hbm {
       // We print the configuration used later.
       ptr->conf = conf;
 
+      // Apply or not the simple/multiple dominance removal.
       if (conf.apply_smdom && conf.apply_smdom_before_sort) {
         begin = steady_clock::now();
         vector< item_t<W, P> > undominated;
@@ -695,10 +696,10 @@ namespace hbm {
       // sol.used_items exist and it's the best item.
       // NOTE: this works even if the array isn't sorted, because if the
       // best item isn't the first, then our periodicity check never
-      // stops the computation before the end. We can safely assume that the
-      // best item is the first on the solution, if our periodicity check
-      // stopped the computation (and, therefore
-      // (c - sol.y_opt) > items[0].w).
+      // stops the computation before the end. If our periodicity check
+      // stopped the computation (the statement c - sol.y_opt > items[0].w
+      // will be true in this case), we can safely assume that the
+      // best item is the first on the solution.
       sol.used_items[0].qt += qt_best_item_inserted_by_per;
       #endif
 
@@ -813,8 +814,8 @@ namespace hbm {
           from_string(argv[2], conf.sort_percent);
         }
         case 2:
-        // exists only to avoid giving waning if the method was called
-        // without parameters
+        // Exists only to avoid giving warning if the method was called
+        // without any extra options.
         break;
 
         case 1:
@@ -822,11 +823,13 @@ namespace hbm {
         cerr << "WARNING: " << __func__ << ": argc < 2?! Executing method"
                 " with default parameter values."
         << endl;
+        usage(__func__);
         break;
 
         default:
         cout << "WARNING: " << __func__ << ": more than " << argc << " "
-              "parameters to ukp5. Will execute with the default values."
+              "parameters to ukp5. Will execute with the default values,"
+              " not with the values provided by command line."
         << endl;
         usage(__func__);
         break;
@@ -854,11 +857,21 @@ namespace hbm {
     }
   }
 
+  /// Solves an UKP instance by the UKP5 algorithm, and stores the results (and
+  /// stats) at sol.
+  ///
+  /// @param ukpi The UKP instance to be solved.
+  /// @param sol The object where the results will be written.
+  /// @param conf An object with the UKP5 options.
+  ///
+  /// @see ukp5_conf_t For the explanation of the UKP5 options.
   template<typename W, typename P, typename I>
   void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, const ukp5_conf_t<I> &conf) {
     hbm_ukp5_impl::ukp5(ukpi, sol, conf);
   }
 
+  /// For information on argv valid arguments consult the procedure "usage",
+  /// or call this function with argv = null_ptr and argc = 0.
   template<typename W, typename P, typename I>
   void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_ukp5_impl::ukp5(ukpi, sol, argc, argv);

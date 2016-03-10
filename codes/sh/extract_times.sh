@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $1 Name of a file that contains one or more concatened run_ukp5 outputs
+# $1 Name of a file that contains one or more concatened run_ukp5.out outputs.
 
 tmp_dir=`mktemp -d`
 

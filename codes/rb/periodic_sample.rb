@@ -1,6 +1,5 @@
 #!/usr/bin/ruby
 
-
 # Snippet of code used to understand better how periodicity works.
 # Values for example: 11 6 & 7 4
 puts "Enter best item profit:"

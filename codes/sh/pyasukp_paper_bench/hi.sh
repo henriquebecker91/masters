@@ -264,7 +264,7 @@ for n in ${ns[@]}; do
 	eval "cs2=(${cs[$n]})"
 	for ((i=0; i < 500; ++i)); do
 		pyasukp -nosolve -form hi -save "hi_n${n}-${i}-s${seeds[$i]}c${cs2[$i]}.ukp" -seed ${seeds[$i]} -cap ${cs2[$i]} -pmin $pmin -wmin $wmin -wmax $wmax -n $n
-		pyasukp -nosolve -form hi2 -save "hi2_n${n}-${i}-s${seeds[$i]}c${cs2[$i]}.ukp" -seed ${seeds[$i]} -cap ${cs2[$i]} -pmin $pmin -wmin $wmin -wmax $wmax -n $n
+		#pyasukp -nosolve -form hi2 -save "hi2_n${n}-${i}-s${seeds[$i]}c${cs2[$i]}.ukp" -seed ${seeds[$i]} -cap ${cs2[$i]} -pmin $pmin -wmin $wmin -wmax $wmax -n $n
 	done
 done
 

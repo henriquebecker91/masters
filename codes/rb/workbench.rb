@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+# File used to test the routines implemented at solve_ukp.rb.
+
 require 'require_relative'
 require_relative 'solve_ukp.rb'
 
@@ -13,7 +15,8 @@ puts 'c : ' + instance[:c].to_s
 puts 'y*: ' + y_bound.to_s
 puts 'c0: ' + kellerer(instance[:items]).to_s
 puts 'my: ' + my_bound(instance[:items]).to_s
-puts 'ht: ' + huangtang(instance[:items]).to_s
+puts
+#puts 'ht: ' + huangtang(instance[:items]).to_s
 
 =begin
 instance = read_instance(ARGV[0])

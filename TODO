@@ -2,20 +2,10 @@ Algorithm For Knapsack Problems Pisinger p. 153 implement algorithm PMIN to test
 
 RANDOMIZE ITEM ORDER ON .UKP FILES, AND THEN EXECUTE PYASUKP AND UKP5 OVER THEM
 
-CHANGE UKP5 l. 491 TO DON'T ASSUME THAT THE ITEMS ARE SORTED
-	l 491 DON'T ASSUME THAT, IT WORKS EVEN IF THE FIRST ITEM ISN'T THE MOST EFFICIENT (PERIODICITY WILL NEVER OCCUR)
-
 MAKES ALL ARGC/ARGC WRAPPERS TO CONSIDER THE FIRST TWO ARGUMENTS
 UPDATE DOCUMENTATION OF THAT
 STOP SKIPPING THE FIRST TWO ARGUMENTS ON RUN_UKP
 CHANGE PYASUKP BENCHMARK TO RECEIVE ARGC/ARGV AND HIJACK IT, IT WILL CREATE A NEW ARGV WHERE argv[1] IS THE INSTANCE NAME (ALL OTHER PARAMETERS FOLLOW) AND WILL PASS ARGC+1 TO THE FUNCTIONS
-
-PUT DUMP TO WORK AGAIN, WE NEED IT TO CHECK THE TWO INSTANCES BELOW
-
-PUT Y* TO WORK WITH UKP5
-  * PUT Y* TO WORK WITH NON-INTEGER P (DONE)
-  * UPDATE Y_WRAPPER TO WORK WITH THE VOID* FUNCTION POINTER, AND TAKE THE TWO BEST ITEMS, UKP5 WILL TAKE THE TWO FIRST ITEMS OF THE ARRAY IF IT WAS SORTED, OR WILL EXECUTE A LINEAR TIME FUNCTION TO GET THE TWO BEST, AND CREATE A LINEAR TIME FUNCTION TO GET THE TWO MOST EFFICIENT ITEMS
-  * VERIFY IF UKP5 l. 491 NEEDS TO BE ADAPTED TO ACCOMODATE THIS CHANGES
 
 ../../data/ukp/myinst/fhd_c_1000000_wmin_1_wmax_c.ukp
 This instance has a highly anomalous behaviour. The sort time isn't dominant (0.01% of total time), only phase1 has a significant time fraction (~99.95%), but the phase1 time gets down from 81s to 34s if the sort is changed from sorting all the items to partially sort the first 10% of the items. This happens because: the solution have 16 items (of 6 different types), the first 14 items make 5 of the different types and are all in the 10%, and the last two items are of a terribly inneficient item type (almost the last element when ordered by efficiency) but have weight 1. Maybe would be interesting to sort the first x% by efficiency and the last (100-x)% by non-decreasing weight. This is an heuristic for the items that would probably be in the solution, the most efficient ones, and the lighter ones (that fill the gaps).

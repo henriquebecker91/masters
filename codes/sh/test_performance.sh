@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TODO: This needs to be adapted to ruby and fused with the code that send jobs
+# to each core individually, always keeping all of them processing. Also it
+# needs to become more flexible, the commands need to be parametrized.
+
 # Args:
 # $1 Number of iterations
 # $2 CPU core to execute computation

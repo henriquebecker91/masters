@@ -1,6 +1,18 @@
 #!/usr/bin/ruby
 
-# putting the variables on the global scope
+# Script that takes an file in the ".ukp" format and then creates an ".mod"
+# version of it. Examples of ".ukp" formats are at data/ukp/. The ".mod" format
+# is one of the formats used by GLPK (Linear Programming Solver). We used the
+# glpsol command to convert between ".mod" and ".lp" (format used by CPlex).
+# See https://en.wikibooks.org/wiki/GLPK/Interoperability#CPLEX.C2.A0LP_format
+# for conversion examples. We could convert the ".ukp" directly to the ".lp"
+# format used by CPlex, but the ".lp" format is problematic to handle (no line
+# can have more than X characters, and we only can break the line at some
+# specific points).
+
+# Only takes one argument. The name of an file on the ".ukp" format. Writes the
+# converted instance at the standard output.
+
 $n = nil
 $c = nil
 $p = ''

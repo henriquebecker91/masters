@@ -25,6 +25,12 @@
 namespace hbm {
   /// Implementation details. Do not depend.
   ///
+  /// This is an adaptation of the algorithm described at "Sparse knapsack
+  /// algo-tech-cuit and its synthesis". The original algorithm is described
+  /// using a functional programming language, and makes use of lazy evaluation.
+  /// A most faithful adaptation is provided at codes/hs/ukp.hs and is written
+  /// in haskell.
+  ///
   /// The basic ideia is to implement the lazy list concept as a class, and
   /// create a specific subclass for every lazy function that was applied over
   /// lazy lists in the original algorithm. A lazy list is basically a list

@@ -1,6 +1,13 @@
 import Data.List (sort{-, sortBy-})
 import Data.String (fromString)
 
+-- This is an implementation of the algorithm described at "Sparse knapsack
+-- algo-tech-cuit and its synthesis". An imperative adaptation was tried at:
+-- codes/cpp/eduk.hpp
+--
+-- Compile with "ghc ukp.hs". Only work with ".sukp" format files.
+-- Execute with "cat instance.sukp | ./ukp".
+
 merge :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)]
 merge [] ys = ys
 merge xs [] = xs

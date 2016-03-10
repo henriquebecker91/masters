@@ -1,3 +1,6 @@
+# The file where UKP5 was born. Kept for legacy reasons. Also, used to
+# prototype things before implementing in C++.
+
 # Sort items on non-ascending order by profitability first and
 # by non-descending weight after.
 def sort_items_by_profitability!(items)
@@ -182,78 +185,6 @@ def ukp5(ukpi, return_used_items = false)
       last_y_where_nonbest_item_was_used = wi if wi > last_y_where_nonbest_item_was_used && ix != 0
     end
   end
-
-  # This opt variable, and the "|| g[y] < opt" implements all the dominances,
-  # the proof is simple:
-  # (1) All the dominances (simple, multiple, collective and threshold) needs
-  #     the existence of an item with better profitability than the dominated
-  #     item.
-  # (2) If opt > g[y] then there's a y' < y where g[y'] > g[y].
-  # (3) The items are ordered by non-decreasing efficiency and non-increasing
-  #     weight (if the efficiency of i an j differ, then only it is used to
-  #     define the order, if the efficiences are equal then the weight is used).
-  # (4) If g[y] is different from zero, then the d[y] is always the item of
-  #     best profitability that was used on the solution of the knapsack with
-  #     capacity y.
-  # (5) All the dominances are special cases of a multiset of knapsack items
-  #     being lighter and more profitable than another (i.e. better).
-  #     The simple, multiple,
-  #     and collective dominances are a multiset (respectively: of one, many of
-  #     the same, and some differente items) being "better" than one single
-  #     element. The threshold is the special case of some different items being
-  #     better than a set of many of the same item.
-  # (6) If we skip a y where g[y] != 0 then no capacity after y will
-  #     use a multiset of items that include the multiset of items used
-  #     to obtain g[y]. This happens because the solutions are build from
-  #     inserting one more item on the current multiset. If we skip y
-  #     no solution will be created from that multiset. Also, no multiset
-  #     that is a subset of the multiset of y will follow a insertion route
-  #     that allow it to become a superset of the multiset of y. Lets 
-  #     suppose that the last item used to make the multiset of y was
-  #     j, if instead of j we used i (to after use j) then the profitability
-  #     of the whole multiset would be lower than the multiset of y, this is
-  #     because of (3), ...
-  # (X) When opt > g[y] there's a multiset of items that is better than
-  #     another (2), what is a case that supersedes all dominances (5),
-  #     by skipping that multiset we are skipping any solution that would
-  #     have that multiset, 
-  #     
-  # Simple dominance: Simple dominance is a special case of multiple
-  #   dominance where floor(w_i/w_j) == 1. See bellow.
-  # If there's one item i that is dominated by an item j,
-  #   then p_i < p_j and there's two possibilities: w_i < w_j or
-  #   w_i == w_j. Both possibilities already imply that i have a lower
-  #   profitability than j. If is the first possibility, then opt will be greater than
-  #   g[w_i] when the capacity w_i is reached, and will be skipped. As (3) is true
-  #   then any next d[y] greater or equal than i will be skipped, and items
-  #   that have a equal or lower profitability than i will not be used anymore.
-  #   If w_i == w_j then, after the inner for have ended, g[w_i] == p_j
-  #   and d[w_i] == j. As j < i (because (3)) again no d[w_i] bigger than will
-  #   exist after w_i.
-  # Simple/Multiple dominance: One item j is dominated by an item i if
-  #   p_j <= floor(w_j/w_i)*p_i. In another words, if putting one or
-  #   more items i on the knapsack weights the same or less than putting one
-  #   item j and gives the same or more profit than one item j, then i
-  #   dominates j. 
-  #   If i dominates j then the efficiency of i is greater or equal to the
-  #   efficiency of j. If it's equal we will assume, without loss of 
-  #   generality, that i < j and w_i <= w_j (see 3). If it's greater then i < j
-  #   because of (3).
-  #   If 
-  #
-  # Collective dominance:
-  # Threshold dominance: One item j is dominated by a solution I if
-  #   exists a positive integer n that satisfies the following equation  n*p_j <= floor(n*w_j/w_i)*p_i. In another words, if putting one or
-  #   more items i on the knapsack weights the same or less than putting one
-  #   item j and gives the same or more profit than one item j, then i
-  #   dominates j. 
-  #   If i dominates j then the efficiency of i is greater or equal to the
-  #   efficiency of j. If it's equal we will assume, without loss of 
-  #   generality, that i < j and w_i <= w_j (see 3). If it's greater then i < j
-  #   because of (3).
-  # Multiset dominance: One item j is dominated by a solution I at capacity
-  #   y if y is the smallest capacity where the 
-  #   
 
   opt = 0
   (1..(c-1)).each do | y |

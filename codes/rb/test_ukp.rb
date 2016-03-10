@@ -1,17 +1,22 @@
 #!/usr/bin/ruby
 
+# File used to test if the first version of the UKP5 was working.
+# Kept for legacy reasons.
+# Needs the installation of the gem 'require_relative' (i.e. gem install
+# require_relative).
+
 require 'require_relative'
 require_relative 'solve_ukp.rb'
 
 instances_data = [
-  { name: 'corepb',     opt: 10077782 },
   { name: 'exnsd16',    opt: 1029680 },
   { name: 'exnsd18',    opt: 1112131 },
   { name: 'exnsd20',    opt: 1026086 },
   { name: 'exnsd26',    opt: 1027564 },
   { name: 'exnsdbis10', opt: 1028035 },
   { name: 'exnsdbis18', opt: 1037156 },
-  { name: 'exnsds12',   opt: 3793952 }
+  { name: 'exnsds12',   opt: 3793952 },
+  { name: 'corepb',     opt: 10077782 }
 ]
 
 everything_ok = true

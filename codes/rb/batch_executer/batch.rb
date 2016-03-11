@@ -35,7 +35,7 @@ def batch(commands, cpus_avaliable, timeout, post_timeout)
       sleep 1
     end
     
-    cproc = ChildProcess.build('timeout', '-k',  post_timeout, timeout, 'taskset', '-c', cpu.to_s, 'sh', '-c', command)
+    cproc = ChildProcess.build('timeout', '-k',  post_timeout, timeout, 'taskset', '-c', cpu.to_s, 'time', '-f', 'ext_time: %e\\next_mem: %M\\n', 'sh', '-c', command)
     base_name = sanitize_filename(command)
     out = File.open(base_name << '.out', 'w')
     err = File.open(base_name << '.err', 'w')

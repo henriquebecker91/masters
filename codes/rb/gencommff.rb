@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'require_relative'
+require_relative './info_extract.rb'
 # Created at 10/03/2016 by Henrique Becker
 # gencommff: GENerate COMMands For Files
 # Receives N strings. The first one is intended to be a command (but can be anything really). The second one is a pattern that happens in the first string. All the other strings will replace the pattern in the first string generating an output of N-2 strings. 
@@ -29,29 +31,57 @@ def gencommsff(comms, patt, files, intercalate = true)
   ret
 end
 
-def experiment(comms, patt, repls, cpus, timeout, post_timeout)
-end
-
-log_lines = File.open(fname) { | f | f.read }.lines
-# For when there's a field whose value is after '<field>: '.
-def get_field(lines, field)
-  lines.grep(/^#{field}: .*/).each { | l | l.match(/: (.*)/)[1] }
-end
-
-# For when there's a field whose value is in the next line.
-def get_hfield(lines, field)
-  lines[lines.find_index(field) + 1]
-end
-
-ukp5_labels = ['Seconds', 'ext_time', 'ext_mem', 'opt']
-ukp5_gatherers = ukp5_labels.map { | l | lambda { | ls | get_field(ls, l) } }
-pya_labels = ['Total Time ', 'ext_time', 'ext_mem']
-
-def gather_field_info(lines, gatherers)
-  ret = ''
-  labels.each | l | do 
-    ret << get_field(lines, l) << ';'
+def gather_from_lines(lines, gatherers, sep)
+  ret = []
+  gatherers.each | g | do 
+    ret << g(lines) << sep
   end
-  ret
+  ret.join
+end
+
+def gather_from_file(file, gatherers, sep)
+  file_lines = File.open(fname) { | f | f.read }.lines.to_a
+  gather_from_lines(file_lines, gatherers, sep)
+end
+
+def gather_from_files(files, gatherers, sep)
+  files.map do | file |
+    gather_from_file(file, gatherers)
+  end
+end
+
+comms_info = {
+  # Commands to be executed (array of strings without linebreaks).
+  commands: [],
+  # Substring present in all elements of 'commands'.
+  # Will be replaced by the instance filename in every command.
+  patt: '',
+  # Array of objects with a call method.
+  # All this objects will be called over the command output. Their returns will
+  # be merged as a line in a CSV file.
+  gatherers: [],
+  # Array of strings without linebreaks.
+  # Will be written at the top of the file that aggregates the info gathered
+  # from all the commands outputs.
+  header: [],
+  # Separator to be used between the returns of the gatherers.
+  # The default is a semicolon.
+  sep: '',
+}
+
+execution_info = {
+  # IDs of the CPU cores that can be used for executing tests.
+  cpus_available: [],
+  # Maximum number of seconds that a command can run. After this a kill command will be issued.
+  timeout: ,
+  # Maximum number of seconds that a command can run after a kill command was issued. After this a kill -9 command will be issued.
+  post_timeout: ,
+}
+
+  # logfname: String (valid as a filename).
+  # The name of the file where will be written the CSV file with all the
+  # info gathered.
+def experiment(comms_info, execution_info, logfname, files)
+  
 end
 

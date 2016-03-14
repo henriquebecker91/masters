@@ -150,11 +150,11 @@ The threshold dominance needs to know the \(opt(\alpha\times w_i)\) to exclude t
 \subsection{Periodicity}
 
 % The y* notation is being used to denote a periodicity bound value, and to denote the garfinkel method, specifically. Should chose another notaton for the generic bound value.
-A periodicity bound \(y^{*}\) is an upper capacity bound for the existence of optimal solutions without the best item. 
-In another words, it's a guarantee that any optimal solution for an instance where \(y^{*} \leq c\) has at least one copy of the best item. 
+A periodicity bound \(y\) is an upper capacity bound for the existence of optimal solutions without the best item. 
+In another words, it's a guarantee that any optimal solution for an instance where \(c \geq y\) has at least one copy of the best item. 
 The periodicity bound is specially useful because it can be applied repeatedly. 
-For example, let \(c = 1000\), \(y^{*} = 800\) and \(w_b = 25\) where \(b\) is the best item; because of \(y^{*} \leq c\) we know that any optimal solution has a copy of \(b\), so we can add one \(b\) to the solution and combine with an optimal solution for \(c = 975\); but \(975\) is yet bigger than \(800\), so we can repeat the process until \(c = 775\). 
-This way, for any UKP instance where \(y^{*} \leq c\) we can reduce instance capacity by \(max(1, \lceil(c-y^{*})/w_b\rceil)\times w_b\). After solving this instance with reduced capacity we can add \(max(1, \lceil(c-y^{*})/w_b\rceil)\) copies of \(b\) to the optimal solution to obtain an optimal solution for the original instance.
+For example, let \(c = 1000\), \(y = 800\) and \(w_b = 25\) where \(b\) is the best item; because of \(c \geq y\) we know that any optimal solution has a copy of \(b\), so we can add one \(b\) to the solution and combine with an optimal solution for \(c = 975\); but \(975\) is yet bigger than \(800\), so we can repeat the process until \(c = 775\). 
+This way, for any UKP instance where \(c \leq y\) we can reduce instance capacity by \(max(1, \lceil(c-y^{*})/w_b\rceil)\times w_b\). After solving this instance with reduced capacity we can add \(max(1, \lceil(c-y^{*})/w_b\rceil)\) copies of \(b\) to the optimal solution to obtain an optimal solution for the original instance.
 
 There exist many proposed periodicity bounds, but some are time consuming (as \(O(n^2)\)\cite{badbound1}), others depend on specific instance characteristics (as \cite{badbound2}\cite{pya}).
 We used only a UKP5-specific periodicity bound described later and the \(y^{*}\) bound described in~\cite[p. 223]{gar72}.
@@ -298,7 +298,7 @@ In other words, if \(\{3, 2\}\) is dominated, then \(\{3, 2, 2\}\) and \(\{3, 2,
 Ideally, any \(u\) where \(u \supsetneq t\) should not be generated as it will be dominated by a solution \(x\) where \(x \supsetneq s\) anyway. 
 It's interesting to note that this happens eventually, as any \(t \cap \{i\}\) where \(i > min_{ix}(t)\) will be dominated by \(s \cap \{i\}\) (or by a solution that dominates \(s \cap \{i\}\)), and at some point no solution that is a superset of \(t\) is generated anymore.
 
-What we are saying is that, as the algorithm executes, some items will stop being used to create new solutions, as the four known dominance relations were being applied to the item list, with little, if any, overhead.
+What we are saying is that, as the algorithm executes, some items will stop being used to create new solutions, as the four known dominance relations were being applied to the item list, with little, if any, overhead. We credit the surprising performance of UKP5 to this behaviour.
 
 %We would like to point again that a dominated solution and its supersets can always be excluded from the problem without affecting the optimal solution value. 
 %A dominated solution always have a dominant solution, and the dominant solution have the same or more profit value, and the same or less weight. This way, the dominant solution can always be used in place of the dominated one without loss to the optimal solution value. 
@@ -486,7 +486,7 @@ The number of instances where PYAsUKP was faster than UKP5 by instance class are
   \label{fig:times}
   \centering
   \includegraphics[width=\textwidth]{six_plots.png}
-  \caption{The times used by UKP5 and PYAsUKP for each instance of each class. The black dots represent PYAsUKP times. The gray dots represent UKP5 times. The y axis is time used to solve an UKP instance, in seconds. The x axis is the instance index when the times are sorted by increasing PYAsUKP time. \textbf{Note that the y axis is in logarithmic scale.}}
+  \caption{The times used by UKP5 and PYAsUKP for each instance of each class. The black dots represent PYAsUKP times. The gray dots represent UKP5 times. The y axis is the time used to solve an UKP instance, in seconds. The x axis is the instance index when the instances are are sorted by the time PYAsUKP taken to solve it. \textbf{Note that the y axis is in logarithmic scale.}}
 \end{figure}
 
 For the instances that are solved by B\&B in short time, the DP is not competitive against B\&B. 

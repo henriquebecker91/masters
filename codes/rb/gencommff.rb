@@ -50,6 +50,20 @@ def gather_from_files(files, gatherers, sep)
   end
 end
 
+def Gatherer
+  # Return the field names for each of the elements returned by
+  # extract_field_values.
+  def field_names
+    fail 'This method should have been overwritten by a subclass.'
+  end
+
+  # Extract from the command output an array of values. This array has the same
+  # size as the one returned by field_names.
+  def extract_field_values(lines)
+    fail 'This method should have been overwritten by a subclass.'
+  def 
+end
+
 comms_info = {
   # Commands to be executed (array of strings without linebreaks).
   commands: [],
@@ -64,7 +78,8 @@ comms_info = {
   # Will be written at the top of the file that aggregates the info gathered
   # from all the commands outputs.
   header: [],
-  # Separator to be used between the returns of the gatherers.
+  # Separator to be used between the returns of the gatherers. And after the
+  # last return.
   # The default is a semicolon.
   sep: '',
 }

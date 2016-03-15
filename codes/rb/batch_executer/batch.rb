@@ -45,7 +45,7 @@ def batch(commands, cpus_avaliable, timeout, post_timeout)
       end
     end
     
-    cproc = ChildProcess.build('timeout', '-k',  post_timeout, timeout, 'taskset', '-c', cpu.to_s, 'time', '-f', 'ext_time: %e\\next_mem: %M\\n', 'sh', '-c', command)
+    cproc = ChildProcess.build('timeout', '-k',  post_timeout, timeout, 'taskset', '-c', cpu.to_s, 'time', '-f', 'ext_time: %e\\next_mem: %M\\n', '--append', '-o', "#{commfname}.out" , 'sh', '-c', command)
     commfname = sanitize_filename(command)
 
     lockfname = commfname + unfinished_ext
@@ -53,6 +53,7 @@ def batch(commands, cpus_avaliable, timeout, post_timeout)
 
     out = File.open(commfname + '.out', 'w')
     err = File.open(commfname + '.err', 'w')
+
     cproc.io.stdout = out
     cproc.io.stderr = err
 

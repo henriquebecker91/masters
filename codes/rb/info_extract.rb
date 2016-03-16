@@ -5,11 +5,12 @@ class Extractor
   # For when there's a field whose value is after '<field>: '.
   def self.get_field(lines, field)
     lines.grep(/^#{field}: .*/).each { | l | return l.match(/:[\t ]+(.*)/)[1] }
+    ''
   end
 
   # For when there's a field whose value is in the next line.
   def self.get_hfield(lines, field)
-    lines[lines.find_index(field) + 1]
+    if ix = lines.find_index(field) then lines[ix + 1] else '' end
   end
 
   # Return the field names for each of the elements returned by
@@ -30,7 +31,7 @@ class Extractor
 end
 
 class UKP5Extractor < Extractor
-  def names 
+  def names
     ['internal time', 'external time', 'external memory', 'opt']
   end
 
@@ -42,7 +43,7 @@ class UKP5Extractor < Extractor
 end
 
 class PyaExtractor< Extractor
-  def names 
+  def names
     ['internal time', 'external time', 'external memory', 'opt']
   end
 

@@ -47,7 +47,7 @@ conf = {
 }
 
 files = ['corepb.ukp', 'exnsd18.ukp', 'exnsd26.ukp', 'exnsdbis18.ukp', 'exnsd16.ukp', 'exnsd20.ukp', 'exnsdbis10.ukp', 'exnsds12.ukp']
-path = '/home/henrique/AreaDeTrabalho/masters/data/ukp/'
+path = ''
 files.map! { | f | path + f }
 
 experiment(comms_info, execution_info, conf, files)

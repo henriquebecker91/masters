@@ -50,6 +50,8 @@ conf = {
   # info gathered.
   csvfname: 'pya_site8.log',
   unfinished_ext: '.unfinished',
+
+  intercal_columns: true,
 }
 
 files = ['corepb.ukp', 'exnsd18.ukp', 'exnsd26.ukp', 'exnsdbis18.ukp', 'exnsd16.ukp', 'exnsd20.ukp', 'exnsdbis10.ukp', 'exnsds12.ukp']

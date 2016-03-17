@@ -1,6 +1,12 @@
+#!/bin/ruby
+
+require 'require_relative'
+require_relative './sample_extractors.rb'
+require_relative './batch.rb'
+
 comms_info = [{
   # String with command to be executed. Must have 'pattern' as substring.
-  command: 'sleep 1 && echo X',
+  command: 'sleep 1 && echo X X',
   # Substring present in 'command'. Often replaced by the instance filename.
   pattern: 'X',
   # Extractor subclass object. Receives the output of the command and return
@@ -44,11 +50,27 @@ conf = {
   # info gathered.
   csvfname: 'sample.log',
   unfinished_ext: '.unfinished',
+  # Intercalate the data returned by the extractors. In other words, the csv
+  # line for some file will not present all fields of the first command, then
+  # all fields of the second command, ..., but instead will present the first
+  # field of all commands, the second field of all commands, and so on.
+  ic_columns: true,
+  # Intercalate the commands execution. Instead of executing the first command
+  # over all files first, execute all the commands over the first file first.
+  # This was made to avoid confounding (statistical concept). If something
+  # disrupts the processing power for some period of time, the effect will
+  # probably be distributed between commands. The risk some algorithm seems
+  # better or worse than it really is will be reduced. For example: you are
+  # making tests at an notebook, the notebook becomes unplugged for a short
+  # time. The cores will probably enter in energy saving mode and affect the
+  # observed performance. If this happens when all tested commands are the
+  # same, then will seem that that an command had a worse performance. If this
+  # happens when the commands are intercalated, then maybe some instances will
+  # seem harder than others (what is less problematic).
+  ic_comm: true,
 }
 
-files = ['corepb.ukp', 'exnsd18.ukp', 'exnsd26.ukp', 'exnsdbis18.ukp', 'exnsd16.ukp', 'exnsd20.ukp', 'exnsdbis10.ukp', 'exnsds12.ukp']
-path = ''
-files.map! { | f | path + f }
+files = ['apple', 'orange'] # Applejack would be proud
 
-experiment(comms_info, execution_info, conf, files)
+Batch::experiment(comms_info, execution_info, conf, files)
 

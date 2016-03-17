@@ -7,11 +7,14 @@ require_relative './extractor.rb'
 
 class SampleExtractor < Extractor
   def names
-    ['first word', 'second word'] 
+    ['first word', 'second word', 'ext_time', 'ext_mem'] 
   end
 
   def extract_from_lines(lines)
-    lines[0].split().take(2)
+    words = lines.empty? || lines[0].nil? ? ['',''] : lines[0].split().take(2)
+    words << Extractor.get_field(lines, 'ext_time')
+    words << Extractor.get_field(lines, 'ext_mem')
+    words
   end
 end
 

@@ -6,17 +6,17 @@ module Batch
   # filename.
   class FilenameSanitizer
     def call(command)
-      name = command.strip
-      name.gsub!(/[^[:alnum:]]/, '_')
-      name.gsub!(/_+/, '_')
-      name
+      fname = command.strip
+      fname.gsub!(/[^[:alnum:]]/, '_')
+      fname.gsub!(/_+/, '_')
+      fname
     end
   end
 
   # Internal use only. DO NOT DEPEND.
   # Remove the finished commands from commands_running, and insert the cpus
   # freed by the commands termination to the cpus_in_standby.
-  def clean_finished(cpus_in_standby, commands_running)
+  def self.update_finished(cpus_in_standby, commands_running)
     commands_running.delete_if do | job |
       if job[:proc].exited?
         cpus_in_standby.push(job[:cpu])
@@ -57,7 +57,7 @@ module Batch
   #   a TERM signal. If the command hasn't stopped, waits post_timeout seconds
   #   before sending a KILL signal (give it a chance to end gracefully).
   #   Default: 5;
-  #   :filename_sanitizer [Callable Object] The call method of this object
+  #   :fname_sanitizer [Callable Object] The call method of this object
   #   should take a String and convert it (possibly losing information), to a
   #   valid filename. Used over the commands to define the output files of
   #   commands.
@@ -66,7 +66,7 @@ module Batch
   # @note This procedure was not designed to support equal commands (the last
   #   equal command executed will subscribe the '.out', '.err' and '.unfinished'
   #   files used by any previous equal command). But the parameter
-  #   conf[:filename_sanitizer] can be used to circumvent the restriction over
+  #   conf[:fname_sanitizer] can be used to circumvent the restriction over
   #   equal commands (if the object has state it can return a different
   #   filename for every time it's called with the same argument).
   # @note This procedure makes use of the following linux commands: time (not
@@ -81,7 +81,7 @@ module Batch
   #   appended to the '.out' file of every command. If you set conf[:time_fmt]
   #   to a empty string only a newline will be appended.
   #
-  def batch(commands, conf)
+  def self.batch(commands, conf)
     # Throw exceptions if required configurations aren't provided.
     fail "conf[:cpus_available] not set" unless conf[:cpus_available]
     fail "conf[:timeout] not set" unless conf[:timeout] 
@@ -93,7 +93,7 @@ module Batch
     conf[:unfinished_ext]     ||= '.unfinished'
     conf[:busy_loop_sleep]    ||= 0.1
     conf[:post_timeout]       ||= 5
-    conf[:filename_sanitizer] ||= Batch::FilenameSanitizer.new
+    conf[:fname_sanitizer] ||= Batch::FilenameSanitizer.new
 
     # Initialize main variables
     cpus_in_standby = conf[:cpus_available].clone
@@ -116,12 +116,13 @@ module Batch
 
       cpu = cpus_in_standby.pop 
 
-      commfname = conf[:filename_sanitizer].call(command)
+      commfname = conf[:fname_sanitizer].call(command)
 
       cproc = ChildProcess.build(
-        'timeout', '-k', "#{conf[:post_timeout]}s", "#{conf[:timeout]}s",
         'taskset', '-c', cpu.to_s,
         'time', '-f', conf[:time_fmt], '--append', '-o', "#{commfname}.out",
+        'timeout', '--preserve-status', '-k', "#{conf[:post_timeout]}s",
+          "#{conf[:timeout]}s",
         'sh', '-c', command)
 
       lockfname = commfname + conf[:unfinished_ext]
@@ -147,9 +148,9 @@ module Batch
       commfnames << commfname
     end
 
-    unless commands_running.empty? do
+    until commands_running.empty? do
       sleep conf[:busy_loop_sleep]
-      update_finished(cpus_available, commands_running)
+      update_finished(cpus_in_standby, commands_running)
     end
 
     commfnames
@@ -163,41 +164,50 @@ module Batch
   #   comm.
   # @return [Array<String>] Example: gencommff('echo STR', 'STR', ['a', 'b',
   #   'c']) returns ['echo a', 'echo b', 'echo c'].
-  def gencommff(comm, patt, files)
+  def self.gencommff(comm, patt, files)
     ret = []
     files.each { | f | ret << comm.gsub(patt, f) }
     ret
   end
 
-  # Intercalate a variable number of same-size arrays in one array.
+  # Intercalate a variable number of variable sized arrays in one array.
   #
-  # @param [Array<Array<Object>>] xss An array of arrays. All the internal
-  # arrays should share the same size.
-  # @return [Array<Object>] An array of size xss.size * xss.first.size. Where
-  # the values are intercalated. Example: intercalate([1, 3], [2, 4]) returns
-  # [1, 2, 3, 4].
-  # @note Don't fail if the arrays that are not the same size, but can add nil
-  # values to the returned array, or lose values.
-  def intercalate(xss)
-    group_size = xss.first.size
-    num_groups = xss.size
-    ret = Array.new(group_size * num_groups)
-    xss.each_with_index do | xs, i |
-      xs.each_with_index do | x, j |
-        ret[(j * num_groups) + i] = x
+  # @param [Array<Array<Object>>] xss An array of arrays.
+  # @return [Array<Object>] An array of the same size as the sum of the size
+  #   of all inner arrays. The values are the same (not copies) as the values
+  #   of the array. Example: intercalate([[1, 4, 6, 7], [], [2, 5], [3]])
+  #   returns [1, 2, 3, 4, 5, 6, 7].
+  def self.intercalate(xss)
+    ret = []
+    xss = xss.map { | xs | xs.reverse }
+    until xss.empty? do
+      xss.delete_if do | xs |
+        unless xs.empty?
+          ret << xs.pop
+        end
+        xs.empty?
       end
     end
     ret
   end
 
-  def experiment(comms_info, batch_conf, conf, files)
+  # Takes N shell commands and M files/parameters, execute each command of the N commands over the M files, save the output of each command/file combination, use objects provided with the command to extract relevant information from the 
+  def self.experiment(comms_info, batch_conf, conf, files)
+    # We will make of it too, so it's useful for us to have it already defined
+    conf[:fname_sanitizer] ||= Batch::FilenameSanitizer.new
+
     command_sets = []
     comms_info.each do | comm_info |
       command_sets << gencommff(comm_info[:command], comm_info[:pattern], files)
     end
-    intercalated_comms = intercalate(command_sets)
 
-    output_files = batch(intercalated_comms, batch_conf)
+    comm_list = if conf[:ic_comm]
+      intercalate(command_sets)
+    else
+      command_sets.flatten
+    end
+    
+    batch(comm_list, batch_conf)
 
     header = []
     comms_info.each do | comm_info |
@@ -206,20 +216,27 @@ module Batch
       end
       header << prefixed_names
     end
-    header = ['Filename'].concat(intercalate(header)).join(conf[:separator])
+    header = intercalate(header) if conf[:ic_columns]
+    header = ['Filename'].concat(header).join(conf[:separator])
 
     body = [header]
     files.each_with_index do | inst_fname, j |
       line = []
       comms_info.each_with_index do | comm_info, i |
-        output_fname = output_files[(j * comms_info.size) + i]
+        output_fname = if conf[:ic_comm]
+          comm_list[(j * comms_info.size) + i]
+        else
+          comm_list[(i * files.size) + j]
+        end
+        output_fname = conf[:fname_sanitizer].call(output_fname)
+          
         f_content = File.open(output_fname + '.out') { | f | f.read }
 
         extractor = comm_info[:extractor]
         line << extractor.extract(f_content)
       end
-      
-      body << [inst_fname].concat(intercalate(line)).join(conf[:separator])
+      line = intercalate(line) if conf[:ic_columns]
+      body << [inst_fname].concat(line).join(conf[:separator])
     end
     body = body.map! { | line | line << ';' }.join("\n")
 

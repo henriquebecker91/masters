@@ -1,4 +1,4 @@
-class Extractor
+module Extractor
   # For when there's a field whose value is after '<field>: '.
   def self.get_field(lines, field)
     lines.grep(/^#{field}: .*/).each { | l | return l.match(/:[\t ]+(.*)/)[1] }

@@ -1,8 +1,7 @@
 #!/usr/bin/ruby
 
-require 'require_relative'
-require_relative './batch.rb'
-require_relative './sample_extractors.rb'
+require_relative 'batch_experiment'
+require_relative 'batch_experiment/sample_extractors'
 
 # I run the three lines below in the console to disable hyperthreading cores on
 # my computer before examining the cores with the top command.

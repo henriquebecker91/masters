@@ -1,7 +1,7 @@
 require 'childprocess'
 require 'pathname'
 
-module Batch
+module BatchExperiment
   # The default callable class used by batch to convert a command into a
   # filename.
   class FilenameSanitizer
@@ -63,7 +63,7 @@ module Batch
   #   should take a String and convert it (possibly losing information), to a
   #   valid filename. Used over the commands to define the output files of
   #   commands.
-  #   Default: Batch::FilenameSanitizer.new;
+  #   Default: BatchExperiment::FilenameSanitizer.new;
   #   :skip_done_comms [FalseClass,TrueClass] Skip any command for what a
   #   corresponding '.out' file exists, except if both a '.out' and a
   #   '.unfinished' file exist, in the last case the command is executed.
@@ -108,7 +108,7 @@ module Batch
     conf[:err_ext]          ||= '.err'
     conf[:busy_loop_sleep]  ||= 0.1
     conf[:post_timeout]     ||= 5
-    conf[:fname_sanitizer]  ||= Batch::FilenameSanitizer.new
+    conf[:fname_sanitizer]  ||= BatchExperiment::FilenameSanitizer.new
     conf[:skip_done_comms]    = true if conf[:skip_done_comms].nil?
 
     # Initialize main variables
@@ -231,7 +231,7 @@ module Batch
   #   prefix [String] A string that will be used to prefix the extractor.names
   #   when they are used as column names. Improves Extractor reusability.
   # @param batch_conf [Hash] Configuration used to call batch. See the
-  #   explanation for parameter 'conf' on the documentation of the Batch.batch
+  #   explanation for parameter 'conf' on the documentation of the batch
   #   method. There are required fields for this hash parameter.
   # @param conf [Hash] Lots of parameters. Here's a list:
   #   csvfname [String] The filename/filepath for the file that will contain
@@ -263,8 +263,10 @@ module Batch
   # @param files [Array<Strings>] The strings that will replace the :pattern
   #   on :command, for every element in comms_info.
   #
-  # @return [NilClass,Array<String>] The return of the internal Batch::batch
+  # @return [NilClass,Array<String>] The return of the internal #batch
   #   call. Returns nil if conf[:skip_commands] was set to true.
+  #
+  # @see BatchExperiment.batch
   def self.experiment(comms_info, batch_conf, conf, files)
     # Throw exceptions if required configurations aren't provided.
     fail 'conf[:csvfname] is not defined' unless conf[:csvfname]
@@ -281,7 +283,7 @@ module Batch
     out_ext = batch_conf[:out_ext] || '.out'
     unfinished_ext = batch_conf[:unfinished_ext] || '.unfinished'
     fname_sanitizer   = batch_conf[:fname_sanitizer]
-    fname_sanitizer ||= Batch::FilenameSanitizer.new
+    fname_sanitizer ||= BatchExperiment::FilenameSanitizer.new
 
     # Create commands the templates and the file list.
     comms_sets = []

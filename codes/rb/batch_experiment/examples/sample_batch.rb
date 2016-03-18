@@ -1,8 +1,7 @@
 #!/bin/ruby
 
-require 'require_relative'
-require_relative './sample_extractors.rb'
-require_relative './batch.rb'
+require 'batch_experiment'
+require 'batch_experiment/sample_extractors'
 
 comms_info = [{
   # String with command to be executed. Must have 'pattern' as substring.
@@ -45,5 +44,5 @@ conf = {
 
 files = ['apple', 'orange'] # Applejack would be proud
 
-Batch::experiment(comms_info, execution_info, conf, files)
+BatchExperiment::experiment(comms_info, execution_info, conf, files)
 

@@ -38,42 +38,42 @@ module BatchExperiment
   # filename were the command stdout was redirected. The analogue is valid for
   # '.err' and stderr. The first partial filename corresponds to the first
   # command in commands, and so on. Right before a command begans to run, a
-  # "partial_filename.#{conf[:unfinished_ext]}" file is created. After the
-  # command ends its execution this file is removed. If the command ends its
-  # execution by means of a timeout the file is also removed. The file only
-  # remains if the batch procedure is interrupted (not a specific command).
+  # "partial_filename.unfinished file is created. After the command ends its
+  # execution this file is removed. If the command ends its execution by means
+  # of a timeout the file is also removed. The file only remains if the batch
+  # procedure is interrupted (not a specific command).
   #
   # @param commands [Array<String>] The shell commands.
   # @param conf [Hash] The configurations, as follows:
-  #   :cpus_available [Array<Fixnum>] Cpu cores that can be used to run the
+  #   cpus_available [Array<Fixnum>] Cpu cores that can be used to run the
   #   commands. Required parameter. The cpu numbers begin at 0, despite what
-  #   htop tells you;
-  #   :timeout [Number] Number of seconds before killing a command. Required
-  #   parameter. Is the same for all the commands;
-  #   :time_fmt [String] A string in the time (external command) format. See
+  #   htop tells you.
+  #   timeout [Number] Number of seconds before killing a command. Required
+  #   parameter. Is the same for all the commands.
+  #   time_fmt [String] A string in the time (external command) format. See
   #   http://linux.die.net/man/1/time. Default: 'ext_time: %e\next_mem: %M\n'.
-  #   :busy_loop_sleep [Number] How many seconds to wait before checking if a
+  #   busy_loop_sleep [Number] How many seconds to wait before checking if a
   #   command ended execution. This is max time a cpu will be vacant between
-  #   two commands. Default: 0.1;
-  #   :post_timeout [Number] A command isn't guaranteed to end after receiving
+  #   two commands. Default: 0.1.
+  #   post_timeout [Number] A command isn't guaranteed to end after receiving
   #   a TERM signal. If the command hasn't stopped, waits post_timeout seconds
   #   before sending a KILL signal (give it a chance to end gracefully).
-  #   Default: 5;
-  #   :fname_sanitizer [Callable Object] The call method of this object
+  #   Default: 5.
+  #   fname_sanitizer [#call] The call method of this object
   #   should take a String and convert it (possibly losing information), to a
   #   valid filename. Used over the commands to define the output files of
   #   commands.
-  #   Default: BatchExperiment::FilenameSanitizer.new;
-  #   :skip_done_comms [FalseClass,TrueClass] Skip any command for what a
+  #   Default: BatchExperiment::FilenameSanitizer.new.
+  #   skip_done_comms [FalseClass,TrueClass] Skip any command for what a
   #   corresponding '.out' file exists, except if both a '.out' and a
   #   '.unfinished' file exist, in the last case the command is executed.
-  #   Default: true;
-  #   :unfinished_ext [String] Extension to be used in place of '.unfinished'.
-  #   Default: '.unfinished';
-  #   :out_ext [String] Extension to be used in place of '.out'.
-  #   Default: '.out';
-  #   :err_ext [String] Extension to be used in place of '.err'.
-  #   Default: '.err';
+  #   Default: true.
+  #   unfinished_ext [String] Extension to be used in place of '.unfinished'.
+  #   Default: '.unfinished'.
+  #   out_ext [String] Extension to be used in place of '.out'.
+  #   Default: '.out'.
+  #   err_ext [String] Extension to be used in place of '.err'.
+  #   Default: '.err'.
   # @return [String] Which commands were executed. Can be different from
   #   the 'commands' argument if commands are skipped (see :skip_done_comms).
   #
@@ -91,7 +91,7 @@ module BatchExperiment
   #   shell).
   # @note The command is executed inside a call to "sh -c command", so it has
   #   to be a valid sh command.
-  # @note The output of the command "time -f #{conf[:time_fmt]}" will be
+  # @note The output of the command "time -f conf[:time_fmt]" will be
   #   appended to the '.out' file of every command. If you set conf[:time_fmt]
   #   to a empty string only a newline will be appended.
   def self.batch(commands, conf)

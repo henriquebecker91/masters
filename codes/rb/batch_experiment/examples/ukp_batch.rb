@@ -12,12 +12,12 @@ require_relative 'batch_experiment/sample_extractors'
 comms_info = [{
   command: 'pyasukpt -src INST_FILE',
   pattern: 'INST_FILE',
-  extractor: PyaExtractor.new,
+  extractor: PyaExtractor,
   prefix: 'PYAsUKP',
 }, {
   command: 'run_ukp5.out INST_FILE',
   pattern: 'INST_FILE',
-  extractor: UKP5Extractor.new,
+  extractor: UKP5Extractor,
   prefix: 'UKP5',
 }]
 

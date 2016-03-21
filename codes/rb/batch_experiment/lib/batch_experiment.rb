@@ -1,11 +1,13 @@
 require 'childprocess'
 require 'pathname'
 
+# The main module, the two main utility method offered are ::batch and
+# ::experiment.
 module BatchExperiment
-  # The default callable class used by batch to convert a command into a
+  # The default callable object used by #batch to convert a command into a
   # filename.
-  class FilenameSanitizer
-    def call(command)
+  module FilenameSanitizer
+    def self.call(command)
       fname = command.strip
       fname.gsub!(/[^[:alnum:]]/, '_')
       fname.gsub!(/_+/, '_')
@@ -63,7 +65,7 @@ module BatchExperiment
   #   should take a String and convert it (possibly losing information), to a
   #   valid filename. Used over the commands to define the output files of
   #   commands.
-  #   Default: BatchExperiment::FilenameSanitizer.new.
+  #   Default: BatchExperiment::FilenameSanitizer
   #   skip_done_comms [FalseClass,TrueClass] Skip any command for what a
   #   corresponding '.out' file exists, except if both a '.out' and a
   #   '.unfinished' file exist, in the last case the command is executed.
@@ -108,7 +110,7 @@ module BatchExperiment
     conf[:err_ext]          ||= '.err'
     conf[:busy_loop_sleep]  ||= 0.1
     conf[:post_timeout]     ||= 5
-    conf[:fname_sanitizer]  ||= BatchExperiment::FilenameSanitizer.new
+    conf[:fname_sanitizer]  ||= BatchExperiment::FilenameSanitizer
     conf[:skip_done_comms]    = true if conf[:skip_done_comms].nil?
 
     # Initialize main variables
@@ -227,7 +229,7 @@ module BatchExperiment
   #   command [String] A string with a sh shell command.
   #   pattern [String] A substring of command, will be replace by the strings
   #   in the paramenter 'files'.
-  #   extractor [Extractor] An object that implements the Extractor interface.
+  #   extractor [#extract,#names] Object implementing the Extractor interface.
   #   prefix [String] A string that will be used to prefix the extractor.names
   #   when they are used as column names. Improves Extractor reusability.
   # @param batch_conf [Hash] Configuration used to call batch. See the
@@ -283,7 +285,7 @@ module BatchExperiment
     out_ext = batch_conf[:out_ext] || '.out'
     unfinished_ext = batch_conf[:unfinished_ext] || '.unfinished'
     fname_sanitizer   = batch_conf[:fname_sanitizer]
-    fname_sanitizer ||= BatchExperiment::FilenameSanitizer.new
+    fname_sanitizer ||= BatchExperiment::FilenameSanitizer
 
     # Create commands the templates and the file list.
     comms_sets = []

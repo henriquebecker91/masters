@@ -1,7 +1,7 @@
 require 'childprocess'
 require 'pathname'
 
-# The main module, the two main utility method offered are ::batch and
+# The main module, the two main utility methods offered are ::batch and
 # ::experiment.
 module BatchExperiment
   # The default callable object used by #batch to convert a command into a
@@ -34,55 +34,53 @@ module BatchExperiment
 
   # Takes a list of commands, execute them only on the designed core/cpus, and
   # kill them if the timeout expires, never lets a core/cpu rest for more than
-  # conf[:busy_loop_sleep] seconds between a command and another. The
-  # conf[:fname_sanitizer] is called over the commands to generate partial
-  # filenames. Appending '.out' to one of the partial filenames will give the
-  # filename were the command stdout was redirected. The analogue is valid for
-  # '.err' and stderr. The first partial filename corresponds to the first
-  # command in commands, and so on. Right before a command begans to run, a
-  # "partial_filename.unfinished file is created. After the command ends its
-  # execution this file is removed. If the command ends its execution by means
-  # of a timeout the file is also removed. The file only remains if the batch
-  # procedure is interrupted (not a specific command).
+  # a predetermined amount of seconds between a command and another. Partial
+  # filenames are derived from the commands. Appending '.out' to one of the
+  # partial filenames will give the filename were the command stdout was
+  # redirected. The analogue is valid for '.err' and stderr. Right before a
+  # command begans to run, a "partial_filename.unfinished file is created.
+  # After the command ends its execution this file is removed. If the command
+  # ends its execution by means of a timeout the file is also removed. The file
+  # only remains if the batch procedure is interrupted (script was killed,
+  # or system crashed).
   #
   # @param commands [Array<String>] The shell commands.
   # @param conf [Hash] The configurations, as follows:
-  #   cpus_available [Array<Fixnum>] Cpu cores that can be used to run the
+  #   -- cpus_available [Array<Fixnum>] Cpu cores that can be used to run the
   #   commands. Required parameter. The cpu numbers begin at 0, despite what
   #   htop tells you.
-  #   timeout [Number] Number of seconds before killing a command. Required
+  #   -- timeout [Number] Number of seconds before killing a command. Required
   #   parameter. Is the same for all the commands.
-  #   time_fmt [String] A string in the time (external command) format. See
+  #   -- time_fmt [String] A string in the time (external command) format. See
   #   http://linux.die.net/man/1/time. Default: 'ext_time: %e\next_mem: %M\n'.
   #   busy_loop_sleep [Number] How many seconds to wait before checking if a
   #   command ended execution. This is max time a cpu will be vacant between
   #   two commands. Default: 0.1.
-  #   post_timeout [Number] A command isn't guaranteed to end after receiving
-  #   a TERM signal. If the command hasn't stopped, waits post_timeout seconds
-  #   before sending a KILL signal (give it a chance to end gracefully).
-  #   Default: 5.
-  #   fname_sanitizer [#call] The call method of this object
+  #   -- post_timeout [Number] A command isn't guaranteed to end after
+  #   receiving a TERM signal. If the command hasn't stopped, waits
+  #   post_timeout seconds before sending a KILL signal (give it a chance to
+  #   end gracefully). Default: 5.
+  #   -- fname_sanitizer [#call] The call method of this object
   #   should take a String and convert it (possibly losing information), to a
   #   valid filename. Used over the commands to define the output files of
-  #   commands.
-  #   Default: BatchExperiment::FilenameSanitizer
-  #   skip_done_comms [FalseClass,TrueClass] Skip any command for what a
+  #   commands. Default: BatchExperiment::FilenameSanitizer
+  #   -- skip_done_comms [FalseClass,TrueClass] Skip any command for what a
   #   corresponding '.out' file exists, except if both a '.out' and a
   #   '.unfinished' file exist, in the last case the command is executed.
   #   Default: true.
-  #   unfinished_ext [String] Extension to be used in place of '.unfinished'.
-  #   Default: '.unfinished'.
-  #   out_ext [String] Extension to be used in place of '.out'.
+  #   -- unfinished_ext [String] Extension to be used in place of
+  #   '.unfinished'.  Default: '.unfinished'.
+  #   -- out_ext [String] Extension to be used in place of '.out'.
   #   Default: '.out'.
-  #   err_ext [String] Extension to be used in place of '.err'.
+  #   -- err_ext [String] Extension to be used in place of '.err'.
   #   Default: '.err'.
   # @return [String] Which commands were executed. Can be different from
   #   the 'commands' argument if commands are skipped (see :skip_done_comms).
   #
-  # @note This procedure was not designed to support equal commands (the last
-  #   equal command executed will subscribe the '.out', '.err' and '.unfinished'
-  #   files used by any previous equal command). But the parameter
-  #   conf[:fname_sanitizer] can be used to circumvent the restriction over
+  # @note If the same command is executed over the same file more than one
+  #   time, then only the last execution will be saved (because the '.out',
+  #   '.err' and '.unfinished' files will be overwritten). But the parameter
+  #   conf\[:fname_sanitizer\] can be used to circumvent the restriction over
   #   equal commands (if the object has state it can return a different
   #   filename for every time it's called with the same argument).
   # @note This procedure makes use of the following linux commands: time (not
@@ -93,13 +91,13 @@ module BatchExperiment
   #   shell).
   # @note The command is executed inside a call to "sh -c command", so it has
   #   to be a valid sh command.
-  # @note The output of the command "time -f conf[:time_fmt]" will be
-  #   appended to the '.out' file of every command. If you set conf[:time_fmt]
-  #   to a empty string only a newline will be appended.
+  # @note The output of the command "time -f conf\[:time_fmt\]" will be
+  #   appended to the '.out' file of every command. If you set
+  #   conf\[:time_fmt\] to a empty string only a newline will be appended.
   def self.batch(commands, conf)
     # Throw exceptions if required configurations aren't provided.
-    fail "conf[:cpus_available] not set" unless conf[:cpus_available]
-    fail "conf[:timeout] not set" unless conf[:timeout]
+    fail 'conf[:cpus_available] not set' unless conf[:cpus_available]
+    fail 'conf[:timeout] not set' unless conf[:timeout]
 
     # Initialize optional configurations with default values if they weren't
     # provided. Don't change the conf argument, only our version of conf.
@@ -268,7 +266,8 @@ module BatchExperiment
   # @return [NilClass,Array<String>] The return of the internal #batch
   #   call. Returns nil if conf[:skip_commands] was set to true.
   #
-  # @see BatchExperiment.batch
+  # @see BatchExperiment::batch
+  # @note This command call ::batch internally.
   def self.experiment(comms_info, batch_conf, conf, files)
     # Throw exceptions if required configurations aren't provided.
     fail 'conf[:csvfname] is not defined' unless conf[:csvfname]
@@ -293,7 +292,7 @@ module BatchExperiment
       comms_sets << gencommff(comm_info[:command], comm_info[:pattern], files)
     end
 
-    comm_list = conf[:ic_comm] ? intercalate(comms_sets) : comms_sets.flatten
+    comm_list = conf[:ic_comms] ? intercalate(comms_sets) : comms_sets.flatten
 
     # Execute the commands (or not).
     ret = batch(comm_list, batch_conf) unless conf[:skip_commands]
@@ -315,7 +314,7 @@ module BatchExperiment
       line = []
       comms_info.each_with_index do | comm_info, i |
         command =
-          if conf[:ic_comm]
+          if conf[:ic_comms]
             comm_list[(j * comms_info.size) + i]
           else
             comm_list[(i * files.size) + j]

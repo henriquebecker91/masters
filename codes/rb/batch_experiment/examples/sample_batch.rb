@@ -10,19 +10,19 @@ comms_info = [{
   pattern: 'X',
   # Extractor object. Receives the output of the command and return
   # the most important fields.
-  extractor: SampleExtractor,
+  extractor: BatchExperiment::TwoWordsExtractor,
   # String used to identify the command. Will be used to prefix the return of
   # extractor.names.
   prefix: 'doubled',
 }, {
   command: 'sleep 3 && echo "banana X"',
   pattern: 'X',
-  extractor: SampleExtractor,
+  extractor: BatchExperiment::TwoWordsExtractor,
   prefix: 'banana',
 }, {
   command: 'sleep 100 && echo "never gonna happen X"',
   pattern: 'X',
-  extractor: SampleExtractor,
+  extractor: BatchExperiment::TwoWordsExtractor,
   prefix: 'timeout',
 }]
 

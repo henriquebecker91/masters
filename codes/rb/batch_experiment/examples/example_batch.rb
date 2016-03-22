@@ -11,7 +11,7 @@ comms_info = [{
 }, {
   command: 'echo y',
   pattern: 'y',
-  extractor: BatchExperiment::IdExtractor,
+  extractor: BatchExperiment::FirstLineExtractor,
   prefix: 'echo',
 }, {
   command: 'wc FILE',

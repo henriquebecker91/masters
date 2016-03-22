@@ -9,14 +9,18 @@ Things you could want to do, and this tool does for you:
 
 What conditions you need to use this tool:
 * You use linux.
-* You have installed: sh (the shell); time (NOT the bash/sh internal command, but the package one, i.e.: https://www.archlinux.org/packages/extra/x86_64/time/ ); timeout (from coreutils); taskset (from util-linux, https://www.archlinux.org/packages/core/x86_64/util-linux/ ).
+* You have installed: sh (the shell); ruby (obvioulsy); time (NOT the bash/sh internal command, but the [package one](https://www.archlinux.org/packages/extra/x86_64/time/)); timeout (from coreutils); taskset (from [util-linux](https://www.archlinux.org/packages/core/x86_64/util-linux/)).
 
 What is not needed:
-* To know how to program in ruby. Only taking less than 5 minutes to learn some basic syntax will suffice. However, there's an exception, if you want not only to execute the commands but want to extract and group some information from the output to a CVS, you will need to tell ruby how to do the extracting part.
+* To know how to program in ruby. Only taking less than 5 minutes to learn some basic syntax will suffice to run commands on multiple cores and save the results to files. However, there's an exception, if you want not only to execute the commands but want to extract and group some information from their output to a CVS, you will need to tell ruby how to do the extracting part.
 
-## Example
+## How to use it
 
+You will need to create a ruby script (copy, past and adapt one of the provided examples), give it execution permissions ("chmod +x script.rb"), and execute it ("./script.rb"). It's good to remember that this will probably flood the folder from were you called the command with files containing the output of the commands. Also good to remember that the commands will be called from the folder where you called the script, so they probably will expect that any relative paths/filenames given to them to be relative to the current folder.
 
+## Examples
+
+After installing the gem, you will have a examples folder (/home/YOUR_USER/.gem/ruby/RUBY_VERSION/gems/batch_experiment-GEM_VERSION/examples). The example_batch.rb 
 
 This code was born in [this repository](https://github.com/henriquebecker91/masters/tree/master/codes/rb/batch_experiment).
 

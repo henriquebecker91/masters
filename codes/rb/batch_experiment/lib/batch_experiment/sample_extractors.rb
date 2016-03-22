@@ -15,17 +15,6 @@ module BatchExperiment
     end
   end
 
-  module IdExtractor
-    extend Extractor
-    def self.names
-      ['content']
-    end
-
-    def self.extract(content)
-      [content]
-    end
-  end
-
   module WcExtractor
     extend Extractor
     def self.names

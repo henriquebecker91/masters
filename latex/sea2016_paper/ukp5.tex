@@ -285,7 +285,7 @@ This phase has a \(O(c)\) time complexity, as the solution can be composed of \(
 In the computational results section we will show that UKP5 outperforms PYAsUKP in about two orders of magnitude.
 We grant the majority of the algorithm performance to the ability of applying sparsity, solution dominance and symmetry pruning with almost no overhead.
 At each iteration of capacity \(y\), sparsity and solution dominance are integrated in a single constant time test~(line~\ref{if_less_than_opt_begin}).
-This test, when combined with an item list sorted by non-decreasing efficiency, also helps to avoid propagating big index values for the next positions of \(d\), benefiting the performance of the solution generation with symmetry pruning (the use of \(d[y]\) on line~\ref{main_inner_loop_begin}).
+This test, when combined with an item list sorted by non-increasing efficiency, also helps to avoid propagating big index values for the next positions of \(d\), benefiting the performance of the solution generation with symmetry pruning (the use of \(d[y]\) on line~\ref{main_inner_loop_begin}).
 
 \subsection{Solution dominance}
 

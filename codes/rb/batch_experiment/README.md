@@ -20,7 +20,32 @@ You will need to create a ruby script (copy, past and adapt one of the provided 
 
 ## Examples
 
-After installing the gem, you will have a examples folder (/home/YOUR_USER/.gem/ruby/RUBY_VERSION/gems/batch_experiment-GEM_VERSION/examples). The example_batch.rb 
+After installing the gem, you will have a examples folder (/home/YOUR_USER/.gem/ruby/RUBY_VERSION/gems/batch_experiment-GEM_VERSION/examples). The sample_batch.rb gives you a good ideia of how to use #batch (no csv creation). The example_batch.rb together with the lib/batch_experiment/sample_extractors.rb gives a good ideia of how to use #experiment with multiple commands and extractors (csv creation).
+
+```ruby
+#!/bin/ruby
+
+require 'batch_experiment'
+
+commands = [
+  'sleep 2 && echo orange',
+  'sleep 4 && echo banana',
+  'sleep 100 && echo "never gonna happen"',
+]
+
+conf = {
+  # IDs of the CPU cores that can be used for executing tests.
+  cpus_available: [0, 1],
+  # Maximum number of seconds that a command can run. After this a kill command
+  # (TERM signal) will be issued.
+  timeout: 5,
+  # Maximum number of seconds that a command can run after a kill command was
+  # issued. After this a kill -9 command (KILL signal) will be issued.
+  post_timeout: 1,
+}
+
+BatchExperiment::batch(commands, conf)
+```
 
 This code was born in [this repository](https://github.com/henriquebecker91/masters/tree/master/codes/rb/batch_experiment).
 

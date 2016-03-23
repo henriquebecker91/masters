@@ -32,16 +32,12 @@ module BatchExperiment
     end
   end
 
-  # Sample Extractor used as example for new users of the gem.
   module TwoWordsExtractor
     extend Extractor
-    # The field names of the values extracted by #extract.
     def self.names
       ['first word', 'second word', 'ext_time', 'ext_mem']
     end
 
-    # The code that extract the values from the example commands
-    # (sample_batch.rb).
     def self.extract_from_lines(lines)
       words = lines.empty? || lines[0].nil? ? ['',''] : lines[0].split().take(2)
       words << Extractor.get_field(lines, 'ext_time')

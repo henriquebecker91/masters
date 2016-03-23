@@ -1,34 +1,16 @@
 #!/bin/ruby
 
 require 'batch_experiment'
-require 'batch_experiment/sample_extractors'
 
-comms_info = [{
-  # String with command to be executed. Must have 'pattern' as substring.
-  command: 'sleep 1 && echo X X',
-  # Substring present in 'command'. Often replaced by the instance filename.
-  pattern: 'X',
-  # Extractor object. Receives the output of the command and return
-  # the most important fields.
-  extractor: BatchExperiment::TwoWordsExtractor,
-  # String used to identify the command. Will be used to prefix the return of
-  # extractor.names.
-  prefix: 'doubled',
-}, {
-  command: 'sleep 3 && echo "banana X"',
-  pattern: 'X',
-  extractor: BatchExperiment::TwoWordsExtractor,
-  prefix: 'banana',
-}, {
-  command: 'sleep 100 && echo "never gonna happen X"',
-  pattern: 'X',
-  extractor: BatchExperiment::TwoWordsExtractor,
-  prefix: 'timeout',
-}]
+commands = [
+  'sleep 2 && echo orange',
+  'sleep 4 && echo banana',
+  'sleep 100 && echo "never gonna happen"',
+]
 
-execution_info = {
+conf = {
   # IDs of the CPU cores that can be used for executing tests.
-  cpus_available: [1, 2, 3],
+  cpus_available: [0, 1],
   # Maximum number of seconds that a command can run. After this a kill command
   # (TERM signal) will be issued.
   timeout: 5,
@@ -37,12 +19,5 @@ execution_info = {
   post_timeout: 1,
 }
 
-conf = {
-  # The name of the file where will be written the CSV data.
-  csvfname: 'sample.csv',
-}
-
-files = ['apple', 'orange'] # Applejack would be proud
-
-BatchExperiment::experiment(comms_info, execution_info, conf, files)
+BatchExperiment::batch(commands, conf)
 

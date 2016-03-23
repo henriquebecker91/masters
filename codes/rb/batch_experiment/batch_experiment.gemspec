@@ -1,6 +1,6 @@
 Gem::Specification.new do | s |
   s.name        = 'batch_experiment'
-  s.version     = '0.1.0'
+  s.version     = '1.0.0'
   s.licenses    = ['Unlicense']
   s.summary     = 'A ruby script that distributes system commands between cpu cores, and save their output.'
   s.description = ''

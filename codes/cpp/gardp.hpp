@@ -2,6 +2,7 @@
 #define HBM_GARDP_HPP
 
 #include "ukp_common.hpp"
+#include "periodicity.hpp"
 #include "wrapper.hpp"
 
 namespace hbm {
@@ -10,10 +11,19 @@ namespace hbm {
 
     template<typename W, typename P, typename I>
     void gardp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
-      const W c = ukpi.c;
+      const W original_c = ukpi.c;
+      W c = ukpi.c;
       const I n = ukpi.items.size();
 
       if (!already_sorted) sort_by_eff(ukpi.items);
+
+      I b1_ix = 0;
+      item_t<W, P> b1 = ukpi.items[0];
+      item_t<W, P> b2 = ukpi.items[1];
+
+      W y_ = y_star(b1, b2);
+      W y_bound = refine_y_star(y_, c, b1.w);
+      if (y_bound < c) c = y_bound;
 
       std::vector<P> g(c + 1, 0);
       std::vector<I> d(c + 1, n-1);
@@ -22,7 +32,7 @@ namespace hbm {
         for (I j = 0; j < n; ++j) {
           item_t<W, P> it = ukpi.items[j];
           if (y >= it.w && j <= d[y - it.w]) {
-            P x = g[y - it.w] + it.p;
+            const P x = g[y - it.w] + it.p;
             if (x > g[y]) {
               g[y] = x;
               d[y] = j;
@@ -55,6 +65,23 @@ namespace hbm {
         }
       }
       sol.used_items.shrink_to_fit();
+
+      if (y_bound < original_c) {
+        W qt_b = (original_c - sol.y_opt)/b1.w;
+        sol.opt += static_cast<P>(qt_b) * b1.p;
+        sol.y_opt += qt_b * b1.w;
+
+        auto eq_b1 = [&](const itemqt_t<W, P, I> &i) { return i.it == b1; };
+        auto bp = find_if(sol.used_items.begin(), sol.used_items.end(), eq_b1);
+        if (bp == sol.used_items.end()) {
+          // The best item wasn't used on the reduced capacity optimal
+          // solution, we need to add it.
+          auto bqt = itemqt_t<W, P, I>(b1, qt_b, b1_ix);
+          sol.used_items.push_back(bqt);
+        } else {
+          bp->qt += qt_b;
+        }
+      }
     }
 
     template<typename W, typename P, typename I>

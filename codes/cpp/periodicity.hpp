@@ -56,6 +56,7 @@ namespace hbm {
 
     template <typename W, typename P>
     W y_star(const item_t<W, P> &b, const item_t<W, P> &b2) {
+      assert(b < b2);
       if (std::is_integral<W>::value && std::is_same<W, P>::value) {
         // Without the castings, the compiler gives conversion warnings
         // that don't will ever happen. If P is a floating point number

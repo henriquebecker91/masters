@@ -234,7 +234,7 @@ namespace hbm {
       /// This method set the majority of the values of this stats class. All
       /// the values set by it need extra computation, and because of this they
       /// are computed here, after the UKP5 executed, and without affecting its
-      /// time measurement.  This method only works if the following variables
+      /// time measurement. This method only works if the following variables
       /// are set first: n, c, y_bound, w_min, w_max, g and d. It can't receive
       /// this values by constructor as g and d are initialized empty and
       /// changed by UKP5 (they aren't a copy of the vectors used by ukp5, they
@@ -300,11 +300,11 @@ namespace hbm {
       for (auto it = items.begin()+1; it != items.end(); ++it) {
         // Two best items and index of the best
         item_t<W, P> i = *it;
-        if (b.b1 < i) {
+        if (i < b.b1) {
           b.b1_ix = it - items.begin();
           b.b2 = b.b1;
           b.b1 = i;
-        } else if (b.b2 < i) {
+        } else if (i < b.b2) {
           b.b2 = i;
         }
         // Weight max/min
@@ -769,7 +769,7 @@ namespace hbm {
       // below we only change what was explicited by command-line
       ukp5_conf_t<I> conf;
 
-      const regex float_0_1("(0|1|0\\.[0-9]*[1-9])", nosubs),
+      const regex float_0_1("(0|1|0\\.[0-9]+|1\\.0+)", nosubs),
                   bool_0_1("[01]", nosubs);
 
       switch (argc) {

@@ -53,8 +53,8 @@ module BatchExperiment
   #   parameter. Is the same for all the commands.
   #   -- time_fmt [String] A string in the time (external command) format. See
   #   http://linux.die.net/man/1/time. Default: 'ext_time: %e\next_mem: %M\n'.
-  #   busy_loop_sleep [Number] How many seconds to wait before checking if a
-  #   command ended execution. This is max time a cpu will be vacant between
+  #   -- busy_loop_sleep [Number] How many seconds to wait before checking if
+  #   a command ended execution. This is max time a cpu will be vacant between
   #   two commands. Default: 0.1.
   #   -- post_timeout [Number] A command isn't guaranteed to end after
   #   receiving a TERM signal. If the command hasn't stopped, waits

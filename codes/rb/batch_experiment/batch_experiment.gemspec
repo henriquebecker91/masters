@@ -1,6 +1,6 @@
 Gem::Specification.new do | s |
   s.name        = 'batch_experiment'
-  s.version     = '1.0.1'
+  s.version     = '1.0.2'
   s.licenses    = ['Unlicense']
   s.summary     = 'A ruby script that distributes system commands between cpu cores, and save their output.'
   s.description = ''
@@ -16,6 +16,7 @@ Gem::Specification.new do | s |
     'examples/taoteching.txt',
     'examples/example_batch.rb',
     'examples/debug_batch.rb',
+    'README.md',
   ]
   s.add_runtime_dependency 'childprocess', '~> 0.5'
   s.homepage    = 'https://rubygems.org/gems/batch_experiment'

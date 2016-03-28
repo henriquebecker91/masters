@@ -35,3 +35,6 @@ latex/**/*.pdf
 *.lp
 *.mod
 
+# ruby
+*.gem
+

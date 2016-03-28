@@ -76,7 +76,8 @@ It can be faster than DP on instances with some characteristics, such as when th
 
 The state-of-the-art solver for the UKP, introduced by~\cite{pya}, is a hybrid solver that combines DP and B\&B. 
 It tries to solve the problem by B\&B, and if this fails to solve the problem quickly, it switches to DP using some data gathered by the B\&B to speed up the process. 
-The solver's name is PYAsUKP, and it is an implementation of the EDUK2 algorithm.%We have found that the DP used by PYAsUKP is very slow when compared to our algorithm. Even solving some instances in less than a centisecond using B\&B, the solver is yet about thirty times slower than our method, in average. Also, our algorithm is much less complex, and can be easily implemented on a imperative language. The periodicity stop condition, and the solution dominance concept, used on UKP55 are algorithm specific. So we don't count them as individual contributions.
+The solver's name is PYAsUKP, and it is an implementation of the EDUK2 algorithm.
+%We have found that the DP used by PYAsUKP is very slow when compared to our algorithm. Even solving some instances in less than a centisecond using B\&B, the solver is yet about thirty times slower than our method, in average. Also, our algorithm is much less complex, and can be easily implemented on a imperative language. The periodicity stop condition, and the solution dominance concept, used on UKP55 are algorithm specific. So we don't count them as individual contributions.
 
 %The recent paper \cite{parallellUKP} proposes, implements and compares two parallelization approaches for classical DP formulations of the UKP. 
 %It doesn't compare with the state-of-the-art but, regarding to PYAsUKP, states that ``The algorithm (PYAsUKP) significantly outperforms all existing algorithms for solving the problem.''.

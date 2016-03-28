@@ -23,12 +23,16 @@ module BatchExperiment
   # terminated commands on comms_executed.
   def self.update_finished(free_cpus, comms_running, comms_executed)
     comms_running.delete_if do | job |
-      if job[:proc].exited?
+      # Don't call '#exited?' twice, store value at variable. If you call
+      # it twice it's possible to remove it from the list of running commands
+      # without freeing a cpu, what will end locking all cpus forever.
+      exited = job[:proc].exited?
+      if exited
         free_cpus.push(job[:cpu])
         File.delete(job[:lockfname])
         comms_executed << job[:command]
       end
-      job[:proc].exited? # bool returned to delete_if
+      exited # bool returned to delete_if
     end
   end
 
@@ -42,7 +46,8 @@ module BatchExperiment
   # After the command ends its execution this file is removed. If the command
   # ends its execution by means of a timeout the file is also removed. The file
   # only remains if the batch procedure is interrupted (script was killed,
-  # or system crashed).
+  # or system crashed). This '.unfinished' file will contain the process pid,
+  # if the corresponding process started with success.
   #
   # @param commands [Array<String>] The shell commands.
   # @param conf [Hash] The configurations, as follows:
@@ -167,6 +172,9 @@ module BatchExperiment
         lockfname: lockfname,
         command: command
       }
+
+      # The lock file now stores the process pid for debug reasons.
+      File.open(lockfname, 'w') { | f | f.write cproc.pid }
 
       puts "command assigned to cpu#{cpu}"
       STDOUT.flush

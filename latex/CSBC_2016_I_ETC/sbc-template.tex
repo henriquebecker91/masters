@@ -15,7 +15,7 @@
      
 \sloppy
 
-\title{UKP5: a New Algorithm for the Unbounded Knapsack Problem}
+\title{UKP5: Solving the Unbounded Knapsack Problem}
 
 \author{Henrique Becker \and Luciana S. Buriol}
 
@@ -46,7 +46,7 @@ O UKP5 é baseado em programação dinâmica, mas implementado de uma forma não-trad
 %UKP5 uses sparsity, periodicity, and dominance for speeding up computation. 
 O UKP5 é consideravelmente mais simples que o EDUK2, o algoritmo do estado da arte para solucionar o problema.
 %Moreover, it can be naturally implemented using the imperative paradigm, differently from EDUK2. 
-Nós executamos o UKP5 e o EDUK2 em uma bateria de testes contendo 4540 instâncias consideradas difíceis pelos autores do EDUK2.
+Nós executamos o UKP5 e o EDUK2 em uma bateria de testes contendo 4540 instâncias conside-radas difíceis pelos autores do EDUK2.
 Os resultados mostram que o UKP5 é, em média, 47 vezes mais rápido que o EDUK2.
 \end{resumo}
 
@@ -82,22 +82,26 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 The quantities of each item \(i\) in an optimal solution are denoted by \(x_i\), and are restricted to the non-negative integers, as~\eqref{eq:x_integer} indicates. 
 %We assume that the capacity \(c\), the quantity of items \(n\) and the weights of the items \(w_i\) are positive integers. 
 %The profits of the items \(p_i\) are positive real numbers.
-
-The efficiency of an item \(i\) is the ratio \(\frac{p_i}{w_i}\), and is denoted by \(e_i\). 
+The efficiency of an item \(i\) is the ratio \(\frac{p_i}{w_i}\). 
 We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight, and the biggest item weight, respectively. 
-Also, we refer to the item with the lowest weight among the ones tied with the greatest efficiency as the \emph{best item}, % CHECAR SE NECESSÁRIO
-and the item with the lowest weight among all items as the \emph{smallest item}. % CHECAR SE NECESSÁRIO
+%Also, we refer to the item with the lowest weight among the ones tied with the greatest efficiency as the \emph{best item}, % CHECAR SE NECESSÁRIO
+%and the item with the lowest weight among all items as the \emph{smallest item}. % CHECAR SE NECESSÁRIO
 
 \section{UKP5: The Proposed Algorithm}
 
-UKP5 is inspired by the DP algorithm described by Garfinkel~\cite[p. 221]{gar72}. 
-The name ``UKP5'' is due to five improvements applied over that algorithm: \textbf{Symmetry pruning}: symmetric solutions are pruned in a more efficient fashion than in~\cite{gar72};
+UKP5 is inspired by the DP algorithm described by Garfinkel and Nemhauser (we will reference it as G\&N)~\cite[p. 221]{gar72}.
+The name ``UKP5'' is due to five improvements applied over that algorithm: \textbf{Symmetry pruning}: symmetric solutions are pruned in a more efficient fashion than in G\&N;
 \textbf{Sparsity}: not every position of the optimal solutions value array has to be computed;
-\textbf{Dominated solutions pruning}: dominated solutions are pruned;
-\textbf{Time/memory tradeoff}: the test \(w_i \leq y\) from the algorithm in~~\cite{gar72} was removed in cost of more O(\(w_{max}\)) memory;
+\textbf{Dominated solutions pruning}: we never generate some solutions if they are worse than solutions already generated (bigger weight and smaller profit);
+\textbf{Time/memory tradeoff}: the test \(w_i \leq y\) from G\&N was removed in cost of more O(\(w_{max}\)) memory;
 \textbf{Periodicity}: the periodicity check suggested in~\cite{gar72} (but not implemented there) was adapted and implemented.
 
-\begin{algorithm}[!t]
+The \(g\) is a sparse array where we store solutions profit. If \(g[y] > 0\) then there exists a non-empty solution \(s\) with \(w_s = y\) and \(p_s = g[y]\). 
+The \(d\) array stores the index of the last item used on a solution. If \(g[y] > 0 \land d[y] = i\) then the solution \(s\) with \(w_s = y\) and \(p_s = g[y]\) has at least one copy of item \(i\). 
+Our first loop (lines \ref{begin_trivial_bounds} to \ref{end_trivial_bounds}) stores all solutions comprised of a single item in the arrays \(g\) and \(d\). 
+After this setup, we simply iterate \(g\) and, when we find a stored solution, we create new solutions combining the current solution with single items. We only prune symmetric or dominated solutions, all other valid solutions are generated, one of those solutions is guaranteed to be an optimal solution, and therefore \(opt\) will end with an optimal solution profit value.
+
+\begin{algorithm}[ht]
 \caption{UKP5 -- Computation of $opt$}\label{alg:ukp5}
 \begin{algorithmic}[1]
 \Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
@@ -124,30 +128,21 @@ The name ``UKP5'' is due to five improvements applied over that algorithm: \text
       \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
         \State \(g[y + w_i] \gets g[y] + p_i\)
         \State \(d[y + w_i] \gets i\)
-%      \ElsIf{\(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\)}
-%        \State \(d[y + w_i] \gets i\)
       \EndIf\label{if_new_lower_bound_end}
     \EndFor\label{main_inner_loop_end}
   \EndFor\label{main_ext_loop_end}
   \State \textbf{return} \(opt\)
-
-%  \For{\(y \gets c-w_{min}+1, c\)}\label{get_y_opt_loop_begin}\Comment{Removal of dominated solutions}
-%    \If{\(g[y] > opt\)}\label{last_loop_inner_if}
-%      \State \(opt \gets g[y]\)
-%      \State \(y_{opt} \gets y\)
-%    \EndIf
-%  \EndFor\label{get_y_opt_loop_end}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-With the intent of making easier to the reader to undestand the core ideia of the UKP5 algorithm, the pseudocode presented at Algorithm \ref{alg:ukp5} was stripped of many optimizations. Some of them are: all the items are sorted by non-increasing efficiency and, between items with the same efficiency, by increasing weight; the \(y^{*}\) periodicity bound is computed as in~\cite[p. 223]{gar72}, and used to reduce the \(c\) value; we make use of a UKP5-specific periodicity check described below.
+With the intent of making easier to the reader to undestand the core ideia of the UKP5 algorithm, the pseudocode presented at Algorithm \ref{alg:ukp5} was stripped of many small optimizations. Some of them are: all the items are sorted by non-increasing efficiency; the \(y^{*}\) periodicity bound is computed as in~\cite[p. 223]{gar72}, and used to reduce the \(c\) value; an UKP5-specific periodicity check is used, we don't describe it here because of the page limit. The solution assemble phase also isn't described here, but it's similar to the one used by the DP method described in \cite[p. 221, Steps 6-8]{gar72}.
 
-Our periodicity check is a stopping condition inside UKP5 main loop (\ref{main_ext_loop_begin} and \ref{main_ext_loop_end}). 
-Let \(y\) be the value of the variable \(y\) at line \ref{main_ext_loop_begin}, and let \(y'\) be the biggest capacity where \(g[y'] \neq 0 \land d[y'] > 1\). 
-If at some moment \(y > y'\) then we can stop the computation and fill the remaining capacity with copies of the first item (item of index \(1\)).
-This periodicity check works only if the first item is the best item. 
-If this assumption is false, then the described condition will never happen, and the algorithm will iterate until \(y = c\) as usual.
+%Our periodicity check is a stopping condition inside UKP5 main loop (\ref{main_ext_loop_begin} and \ref{main_ext_loop_end}). 
+%Let \(y\) be the value of the variable \(y\) at line \ref{main_ext_loop_begin}, and let \(y'\) be the biggest capacity where \(g[y'] \neq 0 \land d[y'] > 1\). 
+%If at some moment \(y > y'\) then we can stop the computation and fill the remaining capacity with copies of the first item (item of index \(1\)).
+%This periodicity check works only if the first item is the best item. 
+%If this assumption is false, then the described condition will never happen, and the algorithm will iterate until \(y = c\) as usual.
 
 \section{Computational Results and Analysis}
 
@@ -158,8 +153,23 @@ If this assumption is false, then the described condition will never happen, and
   \caption{The times used by UKP5 and PYAsUKP for each instance of each class. The black dots represent PYAsUKP times. The gray dots represent UKP5 times. The y axis is the time used to solve an UKP instance, in seconds. The x axis is the instance index when the instances are are sorted by the time PYAsUKP took to solve it. Note that the y axis is in logarithmic scale.}
 \end{figure}
 
+The computer used on the experiments was an ASUS R552JK-CN159H (Intel Core i7-4700HQ Processor, 6M Cache, 3.40 GHz).
+The operating system used was Linux 4.3.3-2 x86\_64.
+The instance sets aim to reproduce the ones described in~\cite{pya}, the same tool was used to generate the datasets (PYAsUKP).
+The source can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{
+	The UKP5 implementation is at \textbf{codes/cpp/} and two versions of PYAsUKP are at \textbf{codes/ocaml/}.
+	The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html}. 
+	A more stable version was provided by the authors. 
+	This version is in \emph{pyasukp\_mail.tgz} and it was used to solve the instances the results presented in Figure~\ref{fig:times}. 
+	The \emph{create\_*\_instances.sh} scripts inside \textbf{codes/sh/} were used to generate the instance datasets.
+}. 
+
 \section{Conclusion and Final Remarks}
 
+As we can see in figure~\ref{fig:times}, for many instances PYAsUKP is faster than UKP5. However, PYAsUKP can also be one or more orders of magnitude slower than UKP5 on some instances. Our tests have shown when PYAsUKP is faster than UKP5 this is often because of its B\&B phase, that solves some instances almost instantly. When B\&B fails to solve the instance in a short time, PYAsUKP fallbacks to a DP algorithm that seems to be many times slower than UKP5. It's important to note that the asymptotic complexity of both algorithms is pseudo-polynomial (\(O(c\times n)\)), but the difference on the constant factor seems big. Integrating a B\&B phase to UKP5 seems promising, and will be the theme for future works.\vspace{1mm}\\
+\textbf{Acknowledgments}
+%We are very thankful to Vincent Poirriez for providing us the codes of a stable version of PYAsUKP, and answering our questions about the paper~\cite{pya}. 
+We are thankful to the CNPq (Conselho Nacional de Desenvolvimento Cient\'ifico e Tecnol\'ogico) for the financial support.
 
 \bibliographystyle{sbc}
 \bibliography{sbc-template}

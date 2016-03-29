@@ -61,8 +61,6 @@ Two techniques are often used for solving UKP: dynamic programming (DP) \cite{ed
 The state-of-the-art solver for the UKP, introduced by~\cite{pya}, is a hybrid solver that combines DP and B\&B. 
 The solver's name is PYAsUKP, and it is an implementation of the EDUK2 algorithm.
 
-\subsection{UKP Formal Notation}
-
 An UKP instance is composed by a capacity \(c\), and a list of \(n\) items.
 Each item can be referenced by its index in the item list \(i \in \{1\dots n\}\). 
 Each item \(i\) has a weight value \(w_i\), and a profit value \(p_i\).
@@ -73,11 +71,37 @@ An optimal solution \(s^*\) is a valid solution with the greatest profit among a
 The UKP objective is to find an optimal solution for the given UKP instance. 
 The mathematical formulation of UKP is:
 
-\begin{align}
-  maximize &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
-subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
-            &x_i \in \mathbb{N}_0\label{eq:x_integer}
-\end{align}
+%\begin{multicols}{3}
+%\begin{equation}
+%maximize \sum_{i=1}^n p_i x_i\label{eq:objfun}\\
+%\end{equation}\break
+%\begin{equation}
+%subject~to \sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
+%\end{equation}\break
+%\begin{equation}
+%x_i \in \mathbb{N}_0\label{eq:x_integer}
+%\end{equation}\break
+%\end{multicols}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minipage}[c]{.30\linewidth}
+\begin{equation}
+maximize \sum_{i=1}^n p_i x_i\label{eq:objfun}\\
+\end{equation}
+\end{minipage}
+\begin{minipage}[c]{.38\linewidth}
+\begin{equation}
+\phantom{\sum_{i=1}^n}subject~to \sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
+\end{equation}
+\end{minipage}
+\begin{minipage}[c]{.20\linewidth}
+%\begin{minipage}[c]{.20\linewidth}
+\begin{equation}
+\phantom{\sum_{i=1}^n}x_i \in \mathbb{N}_0\label{eq:x_integer}
+\end{equation}
+\end{minipage}
+\end{minipage}
 
 The quantities of each item \(i\) in an optimal solution are denoted by \(x_i\), and are restricted to the non-negative integers, as~\eqref{eq:x_integer} indicates. 
 %We assume that the capacity \(c\), the quantity of items \(n\) and the weights of the items \(w_i\) are positive integers. 
@@ -99,7 +123,7 @@ The name ``UKP5'' is due to five improvements applied over that algorithm: \text
 The \(g\) is a sparse array where we store solutions profit. If \(g[y] > 0\) then there exists a non-empty solution \(s\) with \(w_s = y\) and \(p_s = g[y]\). 
 The \(d\) array stores the index of the last item used on a solution. If \(g[y] > 0 \land d[y] = i\) then the solution \(s\) with \(w_s = y\) and \(p_s = g[y]\) has at least one copy of item \(i\). 
 Our first loop (lines \ref{begin_trivial_bounds} to \ref{end_trivial_bounds}) stores all solutions comprised of a single item in the arrays \(g\) and \(d\). 
-After this setup, we simply iterate \(g\) and, when we find a stored solution, we create new solutions combining the current solution with single items. We only prune symmetric or dominated solutions, all other valid solutions are generated, one of those solutions is guaranteed to be an optimal solution, and therefore \(opt\) will end with an optimal solution profit value.
+After this setup, we simply iterate \(g\) and, when we find a stored solution, we create new solutions combining the current solution with single items. We only prune symmetric or dominated solutions, all other valid solutions are generated. Consequently, one of those solutions is guaranteed to be an optimal solution, and \(opt\) will end with the optimal solution profit value.
 
 \begin{algorithm}[ht]
 \caption{UKP5 -- Computation of $opt$}\label{alg:ukp5}
@@ -144,7 +168,7 @@ With the intent of making easier to the reader to undestand the core ideia of th
 %This periodicity check works only if the first item is the best item. 
 %If this assumption is false, then the described condition will never happen, and the algorithm will iterate until \(y = c\) as usual.
 
-\section{Computational Results and Analysis}
+\section{Computational Results, Analysis and Conclusions}
 
 \begin{figure}[th]
   \label{fig:times}
@@ -155,8 +179,9 @@ With the intent of making easier to the reader to undestand the core ideia of th
 
 The computer used on the experiments was an ASUS R552JK-CN159H (Intel Core i7-4700HQ Processor, 6M Cache, 3.40 GHz).
 The operating system used was Linux 4.3.3-2 x86\_64.
-The instance sets aim to reproduce the ones described in~\cite{pya}, the same tool was used to generate the datasets (PYAsUKP).
-The source can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{
+The number of instances of each different class are: Subset-Sum~(400); Strong~Correlation~(240); Postponed~Periodicity~(800); No~Collective~Dominance~(2000); SAW~(1100). These datasets aim to reproduce the ones described in~\cite{pya} (see the paper for more information). 
+The same tool was used to generate the datasets (PYAsUKP).
+The sources can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{
 	The UKP5 implementation is at \textbf{codes/cpp/} and two versions of PYAsUKP are at \textbf{codes/ocaml/}.
 	The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html}. 
 	A more stable version was provided by the authors. 
@@ -164,9 +189,7 @@ The source can be found at \url{https://github.com/henriquebecker91/masters/tree
 	The \emph{create\_*\_instances.sh} scripts inside \textbf{codes/sh/} were used to generate the instance datasets.
 }. 
 
-\section{Conclusion and Final Remarks}
-
-As we can see in figure~\ref{fig:times}, for many instances PYAsUKP is faster than UKP5. However, PYAsUKP can also be one or more orders of magnitude slower than UKP5 on some instances. Our tests have shown when PYAsUKP is faster than UKP5 this is often because of its B\&B phase, that solves some instances almost instantly. When B\&B fails to solve the instance in a short time, PYAsUKP fallbacks to a DP algorithm that seems to be many times slower than UKP5. It's important to note that the asymptotic complexity of both algorithms is pseudo-polynomial (\(O(c\times n)\)), but the difference on the constant factor seems big. Integrating a B\&B phase to UKP5 seems promising, and will be the theme for future works.\vspace{1mm}\\
+As we can see in figure~\ref{fig:times}, for many instances PYAsUKP is faster than UKP5. However, PYAsUKP can also be one or more orders of magnitude slower than UKP5 on some instances. Our tests have shown when PYAsUKP is faster than UKP5 this is often because of its B\&B phase, that solves some instances almost instantly. When B\&B fails to solve the instance in a short time, PYAsUKP fallbacks to a DP algorithm that seems to be many times slower than UKP5. It's important to note that both algorithms have a pseudo-polynomial worst-case (\(O(c\times n)\)). Integrating a B\&B phase to UKP5 seems promising, and will be the theme for future works.\vspace{1mm}\\
 \textbf{Acknowledgments}
 %We are very thankful to Vincent Poirriez for providing us the codes of a stable version of PYAsUKP, and answering our questions about the paper~\cite{pya}. 
 We are thankful to the CNPq (Conselho Nacional de Desenvolvimento Cient\'ifico e Tecnol\'ogico) for the financial support.

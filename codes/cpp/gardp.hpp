@@ -113,7 +113,7 @@ namespace hbm {
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
-  ///   non-decreasing efficiency.
+  ///   non-increasing efficiency.
   template<typename W, typename P, typename I>
   void gardp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
     hbm_gardp_impl::gardp(ukpi, sol, already_sorted);
@@ -122,8 +122,8 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
-  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  /// given the ukpi.items isn't sorted by non-increasing efficiency. If it's
+  /// ommited the ukpi.items is sorted by non-increasing efficiency.
   ///
   /// @see main_take_path
   /// @see gardp(instance_t<W, P> &, solution_t<W, P, I> &, bool)

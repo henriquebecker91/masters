@@ -1,0 +1,4 @@
+Cited by "A Better Step-Off Algorithm for the Knapsack Problem". Behind a paywall. More info here: http://pubsonline.informs.org/doi/abs/10.1287/opre.18.2.306
+
+Would be interesting to have access to this paper, but "A Better Step-Off Algorithm for the Knapsack Problem" claims to have a better version of the algorithm present in this paper (for the UKP). So it's not a big problem to ignore it for now.
+

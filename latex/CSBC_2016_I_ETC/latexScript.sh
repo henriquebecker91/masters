@@ -5,5 +5,5 @@ pdflatex $tex
 bibtex "${tex%.*}"
 pdflatex $tex
 pdflatex $tex
-rm "${tex%.*}.aux"
+rm "${tex%.*}.aux" "${tex%.*}.blg" "${tex%.*}.bbl" "${tex%.*}.log"
 

@@ -57,7 +57,7 @@ UKP allows the allocation of an unbounded quantity of each item type.
 The UKP is NP-Hard, and thus has no known polynomial-time algorithm for solving it. 
 However, it can be solved by a pseudo-polynomial dynamic programming algorithm.
 
-Two techniques are often used for solving UKP: dynamic programming (DP) \cite{eduk}, \cite[p. 214]{gar72}, \cite[p. 311]{tchu} and branch and bound (B\&B) \cite{mtu2}. 
+Two techniques are often used for solving UKP: dynamic programming (DP) \cite{eduk}, \cite[p. 214]{gar72}, and branch and bound (B\&B) \cite{mtu2}. 
 The state-of-the-art solver for the UKP, introduced by~\cite{pya}, is a hybrid solver that combines DP and B\&B. 
 The solver's name is PYAsUKP, and it is an implementation of the EDUK2 algorithm.
 
@@ -189,7 +189,7 @@ The sources can be found at \url{https://github.com/henriquebecker91/masters/tre
 	The \emph{create\_*\_instances.sh} scripts inside \textbf{codes/sh/} were used to generate the instance datasets.
 }. 
 
-As we can see in figure~\ref{fig:times}, for many instances PYAsUKP is faster than UKP5. However, PYAsUKP can also be one or more orders of magnitude slower than UKP5 on some instances. Our tests have shown when PYAsUKP is faster than UKP5 this is often because of its B\&B phase, that solves some instances almost instantly. When B\&B fails to solve the instance in a short time, PYAsUKP fallbacks to a DP algorithm that seems to be many times slower than UKP5. It's important to note that both algorithms have a pseudo-polynomial worst-case (\(O(c\times n)\)). Integrating a B\&B phase to UKP5 seems promising, and will be the theme for future works.\vspace{1mm}\\
+As we can see in Figure~\ref{fig:times}, for many instances PYAsUKP is faster than UKP5. However, PYAsUKP can also be one or more orders of magnitude slower than UKP5 on some instances. Our tests have shown when PYAsUKP is faster than UKP5 this is often because of its B\&B phase, that solves some instances almost instantly. When B\&B fails to solve the instance in a short time, PYAsUKP fallbacks to a DP algorithm that seems to be many times slower than UKP5. It's important to note that both algorithms have a pseudo-polynomial worst-case (\(O(c\times n)\)). Integrating a B\&B phase to UKP5 seems promising, and will be the theme for future works.\vspace{1mm}\\
 \newpage
 \noindent\textbf{Acknowledgments}
 %We are very thankful to Vincent Poirriez for providing us the codes of a stable version of PYAsUKP, and answering our questions about the paper~\cite{pya}. 

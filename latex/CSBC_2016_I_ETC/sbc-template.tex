@@ -180,7 +180,7 @@ With the intent of making easier to the reader to undestand the core ideia of th
 The computer used on the experiments was an ASUS R552JK-CN159H (Intel Core i7-4700HQ Processor, 6M Cache, 3.40 GHz).
 The operating system used was Linux 4.3.3-2 x86\_64.
 The number of instances of each different class are: Subset-Sum~(400); Strong~Correlation~(240); Postponed~Periodicity~(800); No~Collective~Dominance~(2000); SAW~(1100). These datasets aim to reproduce the ones described in~\cite{pya} (see the paper for more information). 
-The same tool was used to generate the datasets (PYAsUKP).
+The same tool was used to generate the datasets (PYAsUKP). The capacity of the instances vary between \(10^6\) and \(10^8\), and the number of items vary between \(10^3\) and \(10^5\).
 The sources can be found at \url{https://github.com/henriquebecker91/masters/tree/v0.1}\footnote{
 	The UKP5 implementation is at \textbf{codes/cpp/} and two versions of PYAsUKP are at \textbf{codes/ocaml/}.
 	The \emph{pyasukp\_site.tgz} is the version used to generate the instances, and was also available at \url{http://download.gna.org/pyasukp/pyasukpsrc.html}. 
@@ -190,7 +190,8 @@ The sources can be found at \url{https://github.com/henriquebecker91/masters/tre
 }. 
 
 As we can see in figure~\ref{fig:times}, for many instances PYAsUKP is faster than UKP5. However, PYAsUKP can also be one or more orders of magnitude slower than UKP5 on some instances. Our tests have shown when PYAsUKP is faster than UKP5 this is often because of its B\&B phase, that solves some instances almost instantly. When B\&B fails to solve the instance in a short time, PYAsUKP fallbacks to a DP algorithm that seems to be many times slower than UKP5. It's important to note that both algorithms have a pseudo-polynomial worst-case (\(O(c\times n)\)). Integrating a B\&B phase to UKP5 seems promising, and will be the theme for future works.\vspace{1mm}\\
-\textbf{Acknowledgments}
+\newpage
+\noindent\textbf{Acknowledgments}
 %We are very thankful to Vincent Poirriez for providing us the codes of a stable version of PYAsUKP, and answering our questions about the paper~\cite{pya}. 
 We are thankful to the CNPq (Conselho Nacional de Desenvolvimento Cient\'ifico e Tecnol\'ogico) for the financial support.
 

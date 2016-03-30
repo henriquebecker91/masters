@@ -1,4 +1,4 @@
-all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.out test_gardp.out
+all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.out test_gardp.out run_greendp.out
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -29,6 +29,9 @@ run_gardp.out: run_gardp.cpp gardp.hpp wrapper.hpp $(H_DEPS)
 
 test_gardp.out: test_gardp.cpp gardp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ test_gardp.cpp $(CFLAGS) $(DEFS)
+
+run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_greendp.cpp $(CFLAGS) $(DEFS)
 
 .PHONY: clean
 

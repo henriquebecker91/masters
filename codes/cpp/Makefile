@@ -1,9 +1,9 @@
-all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.out test_gardp.out run_greendp.out
+all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.out test_gardp.out run_greendp.out test_greendp.out
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
 # This makes easies to debug overflow errors.
-CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g
+CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 
 LBOOST=-lboost_filesystem -lboost_system 
 H_DEPS=ukp_common.hpp test_common.hpp
 UKP5_DEPS=ukp5.hpp periodicity.hpp dominance.hpp
@@ -32,6 +32,9 @@ test_gardp.out: test_gardp.cpp gardp.hpp wrapper.hpp $(H_DEPS)
 
 run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_greendp.cpp $(CFLAGS) $(DEFS)
+
+test_greendp.out: test_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ test_greendp.cpp $(CFLAGS) $(DEFS)
 
 .PHONY: clean
 

@@ -105,6 +105,123 @@ namespace hbm {
       return true;
     }
 
+    // This function is used to initialize b_ as const.
+    template<typename W, typename P, typename I>
+    vector<W> compute_b_(const I m, const vector<W> &a, const vector<P> &c) {
+      vector<P> b_(m); // it goes until m-1
+      b_[0] = 0; // does not exist, notation begins at 1
+
+      for (I i = 1; i <= m - 1; ++i) {
+        b_[i] = c[m]*a[i] - c[i]*a[m];
+      }
+
+      return b_;
+    }
+
+    /// Modified greendp, or Modern greendp: essentially the same algorithm,
+    /// but using loops (instead of gotos), and without trying to be a carbon
+    /// copy of the article notation and step organization.
+    template<typename W, typename P, typename I>
+    void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+      if (!already_sorted) {
+        sort_by_eff(ukpi.items);
+        reverse(ukpi.items.begin(), ukpi.items.end());
+      }
+
+      // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
+      const I m = static_cast<I>(ukpi.items.size());
+      const W b = ukpi.c;
+
+      vector<W> a(m + 1);
+      a[0] = 0; // Does not exist, notation begins at 1
+      vector<P> c(m + 1);
+      c[0] = 0; // Does not exist, notation begins at 1
+      const W am = ukpi.items[m - 1].w;
+
+      const P cm = ukpi.items[m - 1].p;
+      for (I i = 0; i < m; ++i) {
+        item_t<W, P> it = ukpi.items[i];
+        a[i+1] = it.w;
+        c[i+1] = it.p;
+      }
+
+      // Starts at index 1, this is the cause of the +1
+      W tmp;
+      gcd_n(c.begin() + 1, c.end(), tmp);
+      const W d = tmp;
+
+      // lambda is the remaining space if we fill the capacity b
+      // with the most efficient item.
+      const W lambda = b - (b / a[m]) * a[m];
+      W upper_l = lambda;
+      vector<P> f(b + 1, 0);
+      vector<I> i(b + 1);
+      i[0] = 1;
+
+      P &z = sol.opt; // z is another name for sol.opt
+      z = cm * (b / am);
+      W k = 0;
+
+      // STEP 1
+      // As b is the capacity, b_ will be used where b was subscribed
+      const vector<P> b_ = compute_b_(m, a, c);
+
+      W y = 0;
+      W k_max;
+      if (!compute_k_max(m, b_, a, c, am, cm, b, z, d, k, lambda, k_max)) {
+        //goto stop;
+        return;
+      }
+
+      // STEP 3c
+      bool loop_over_items = true;
+      while (true) {
+        if (loop_over_items) {
+          // STEP 2a, 2b, 2c, 2d
+          // This is very similar to the loop over items of UKP5.
+          // The difference is the "m-1" and the "lambda + am*k_max".
+          for (I j = i[y]; j <= m - 1; ++j) {
+            if (y + a[j] <= lambda + am*k_max)  {
+              I v = c[j] + f[y];
+              if (v >= f[y + a[j]]) {
+                f[y + a[j]] = v;
+                i[y + a[j]] = j;
+              }
+            }
+          }
+        }
+
+        // STEP 3a
+        y = y + 1;
+
+        // STEP 3b
+        if (f[y] <= f[y - 1]) {
+          f[y] = f[y - 1];
+          i[y] = m + 1;
+          loop_over_items = false;
+        } else {
+          loop_over_items = true;
+        }
+
+        // STEP 3d
+        if (y == upper_l) {
+          // STEP 1 (Routine next z)
+          if (f[y] + cm*(b/am) - cm*k > z) {
+            z = f[y] + cm*(b/am) - cm*k;
+            if (!compute_k_max(m, b_, a, c, am, cm, b, z, d, k, lambda, k_max)) {
+              return;
+            }
+          }
+
+          // STEP 2 (Routine next z)
+          k = k + 1;
+          if (k > k_max) return;
+
+          upper_l = upper_l + am;
+        }
+
+      }
+    }
     template<typename W, typename P, typename I>
     void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // I tried to implement the algorithm in a way that anyone can verify
@@ -280,6 +397,50 @@ namespace hbm {
                 int argc, argv_t argv) {
       simple_wrapper(greendp_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
+
+    template<typename W, typename P, typename I>
+    struct mgreendp_wrap : wrapper_t<W, P, I> {
+      virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
+        // Calls the overloaded version with the third argument as a bool
+        hbm_greendp_impl::mgreendp(ukpi, sol, already_sorted);
+
+        return;
+      }
+
+      virtual const std::string& name(void) const {
+        static const std::string name = "mgreendp";
+        return name;
+      }
+    };
+
+    template<typename W, typename P, typename I = size_t>
+    void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
+                int argc, argv_t argv) {
+      simple_wrapper(mgreendp_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    }
+  }
+
+  /// A rewritten version of the algorithm presented at "A Better Step-off
+  /// Algorithm for the Knapsack Problem", an attemp to adapt the algorithm
+  /// to structured programming.
+  ///
+  /// @see greendp
+  template<typename W, typename P, typename I>
+  void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    hbm_greendp_impl::mgreendp(ukpi, sol, already_sorted);
+  }
+
+  /// An overloaded function, it's used as argument to test_common functions.
+  ///
+  /// The only parameter recognized is "--already-sorted". If this parameter is
+  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
+  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  ///
+  /// @see main_take_path
+  /// @see mgreendp(instance_t<W, P> &, solution_t<W, P, I> &, bool)
+  template<typename W, typename P, typename I>
+  void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
+    hbm_greendp_impl::mgreendp(ukpi, sol, argc, argv);
   }
 
   /// Solves an UKP instance by the dynamic programming algorithm presented at

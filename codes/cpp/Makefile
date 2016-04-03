@@ -1,4 +1,4 @@
-all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.out test_gardp.out run_greendp.out test_greendp.out
+all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.out test_gardp.out run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -36,8 +36,14 @@ run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 test_greendp.out: test_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ test_greendp.cpp $(CFLAGS) $(DEFS)
 
+run_mgreendp.out: run_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_mgreendp.cpp $(CFLAGS) $(DEFS)
+
+test_mgreendp.out: test_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ test_mgreendp.cpp $(CFLAGS) $(DEFS)
+
 .PHONY: clean
 
 clean:
-	rm *.out
+	rm run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.out test_gardp.out run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out
 

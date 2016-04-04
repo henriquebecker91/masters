@@ -59,6 +59,19 @@ stop earlier for instances with the properties described above, and will
 last a litlle longer for other instances (because of the overhead of trying
 to detect this situation).
 
+#### HBM_INIT_G_BY_CHUNKS
+The UKP5 mainly use two arrays/vectors with a size between c and two times c
+(c is the knapsack capacity). One of those arrays (the d array) don't need
+initialization. The other (the g array) needs to be zeroed before use.
+The g initialization can be done at the algorithm startup (all g is
+initialized) or while the algorithm runs (chunks of size w_max are initialized
+when needed). Sometimes the capacity is very big, but the instance is 'easy'
+and ukp5 (with HBM_CHECK_PERIODICITY enabled) will stop after using only a
+small fraction of both vectors. In these cases, enabling this flag
+(HBM_INIT_G_BY_CHUNKS) will avoid UKP5 time being bounded by c (even in linear
+time). Note that this will not avoid the memory consumption being bounded
+by c.
+
 #### HBM_PROFILE_PRECISION
 A macro that defines how many digits after the period will be used to display
 some percentages outputed by HBM_PROFILE. Its value should be an integral

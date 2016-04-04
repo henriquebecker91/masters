@@ -7,16 +7,17 @@ CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0
 LBOOST=-lboost_filesystem -lboost_system 
 H_DEPS=ukp_common.hpp test_common.hpp
 UKP5_DEPS=ukp5.hpp periodicity.hpp dominance.hpp
-DEFS=-DHBM_CHECK_PERIODICITY -DHBM_XOR_SWAP
+DEFS=-DHBM_XOR_SWAP 
+UKP5_DEFS=$(DEFS) -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS
 
 run_eduk.out: run_eduk.cpp eduk.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_eduk.cpp $(CFLAGS) $(DEFS)
 
 run_ukp5.out: run_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
-	$(CC) -o $@ run_ukp5.cpp $(CFLAGS) $(LBOOST) $(DEFS)
+	$(CC) -o $@ run_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
 
 test_ukp5.out: test_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
-	$(CC) -o $@ test_ukp5.cpp $(CFLAGS) $(LBOOST) $(DEFS)
+	$(CC) -o $@ test_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
 
 run_per.out: run_per.cpp periodicity.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_per.cpp $(CFLAGS) $(DEFS)

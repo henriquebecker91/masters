@@ -20,8 +20,20 @@
 #include "dominance.hpp"
 #include "periodicity.hpp"
 
+#ifdef HBM_INIT_G_BY_CHUNKS
+  #ifndef HBM_CHECK_PERIODICITY
+    #error The periodicity check is the only possibility of having some gain\
+with the chunk allocation of 'g'. There is no reason to define\
+HBM_INIT_G_BY_CHUNKS without defining HBM_CHECK_PERIODICITY.
+  #endif
+#endif
+
 #ifndef HBM_PROFILE_PRECISION
   #define HBM_PROFILE_PRECISION 5
+#endif
+
+#ifndef HBM_PRINT_VAR
+  #define HBM_PRINT_VAR(var) out << #var ": " << var << std::endl
 #endif
 
 namespace hbm {
@@ -60,7 +72,6 @@ namespace hbm {
     void print(std::ostream &out = std::cout) const {
       // TODO: create a to_string overloaded funtion for this object
       // and use this function with an stringstream as implementation.
-      #define HBM_PRINT_VAR(var) out << #var ": " << var << std::endl
       HBM_PRINT_VAR(apply_smdom);
       if (apply_smdom) HBM_PRINT_VAR(apply_smdom_before_sort);
 
@@ -88,6 +99,39 @@ namespace hbm {
     using namespace std::regex_constants;
     using namespace std::chrono;
     //namespace po = boost::program_options;
+
+    // Stolen from: http://stackoverflow.com/questions/21028299
+    // Allocator adaptor that interposes construct() calls to
+    // convert value initialization into default initialization.
+    template <typename T, typename A=std::allocator<T>>
+    struct no_init_alloc : public A {
+      typedef std::allocator_traits<A> a_t;
+      template <typename U> struct rebind {
+        using other =
+          no_init_alloc<
+            U, typename a_t::template rebind_alloc<U>
+          >;
+      };
+
+      using A::A;
+
+      template <typename U>
+      void construct(U* ptr)
+        noexcept(std::is_nothrow_default_constructible<U>::value) {
+        ::new(static_cast<void*>(ptr)) U;
+      }
+      template <typename U, typename...Args>
+      void construct(U* ptr, Args&&... args) {
+        a_t::construct(static_cast<A&>(*this),
+                       ptr, std::forward<Args>(args)...);
+      }
+    };
+
+    /// The STL vector with a different default allocator.
+    /// This allocator will not initialize the primitive
+    /// numbers to zero when resize is used.
+    template <typename T>
+    using myvector = std::vector<T, no_init_alloc<T>>;
 
     template <typename W, typename P, typename I>
     struct ukp5_extra_info_t : extra_info_t {
@@ -117,31 +161,42 @@ namespace hbm {
       w_min,    ///< Instance smallest item weight.
       w_max;    ///< Instance biggest item weight.
       // Some data about structures manipulated by ukp5
-      std::vector<P> g; ///< The vector with profit values.
-      std::vector<I> d; ///< The vector with item index values.
+      myvector<P> g;  ///< The vector with profit values.
+      myvector<I> d;  ///< The vector with item index values.
       // Some statistics
       /// Number of items sized vector, with the quantity of each value i in dy.
+      /// @note As d isn't initialized, and is sparse, we only count numbers
+      ///   on d[y] if g[y] > 0.
       std::vector<W> qt_i_in_dy;
       /// Same as d, but without the positions skipped.
       std::vector<I> non_skipped_d;
       /// Last position of the d vector that wasn't zero or n (item indexes).
-      W last_dy_non_zero_non_n;
+      /// @note As d isn't initialized, and is sparse, we only count numbers
+      ///   on d[y] if g[y] > 0.
+      W last_dy_non_zero;
       /// Quantity of g positions that weren't skipped by ukp5.
       W qt_non_skipped_ys;
       /// Quantity of zeros in g.
       W qt_gy_zeros;
       /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
       W qt_inner_loop_executions;
+      #ifdef HBM_INIT_G_BY_CHUNKS
+      /// The g array isn't initialized with zeros before starting, it's
+      /// gradually initialized by the UKP5; therefore, it can end before
+      /// initializing all g; this is the last capacity initialized
+      /// (will never be bigger than c).
+      W last_gy_initialized;
+      #endif
 
       /// If an file existed in path, its content is dicarded.
       /// The value of header is written in the file at path, then
       /// two columns are written in the file. The first column is
       /// composed from the vector indexes (will vary between 0 and
       /// v.size()-1). The second column has the vector values.
-      template <typename W_OR_P>
+      template <typename V>
       static void dump(const string &path,
                        const string &header,
-                       const vector<W_OR_P> &v) {
+                       const V &v) {
         ofstream f(path, ofstream::out|ofstream::trunc);
         if (f.is_open())
         {
@@ -166,17 +221,20 @@ namespace hbm {
         out << "end of ukp5 conf" << endl;
 
         #ifdef HBM_CHECK_PERIODICITY
-        out << "last_y_value_outer_loop: " << last_y_value_outer_loop << endl;
+        HBM_PRINT_VAR(last_y_value_outer_loop);
         #endif
-        out << "y_bound: " << y_bound << endl;
-        out << "c: " << c << endl;
-        out << "n: " << n << endl;
-        out << "w_min: " << w_min << endl;
-        out << "w_max: " << w_max << endl;
-        out << "last_dy_non_zero_non_n: " << last_dy_non_zero_non_n << endl;
-        out << "qt_non_skipped_ys: " << qt_non_skipped_ys << endl;
-        out << "qt_gy_zeros: " << qt_gy_zeros << endl;
-        out << "qt_inner_loop_executions: " << qt_inner_loop_executions << endl;
+        #ifdef HBM_INIT_G_BY_CHUNKS
+        HBM_PRINT_VAR(last_gy_initialized);
+        #endif
+        HBM_PRINT_VAR(y_bound);
+        HBM_PRINT_VAR(c);
+        HBM_PRINT_VAR(n);
+        HBM_PRINT_VAR(w_min);
+        HBM_PRINT_VAR(w_max);
+        HBM_PRINT_VAR(last_dy_non_zero);
+        HBM_PRINT_VAR(qt_non_skipped_ys);
+        HBM_PRINT_VAR(qt_gy_zeros);
+        HBM_PRINT_VAR(qt_inner_loop_executions);
         out << "qt_inner_loop_executions/qt_non_skipped_ys: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys) << endl;
         out << "qt_inner_loop_executions/c: " << ((long double) qt_inner_loop_executions)/((long double) c) << endl;
         out << "(qt_inner_loop_executions/qt_non_skipped_ys)/n: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys)/((long double)n)  << endl;
@@ -243,23 +301,33 @@ namespace hbm {
         non_skipped_d.assign(y_bound-w_min + 1, n-1);
 
         qt_i_in_dy.assign(n, 0);
-        qt_i_in_dy[n-1] = w_min;
 
         qt_gy_zeros = w_min;
-        P opt = 0;
         qt_non_skipped_ys = 0;
         qt_inner_loop_executions = 0;
 
-        for (W y = w_min; y <= y_bound-w_min; ++y) {
-          ++(qt_i_in_dy[d[y]]);
+        P opt = 0;
+        W last_position_used = y_bound - w_min;
+        #ifdef HBM_CHECK_PERIODICITY
+        // last_y_value_outer_loop only exists if HBM_CHECK_PERIODICITY is defined
+        last_position_used = std::min(last_position_used, last_y_value_outer_loop);
+        #endif
+        for (W y = w_min; y <= last_position_used; ++y) {
           if (g[y] > opt) {
             ++(qt_non_skipped_ys);
             qt_inner_loop_executions += d[y];
             non_skipped_d[y] = d[y];
+            
             opt = g[y];
           }
-          if (g[y] == 0) ++(qt_gy_zeros);
-          if (d[y] != 0 && d[y] != (n-1)) last_dy_non_zero_non_n = y;
+          if (g[y] == 0) {
+            ++(qt_gy_zeros);
+          } else {
+            if (g[y] > 0) {
+              ++(qt_i_in_dy[d[y]]);
+              last_dy_non_zero = y;
+            }
+          }
         }
         return;
       }
@@ -328,7 +396,7 @@ namespace hbm {
     /// @return The optimal solution value and its weight,
     ///   respectively.
     template<typename W, typename P>
-    pair<P, W> get_opts(W c, const vector<P> &g, W w_min) {
+    pair<P, W> get_opts(W c, const myvector<P> &g, W w_min) {
       P opt = 0;
       // Dont need to be initialized, but initializing to stop
       // compiler warning messages
@@ -366,7 +434,7 @@ namespace hbm {
     /// @param sol The struct with the field used_items, that is set by this
     ///   procedure.
     template<typename W, typename P, typename I>
-    void ukp5_phase2(const vector< item_t<W, P> > &items, const vector<I> &d, solution_t<W, P, I> &sol) {
+    void ukp5_phase2(const vector< item_t<W, P> > &items, const myvector<I> &d, solution_t<W, P, I> &sol) {
       I n = items.size();
       vector<I> qts_its(n, 0);
 
@@ -430,7 +498,7 @@ namespace hbm {
     /// @param w_min The minimal item weight between the items in ukpi.items.
     /// @param w_max The maximal item weight between the items in ukpi.items.
     template<typename W, typename P, typename I>
-    void ukp5_phase1(const instance_t<W, P> &ukpi, vector<P> &g, vector<I> &d, solution_t<W, P, I> &sol, W w_min, W w_max) {
+    void ukp5_phase1(const instance_t<W, P> &ukpi, myvector<P> &g, myvector<I> &d, solution_t<W, P, I> &sol, W w_min, W w_max) {
       const W &c = ukpi.c;
       const I &n = ukpi.items.size();
       const vector< item_t<W, P> > &items = ukpi.items;
@@ -448,7 +516,7 @@ namespace hbm {
       // item. Its utility is to simplify the code when HBM_CHECK_PERIODICITY
       // is defined.
       W wb = items[0].w;
-      g[wb] = items[0].p;;
+      g[wb] = items[0].p;
       d[wb] = 0;
 
       for (I i = 1; i < n; ++i) {
@@ -467,6 +535,29 @@ namespace hbm {
 
       opt = 0;
       for (W y = w_min; y <= c-w_min; ++y) {
+        #ifdef HBM_INIT_G_BY_CHUNKS
+        if (y % w_max == 0) {
+          // If w_max = 10, then g will be zeroed from 0 to 20.
+          // When we reach y == 11, we need to zero the range 21 to 30,
+          // before any other computation take place.
+          W start = y + w_max + 1; // Ex.: 21
+          if (start <= c) { // If c == 14, we don't need to modify 21~30
+            W slice_size = w_max; // Ex.: 10
+            if (y + 2*w_max > c) { // Ex.: But if c == 26?
+              slice_size = c - (y + w_max); // Ex.: 26 - 20 == 6
+            }
+            const W new_size = std::min(y + 2*w_max + 1, c + 1);
+            g.resize(new_size);
+            // The g is a myvector, and will not initialize its contents when
+            // resize is called. We initialize with memset below.
+            // (We prefer to not trust resize -O3 optimization.)
+            memset(g.data() + start, 0, slice_size * sizeof(P));
+            // Update the info
+            shared_ptr< ukp5_extra_info_t<W, P, I> > downcast_ptr = dynamic_pointer_cast< ukp5_extra_info_t<W, P, I> >(sol.extra_info);
+            downcast_ptr->last_gy_initialized = new_size - 1;
+          }
+        }
+        #endif // HBM_INIT_G_BY_CHUNKS
         if (g[y] <= opt) continue;
         #ifdef HBM_CHECK_PERIODICITY
         if (last_y_where_nonbest_item_was_used < y) break;
@@ -509,12 +600,13 @@ namespace hbm {
             d[ny] = ix;
           }
         }
+
       }
 
       #ifdef HBM_CHECK_PERIODICITY
       if (last_y_where_nonbest_item_was_used < c-w_min) {
         W y_ = last_y_where_nonbest_item_was_used;
-        while (d[y_] != 0) ++y_;
+        while (d[y_] != 0 || g[y_] == 0) ++y_;
 
         W a1 = items[0].w;
         W extra_capacity = c - y_;
@@ -654,14 +746,36 @@ namespace hbm {
       ptr->w_min = w_min;
       ptr->w_max = w_max;
 
-      begin = steady_clock::now();
+      begin = steady_clock::now(); // vector_alloc_time
       // Use solution_t.extra_info fields instead of local variables to
       // propagate the array values. The arrays will be dumped to files,
       // making possible study them with R or other tool.
-      vector<P> &g = ptr->g;
-      vector<I> &d = ptr->d;
-      g.assign(y_bound+1+(w_max-w_min), 0);
-      d.assign(y_bound+1+(w_max-w_min), n-1);
+      myvector<P> &g = ptr->g;
+      myvector<I> &d = ptr->d;
+
+      // As d is a myvector this will not initialize its contents
+      // (it's an O(1) operation, and d elements are of undefined value).
+      d.resize(y_bound+1+(w_max-w_min));
+
+      // Not that we need to allocate y_bound+1+(w_max-w_min), as we can
+      // reference until this position on the algorithm. But we will only
+      // read until y_bound (anything after position y_bound is not
+      // relevant and only exists to avoid weight vs capacity tests).
+      g.reserve(y_bound+1+(w_max-w_min));
+      #ifdef HBM_INIT_G_BY_CHUNKS
+      const W qt_to_initialize = std::min(2*w_max + 1, y_bound+1);
+      #else
+      const W qt_to_initialize = y_bound+1;
+      #endif
+
+      // The g is a myvector, and will not initialize its contents when
+      // resize is called. We initialize with memset below.
+      // (We prefer to not trust resize -O3 optimization.)
+      g.resize(qt_to_initialize);
+      memset(g.data(), 0, qt_to_initialize*sizeof(P));
+      #ifdef HBM_INIT_G_BY_CHUNKS
+      ptr->last_gy_initialized = qt_to_initialize - 1;
+      #endif
       ptr->vector_alloc_time = difftime_between_now_and(begin);
 
       begin = steady_clock::now();

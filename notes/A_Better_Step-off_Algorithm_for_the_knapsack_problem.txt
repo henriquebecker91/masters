@@ -5,4 +5,9 @@ PDF of terrible quality.
 
 The code was implemented (codes/cpp/greenberg.hpp) and it shows a performance very similar to UKP5. I'm sure it's not the exactly same algorithm, many additional variables are used by the greenberg method, and both the 'i' and the 'f' vectors seem organized in different ways than the 'd' and 'g' ('i' is similar to 'd', and 'f' to 'g' but they aren't equal after different algorithms execution), but both are similar at other points, like the fact that it stores lower bounds forward instead of looking for subproblems backward, and have a built-in periodicity check (but the test iself is different too).
 
+Seems like the 'k' variable represents how many copies of the best item AREN'T used. The algorithm begins assuming the knapsack is completely filled with copies of the best item and k becomes bigger when we are trying possibilities with lesser quantities of the best item. The algorithm can ends before y = c because the algorithm detects that increasing k (i.e. reducing the quantity of the best item on the solution) can't help to find a better solution.
+
+The k_max is the maximum value of k (i.e. the minimal quantity of best item elements that have to appear on a optimal solution). It works basically as a reverse y* periodicity test. Where we know that the algorithm can be stopped because the only solutions yet not examined have a k bigger than k_max (i.e. less than the minimal quantity of best items to be a optimal solution).
+
+The k used on Section 3 ("The c_m/a_m = c_i/a_i case") is a completely different k, that is in the interval 0 to c (or [b/gcd(all_item_weights)] on the article).
 

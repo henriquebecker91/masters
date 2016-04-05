@@ -155,6 +155,8 @@ namespace hbm {
       const W lambda = b - (b / a[m]) * a[m];
       W upper_l = lambda;
       vector<P> f(b + 1, 0);
+      // TODO: optimize i to use myvector (put myvector on ukp_common, and
+      // use it on UKP5 and greenberg)
       vector<I> i(b + 1);
       i[0] = 1;
 

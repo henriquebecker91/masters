@@ -100,39 +100,6 @@ namespace hbm {
     using namespace std::chrono;
     //namespace po = boost::program_options;
 
-    // Stolen from: http://stackoverflow.com/questions/21028299
-    // Allocator adaptor that interposes construct() calls to
-    // convert value initialization into default initialization.
-    template <typename T, typename A=std::allocator<T>>
-    struct no_init_alloc : public A {
-      typedef std::allocator_traits<A> a_t;
-      template <typename U> struct rebind {
-        using other =
-          no_init_alloc<
-            U, typename a_t::template rebind_alloc<U>
-          >;
-      };
-
-      using A::A;
-
-      template <typename U>
-      void construct(U* ptr)
-        noexcept(std::is_nothrow_default_constructible<U>::value) {
-        ::new(static_cast<void*>(ptr)) U;
-      }
-      template <typename U, typename...Args>
-      void construct(U* ptr, Args&&... args) {
-        a_t::construct(static_cast<A&>(*this),
-                       ptr, std::forward<Args>(args)...);
-      }
-    };
-
-    /// The STL vector with a different default allocator.
-    /// This allocator will not initialize the primitive
-    /// numbers to zero when resize is used.
-    template <typename T>
-    using myvector = std::vector<T, no_init_alloc<T>>;
-
     template <typename W, typename P, typename I>
     struct ukp5_extra_info_t : extra_info_t {
       #ifdef HBM_CHECK_PERIODICITY

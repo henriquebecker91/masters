@@ -254,49 +254,42 @@ namespace hbm {
       }
 
       W y = 1;
-      for (; upper_l <= c; upper_l += bi.w) {
-        for (; y < upper_l; ++y) {
+      P z_without_bi = 0;
+      for (; upper_l <= c; upper_l += bi.w, --bi_qt) {
+        for (; y <= upper_l; ++y) {
           // STEP 3b
-          if (f[y] <= f[y - 1]) {
-            f[y] = f[y - 1];
-            i[y] = n + 1;
+          if (f[y] <= z_without_bi) {
+            //f[y] = f[y - 1];
+            //i[y] = n + 1;
             continue;
           }
+          z_without_bi = f[y];
 
           // STEP 2a, 2b, 2c, 2d
           // This is very similar to the loop over items of UKP5.
           // The difference is the "m-1" and the "lambda + am*k_max".
-            for (I j = 1; j <= i[y]; ++j) {
-              const item_t<W, P> it = items[j];
-              const W new_y = y + it.w;
-              const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
-              const P new_p = it.p + f[y];
-              const P old_p = f[new_y];
-              if (new_y < first_y_reserved_for_best_items && new_p >= old_p) {
-                f[new_y] = new_p;
-                i[new_y] = j;
-              }
+          for (I j = 1; j <= i[y]; ++j) {
+            const item_t<W, P> it = items[j];
+            const W new_y = y + it.w;
+            const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
+            const P new_p = it.p + f[y];
+            const P old_p = f[new_y];
+            if (new_y < first_y_reserved_for_best_items && new_p >= old_p) {
+              f[new_y] = new_p;
+              i[new_y] = j;
             }
-        }
-
-        if (f[y] <= f[y - 1]) {
-          f[y] = f[y - 1];
-          i[y] = n + 1;
+          }
         }
 
         // STEP 3d
         // STEP 1 (Routine next z)
-        const P z_ = f[y] + bi.p*bi_qt;
+        const P z_ = z_without_bi + bi.p*bi_qt;
         if (z_ > z) {
           z = z_;
           if (!compute_k_max(b, items, c, z, d, bi_qt, lambda, bi_qt_lb)) {
             break;
           }
         }
-
-        // STEP 2 (Routine next z)
-        --bi_qt;
-        if (bi_qt < bi_qt_lb) break;
       }
     }
 

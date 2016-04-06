@@ -79,7 +79,6 @@ namespace hbm {
                         const P opt,
                         const P d,
                         const W bi_qt,
-                        const W lambda,
                         W &bi_qt_lb) {
       // STEP 1 (Routine k_max)
       const item_t<W, P> &bi = items.front();
@@ -91,6 +90,9 @@ namespace hbm {
       if (r > n) return false;
 
       // STEP 2 (Routine k_max)
+      // lambda is the remaining space if we fill the capacity b
+      // with the most efficient item.
+      const W lambda = c - (c / bi.w) * bi.w;
       const P delta = opt - bi.p*(c/bi.w) + d; 
       const P l_side = (items[r].p*lambda - items[r].w*delta)/b[r];
       const P max_bi_qt = c/bi.w;
@@ -218,12 +220,6 @@ namespace hbm {
       for (I i = 0; i < n; ++i) p.push_back(items[i].p);
       const P d = gcd_n<typename vector<P>::iterator, P>(p.begin(), p.end());
 
-      // lambda is the remaining space if we fill the capacity b
-      // with the most efficient item.
-      const W lambda = c - (c / bi.w) * bi.w;
-      // upper_l is initialized with lambda and is incremented by bi.w at
-      // each time y reachs upper_l
-      W upper_l = lambda;
       vector<P> f(c + 1, 0);
       myvector<I> i;
       i.resize(c + 1);
@@ -240,7 +236,7 @@ namespace hbm {
 
       W bi_qt_lb;
 
-      if (!compute_k_max(b, items, c, z, d, bi_qt, lambda, bi_qt_lb)) {
+      if (!compute_k_max(b, items, c, z, d, bi_qt, bi_qt_lb)) {
         return;
       }
 
@@ -255,19 +251,15 @@ namespace hbm {
 
       W y = 1;
       P z_without_bi = 0;
-      for (; upper_l <= c; upper_l += bi.w, --bi_qt) {
-        for (; y <= upper_l; ++y) {
-          // STEP 3b
-          if (f[y] <= z_without_bi) {
-            //f[y] = f[y - 1];
-            //i[y] = n + 1;
-            continue;
-          }
+      for (++bi_qt; bi_qt-- > 0;) {
+        for (; y <= c - bi_qt*bi.w ; ++y) {
+          if (f[y] <= z_without_bi) continue;
+
           z_without_bi = f[y];
 
           // STEP 2a, 2b, 2c, 2d
           // This is very similar to the loop over items of UKP5.
-          // The difference is the "m-1" and the "lambda + am*k_max".
+          // The difference is the j=1 and the first_y_reserved_for_best_items
           for (I j = 1; j <= i[y]; ++j) {
             const item_t<W, P> it = items[j];
             const W new_y = y + it.w;
@@ -286,7 +278,7 @@ namespace hbm {
         const P z_ = z_without_bi + bi.p*bi_qt;
         if (z_ > z) {
           z = z_;
-          if (!compute_k_max(b, items, c, z, d, bi_qt, lambda, bi_qt_lb)) {
+          if (!compute_k_max(b, items, c, z, d, bi_qt, bi_qt_lb)) {
             break;
           }
         }

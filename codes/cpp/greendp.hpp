@@ -19,24 +19,23 @@ namespace hbm {
     /// Compute the gcd for a variable quantity of numbers.
     /// @note This functions was designed with positive integers on mind.
     template<typename ForwardIterator, typename T>
-    void gcd_n(ForwardIterator begin, ForwardIterator end, T &acc) {
+    T gcd_n(ForwardIterator begin, ForwardIterator end) {
       if (begin == end) {
-        acc = 1;
-        return;
-      }
-      if (begin + 1 == end) {
-        acc = *begin;
-        return;
+        return 1;
       }
 
-      acc = gcd(*begin, *(begin+1));
+      if (begin + 1 == end) {
+        return *begin;
+      }
+
+      T acc = gcd(*begin, *(begin+1));
       ++begin;
 
       for (; begin != end && acc > 1; ++begin) {
         acc = gcd(acc, *begin);
       }
       
-      return;
+      return acc;
     }
 
     /// Compute k_max, also, if returns false the greendp procedure (caller)
@@ -83,13 +82,16 @@ namespace hbm {
                         const W lambda,
                         W &k_max) {
       // STEP 1 (Routine k_max)
-      const item_t<W, P> &bi = items.back();
+//      const item_t<W, P> &bi = items.back();
+      const item_t<W, P> &bi = items.front();
+      const size_t n = items.size();
 
-      size_t r = items.size() - 1;
-      while (r > 0 && b[r] > bi.p*c - bi.w*(opt + d)) --r;
+//      size_t r = items.size() - 1;
+      size_t r = 1;
+      while (r <= n && b[r] > bi.p*c - bi.w*(opt + d)) ++r;
 
 
-      if (r == 0) return false;
+      if (r > n) return false;
 
       // STEP 2 (Routine k_max)
       const P delta = opt - bi.p*(c/bi.w) + d; 
@@ -170,14 +172,14 @@ namespace hbm {
     template<typename W, typename P>
     vector<P> compute_b(const vector< item_t<W, P> > &items) {
       const size_t n = items.size();
-      const item_t<W, P> &bi = items.back();
+      const item_t<W, P> &bi = items.front();
 
       vector<P> b;
-      b.reserve(items.size() - 1);
+      b.reserve(items.size());
       b.push_back(0);
 
       for (size_t i = 1; i < n; ++i) {
-        const item_t<W, P> &it = items[i-1];
+        const item_t<W, P> &it = items[i];
         b.push_back(bi.p*it.w - it.p*bi.w);
       }
 
@@ -203,66 +205,58 @@ namespace hbm {
     template<typename W, typename P, typename I>
     void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       vector< item_t<W, P> > &items = ukpi.items;
-      // Greenberg used the items on non-decreasing efficiency order
-      if (!already_sorted) {
-        sort_by_eff(items);
-        reverse(items.begin(), items.end());
-      }
+      if (!already_sorted) sort_by_eff(items);
+      //reverse(items.begin(), items.end());
 
-      // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
       const I n = static_cast<I>(items.size());
       const W c = ukpi.c;
+      // bi stands for 'best item'
+      const item_t<W, P> bi = items[0];//items[n - 1];
 
-      /*vector<W> a(n + 1);
-      a[0] = 0; // Does not exist, notation begins at 1*/
       vector<P> p;
-      p.reserve(n + 1);
-      p.push_back(0); // Does not exist, notation begins at 1
+      p.reserve(n);
 
-      //const W am = ukpi.items[n - 1].w;
-      //const P cm = ukpi.items[n - 1].p;
-      const item_t<W, P> bi = items[n - 1];
       for (I i = 0; i < n; ++i) {
         p.push_back(items[i].p);
-        //item_t<W, P> it = ukpi.items[i];
-        //a[i+1] = it.w;
-        //p[i+1] = it.p;
       }
 
-      // Starts at index 1, this is the cause of the +1
-      W tmp;
-      gcd_n(p.begin() + 1, p.end(), tmp);
-      const W d = tmp;
+      const P d = gcd_n<typename vector<P>::iterator, P>(p.begin(), p.end());
 
       // lambda is the remaining space if we fill the capacity b
       // with the most efficient item.
       const W lambda = c - (c / bi.w) * bi.w;
+      // upper_l is initialized with lambda and is incremented by bi.w at
+      // each time y reachees upper_l
       W upper_l = lambda;
       vector<P> f(c + 1, 0);
       myvector<I> i;
       i.resize(c + 1);
-
 
       // z is another name for sol.opt
       P &z = sol.opt;
       // We init z with the profit value of the solution composed by the 
       // maximum number of best items that the knapsack can hold.
       z = bi.p * (c / bi.w);
+      // k is the nuber of bi.w capacity slices after lambda that aren't
+      // occupied by copies of the best item
       W k = 0;
 
       // STEP 1
-      // As b is the capacity, b will be used where b was subscribed
       const vector<P> b = compute_b(items);
 
+      // k_max is the upper bound on k. This means that if k becomes greater
+      // than k_max we can stop the algorithm. By the definition of k, k_max
+      // means that the last k_max*bi.w capacities are reserved to the copies
+      // of the best item on an optimal solution.
       W k_max;
       if (!compute_k_max(b, items, c, z, d, k, lambda, k_max)) {
         return;
       }
 
-      for (I j = 1; j <= n - 1; ++j) {
+      for (I j = 1; j < n; ++j) {
         const W first_y_reserved_for_best_items = lambda + bi.w*k_max + 1;
         const item_t<W, P> it = items[j];
-        if (it.w < first_y_reserved_for_best_items && it.p >= f[it.w]) {
+        if (it.w < first_y_reserved_for_best_items/* && it.p >= f[it.w]*/) {
           f[it.w] = it.p;
           i[it.w] = j;
         }
@@ -300,7 +294,7 @@ namespace hbm {
         // This is very similar to the loop over items of UKP5.
         // The difference is the "m-1" and the "lambda + am*k_max".
         if (enumerate_solutions) {
-          for (I j = i[y]; j <= n - 1; ++j) {
+          for (I j = 1; j <= i[y]; ++j) {
             const item_t<W, P> it = items[j];
             const W new_y = y + it.w;
             const W first_y_reserved_for_best_items = lambda + bi.w*k_max + 1;
@@ -348,9 +342,7 @@ namespace hbm {
       }
 
       // Starts at index 1, this is the cause of the +1
-      W tmp;
-      gcd_n(c.begin() + 1, c.end(), tmp);
-      const W d = tmp;
+      const W d = gcd_n<typename vector<P>::iterator, P>(c.begin() + 1, c.end());
 
       // lambda is the remaining space if we fill the capacity b
       // with the most efficient item.

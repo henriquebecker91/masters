@@ -78,18 +78,15 @@ namespace hbm {
                         const W c,
                         const P opt,
                         const P d,
-                        const W k,
+                        const W bi_qt,
                         const W lambda,
-                        W &k_max) {
+                        W &bi_qt_lb) {
       // STEP 1 (Routine k_max)
-//      const item_t<W, P> &bi = items.back();
       const item_t<W, P> &bi = items.front();
       const size_t n = items.size();
 
-//      size_t r = items.size() - 1;
       size_t r = 1;
       while (r <= n && b[r] > bi.p*c - bi.w*(opt + d)) ++r;
-
 
       if (r > n) return false;
 
@@ -97,9 +94,13 @@ namespace hbm {
       const P delta = opt - bi.p*(c/bi.w) + d; 
       const P l_side = (items[r].p*lambda - items[r].w*delta)/b[r];
       const P max_bi_qt = c/bi.w;
-      k_max = l_side < max_bi_qt ? l_side : max_bi_qt;
+      const W k_max = l_side < max_bi_qt ? l_side : max_bi_qt;
+//      const P max_bi_qt = c/bi.w;
+//      const P delta = opt - bi.p*max_bi_qt + d; 
+//      const P l_side = max_bi_qt - ((items[r].p*lambda - items[r].w*delta)/b[r]);
+      bi_qt_lb = max_bi_qt - k_max;
 
-      if (k > k_max) return false;
+      if (bi_qt < bi_qt_lb) return false;
 
       return true;
     }
@@ -206,27 +207,22 @@ namespace hbm {
     void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       vector< item_t<W, P> > &items = ukpi.items;
       if (!already_sorted) sort_by_eff(items);
-      //reverse(items.begin(), items.end());
 
       const I n = static_cast<I>(items.size());
       const W c = ukpi.c;
       // bi stands for 'best item'
-      const item_t<W, P> bi = items[0];//items[n - 1];
+      const item_t<W, P> bi = items[0];
 
       vector<P> p;
       p.reserve(n);
-
-      for (I i = 0; i < n; ++i) {
-        p.push_back(items[i].p);
-      }
-
+      for (I i = 0; i < n; ++i) p.push_back(items[i].p);
       const P d = gcd_n<typename vector<P>::iterator, P>(p.begin(), p.end());
 
       // lambda is the remaining space if we fill the capacity b
       // with the most efficient item.
       const W lambda = c - (c / bi.w) * bi.w;
       // upper_l is initialized with lambda and is incremented by bi.w at
-      // each time y reachees upper_l
+      // each time y reachs upper_l
       W upper_l = lambda;
       vector<P> f(c + 1, 0);
       myvector<I> i;
@@ -236,25 +232,20 @@ namespace hbm {
       P &z = sol.opt;
       // We init z with the profit value of the solution composed by the 
       // maximum number of best items that the knapsack can hold.
-      z = bi.p * (c / bi.w);
-      // k is the nuber of bi.w capacity slices after lambda that aren't
-      // occupied by copies of the best item
-      W k = 0;
+      W bi_qt = (c / bi.w);
+      z = bi.p * bi_qt;
 
       // STEP 1
       const vector<P> b = compute_b(items);
 
-      // k_max is the upper bound on k. This means that if k becomes greater
-      // than k_max we can stop the algorithm. By the definition of k, k_max
-      // means that the last k_max*bi.w capacities are reserved to the copies
-      // of the best item on an optimal solution.
-      W k_max;
-      if (!compute_k_max(b, items, c, z, d, k, lambda, k_max)) {
+      W bi_qt_lb;
+
+      if (!compute_k_max(b, items, c, z, d, bi_qt, lambda, bi_qt_lb)) {
         return;
       }
 
       for (I j = 1; j < n; ++j) {
-        const W first_y_reserved_for_best_items = lambda + bi.w*k_max + 1;
+        const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
         const item_t<W, P> it = items[j];
         if (it.w < first_y_reserved_for_best_items/* && it.p >= f[it.w]*/) {
           f[it.w] = it.p;
@@ -263,7 +254,7 @@ namespace hbm {
       }
 
       bool enumerate_solutions;
-      for (W y = 1; k <= k_max; ++y) {
+      for (W y = 1; bi_qt >= bi_qt_lb && y <= c; ++y) {
         enumerate_solutions = true;
         // STEP 3b
         if (f[y] <= f[y - 1]) {
@@ -275,17 +266,17 @@ namespace hbm {
         // STEP 3d
         if (y == upper_l) {
           // STEP 1 (Routine next z)
-          const P z_ = f[y] + bi.p*(c/bi.w) - bi.p*k;
+          const P z_ = f[y] + bi.p*bi_qt;
           if (z_ > z) {
             z = z_;
-            if (!compute_k_max(b, items, c, z, d, k, lambda, k_max)) {
+            if (!compute_k_max(b, items, c, z, d, bi_qt, lambda, bi_qt_lb)) {
               return;
             }
           }
 
           // STEP 2 (Routine next z)
-          k = k + 1;
-          if (k > k_max) return;
+          --bi_qt;
+          if (bi_qt < bi_qt_lb) return;
 
           upper_l = upper_l + bi.w;
         }
@@ -297,7 +288,7 @@ namespace hbm {
           for (I j = 1; j <= i[y]; ++j) {
             const item_t<W, P> it = items[j];
             const W new_y = y + it.w;
-            const W first_y_reserved_for_best_items = lambda + bi.w*k_max + 1;
+            const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
             const P new_p = it.p + f[y];
             const P old_p = f[new_y];
             if (new_y < first_y_reserved_for_best_items && new_p >= old_p) {

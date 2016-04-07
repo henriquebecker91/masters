@@ -85,30 +85,46 @@ namespace hbm {
       const size_t n = items.size();
 
       size_t r = 1;
-      //if (bi.p*c < bi.w*(opt + d)) cout << bi.p*c << "<" << bi.w*(opt + d) << endl;
       const P eff_diff_bi_and_opt_plus_one = bi.p*c - (opt + d)*bi.w;
-      //cout << "eff_diff_bi_and_opt_plus_one: " << eff_diff_bi_and_opt_plus_one << endl;
-      //cout << "b[" << r << "]: " << b[r] << endl;
-      while (r < n && b[r] > eff_diff_bi_and_opt_plus_one) {
-        ++r;
-        //cout << "b[" << r << "]: " << b[r] << endl;
-      }
-      // r == n, only if the best item threshold dominated every other item?
-      // bi.p*c - (opt + d)*bi.w == bi.p/bi.w - (opt + min_value_non_zero)/c
-      // The equality above is only accurate if the division is not the
-      // integer division, but the floating point division.
-      // This test verifies if the difference in efficiency between the
-      // best item and the item r is greater than the difference in efficiency
-      // between the best item and a solution slight better than ours.
+      while (r < n && b[r] > eff_diff_bi_and_opt_plus_one) ++r;
+      // Let's examine the condition above:
+      // b[r] > eff_diff_bi_and_opt_plus_one | original
+      // bi.p*it.w - it.p*bi.w > bi.p*c - (opt + d)*bi.w | expansion
+      // (bi.p*it.w)/bi.w - it.p > (bi.p*c)/bi.w - (opt + d) | div by bi.w
+      // (bi.p/bi.w * it.w) - it.p > (bi.p/bi.w * c) - (opt + d) | rearrange
+      // So, basically what's happening here is that the we are multiplying the
+      // efficiency of the best item (bi.p/bi.w) with two weights (the weight
+      // of an item on the left side, and the knapsack max weight at the right
+      // side) and subtracting the 'natural' profit of that weight (the profit
+      // of an item on the left side, and the best solution found until now at
+      // the right side). For the same weight (i.e it.w == bi.w and bi.w == c)
+      // we have bi.p - it.p and bi.p - (opt + d). This way we can easily
+      // verify that for a more efficient 'it' or opt we have a smaller value
+      // (always above zero, as bi is the most efficient item and (bi.p/bi.w)*c
+      // is the relaxed solution). If b[r] is greater than
+      // eff_diff_bi_and_opt_plus_one this means 'it' is LESS efficient than
+      // the solution, and therefore can't improve the solution. Remember that
+      // the current solution is f[c-bi_qt*bi.w]+bi_qt*bi.p, or in other words,
+      // the guaranteed optimal solution value for c-bi_qt*bi.w more copies of
+      // the most efficient item. The current solution can be more efficient
+      // than the second most efficient item (items[1]) because opt is
+      // reasonably efficient and some copies of bi are sufficient to make the
+      // current solution more efficient than the second most efficient item.
+      // Also, as f[c-bi_qt*bi.w] is a guaranteed optimal value, the only way
+      // to insert a copy of item 'it' to the solution is removing one or more
+      // copies of the best item.
       if (r == n) return false;
-      //bi.p*it.w - it.p*bi.w
+      // if r == n, then no item can improve the solution 
 
-      // lambda is the remaining space if we fill the capacity b
+      // lambda is the remaining space if we fill the capacity c
       // with the most efficient item.
       const W lambda = c - (c / bi.w) * bi.w;
-      const P max_bi_qt = c/bi.w;
+      const W max_bi_qt = c/bi.w;
 
-      const P delta = opt - bi.p*max_bi_qt + d; 
+      // delta is the profit value of lambda in the current solution, if we
+      // assume that after lambda the remaining capacity is filled with copies
+      // of the best item.
+      const P delta = (opt + d) - bi.p*max_bi_qt; 
       const P l_side = (items[r].p*lambda - items[r].w*delta)/b[r];
       bi_qt_lb = max_bi_qt - std::min(l_side, max_bi_qt);
 
@@ -262,22 +278,19 @@ namespace hbm {
       for (I j = 1; j < n; ++j) {
         const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
         const item_t<W, P> it = items[j];
-        if (it.w < first_y_reserved_for_best_items/* && it.p >= f[it.w]*/) {
+        if (it.w < first_y_reserved_for_best_items && it.p > f[it.w]) {
           f[it.w] = it.p;
           i[it.w] = j;
         }
       }
 
       W &y = sol.y_opt = 1;
-      P z_without_bi = 0;
-      for (++bi_qt; bi_qt-- > 0;) {
-        // TODO: check why 'y' is bigger at end of this version than
-        // the original version, check if y should end this loop
-        // with this exactly value or less.
-        for (; y <= c - bi_qt*bi.w; ++y) {
-          if (f[y] <= z_without_bi) continue;
+      P max_previous_fy = 0;
+      for (; bi_qt >= bi_qt_lb; --bi_qt) {
+        for (; y < c - bi_qt*bi.w; ++y) {
+          if (f[y] <= max_previous_fy) continue;
 
-          z_without_bi = f[y];
+          max_previous_fy = f[y];
 
           // STEP 2a, 2b, 2c, 2d
           // This is very similar to the loop over items of UKP5.
@@ -288,7 +301,7 @@ namespace hbm {
             const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
             const P new_p = it.p + f[y];
             const P old_p = f[new_y];
-            if (new_y < first_y_reserved_for_best_items && new_p >= old_p) {
+            if (new_y < first_y_reserved_for_best_items && new_p > old_p) {
               f[new_y] = new_p;
               i[new_y] = j;
             }
@@ -297,15 +310,18 @@ namespace hbm {
 
         // STEP 3d
         // STEP 1 (Routine next z)
-        const P z_ = z_without_bi + bi.p*bi_qt;
+        // Note that now y == c - bi_qt*bi.w,
+        // and max_previous_fy == max(f[0..y-1])
+        const P z_ = std::max(max_previous_fy, f[y]) + bi.p*bi_qt;
         if (z_ > z) {
           z = z_;
           if (!compute_bi_qt_lb(b, items, c, z, d, bi_qt, bi_qt_lb)) {
             break;
           }
         }
+        // The W type can be unsigned, so we have to stop before it underflows
+        if (bi_qt == 0) break;
       }
-      //cout << "bi_qt:" << bi_qt << endl;
     }
 
     template<typename W, typename P, typename I>

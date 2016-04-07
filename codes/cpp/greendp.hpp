@@ -70,37 +70,47 @@ namespace hbm {
       return true;
     }
 
-    /// Compute k_max, also, if returns false the greendp procedure (caller)
+    /// Compute bi_qt_lb, also, if returns false the greendp procedure (caller)
     /// is to be stopped.
     template<typename W, typename P>
-    bool compute_k_max( const vector<P> &b,
-                        const vector< item_t<W, P> > &items,
-                        const W c,
-                        const P opt,
-                        const P d,
-                        const W bi_qt,
-                        W &bi_qt_lb) {
+    inline bool compute_bi_qt_lb(const vector<P> &b,
+                          const vector< item_t<W, P> > &items,
+                          const W c,
+                          const P opt,
+                          const P d,
+                          const W bi_qt,
+                          W &bi_qt_lb) {
       // STEP 1 (Routine k_max)
       const item_t<W, P> &bi = items.front();
       const size_t n = items.size();
 
       size_t r = 1;
-      while (r <= n && b[r] > bi.p*c - bi.w*(opt + d)) ++r;
+      //if (bi.p*c < bi.w*(opt + d)) cout << bi.p*c << "<" << bi.w*(opt + d) << endl;
+      const P eff_diff_bi_and_opt_plus_one = bi.p*c - (opt + d)*bi.w;
+      //cout << "eff_diff_bi_and_opt_plus_one: " << eff_diff_bi_and_opt_plus_one << endl;
+      //cout << "b[" << r << "]: " << b[r] << endl;
+      while (r < n && b[r] > eff_diff_bi_and_opt_plus_one) {
+        ++r;
+        //cout << "b[" << r << "]: " << b[r] << endl;
+      }
+      // r == n, only if the best item threshold dominated every other item?
+      // bi.p*c - (opt + d)*bi.w == bi.p/bi.w - (opt + min_value_non_zero)/c
+      // The equality above is only accurate if the division is not the
+      // integer division, but the floating point division.
+      // This test verifies if the difference in efficiency between the
+      // best item and the item r is greater than the difference in efficiency
+      // between the best item and a solution slight better than ours.
+      if (r == n) return false;
+      //bi.p*it.w - it.p*bi.w
 
-      if (r > n) return false;
-
-      // STEP 2 (Routine k_max)
       // lambda is the remaining space if we fill the capacity b
       // with the most efficient item.
       const W lambda = c - (c / bi.w) * bi.w;
-      const P delta = opt - bi.p*(c/bi.w) + d; 
-      const P l_side = (items[r].p*lambda - items[r].w*delta)/b[r];
       const P max_bi_qt = c/bi.w;
-      const W k_max = l_side < max_bi_qt ? l_side : max_bi_qt;
-//      const P max_bi_qt = c/bi.w;
-//      const P delta = opt - bi.p*max_bi_qt + d; 
-//      const P l_side = max_bi_qt - ((items[r].p*lambda - items[r].w*delta)/b[r]);
-      bi_qt_lb = max_bi_qt - k_max;
+
+      const P delta = opt - bi.p*max_bi_qt + d; 
+      const P l_side = (items[r].p*lambda - items[r].w*delta)/b[r];
+      bi_qt_lb = max_bi_qt - std::min(l_side, max_bi_qt);
 
       if (bi_qt < bi_qt_lb) return false;
 
@@ -172,6 +182,8 @@ namespace hbm {
     }
 
     // This function is used to initialize b as const.
+    // If no item share the same efficiency as the best item
+    // then all b[i] > 0 for i=1..(n-1) (b[0] = 0 always)
     template<typename W, typename P>
     vector<P> compute_b(const vector< item_t<W, P> > &items) {
       const size_t n = items.size();
@@ -181,10 +193,17 @@ namespace hbm {
       b.reserve(items.size());
       b.push_back(0);
 
+      //const P bi_g = gcd(bi.w, bi.p);
+      //const item_t<W, P> bi_n(bi.w / bi_g, bi.p / bi_g);
       for (size_t i = 1; i < n; ++i) {
         const item_t<W, P> &it = items[i];
         b.push_back(bi.p*it.w - it.p*bi.w);
+        //const P it_g = gcd(it.w, it.p);
+        //const item_t<W, P> it_n(it.w / it_g, it.p / it_g);
+        //cout << "it_g: " << it_g << endl;
+        //cout << "b_n[" << i << "]: " << bi_n.p*it_n.w - it_n.p*bi_n.w << endl;
       }
+      //cout << "bi_g: " << bi_g << endl;
 
       return b;
     }
@@ -236,7 +255,7 @@ namespace hbm {
 
       W bi_qt_lb;
 
-      if (!compute_k_max(b, items, c, z, d, bi_qt, bi_qt_lb)) {
+      if (!compute_bi_qt_lb(b, items, c, z, d, bi_qt, bi_qt_lb)) {
         return;
       }
 
@@ -249,10 +268,13 @@ namespace hbm {
         }
       }
 
-      W y = 1;
+      W &y = sol.y_opt = 1;
       P z_without_bi = 0;
       for (++bi_qt; bi_qt-- > 0;) {
-        for (; y <= c - bi_qt*bi.w ; ++y) {
+        // TODO: check why 'y' is bigger at end of this version than
+        // the original version, check if y should end this loop
+        // with this exactly value or less.
+        for (; y <= c - bi_qt*bi.w; ++y) {
           if (f[y] <= z_without_bi) continue;
 
           z_without_bi = f[y];
@@ -278,11 +300,12 @@ namespace hbm {
         const P z_ = z_without_bi + bi.p*bi_qt;
         if (z_ > z) {
           z = z_;
-          if (!compute_k_max(b, items, c, z, d, bi_qt, bi_qt_lb)) {
+          if (!compute_bi_qt_lb(b, items, c, z, d, bi_qt, bi_qt_lb)) {
             break;
           }
         }
       }
+      //cout << "bi_qt:" << bi_qt << endl;
     }
 
     template<typename W, typename P, typename I>

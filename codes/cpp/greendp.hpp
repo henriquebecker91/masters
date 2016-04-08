@@ -367,13 +367,14 @@ namespace hbm {
       // is used because of this. The only ommited goto's are the ones that
       // jump to the next step (that are plainly and clearly unecessary here).
       // BEFORE STEP 1 (on the bold 'Algorithm.' block)
+      auto &items = ukpi.items;
       if (!already_sorted) {
-        sort_by_eff(ukpi.items);
-        reverse(ukpi.items.begin(), ukpi.items.end());
+        sort_by_eff(items);
+        reverse(items.begin(), items.end());
       }
 
       // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
-      const I m = static_cast<I>(ukpi.items.size());
+      const I m = static_cast<I>(items.size());
       const W b = ukpi.c;
 
       vector<W> a(m + 1);
@@ -384,10 +385,10 @@ namespace hbm {
       vector<P> b_(m + 1);
       b_[0] = 0; // Does not exist, notation begins at 1
 
-      const W am = ukpi.items[m - 1].w;
-      const P cm = ukpi.items[m - 1].p;
+      const W am = items[m - 1].w;
+      const P cm = items[m - 1].p;
       for (I i = 0; i < m; ++i) {
-        item_t<W, P> it = ukpi.items[i];
+        item_t<W, P> it = items[i];
         a[i+1] = it.w;
         c[i+1] = it.p;
       }
@@ -482,6 +483,34 @@ namespace hbm {
       // directly into stop
       stop:
       sol.y_opt = y;
+
+      vector<I> qts_its(m, 0);
+
+      W y_opt = lambda;
+      W bi_qt = b/am;
+      for (; y_opt < b && f[y_opt] != z - bi_qt*cm; y_opt += am, --bi_qt);
+      while (y_opt > 0 && f[y_opt-1] == f[y_opt]) --y_opt;
+
+      I dy_opt;
+      while (y_opt != 0) {
+        dy_opt = i[y_opt];
+        PRINT_VAR(y_opt);
+        y_opt -= items[dy_opt].w;
+        ++qts_its[dy_opt];
+      }
+
+      for (I x = 0; x < m; ++x) {
+        if (qts_its[x] > 0) {
+          sol.used_items.emplace_back(items[x], qts_its[x], x);
+        }
+      }
+
+      if (bi_qt > 0) {
+        auto bqt = itemqt_t<W, P, I>(items[m - 1], bi_qt, m - 1);
+        sol.used_items.push_back(bqt);
+      }
+
+      sol.used_items.shrink_to_fit();
 //      for (size_t x = 0; x <= y+1; ++x) {
 //        cout << "f[" << x << "]: " << f[x] << "\ti[" << x << "]: " << i[x] << endl;
 //      }

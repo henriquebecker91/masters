@@ -11,6 +11,7 @@
 #include <regex>            // for regex, regex_match
 #include <algorithm>        // for sort
 #include "workarounds.hpp"  // for from_string
+#include <chrono>           // for steady_clock::
 
 /// Namespace that encloses everything about Henrique Becker Master's.
 namespace hbm {
@@ -440,6 +441,15 @@ namespace hbm {
       std::sort(items.begin(), items.end());
       return;
     }
+  }
+
+  /// Auxiliar procedure to help compiting times. Do not depend.
+  double inline difftime_between_now_and(
+    const std::chrono::steady_clock::time_point &begin
+  ) {
+    using namespace std::chrono;
+    return duration_cast< duration<double> >(steady_clock::now() - begin)
+           .count();
   }
 
   /// Read an instance in the ukp format from the stream to instance_t.

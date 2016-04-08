@@ -8,18 +8,106 @@
 #include <vector> // For vector
 #include <algorithm>  // For reverse
 #include <boost/math/common_factor_rt.hpp>  // For boost::math::gcd
+#include <chrono> // For steady_clock::
 
-#define PRINT_VAR(x) cout << #x << ": " << x << endl
+#ifndef HBM_PROFILE_PRECISION
+  #define HBM_PROFILE_PRECISION 5
+#endif
+
+#ifndef HBM_PRINT_VAR
+  #define HBM_PRINT_VAR(var) out << #var ": " << var << std::endl
+#endif
+
+#if defined(HBM_PROFILE)
+  // Both macros needs a steady_clock::time_point named 'begin' on scope.
+  #ifndef HBM_START_TIMER
+    #define HBM_START_TIMER() begin = steady_clock::now()
+  #endif
+  #ifndef HBM_STOP_TIMER
+    #define HBM_STOP_TIMER(var) var += difftime_between_now_and(begin)
+  #endif
+#else
+  #ifndef HBM_START_TIMER
+    #define HBM_START_TIMER() do {} while (0)
+  #endif
+  #ifndef HBM_STOP_TIMER
+    #define HBM_STOP_TIMER(var) do {} while (0)
+  #endif
+#endif
 
 namespace hbm {
   namespace hbm_greendp_impl {
     using namespace std;
+    using namespace std::chrono;
     using namespace boost::math;
+
+    template <typename W, typename P, typename I>
+    struct greendp_extra_info_t : extra_info_t {
+      /// The last capacity computed before detecting periodicity and stoping.
+      W last_y_value_outer_loop{0};
+      #ifdef HBM_PROFILE
+      double sort_time{0};        ///< Time used sorting items.
+      double vector_alloc_time{0};///< Time used allocating vectors for DP.
+      double linear_comp_time{0}; ///< Time used by linear time preprocessing.
+      double dp_time{0};     ///< Time used creating partial solutions.
+      double sol_time{0};    ///< Time used to assemble solution.
+      double bound_time{0};  ///< Time used computing bounds.
+      double total_time{0};  ///< Time used by all the algorithm.
+      #endif //HBM_PROFILE
+      I n{0};      ///< Instance number of items.
+      W c{0};      ///< Instance capacity.
+      
+      virtual string gen_info(void) {
+        stringstream out("");
+
+        HBM_PRINT_VAR(last_y_value_outer_loop);
+        HBM_PRINT_VAR(c);
+        HBM_PRINT_VAR(n);
+
+        #ifdef HBM_PROFILE
+        const double sum_time = sort_time + vector_alloc_time +
+          linear_comp_time + dp_time + sol_time + bound_time;
+
+        streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
+        const int two_first_digits_and_period = 3;
+        const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
+        ios_base::fmtflags old_flags = out.setf(std::ios::fixed, std:: ios::floatfield);
+        char old_fill = out.fill(' ');
+
+        #ifndef HBM_PRINT_TIME
+          #define HBM_PRINT_TIME(name, var)\
+            out << name << " time: " << var << "s (";\
+            out << setw(percent_size) << (var/total_time)*100.0;\
+            out << "%)" << endl
+        #endif
+
+        HBM_PRINT_TIME("Sort", sort_time);
+        HBM_PRINT_TIME("Vect", vector_alloc_time);
+        HBM_PRINT_TIME("O(n)", linear_comp_time);
+        HBM_PRINT_TIME("dp  ", dp_time);
+        HBM_PRINT_TIME("bd  ", bound_time);
+        HBM_PRINT_TIME("sol ", sol_time);
+        HBM_PRINT_TIME("Sum ", sum_time);
+        HBM_PRINT_TIME("All ", total_time);
+
+        out.fill(old_fill);
+        out.setf(old_flags);
+        out.precision(old_precision);
+        #endif //HBM_PROFILE
+
+        return out.str();
+      }
+    };
+
+    /// Same as greendp_extra_info_t, created only as a contingence if, in the
+    /// future, we have different stats between greendp and mgreendp.
+    template <typename W, typename P, typename I>
+    struct mgreendp_extra_info_t : greendp_extra_info_t<W, P, I> {};
 
     /// Compute the gcd for a variable quantity of numbers.
     /// @note This functions was designed with positive integers on mind.
     template<typename ForwardIterator, typename T>
-    T gcd_n(ForwardIterator begin, ForwardIterator end) {
+    inline T gcd_n(ForwardIterator begin, ForwardIterator end) {
       if (begin == end) {
         return 1;
       }
@@ -41,18 +129,20 @@ namespace hbm {
     /// Compute k_max, also, if returns false the greendp procedure (caller)
     /// is to be stopped.
     template<typename W, typename P, typename I>
-    bool compute_k_max( const I m,
-                        const vector<P> &b_,
-                        const vector<W> &a,
-                        const vector<P> &c,
-                        const W am,
-                        const P cm,
-                        const W b,
-                        const P z,
-                        const P d,
-                        const W k,
-                        const W lambda,
-                        W &k_max) {
+    inline bool compute_k_max(
+      const I &m,
+      const vector<P> &b_,
+      const vector<W> &a,
+      const vector<P> &c,
+      const W &am,
+      const P &cm,
+      const W &b,
+      const P &z,
+      const P &d,
+      const W &k,
+      const W &lambda,
+      W &k_max
+    ) {
       // STEP 1 (Routine k_max)
       I r = m - 1;
       while (r > 0 && b_[r] > cm*b - am*(z + d)) --r;
@@ -75,10 +165,10 @@ namespace hbm {
     template<typename W, typename P>
     inline bool compute_bi_qt_lb(const vector<P> &b,
                           const vector< item_t<W, P> > &items,
-                          const W c,
-                          const P opt,
-                          const P d,
-                          const W bi_qt,
+                          const W &c,
+                          const P &opt,
+                          const P &d,
+                          const W &bi_qt,
                           W &bi_qt_lb) {
       // STEP 1 (Routine k_max)
       const item_t<W, P> &bi = items.front();
@@ -132,36 +222,6 @@ namespace hbm {
 
       return true;
     }
-
-    /// Compute k_max, also, if returns false the greendp procedure (caller)
-    /// is to be stopped.
-    /*template<typename W, typename P>
-    bool compute_k_max( const vector<P> &b,
-                        const vector< item_t<W, P> > &items,
-                        const W c,
-                        const P opt,
-                        const P d,
-                        const W k,
-                        const W lambda,
-                        W &k_max) {
-      // STEP 1 (Routine k_max)
-      const item_t<W, P> &bi = items[0];
-
-      size_t r = 1;
-      while (r < items.size() && b[r] > bi.p*c - bi.w*(opt + d)) ++r;
-
-      if (r == items.size()) return false;
-
-      // STEP 2 (Routine k_max)
-      const P delta = opt - bi.p*(c/bi.w) + d; 
-      const P l_side = (items[r].p*lambda - items[r].w*delta)/b[r];
-      const P max_bi_qt = c/bi.w;
-      k_max = l_side < max_bi_qt ? l_side : max_bi_qt;
-
-      if (k > k_max) return false;
-
-      return true;
-    }*/
 
     /// Compute next_z, also, if returns false the greendp procedure (caller)
     /// is to be stopped.
@@ -242,11 +302,27 @@ namespace hbm {
     /// copy of the article notation and step organization.
     template<typename W, typename P, typename I>
     void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+      // Extra Info Pointer == eip
+      mgreendp_extra_info_t<W, P, I>* eip = new mgreendp_extra_info_t<W, P, I>();
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
+      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+
+      #ifdef HBM_PROFILE
+      // Used to compute the time all the execution algorithm.
+      steady_clock::time_point all_mgreendp_begin = steady_clock::now();
+
+      // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
+      steady_clock::time_point begin; 
+      #endif
+
+      HBM_START_TIMER();
       vector< item_t<W, P> > &items = ukpi.items;
       if (!already_sorted) sort_by_eff(items);
+      HBM_STOP_TIMER(eip->sort_time);
 
-      const I n = static_cast<I>(items.size());
-      const W c = ukpi.c;
+      HBM_START_TIMER();
+      const I n = eip->n = static_cast<I>(items.size());
+      const W c = eip->c = ukpi.c;
       // bi stands for 'best item'
       const item_t<W, P> bi = items[0];
 
@@ -254,11 +330,15 @@ namespace hbm {
       p.reserve(n);
       for (I i = 0; i < n; ++i) p.push_back(items[i].p);
       const P d = gcd_n<typename vector<P>::iterator, P>(p.begin(), p.end());
+      HBM_STOP_TIMER(eip->linear_comp_time);
 
+      HBM_START_TIMER();
       vector<P> f(c + 1, 0);
       myvector<I> i;
-      i.resize(c + 1);
+      i.resize(c + 1); // this do not initialize the vector
+      HBM_STOP_TIMER(eip->vector_alloc_time);
 
+      HBM_START_TIMER();
       // z is another name for sol.opt
       P &z = sol.opt;
       // We init z with the profit value of the solution composed by the 
@@ -268,13 +348,17 @@ namespace hbm {
 
       // STEP 1
       const vector<P> b = compute_b(items);
+      HBM_STOP_TIMER(eip->linear_comp_time);
 
+      HBM_START_TIMER();
       W bi_qt_lb;
 
       if (!compute_bi_qt_lb(b, items, c, z, d, bi_qt, bi_qt_lb)) {
         return;
       }
+      HBM_STOP_TIMER(eip->bound_time);
 
+      HBM_START_TIMER();
       for (I j = 1; j < n; ++j) {
         const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
         const item_t<W, P> it = items[j];
@@ -283,13 +367,14 @@ namespace hbm {
           i[it.w] = j;
         }
       }
+      HBM_STOP_TIMER(eip->dp_time);
 
-      // TODO create variable at extra_info to show the last y value
-      W y = 1;
+      W &y = eip->last_y_value_outer_loop = 1;
       W y_opt_no_bi = 0;
       W bi_qt_in_z = 0;
       P max_previous_fy = 0;
       for (; bi_qt >= bi_qt_lb; --bi_qt) {
+        HBM_START_TIMER();
         for (; y < c - bi_qt*bi.w; ++y) {
           if (f[y] <= max_previous_fy) continue;
 
@@ -298,10 +383,10 @@ namespace hbm {
           // STEP 2a, 2b, 2c, 2d
           // This is very similar to the loop over items of UKP5.
           // The difference is the j=1 and the first_y_reserved_for_best_items
+          const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
           for (I j = 1; j <= i[y]; ++j) {
-            const item_t<W, P> it = items[j];
+            const item_t<W, P> &it = items[j];
             const W new_y = y + it.w;
-            const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
             if (new_y < first_y_reserved_for_best_items
                 && it.p + f[y] > f[new_y]) {
               f[new_y] = it.p + f[y];
@@ -309,11 +394,13 @@ namespace hbm {
             }
           }
         }
+        HBM_STOP_TIMER(eip->dp_time);
 
         // STEP 3d
         // STEP 1 (Routine next z)
         // Note that now y == c - bi_qt*bi.w,
         // and max_previous_fy == max(f[0..y-1])
+        HBM_START_TIMER();
         const P z_ = std::max(max_previous_fy, f[y]) + bi.p*bi_qt;
         if (z_ > z) {
           z = z_;
@@ -324,14 +411,17 @@ namespace hbm {
             break;
           }
         }
+        HBM_STOP_TIMER(eip->bound_time);
         // The W type can be unsigned, so we have to stop before it underflows
         if (bi_qt == 0) break;
       }
 
+      HBM_START_TIMER();
       vector<I> qts_its(n, 0);
 
       W y_opt = y_opt_no_bi;
       while (y_opt > 0 && f[y_opt] < z - bi_qt_in_z*bi.p) --y_opt;
+      sol.y_opt = y_opt + bi_qt_in_z*bi.w;
 
       I dy_opt;
       while (y_opt != 0) {
@@ -352,24 +442,44 @@ namespace hbm {
       }
 
       sol.used_items.shrink_to_fit();
+      HBM_STOP_TIMER(eip->sol_time);
+      #ifdef HBM_PROFILE
+      eip->total_time = difftime_between_now_and(all_mgreendp_begin);
+      #endif
     }
 
     template<typename W, typename P, typename I>
     void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+      // Extra Info Pointer == eip
+      greendp_extra_info_t<W, P, I>* eip = new greendp_extra_info_t<W, P, I>();
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
+      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+
+      #ifdef HBM_PROFILE
+      // Used to compute the time all the execution algorithm.
+      steady_clock::time_point all_greendp_begin = steady_clock::now();
+
+      // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
+      steady_clock::time_point begin; 
+      #endif
+
       // I tried to implement the algorithm in a way that anyone can verify
       // this is the same algorithm described at the paper. The goto construct
       // is used because of this. The only ommited goto's are the ones that
       // jump to the next step (that are plainly and clearly unecessary here).
       // BEFORE STEP 1 (on the bold 'Algorithm.' block)
+      HBM_START_TIMER();
       auto &items = ukpi.items;
       if (!already_sorted) {
         sort_by_eff(items);
         reverse(items.begin(), items.end());
       }
+      HBM_STOP_TIMER(eip->sort_time);
 
+      HBM_START_TIMER();
       // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
-      const I m = static_cast<I>(items.size());
-      const W b = ukpi.c;
+      const I m = eip->n = static_cast<I>(items.size());
+      const W b = eip->c = ukpi.c;
 
       vector<W> a(m + 1);
       a[0] = 0; // Does not exist, notation begins at 1
@@ -394,10 +504,15 @@ namespace hbm {
       // with the most efficient item.
       const W lambda = b - (b / a[m]) * a[m];
       W upper_l = lambda;
+      HBM_STOP_TIMER(eip->linear_comp_time);
+
+      HBM_START_TIMER();
       vector<P> f(b + 1, 0);
       vector<I> i(b + 1);
       i[0] = 1;
+      HBM_STOP_TIMER(eip->vector_alloc_time);
 
+      HBM_START_TIMER();
       P &z = sol.opt; // z is another name for sol.opt
       z = cm * (b / am);
       W k = 0;
@@ -406,15 +521,21 @@ namespace hbm {
       for (I i = 1; i < m; ++i) {
         b_[i] = cm*a[i] - c[i]*am;
       }
-      W y = 0;
+      HBM_STOP_TIMER(eip->linear_comp_time);
+
+      HBM_START_TIMER();
+      W &y = eip->last_y_value_outer_loop = 0;
       W k_max;
       if (!compute_k_max(m, b_, a, c, am, cm, b, z, d, k, lambda, k_max)) {
+        HBM_STOP_TIMER(eip->bound_time);
         goto stop;
       }
+      HBM_STOP_TIMER(eip->bound_time);
 
       // STEP 2a
       I j, v;
       step_2a:
+      HBM_START_TIMER();
       // if DEBUG
       j = i[y];
 
@@ -440,50 +561,62 @@ namespace hbm {
         j = j + 1;
         goto step_2b;
       }
+      HBM_STOP_TIMER(eip->dp_time);
       
       // STEP 3a
       step_3a:
+      HBM_START_TIMER();
       y = y + 1;
 
       // STEP 3b
       if (f[y] > f[y - 1]) {
+        HBM_STOP_TIMER(eip->dp_time);
         goto step_3c;
       } else {
         f[y] = f[y - 1];
         i[y] = m + 1;
+        HBM_STOP_TIMER(eip->dp_time);
         goto step_3d;
       }
 
       // STEP 3c
       step_3c:
+      HBM_START_TIMER();
       if (y == upper_l) {
         if (!next_z(m, b_, a, c, am, cm, b, z, d, k, lambda, k_max, f, y, upper_l)) {
+          HBM_STOP_TIMER(eip->bound_time);
           goto stop;
         }
       }
+      HBM_STOP_TIMER(eip->bound_time);
       goto step_2a;
       // Because the goto above, the code below can only be accessed by jumping
       // directly into step_3d
 
       // STEP 3d
       step_3d:
+      HBM_START_TIMER();
       if (y == upper_l) {
         if (!next_z(m, b_, a, c, am, cm, b, z, d, k, lambda, k_max, f, y, upper_l)) {
+          HBM_STOP_TIMER(eip->bound_time);
           goto stop;
         }
       }
+      HBM_STOP_TIMER(eip->bound_time);
       goto step_3a;
       // Because the goto above, the code below can only be accessed by jumping
       // directly into stop
       stop:
       sol.y_opt = y;
 
+      HBM_START_TIMER();
       vector<I> qts_its(m, 0);
 
       W y_opt = lambda;
       W bi_qt = b/am;
       for (; y_opt < b && f[y_opt] != z - bi_qt*cm; y_opt += am, --bi_qt);
       while (y_opt > 0 && f[y_opt-1] == f[y_opt]) --y_opt;
+      sol.y_opt = y_opt + bi_qt*am;
 
       I dy_opt;
       while (y_opt != 0) {
@@ -504,6 +637,10 @@ namespace hbm {
       }
 
       sol.used_items.shrink_to_fit();
+      HBM_STOP_TIMER(eip->sol_time);
+      #ifdef HBM_PROFILE
+      eip->total_time = difftime_between_now_and(all_greendp_begin);
+      #endif
     }
 
     template<typename W, typename P, typename I>

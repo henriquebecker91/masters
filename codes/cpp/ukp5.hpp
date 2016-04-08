@@ -602,11 +602,6 @@ namespace hbm {
       return;
     }
 
-    double inline difftime_between_now_and(const steady_clock::time_point &begin) {
-      return duration_cast< duration<double> >(steady_clock::now() - begin)
-             .count();
-    }
-
     template<typename W, typename P, typename I>
     void ukp5(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, const ukp5_conf_t<I> &conf) {
       steady_clock::time_point all_ukp5_begin = steady_clock::now();

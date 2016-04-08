@@ -284,7 +284,10 @@ namespace hbm {
         }
       }
 
-      W &y = sol.y_opt = 1;
+      // TODO create variable at extra_info to show the last y value
+      W y = 1;
+      W y_opt_no_bi = 0;
+      W bi_qt_in_z = 0;
       P max_previous_fy = 0;
       for (; bi_qt >= bi_qt_lb; --bi_qt) {
         for (; y < c - bi_qt*bi.w; ++y) {
@@ -299,10 +302,9 @@ namespace hbm {
             const item_t<W, P> it = items[j];
             const W new_y = y + it.w;
             const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
-            const P new_p = it.p + f[y];
-            const P old_p = f[new_y];
-            if (new_y < first_y_reserved_for_best_items && new_p > old_p) {
-              f[new_y] = new_p;
+            if (new_y < first_y_reserved_for_best_items
+                && it.p + f[y] > f[new_y]) {
+              f[new_y] = it.p + f[y];
               i[new_y] = j;
             }
           }
@@ -315,6 +317,9 @@ namespace hbm {
         const P z_ = std::max(max_previous_fy, f[y]) + bi.p*bi_qt;
         if (z_ > z) {
           z = z_;
+          y_opt_no_bi = y;
+          bi_qt_in_z = bi_qt;
+          
           if (!compute_bi_qt_lb(b, items, c, z, d, bi_qt, bi_qt_lb)) {
             break;
           }
@@ -322,6 +327,37 @@ namespace hbm {
         // The W type can be unsigned, so we have to stop before it underflows
         if (bi_qt == 0) break;
       }
+
+      vector<I> qts_its(n, 0);
+
+      W y_opt = y_opt_no_bi;
+      //PRINT_VAR(y_opt);
+      while (y_opt > 0 && f[y_opt] < z - bi_qt_in_z*bi.p) {
+        //PRINT_VAR(y_opt);
+        //PRINT_VAR(f[y_opt]);
+        --y_opt;
+      }
+      //PRINT_VAR(y_opt);
+
+      I dy_opt;
+      while (y_opt != 0) {
+        dy_opt = i[y_opt];
+        y_opt -= items[dy_opt].w;
+        ++qts_its[dy_opt];
+      }
+
+      for (I i = 0; i < n; ++i) {
+        if (qts_its[i] > 0) {
+          sol.used_items.emplace_back(items[i], qts_its[i], i);
+        }
+      }
+
+      if (bi_qt_in_z > 0) {
+        auto bqt = itemqt_t<W, P, I>(bi, bi_qt_in_z, 0);
+        sol.used_items.push_back(bqt);
+      }
+
+      sol.used_items.shrink_to_fit();
     }
 
     template<typename W, typename P, typename I>

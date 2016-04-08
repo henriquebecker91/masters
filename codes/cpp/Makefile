@@ -3,7 +3,7 @@ all: run_eduk.out run_ukp5.out test_ukp5.out run_per.out run_dom.out run_gardp.o
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
 # This makes easies to debug overflow errors.
-CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 
+CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0
 LBOOST=-lboost_filesystem -lboost_system 
 H_DEPS=ukp_common.hpp test_common.hpp
 UKP5_DEPS=ukp5.hpp periodicity.hpp dominance.hpp

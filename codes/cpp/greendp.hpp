@@ -331,13 +331,7 @@ namespace hbm {
       vector<I> qts_its(n, 0);
 
       W y_opt = y_opt_no_bi;
-      //PRINT_VAR(y_opt);
-      while (y_opt > 0 && f[y_opt] < z - bi_qt_in_z*bi.p) {
-        //PRINT_VAR(y_opt);
-        //PRINT_VAR(f[y_opt]);
-        --y_opt;
-      }
-      //PRINT_VAR(y_opt);
+      while (y_opt > 0 && f[y_opt] < z - bi_qt_in_z*bi.p) --y_opt;
 
       I dy_opt;
       while (y_opt != 0) {
@@ -494,52 +488,22 @@ namespace hbm {
       I dy_opt;
       while (y_opt != 0) {
         dy_opt = i[y_opt];
-        PRINT_VAR(y_opt);
-        y_opt -= items[dy_opt].w;
+        y_opt -= a[dy_opt];
         ++qts_its[dy_opt];
       }
 
-      for (I x = 0; x < m; ++x) {
+      for (I x = 1; x < m; ++x) {
         if (qts_its[x] > 0) {
-          sol.used_items.emplace_back(items[x], qts_its[x], x);
+          sol.used_items.emplace_back(items[x-1], qts_its[x], x);
         }
       }
 
       if (bi_qt > 0) {
-        auto bqt = itemqt_t<W, P, I>(items[m - 1], bi_qt, m - 1);
+        auto bqt = itemqt_t<W, P, I>(items[m-1], bi_qt, m);
         sol.used_items.push_back(bqt);
       }
 
       sol.used_items.shrink_to_fit();
-//      for (size_t x = 0; x <= y+1; ++x) {
-//        cout << "f[" << x << "]: " << f[x] << "\ti[" << x << "]: " << i[x] << endl;
-//      }
-      // TODO: ASSEMBLE SOLUTION
-      /*I n = ukpi.items.size();
-      vector<I> qts_its(n, 0);
-
-      W y_opt = y;
-//      W y_opt = 53312;
-      while (y_opt != 0 && i[y_opt] == m + 1) --y_opt;
-      W old_y_opt = y_opt;
-      I dy_opt;
-      while (y_opt != 0) {
-        dy_opt = i[y_opt] - 1;
-        y_opt -= ukpi.items[dy_opt].w;
-        ++qts_its[dy_opt];
-      }
-
-      for (I i = 0; i < n; ++i) {
-        if (qts_its[i] > 0) {
-          sol.used_items.emplace_back(ukpi.items[i], qts_its[i], i + 1);
-        }
-      }
-      sol.used_items.shrink_to_fit();
-
-      W qtd_best_item = (b - old_y_opt)/am;
-      if (qtd_best_item > 0) {
-        sol.used_items.emplace_back(ukpi.items[n-1], qtd_best_item, m);
-      }*/
     }
 
     template<typename W, typename P, typename I>

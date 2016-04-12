@@ -436,17 +436,6 @@ namespace hbm {
       #endif
     }
 
-    template <typename Container, typename K, typename V>
-    V& find_with_default( const Container &c,
-                          const K &key,
-                          const V &default_value)
-    {
-      auto sentinel = c.end();
-      auto ptr = c.find(key);
-      if (ptr == sentinel) return default_value;
-      else return (*ptr);
-    }
-
     template<typename W, typename P, typename I>
     void greendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -510,6 +499,7 @@ namespace hbm {
       // subscript, we use "d_" to denote the d with subscript.
       myvector<P> d_;
       d_.resize(n + 1);
+      d_[0] = 0; // Does not exist, notation begins at 1
       map<P, I> upper_d;
       map<P, I> upper_e;
       for (I j = 1; j <= n; ++j) {
@@ -517,18 +507,18 @@ namespace hbm {
         upper_c[c[j]] = j;
         upper_d[c[j]] = j;
         upper_e[j] = c[j];
-        upper_f[c[j]] = d[j];
+        upper_f[c[j]] = d_[j];
       }
       vector<W> x(n + 2, 0); // It's indexed until x + 1
       W j = 0; // TODO: check type after algorithm is completed.
       W m = n; // TODO: check type after algorithm is completed.
       HBM_STOP_TIMER(eip->vector_alloc_time);
 
-      //step_1:
+      step_2a:
       j = j + 1;
       if (j > m) goto step_3;
 
-      step_2a:
+      step_2b:
       i = upper_e[j];
       if (upper_c[i] != j) {
         goto step_2a;
@@ -541,23 +531,27 @@ namespace hbm {
       if (k > upper_d[i]) {
         goto step_2a;
       } else {
-        d = upper_f[i] + d[k];
+        d = upper_f[i] + d_[k];
         z = d - (d/t)*t;
+        // THIS LINE IS MISSING IN THE ORIGINAL CODE
       }
 
       step_2d:
-      if (z == 0 || 0 < upper_f[z] && upper_f[z] <= d) {
+      if (z == 0 || (0 < upper_f[z] && upper_f[z] <= d)) {
+        //goto step_2c;
       } else {
         m = m + 1;
         upper_c[z] = m;
         upper_e[m] = z;
         upper_f[z] = d;
+        //goto step_2c;
       }
       goto step_2c;
 
       // Because the goto above, the code below can only be accessed by jumping
       // directly into step_3.
       step_3:
+      z = t - 1;
       // As c is more used as the array of item profit values than a simple
       // variable, we use c to denote the array, and c_ to denote the variable.
       P c_;
@@ -570,12 +564,37 @@ namespace hbm {
         goto step_3c;
       }
       
-      // TODO: end the algotithm
+      step_3b:
+      z = z - 1;
+      if (z == c1*(b/a1)) {
+        goto step_3e;
+      } else {
+        goto step_3a;
+      }
 
-      HBM_STOP_TIMER(eip->sol_time);
+      step_3c:
+      k = upper_d[c_];
+      x[k] = x[k] + 1;
+
+      step_3d:
+      c_ = c_ - c[k];
+      if (c_ < 0) {
+        c_ = c_ + t;
+      } else if (c_ > 0) {
+        goto step_3c;
+      } else {
+        goto stop;
+      }
+
+      step_3e:
+      x[1] = b/a1;
+      x[n + 1] = b - a1*(b/a1);
+
+      stop:
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_greendp1_begin);
       #endif
+      return;
     }
 
     template<typename W, typename P, typename I>

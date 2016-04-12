@@ -3,7 +3,7 @@ all: run_eduk.out run_per.out run_dom.out ukp5 gardp greendp
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
 # This makes easies to debug overflow errors.
-CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 
+CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -g -O0 #-O3 #
 LBOOST=-lboost_filesystem -lboost_system 
 H_DEPS=ukp_common.hpp test_common.hpp
 UKP5_DEPS=ukp5.hpp periodicity.hpp dominance.hpp
@@ -49,7 +49,13 @@ run_mgreendp.out: run_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 test_mgreendp.out: test_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ test_mgreendp.cpp $(CFLAGS) $(DEFS)
 
-greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out
+run_greendp1.out: run_greendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_greendp1.cpp $(CFLAGS) $(DEFS)
+
+test_greendp1.out: test_greendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ test_greendp1.cpp $(CFLAGS) $(DEFS)
+
+greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out
 	touch $@
 
 p_run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
@@ -70,5 +76,5 @@ profile_greendp: p_run_greendp.out p_test_greendp.out p_run_mgreendp.out p_test_
 .PHONY: clean
 
 clean:
-	rm -f run_eduk.out run_per.out run_dom.out run_ukp5.out test_ukp5.out ukp5 run_gardp.out test_gardp.out gardp run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out greendp p_run_greendp.out p_test_greendp.out p_run_mgreendp.out p_test_mgreendp.out profile_greendp
+	rm -f run_eduk.out run_per.out run_dom.out run_ukp5.out test_ukp5.out ukp5 run_gardp.out test_gardp.out gardp run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out greendp p_run_greendp.out p_test_greendp.out p_run_mgreendp.out p_test_mgreendp.out profile_greendp run_mgreendp1.out test_mgreendp1.out
 

@@ -18,91 +18,79 @@
   #define HBM_PRINT_VAR(var) out << #var ": " << var << std::endl
 #endif
 
-#if defined(HBM_PROFILE)
-  // Both macros needs a steady_clock::time_point named 'begin' on scope.
-  #ifndef HBM_START_TIMER
-    #define HBM_START_TIMER() begin = steady_clock::now()
-  #endif
-  #ifndef HBM_STOP_TIMER
-    #define HBM_STOP_TIMER(var) var += difftime_between_now_and(begin)
-  #endif
-#else
-  #ifndef HBM_START_TIMER
-    #define HBM_START_TIMER() do {} while (0)
-  #endif
-  #ifndef HBM_STOP_TIMER
-    #define HBM_STOP_TIMER(var) do {} while (0)
-  #endif
-#endif
-
 namespace hbm {
+  template <typename W, typename P, typename I>
+  struct greendp_extra_info_t : extra_info_t {
+    /// The last capacity computed before detecting periodicity and stoping.
+    W last_y_value_outer_loop{0};
+    #ifdef HBM_PROFILE
+    double sort_time{0};        ///< Time used sorting items.
+    double vector_alloc_time{0};///< Time used allocating vectors for DP.
+    double linear_comp_time{0}; ///< Time used by linear time preprocessing.
+    double dp_time{0};     ///< Time used creating partial solutions.
+    double sol_time{0};    ///< Time used to assemble solution.
+    double bound_time{0};  ///< Time used computing bounds.
+    double total_time{0};  ///< Time used by all the algorithm.
+    #endif //HBM_PROFILE
+    I n{0};      ///< Instance number of items.
+    W c{0};      ///< Instance capacity.
+    
+    virtual std::string gen_info(void) {
+      std::stringstream out("");
+
+      HBM_PRINT_VAR(last_y_value_outer_loop);
+      HBM_PRINT_VAR(c);
+      HBM_PRINT_VAR(n);
+
+      #ifdef HBM_PROFILE
+      const double sum_time = sort_time + vector_alloc_time +
+        linear_comp_time + dp_time + sol_time + bound_time;
+
+      std::streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
+      const int two_first_digits_and_period = 3;
+      const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
+      std::ios_base::fmtflags old_flags = out.setf(std::ios::fixed, std:: ios::floatfield);
+      char old_fill = out.fill(' ');
+
+      #ifndef HBM_PRINT_TIME
+        #define HBM_PRINT_TIME(name, var)\
+          out << name << " time: " << var << "s (";\
+          out << std::setw(percent_size) << (var/total_time)*100.0;\
+          out << "%)" << std::endl
+      #endif
+
+      HBM_PRINT_TIME("Sort", sort_time);
+      HBM_PRINT_TIME("Vect", vector_alloc_time);
+      HBM_PRINT_TIME("O(n)", linear_comp_time);
+      HBM_PRINT_TIME("dp  ", dp_time);
+      HBM_PRINT_TIME("bd  ", bound_time);
+      HBM_PRINT_TIME("sol ", sol_time);
+      HBM_PRINT_TIME("Sum ", sum_time);
+      HBM_PRINT_TIME("All ", total_time);
+
+      out.fill(old_fill);
+      out.setf(old_flags);
+      out.precision(old_precision);
+      #endif //HBM_PROFILE
+
+      return out.str();
+    }
+  };
+
+  /// Same as greendp_extra_info_t, created only as a contingence if, in the
+  /// future, we have different stats between greendp and mgreendp.
+  template <typename W, typename P, typename I>
+  struct mgreendp_extra_info_t : greendp_extra_info_t<W, P, I> {};
+
+  /// Same as greendp_extra_info_t, created only as a contingence if, in the
+  /// future, we have different stats between greendp and greendp1.
+  template <typename W, typename P, typename I>
+  struct greendp1_extra_info_t : greendp_extra_info_t<W, P, I> {};
+
   namespace hbm_greendp_impl {
     using namespace std;
     using namespace std::chrono;
     using namespace boost::math;
-
-    template <typename W, typename P, typename I>
-    struct greendp_extra_info_t : extra_info_t {
-      /// The last capacity computed before detecting periodicity and stoping.
-      W last_y_value_outer_loop{0};
-      #ifdef HBM_PROFILE
-      double sort_time{0};        ///< Time used sorting items.
-      double vector_alloc_time{0};///< Time used allocating vectors for DP.
-      double linear_comp_time{0}; ///< Time used by linear time preprocessing.
-      double dp_time{0};     ///< Time used creating partial solutions.
-      double sol_time{0};    ///< Time used to assemble solution.
-      double bound_time{0};  ///< Time used computing bounds.
-      double total_time{0};  ///< Time used by all the algorithm.
-      #endif //HBM_PROFILE
-      I n{0};      ///< Instance number of items.
-      W c{0};      ///< Instance capacity.
-      
-      virtual string gen_info(void) {
-        stringstream out("");
-
-        HBM_PRINT_VAR(last_y_value_outer_loop);
-        HBM_PRINT_VAR(c);
-        HBM_PRINT_VAR(n);
-
-        #ifdef HBM_PROFILE
-        const double sum_time = sort_time + vector_alloc_time +
-          linear_comp_time + dp_time + sol_time + bound_time;
-
-        streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
-        const int two_first_digits_and_period = 3;
-        const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
-        ios_base::fmtflags old_flags = out.setf(std::ios::fixed, std:: ios::floatfield);
-        char old_fill = out.fill(' ');
-
-        #ifndef HBM_PRINT_TIME
-          #define HBM_PRINT_TIME(name, var)\
-            out << name << " time: " << var << "s (";\
-            out << setw(percent_size) << (var/total_time)*100.0;\
-            out << "%)" << endl
-        #endif
-
-        HBM_PRINT_TIME("Sort", sort_time);
-        HBM_PRINT_TIME("Vect", vector_alloc_time);
-        HBM_PRINT_TIME("O(n)", linear_comp_time);
-        HBM_PRINT_TIME("dp  ", dp_time);
-        HBM_PRINT_TIME("bd  ", bound_time);
-        HBM_PRINT_TIME("sol ", sol_time);
-        HBM_PRINT_TIME("Sum ", sum_time);
-        HBM_PRINT_TIME("All ", total_time);
-
-        out.fill(old_fill);
-        out.setf(old_flags);
-        out.precision(old_precision);
-        #endif //HBM_PROFILE
-
-        return out.str();
-      }
-    };
-
-    /// Same as greendp_extra_info_t, created only as a contingence if, in the
-    /// future, we have different stats between greendp and mgreendp.
-    template <typename W, typename P, typename I>
-    struct mgreendp_extra_info_t : greendp_extra_info_t<W, P, I> {};
 
     /// Compute the gcd for a variable quantity of numbers.
     /// @note This functions was designed with positive integers on mind.
@@ -448,6 +436,148 @@ namespace hbm {
       #endif
     }
 
+    template <typename Container, typename K, typename V>
+    V& find_with_default( const Container &c,
+                          const K &key,
+                          const V &default_value)
+    {
+      auto sentinel = c.end();
+      auto ptr = c.find(key);
+      if (ptr == sentinel) return default_value;
+      else return (*ptr);
+    }
+
+    template<typename W, typename P, typename I>
+    void greendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+      // Extra Info Pointer == eip
+      greendp1_extra_info_t<W, P, I>* eip =
+        new greendp1_extra_info_t<W, P, I>();
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
+      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+
+      #ifdef HBM_PROFILE
+      // Used to compute the time all the execution algorithm.
+      steady_clock::time_point all_greendp1_begin = steady_clock::now();
+
+      // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
+      steady_clock::time_point begin; 
+      #endif
+
+      // I tried to implement the algorithm in a way that anyone can verify
+      // this is the same algorithm described at the paper. The goto construct
+      // is used because of this. The only ommited goto's are the ones that
+      // jump to the next step (that are plainly and clearly unecessary here).
+      // BEFORE STEP 1 (notation already introduced by article)
+      HBM_START_TIMER();
+      auto &items = ukpi.items;
+      // In this paper the items are sorted by non-decreasing efficiency
+      // and the ties are solved by ordering by non-increasing weight
+      // (or profit).
+      if (!already_sorted) sort_by_eff(items);
+      HBM_STOP_TIMER(eip->sort_time);
+
+      HBM_START_TIMER();
+      // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
+      const I n = eip->n = static_cast<I>(items.size());
+      const W b = eip->c = ukpi.c;
+
+      vector<W> a(n + 1);
+      a[0] = 0; // Does not exist, notation begins at 1
+      vector<P> c(n + 1);
+      c[0] = 0; // Does not exist, notation begins at 1
+
+      const W a1 = items.front().w;
+      const P c1 = items.front().p;
+      for (I i = 0; i < n; ++i) {
+        item_t<W, P> it = items[i];
+        a[i+1] = it.w;
+        c[i+1] = it.p;
+      }
+
+      P t = (c1*b)/a1 + 1;
+      P i, k, d, &z = sol.opt;
+      HBM_STOP_TIMER(eip->linear_comp_time);
+
+      HBM_START_TIMER();
+      // STEP 1
+      // TODO: check type after algorithm is completed. See if vector can't
+      // be used.
+      // We do not set every value of f[1..t-1] to zero, it's too much,
+      // we simply will return zero for a non defined position.
+      map<P, P> upper_f;
+      map<P, I> upper_c;
+      // The algorithms have an lowercase d, an uppercase D, and a d with
+      // subscript, we use "d_" to denote the d with subscript.
+      myvector<P> d_;
+      d_.resize(n + 1);
+      map<P, I> upper_d;
+      map<P, I> upper_e;
+      for (I j = 1; j <= n; ++j) {
+        d_[j] = c[j] + t*a[j];
+        upper_c[c[j]] = j;
+        upper_d[c[j]] = j;
+        upper_e[j] = c[j];
+        upper_f[c[j]] = d[j];
+      }
+      vector<W> x(n + 2, 0); // It's indexed until x + 1
+      W j = 0; // TODO: check type after algorithm is completed.
+      W m = n; // TODO: check type after algorithm is completed.
+      HBM_STOP_TIMER(eip->vector_alloc_time);
+
+      //step_1:
+      j = j + 1;
+      if (j > m) goto step_3;
+
+      step_2a:
+      i = upper_e[j];
+      if (upper_c[i] != j) {
+        goto step_2a;
+      } else {
+        k = 0;
+      }
+
+      step_2c:
+      k = k + 1;
+      if (k > upper_d[i]) {
+        goto step_2a;
+      } else {
+        d = upper_f[i] + d[k];
+        z = d - (d/t)*t;
+      }
+
+      step_2d:
+      if (z == 0 || 0 < upper_f[z] && upper_f[z] <= d) {
+      } else {
+        m = m + 1;
+        upper_c[z] = m;
+        upper_e[m] = z;
+        upper_f[z] = d;
+      }
+      goto step_2c;
+
+      // Because the goto above, the code below can only be accessed by jumping
+      // directly into step_3.
+      step_3:
+      // As c is more used as the array of item profit values than a simple
+      // variable, we use c to denote the array, and c_ to denote the variable.
+      P c_;
+      step_3a:
+      if (z + t*b < upper_f[z]) {
+        goto step_3b;
+      } else {
+        x[n + 1] = (z + t*b - upper_f[z])/t;
+        c_ = z;
+        goto step_3c;
+      }
+      
+      // TODO: end the algotithm
+
+      HBM_STOP_TIMER(eip->sol_time);
+      #ifdef HBM_PROFILE
+      eip->total_time = difftime_between_now_and(all_greendp1_begin);
+      #endif
+    }
+
     template<typename W, typename P, typename I>
     void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -644,27 +774,6 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
-    struct greendp_wrap : wrapper_t<W, P, I> {
-      virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
-        // Calls the overloaded version with the third argument as a bool
-        hbm_greendp_impl::greendp(ukpi, sol, already_sorted);
-
-        return;
-      }
-
-      virtual const std::string& name(void) const {
-        static const std::string name = "greendp";
-        return name;
-      }
-    };
-
-    template<typename W, typename P, typename I = size_t>
-    void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
-                int argc, argv_t argv) {
-      simple_wrapper(greendp_wrap<W, P, I>(), ukpi, sol, argc, argv);
-    }
-
-    template<typename W, typename P, typename I>
     struct mgreendp_wrap : wrapper_t<W, P, I> {
       virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
         // Calls the overloaded version with the third argument as a bool
@@ -684,6 +793,77 @@ namespace hbm {
                 int argc, argv_t argv) {
       simple_wrapper(mgreendp_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
+
+    template<typename W, typename P, typename I>
+    struct greendp1_wrap : wrapper_t<W, P, I> {
+      virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
+        // Calls the overloaded version with the third argument as a bool
+        hbm_greendp_impl::greendp1(ukpi, sol, already_sorted);
+
+        return;
+      }
+
+      virtual const std::string& name(void) const {
+        static const std::string name = "greendp1";
+        return name;
+      }
+    };
+
+    template<typename W, typename P, typename I = size_t>
+    void greendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
+                  int argc, argv_t argv) {
+      simple_wrapper(greendp1_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    }
+
+    template<typename W, typename P, typename I>
+    struct greendp_wrap : wrapper_t<W, P, I> {
+      virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
+        // Calls the overloaded version with the third argument as a bool
+        hbm_greendp_impl::greendp(ukpi, sol, already_sorted);
+
+        return;
+      }
+
+      virtual const std::string& name(void) const {
+        static const std::string name = "greendp";
+        return name;
+      }
+    };
+
+    template<typename W, typename P, typename I = size_t>
+    void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
+                int argc, argv_t argv) {
+      simple_wrapper(greendp_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    }
+  }
+
+  /// Solves an UKP instance by one of the dynamic programming algorithm
+  /// presented at "On Equivalent Knapsack Problems" from H. Greenberg (this is
+  /// the one presented as "Algorithm 1"), and stores the results at sol. 
+  ///
+  /// @note IMPORTANT: only works with integers, as it relies on the rounding
+  ///   behaviour of integers on divisions.
+  /// @param ukpi The UKP instance to be solved.
+  /// @param sol The object where the results will be written.
+  /// @param already_sorted If the ukpi.items vector needs to be sorted by
+  ///   non-decreasing efficiency. An if there is more than one most efficient
+  ///   item, the one with the smallest profit (or weight) should be the first.
+  template<typename W, typename P, typename I>
+  void greendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    hbm_greendp_impl::greendp1(ukpi, sol, already_sorted);
+  }
+
+  /// An overloaded function, it's used as argument to test_common functions.
+  ///
+  /// The only parameter recognized is "--already-sorted". If this parameter is
+  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
+  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  ///
+  /// @see main_take_path
+  /// @see greendp1(instance_t<W, P> &, solution_t<W, P, I> &, bool)
+  template<typename W, typename P, typename I>
+  void greendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
+    hbm_greendp_impl::greendp1(ukpi, sol, argc, argv);
   }
 
   /// A rewritten version of the algorithm presented at "A Better Step-off

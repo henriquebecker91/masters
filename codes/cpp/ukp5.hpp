@@ -94,212 +94,207 @@ namespace hbm {
     }
   };
 
+  template <typename W, typename P, typename I>
+  struct ukp5_extra_info_t : extra_info_t {
+    #ifdef HBM_CHECK_PERIODICITY
+    /// @attention The last_y_value_outer_loop field exists only if
+    /// HBM_CHECK_PERIODICITY is defined.
+
+    /// The last capacity computed before detecting periodicity and stoping.
+    W last_y_value_outer_loop;
+    #endif // HBM_CHECK_PERIODICITY
+
+    /// The UKP5 used config.
+    ukp5_conf_t<I> conf;
+
+    // Time of each phase
+    double sort_time;        ///< Time used sorting items.
+    double smdom_time;       ///< Time used removing simple/multiple dominance.
+    double vector_alloc_time;///< Time used allocating vectors for DP.
+    double linear_comp_time; ///< Time used by linear time preprocessing.
+    double phase1_time;      ///< Time used by ukp5 phase1 (find optimal).
+    double phase2_time;      ///< Time used by ukp5 phase2 (assemble solution).
+    double total_time;       ///< Time used by all previous steps.
+    // Some data about instance
+    I n;      ///< Instance number of items.
+    W c,      ///< Instance capacity.
+    y_bound,  ///< Capacity used if use_y_star_per is true.
+    w_min,    ///< Instance smallest item weight.
+    w_max;    ///< Instance biggest item weight.
+    // Some data about structures manipulated by ukp5
+    myvector<P> g;  ///< The vector with profit values.
+    myvector<I> d;  ///< The vector with item index values.
+    // Some statistics
+    /// Number of items sized vector, with the quantity of each value i in dy.
+    /// @note As d isn't initialized, and is sparse, we only count numbers
+    ///   on d[y] if g[y] > 0.
+    std::vector<W> qt_i_in_dy;
+    /// Same as d, but without the positions skipped.
+    std::vector<I> non_skipped_d;
+    /// Last position of the d vector that wasn't zero or n (item indexes).
+    /// @note As d isn't initialized, and is sparse, we only count numbers
+    ///   on d[y] if g[y] > 0.
+    W last_dy_non_zero;
+    /// Quantity of g positions that weren't skipped by ukp5.
+    W qt_non_skipped_ys;
+    /// Quantity of zeros in g.
+    W qt_gy_zeros;
+    /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
+    W qt_inner_loop_executions;
+    #ifdef HBM_INIT_G_BY_CHUNKS
+    /// The g array isn't initialized with zeros before starting, it's
+    /// gradually initialized by the UKP5; therefore, it can end before
+    /// initializing all g; this is the last capacity initialized
+    /// (will never be bigger than c).
+    W last_gy_initialized;
+    #endif
+
+    /// If an file existed in path, its content is dicarded.
+    /// The value of header is written in the file at path, then
+    /// two columns are written in the file. The first column is
+    /// composed from the vector indexes (will vary between 0 and
+    /// v.size()-1). The second column has the vector values.
+    template <typename V>
+    static void dump(const std::string &path,
+                     const std::string &header,
+                     const V &v) {
+      using namespace std;
+      ofstream f(path, ofstream::out|ofstream::trunc);
+      if (f.is_open())
+      {
+        f << header << endl;
+        for (size_t y = 0; y < v.size(); ++y) {
+          f << y << "\t" << v[y] << endl;
+        }
+      } else {
+        cerr << __func__ << ": Couldn't open file: " << path << endl;
+      }
+    }
+
+    /// Generates a good number of stats about the UKP5 execution.
+    /// Probably there's no way of adptating this method if the
+    /// UKP5 arrays are changed to slices.
+    virtual std::string gen_info(void) {
+      using namespace std;
+      ukp5_gen_stats();
+
+      stringstream out("");
+      out << "ukp5 used conf follows:" << endl;
+      conf.print(out);
+      out << "end of ukp5 conf" << endl;
+
+      #ifdef HBM_CHECK_PERIODICITY
+      HBM_PRINT_VAR(last_y_value_outer_loop);
+      #endif
+      #ifdef HBM_INIT_G_BY_CHUNKS
+      HBM_PRINT_VAR(last_gy_initialized);
+      #endif
+      HBM_PRINT_VAR(y_bound);
+      HBM_PRINT_VAR(c);
+      HBM_PRINT_VAR(n);
+      HBM_PRINT_VAR(w_min);
+      HBM_PRINT_VAR(w_max);
+      HBM_PRINT_VAR(last_dy_non_zero);
+      HBM_PRINT_VAR(qt_non_skipped_ys);
+      HBM_PRINT_VAR(qt_gy_zeros);
+      HBM_PRINT_VAR(qt_inner_loop_executions);
+      out << "qt_inner_loop_executions/qt_non_skipped_ys: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys) << endl;
+      out << "qt_inner_loop_executions/c: " << ((long double) qt_inner_loop_executions)/((long double) c) << endl;
+      out << "(qt_inner_loop_executions/qt_non_skipped_ys)/n: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys)/((long double)n)  << endl;
+      out << "(qt_inner_loop_executions/c)/n: " << ((long double) qt_inner_loop_executions)/((long double) c)/((long double)n) << endl;
+
+      const double &stime = sort_time, &dtime = smdom_time,
+        &vtime = vector_alloc_time, &lctime = linear_comp_time,
+        &p1time = phase1_time, &p2time = phase2_time;
+      const double sum_time =
+        stime + dtime + vtime + lctime + p1time + p2time;
+
+      streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
+      const int two_first_digits_and_period = 3;
+      const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
+      ios_base::fmtflags old_flags = out.setf(std::ios::fixed, std:: ios::floatfield);
+      char old_fill = out.fill(' ');
+
+      #ifndef HBM_PRINT_TIME
+        #define HBM_PRINT_TIME(name, var)\
+          out << name << " time: " << var << "s (";\
+          out << std::setw(percent_size) << (var/total_time)*100.0;\
+          out << "%)" << std::endl
+      #endif
+
+      HBM_PRINT_TIME("Sort", stime);
+      HBM_PRINT_TIME("Dom ", dtime);
+      HBM_PRINT_TIME("Vect", vtime);
+      HBM_PRINT_TIME("O(n)", lctime);
+      HBM_PRINT_TIME("pha1", p1time);
+      HBM_PRINT_TIME("pha2", p2time);
+      HBM_PRINT_TIME("pha2", sum_time);
+      out << "All  time: " << total_time << "s" << endl;
+
+      out.fill(old_fill);
+      out.setf(old_flags);
+      out.precision(old_precision);
+
+      if (conf.create_dumps) {
+        dump(conf.gd_path, "y\tgy", g);
+        dump(conf.dd_path, "y\tdy", d);
+        dump(conf.nsd_path, "y\tdy", non_skipped_d);
+        dump(conf.dqt_path, "i\tqt_in_d", qt_i_in_dy);
+      }
+
+      return out.str();
+    }
+
+    /// This method set the majority of the values of this stats class. All
+    /// the values set by it need extra computation, and because of this they
+    /// are computed here, after the UKP5 executed, and without affecting its
+    /// time measurement. This method only works if the following variables
+    /// are set first: n, c, y_bound, w_min, w_max, g and d. It can't receive
+    /// this values by constructor as g and d are initialized empty and
+    /// changed by UKP5 (they aren't a copy of the vectors used by ukp5, they
+    /// are the vectors used by ukp5).
+    void ukp5_gen_stats(void) {
+      non_skipped_d.assign(y_bound-w_min + 1, n-1);
+
+      qt_i_in_dy.assign(n, 0);
+
+      qt_gy_zeros = w_min;
+      qt_non_skipped_ys = 0;
+      qt_inner_loop_executions = 0;
+
+      P opt = 0;
+      W last_position_used = y_bound - w_min;
+      #ifdef HBM_CHECK_PERIODICITY
+      // last_y_value_outer_loop only exists if HBM_CHECK_PERIODICITY is defined
+      last_position_used = std::min(last_position_used, last_y_value_outer_loop);
+      #endif
+      for (W y = w_min; y <= last_position_used; ++y) {
+        if (g[y] > opt) {
+          ++(qt_non_skipped_ys);
+          qt_inner_loop_executions += d[y];
+          non_skipped_d[y] = d[y];
+          
+          opt = g[y];
+        }
+        if (g[y] == 0) {
+          ++(qt_gy_zeros);
+        } else {
+          if (g[y] > 0) {
+            ++(qt_i_in_dy[d[y]]);
+            last_dy_non_zero = y;
+          }
+        }
+      }
+      return;
+    }
+  };
+
   namespace hbm_ukp5_impl {
     using namespace std;
     using namespace std::regex_constants;
     using namespace std::chrono;
     //namespace po = boost::program_options;
 
-    template <typename W, typename P, typename I>
-    struct ukp5_extra_info_t : extra_info_t {
-      #ifdef HBM_CHECK_PERIODICITY
-      /// @attention The last_y_value_outer_loop field exists only if
-      /// HBM_CHECK_PERIODICITY is defined.
-
-      /// The last capacity computed before detecting periodicity and stoping.
-      W last_y_value_outer_loop;
-      #endif // HBM_CHECK_PERIODICITY
-
-      /// The UKP5 used config.
-      ukp5_conf_t<I> conf;
-
-      // Time of each phase
-      double sort_time;        ///< Time used sorting items.
-      double smdom_time;       ///< Time used removing simple/multiple dominance.
-      double vector_alloc_time;///< Time used allocating vectors for DP.
-      double linear_comp_time; ///< Time used by linear time preprocessing.
-      double phase1_time;      ///< Time used by ukp5 phase1 (find optimal).
-      double phase2_time;      ///< Time used by ukp5 phase2 (assemble solution).
-      double total_time;       ///< Time used by all previous steps.
-      // Some data about instance
-      I n;      ///< Instance number of items.
-      W c,      ///< Instance capacity.
-      y_bound,  ///< Capacity used if use_y_star_per is true.
-      w_min,    ///< Instance smallest item weight.
-      w_max;    ///< Instance biggest item weight.
-      // Some data about structures manipulated by ukp5
-      myvector<P> g;  ///< The vector with profit values.
-      myvector<I> d;  ///< The vector with item index values.
-      // Some statistics
-      /// Number of items sized vector, with the quantity of each value i in dy.
-      /// @note As d isn't initialized, and is sparse, we only count numbers
-      ///   on d[y] if g[y] > 0.
-      std::vector<W> qt_i_in_dy;
-      /// Same as d, but without the positions skipped.
-      std::vector<I> non_skipped_d;
-      /// Last position of the d vector that wasn't zero or n (item indexes).
-      /// @note As d isn't initialized, and is sparse, we only count numbers
-      ///   on d[y] if g[y] > 0.
-      W last_dy_non_zero;
-      /// Quantity of g positions that weren't skipped by ukp5.
-      W qt_non_skipped_ys;
-      /// Quantity of zeros in g.
-      W qt_gy_zeros;
-      /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
-      W qt_inner_loop_executions;
-      #ifdef HBM_INIT_G_BY_CHUNKS
-      /// The g array isn't initialized with zeros before starting, it's
-      /// gradually initialized by the UKP5; therefore, it can end before
-      /// initializing all g; this is the last capacity initialized
-      /// (will never be bigger than c).
-      W last_gy_initialized;
-      #endif
-
-      /// If an file existed in path, its content is dicarded.
-      /// The value of header is written in the file at path, then
-      /// two columns are written in the file. The first column is
-      /// composed from the vector indexes (will vary between 0 and
-      /// v.size()-1). The second column has the vector values.
-      template <typename V>
-      static void dump(const string &path,
-                       const string &header,
-                       const V &v) {
-        ofstream f(path, ofstream::out|ofstream::trunc);
-        if (f.is_open())
-        {
-          f << header << endl;
-          for (size_t y = 0; y < v.size(); ++y) {
-            f << y << "\t" << v[y] << endl;
-          }
-        } else {
-          cerr << __func__ << ": Couldn't open file: " << path << endl;
-        }
-      }
-
-      /// Generates a good number of stats about the UKP5 execution.
-      /// Probably there's no way of adptating this method if the
-      /// UKP5 arrays are changed to slices.
-      virtual string gen_info(void) {
-        ukp5_gen_stats();
-
-        stringstream out("");
-        out << "ukp5 used conf follows:" << endl;
-        conf.print(out);
-        out << "end of ukp5 conf" << endl;
-
-        #ifdef HBM_CHECK_PERIODICITY
-        HBM_PRINT_VAR(last_y_value_outer_loop);
-        #endif
-        #ifdef HBM_INIT_G_BY_CHUNKS
-        HBM_PRINT_VAR(last_gy_initialized);
-        #endif
-        HBM_PRINT_VAR(y_bound);
-        HBM_PRINT_VAR(c);
-        HBM_PRINT_VAR(n);
-        HBM_PRINT_VAR(w_min);
-        HBM_PRINT_VAR(w_max);
-        HBM_PRINT_VAR(last_dy_non_zero);
-        HBM_PRINT_VAR(qt_non_skipped_ys);
-        HBM_PRINT_VAR(qt_gy_zeros);
-        HBM_PRINT_VAR(qt_inner_loop_executions);
-        out << "qt_inner_loop_executions/qt_non_skipped_ys: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys) << endl;
-        out << "qt_inner_loop_executions/c: " << ((long double) qt_inner_loop_executions)/((long double) c) << endl;
-        out << "(qt_inner_loop_executions/qt_non_skipped_ys)/n: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys)/((long double)n)  << endl;
-        out << "(qt_inner_loop_executions/c)/n: " << ((long double) qt_inner_loop_executions)/((long double) c)/((long double)n) << endl;
-
-        const double &stime = sort_time, &dtime = smdom_time,
-          &vtime = vector_alloc_time, &lctime = linear_comp_time,
-          &p1time = phase1_time, &p2time = phase2_time, &ttime = total_time;
-        const double sum_time =
-          stime + dtime + vtime + lctime + p1time + p2time;
-
-        streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
-        const int two_first_digits_and_period = 3;
-        const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
-        ios_base::fmtflags old_flags = out.setf(std::ios::fixed, std:: ios::floatfield);
-        char old_fill = out.fill(' ');
-
-        out << "Sort time: " << stime << "s (";
-        out << setw(percent_size) << (stime/ttime)*100.0;
-        out << "%)" << endl;
-        out << "Dom  time: " << dtime << "s (";
-        out << setw(percent_size) << (dtime/ttime)*100.0;
-        out << "%)" << endl;
-        out << "Vect time: " << vtime << "s (";
-        out << setw(percent_size) << (vtime/ttime)*100.0;
-        out << "%)" << endl;
-        out << "O(n) time: " << lctime << "s (";
-        out << setw(percent_size) << (lctime/ttime)*100.0;
-        out << "%)" << endl;
-        out << "pha1 time: " << p1time << "s (";
-        out << setw(percent_size) << (p1time/ttime)*100.0;
-        out << "%)" << endl;
-        out << "pha2 time: " << p2time << "s (";
-        out << setw(percent_size) << (p2time/ttime)*100.0;
-        out << "%)" << endl;
-        out << "Sum  time: " << sum_time << "s (";
-        out << setw(percent_size) << (sum_time/ttime)*100.0;
-        out << "%)" << endl;
-        out << "All  time: " << ttime << "s" << endl;
-
-        out.fill(old_fill);
-        out.setf(old_flags);
-        out.precision(old_precision);
-
-        if (conf.create_dumps) {
-          dump(conf.gd_path, "y\tgy", g);
-          dump(conf.dd_path, "y\tdy", d);
-          dump(conf.nsd_path, "y\tdy", non_skipped_d);
-          dump(conf.dqt_path, "i\tqt_in_d", qt_i_in_dy);
-        }
-
-        return out.str();
-      }
-
-      /// This method set the majority of the values of this stats class. All
-      /// the values set by it need extra computation, and because of this they
-      /// are computed here, after the UKP5 executed, and without affecting its
-      /// time measurement. This method only works if the following variables
-      /// are set first: n, c, y_bound, w_min, w_max, g and d. It can't receive
-      /// this values by constructor as g and d are initialized empty and
-      /// changed by UKP5 (they aren't a copy of the vectors used by ukp5, they
-      /// are the vectors used by ukp5).
-      void ukp5_gen_stats(void) {
-        non_skipped_d.assign(y_bound-w_min + 1, n-1);
-
-        qt_i_in_dy.assign(n, 0);
-
-        qt_gy_zeros = w_min;
-        qt_non_skipped_ys = 0;
-        qt_inner_loop_executions = 0;
-
-        P opt = 0;
-        W last_position_used = y_bound - w_min;
-        #ifdef HBM_CHECK_PERIODICITY
-        // last_y_value_outer_loop only exists if HBM_CHECK_PERIODICITY is defined
-        last_position_used = std::min(last_position_used, last_y_value_outer_loop);
-        #endif
-        for (W y = w_min; y <= last_position_used; ++y) {
-          if (g[y] > opt) {
-            ++(qt_non_skipped_ys);
-            qt_inner_loop_executions += d[y];
-            non_skipped_d[y] = d[y];
-            
-            opt = g[y];
-          }
-          if (g[y] == 0) {
-            ++(qt_gy_zeros);
-          } else {
-            if (g[y] > 0) {
-              ++(qt_i_in_dy[d[y]]);
-              last_dy_non_zero = y;
-            }
-          }
-        }
-        return;
-      }
-    };
-  
     /// Gets the minimal and maximal item weights and return them.
     template<typename W, typename P>
     pair<W, W> minmax_item_weight(const vector< item_t<W, P> > &items) {

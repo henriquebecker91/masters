@@ -13,6 +13,25 @@
 #include "workarounds.hpp"  // for from_string
 #include <chrono>           // for steady_clock::
 
+#if defined(HBM_PROFILE)
+  // Both macros needs a steady_clock::time_point named 'begin' on scope.
+  // Also, they need hbm::difftime_between_now_and on scope, but it already
+  // will be because it is provided by this header.
+  #ifndef HBM_START_TIMER
+    #define HBM_START_TIMER() begin = steady_clock::now()
+  #endif
+  #ifndef HBM_STOP_TIMER
+    #define HBM_STOP_TIMER(var) var += hbm::difftime_between_now_and(begin)
+  #endif
+#else
+  #ifndef HBM_START_TIMER
+    #define HBM_START_TIMER() do {} while (0)
+  #endif
+  #ifndef HBM_STOP_TIMER
+    #define HBM_STOP_TIMER(var) do {} while (0)
+  #endif
+#endif
+
 /// Namespace that encloses everything about Henrique Becker Master's.
 namespace hbm {
   /// The item on an UKP (unbounded knapsack problem).
@@ -46,6 +65,17 @@ namespace hbm {
       return p == o.p && w == o.w;
     }
 
+    /// Check if two items have the same efficiency.
+    ///
+    /// @param o An item to be compared with the current object.
+    ///
+    /// @return true if the items have the same efficiency, false otherwise.
+    inline bool has_same_eff_that(const item_t &o) const {
+      P a = p * static_cast<P>(o.w),
+        b = o.p * static_cast<P>(w);
+      return a == b;
+    }
+
     /// The standard ordering for items.
     ///
     /// The condition x \< y is true iff the item x is more efficient
@@ -57,7 +87,7 @@ namespace hbm {
     /// @return True if the criterion described above is met, False otherwise.
     inline bool operator<(const item_t &o) const {
       P a = p * static_cast<P>(o.w),
-            b = o.p * static_cast<P>(w);
+        b = o.p * static_cast<P>(w);
       return a > b || (a == b && w < o.w);
     }
   };

@@ -493,15 +493,20 @@ namespace hbm {
       // be used.
       // We do not set every value of f[1..t-1] to zero, it's too much,
       // we simply will return zero for a non defined position.
-      map<P, P> upper_f;
-      map<P, I> upper_c;
+      //map<P, P> upper_f;
+      //map<P, I> upper_c;
+      vector<P> upper_f(2*t, 0);
+      vector<I> upper_c(2*t, 0);
       // The algorithms have an lowercase d, an uppercase D, and a d with
       // subscript, we use "d_" to denote the d with subscript.
-      myvector<P> d_;
-      d_.resize(n + 1);
+      //myvector<P> d_;
+      //d_.resize(n + 1);
+      map<P, P> d_;
       d_[0] = 0; // Does not exist, notation begins at 1
-      map<P, I> upper_d;
-      map<P, I> upper_e;
+      //map<P, I> upper_d;
+      //map<P, I> upper_e;
+      vector<I> upper_d(2*t, 0);
+      vector<I> upper_e(2*t, 0);
       for (I j = 1; j <= n; ++j) {
         d_[j] = c[j] + t*a[j];
         upper_c[c[j]] = j;
@@ -533,7 +538,6 @@ namespace hbm {
       } else {
         d = upper_f[i] + d_[k];
         z = d - (d/t)*t;
-        // THIS LINE IS MISSING IN THE ORIGINAL CODE
       }
 
       step_2d:
@@ -544,6 +548,8 @@ namespace hbm {
         upper_c[z] = m;
         upper_e[m] = z;
         upper_f[z] = d;
+        // THIS LINE WAS MISSING FROM THE ARTICLE
+        upper_d[z] = k;
         //goto step_2c;
       }
       goto step_2c;
@@ -591,6 +597,13 @@ namespace hbm {
       x[n + 1] = b - a1*(b/a1);
 
       stop:
+      // Put the optimal solution on our format.
+      for (I l = 1; l <= n; ++l) {
+        if (x[l] > 0) {
+          sol.used_items.emplace_back(items[l-1], x[l], l);
+        }
+      }
+
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_greendp1_begin);
       #endif

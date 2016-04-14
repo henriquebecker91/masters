@@ -4,6 +4,7 @@
 #include "ukp_common.hpp"
 #include "periodicity.hpp"
 #include "wrapper.hpp"
+//#include "prettyprint.hpp"
 
 #include <vector> // For vector
 #include <algorithm>  // For reverse
@@ -722,48 +723,97 @@ namespace hbm {
 
       HBM_START_TIMER();
       // STEP 1
-      // TODO: check type after algorithm is completed. See if vector can't
-      // be used.
-      // We do not set every value of f[1..t-1] to zero, it's too much,
-      // we simply will return zero for a non defined position.
-      //map<P, P> upper_f;
-      //map<P, I> upper_c;
+      // We will refer to a combined number as a number that represents
+      // both a weight and a profit. The items are represented this way,
+      // as the solutions (that are simply the sum of many items).
+      // upper_f: maps a profit value a profit value to a combined number,
+      //  initially this means that giving an item profit will return
+      //  the combined number of the item. After, this means that giving
+      //  z will return you the associated solution (sum of the combined
+      //  numbers that make that solution).
       vector<P> upper_f(t, 0);
-      vector<I> upper_c(t, 0);
       // The algorithms have an lowercase d, an uppercase D, and a d with
       // subscript, we use "d_" to denote the d with subscript.
+      // The d_ array maps the index of an item to its combined number
+      // representation. 
       myvector<P> d_;
       d_.resize(n + 1);
-      //map<P, P> d_;
       d_[0] = 0; // Does not exist, notation begins at 1
-      //map<P, I> upper_d;
+
+      // The upper_c and upper_e are inverted indexes of each other.
+      // upper_c maps profit values to indexes, and upper_e maps
+      // indexes to profit values. The problem is: the indexes don't
+      // are item indexes, they don't end at n, they end at 'm'.
+      // I don't yet know what 'm' means, and specially I don't know
+      // its upper bound (because of this upper_e is a map). 
+      // For some instances it can be orders of magnitude bigger than
+      // t (the relaxed optimal solution).
+      vector<I> upper_c(t, 0);
       map<P, I> upper_e;
+
       vector<I> upper_d(t, 0);
-      //vector<I> upper_e(2*t, 0);
       for (I j = 1; j <= n; ++j) {
-        d_[j] = c[j] + t*a[j];
+        // inverted indexes initialization
         upper_c[c[j]] = j;
-        upper_d[c[j]] = j;
         upper_e[j] = c[j];
+
+        // combined numbers for items, and upper_f is
+        // initialized with them
+        d_[j] = c[j] + t*a[j];
         upper_f[c[j]] = d_[j];
+ 
+        // This array should continue to be populated after,
+        // but Greenberg forgot about it. It's different from
+        // upper_c, upper_c receives m values after, and
+        // upper_d receives k values.
+        upper_d[c[j]] = j;
       }
       vector<W> x(n + 2, 0); // It's indexed until x + 1
-      W j = 0; // TODO: check type after algorithm is completed.
-      W m = n; // TODO: check type after algorithm is completed.
+      // Initially, an index like the items index. But iterates until
+      // m, instead of n.
+      W j = 0;
+      // Unknown variable, seems the key to undertanding this algorithm.
+      W m = n;
       HBM_STOP_TIMER(eip->vector_alloc_time);
 
+      // j begins at 1, m begins at n. Seems like a loop between the
+      // items at first, but m can grow. My hypothesis is that m is
+      // associated with the number of solutions. But it's all distinct
+      // solutions? Or is all undominated ones? Can't m be fatorial
+      // if this hypothesis is right?
       while (++j <= m) {
+        // We get the profit of item j (as i and from upper_e), and then
+        // we get j back (from upper_c[i]). In all the algorithm, upper_c
+        // and upper_e are kept as inverted indexes, how could this
+        // juggling don't give the same number back?
+        // ANSWER: there can be items or solutions with the same profit
+        // but different index. Ex:
+        // upper_e[10] = 100, upper_c[100] = 10
+        // upper_e[11] = 100, upper_c[100] = 11
+        // then upper_e[10] = 100, and upper_c[100] = 11
+        // So, seems like we are skipping equivalent solutions here,
+        // we will get only 'j' values that haven't a bigger 'j' value
+        // with the same profit value. I suppose that we get only the
+        // last j because is simpler to skip a j that you know is
+        // repeated on the future than do the small j and control to
+        // avoid the all bigger ones.
         i = upper_e[j];
         if (upper_c[i] != j) continue;
 
+        // Combination of items with existing solutions?
+        // upper_d is like d in ukp5, and stores the index of the last
+        // item used in a solution? So, iterating until upper_d is the
+        // same as pruning symmetric solutions?
         k = 0;
-
         while (++k <= upper_d[i]) {
+          // Combines the solution with z == i with the item k, and
+          // extracts z back from the new solution.
           d = upper_f[i] + d_[k];
           z = d - (d/t)*t;
+          //if (z != (i + c[k])) cout << "z != (i + c[k])" << endl;
 
           //step_2d: // unused label
-          if (z != 0 && (0 >= upper_f[z] || upper_f[z] > d)) {
+          if (z != 0 && (upper_f[z] == 0 || upper_f[z] > d)) {
             m = m + 1;
             upper_c[z] = m;
             upper_e[m] = z;
@@ -777,35 +827,41 @@ namespace hbm {
       //step_3: unused step
       z = t - 1;
       //step_3a: // unused label
+      bool only_best_item_used = false;
       while (z + t*b < upper_f[z]) {
         //goto step_3b;
         //step_3b:
         z = z - 1;
-        if (z == c1*(b/a1)) break;
+        if (z == c1*(b/a1)) {
+          x[1] = b/a1;
+          x[n + 1] = b - a1*(b/a1);
+          only_best_item_used = true;
+          break;
+        }
       }
 
-      x[n + 1] = (z + t*b - upper_f[z])/t;
+      if (!only_best_item_used) {
+        x[n + 1] = (z + t*b - upper_f[z])/t;
 
-      // As c is more used as the array of item profit values than a simple
-      // variable, we use c to denote the array, and c_ to denote the variable.
-      P c_ = z;
+        // As c is more used as the array of item profit values than a simple
+        // variable, we use c to denote the array, and c_ to denote the variable.
+        P c_ = z;
 
-      //goto step_3c;
-      //step_3c:
-      //step_3d: // unused label
-      do {
-        k = upper_d[c_];
-        x[k] = x[k] + 1;
-        if (c_ < c[k]) {
-          c_ = c_ + t - c[k];
-        } else {
-          c_ = c_ - c[k];
-        }
-      } while (c_ > 0);
-
-      //step_3e: // unused label
-      x[1] = b/a1;
-      x[n + 1] = b - a1*(b/a1);
+        //goto step_3c;
+        //step_3c:
+        //step_3d: // unused label
+        do {
+          k = upper_d[c_];
+          x[k] = x[k] + 1;
+          // This part is a little different from greendp1 because we are
+          // avoiding underflow (the P type used by c_ can be unsigned).
+          if (c_ < c[k]) {
+            c_ = c_ + t - c[k];
+          } else {
+            c_ = c_ - c[k];
+          }
+        } while (c_ != 0);
+      }
 
       //stop: // unused label
       // Put the optimal solution on our format.
@@ -814,6 +870,11 @@ namespace hbm {
           sol.used_items.emplace_back(items[l-1], x[l], l);
         }
       }
+
+      //cout << "upper_e: " << upper_e << endl;
+      //cout << "upper_f: " << upper_f << endl;
+      //cout << "upper_d: " << upper_d << endl;
+      //cout << "upper_c: " << upper_c << endl;
 
       eip->upper_e_size = upper_e.size();
       eip->upper_f_size = upper_f.size();
@@ -981,6 +1042,7 @@ namespace hbm {
       c_ = c_ - c[k];
       if (c_ < 0) {
         c_ = c_ + t;
+        goto step_3c;
       } else if (c_ > 0) {
         goto step_3c;
       } else {

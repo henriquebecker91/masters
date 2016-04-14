@@ -7,6 +7,7 @@
 //#include "prettyprint.hpp"
 
 #include <vector> // For vector
+#include <forward_list>
 #include <algorithm>  // For reverse
 #include <boost/math/common_factor_rt.hpp>  // For boost::math::gcd
 #include <chrono> // For steady_clock::
@@ -87,7 +88,6 @@ namespace hbm {
   /// future, we have different stats between greendp and greendp1.
   template <typename W, typename P, typename I>
   struct greendp1_extra_info_t : greendp_extra_info_t<W, P, I> {
-    W upper_e_size;
     W upper_f_size;
     W upper_d_size;
     W upper_c_size;
@@ -99,7 +99,6 @@ namespace hbm {
       std::string s = greendp_extra_info_t<W, P, I>::gen_info();
       std::stringstream out("");
 
-      HBM_PRINT_VAR(upper_e_size);
       HBM_PRINT_VAR(upper_f_size);
       HBM_PRINT_VAR(upper_d_size);
       HBM_PRINT_VAR(upper_c_size);
@@ -467,7 +466,9 @@ namespace hbm {
     }
 
     // Map Find With Default
-    template <typename Map, typename Key, typename Value>
+    // The only advantage over operator[] is to avoid creating default
+    // constructed values at the indexed position.
+    /*template <typename Map, typename Key, typename Value>
     const Value& mfwd(const Map &m, const Key &k, const Value &default_value) {
       auto ptr = m.find(k);
       if (m.end() == ptr) {
@@ -475,7 +476,7 @@ namespace hbm {
       } else {
         return ptr->second;
       }
-    }
+    }*/
 
     template<typename W, typename P, typename I>
     void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
@@ -669,7 +670,6 @@ namespace hbm {
       return;*/
     }
 
-
     template<typename W, typename P, typename I>
     void mgreendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -726,13 +726,14 @@ namespace hbm {
       // We will refer to a combined number as a number that represents
       // both a weight and a profit. The items are represented this way,
       // as the solutions (that are simply the sum of many items).
-      // upper_f: maps a profit value a profit value to a combined number,
-      //  initially this means that giving an item profit will return
-      //  the combined number of the item. After, this means that giving
-      //  z will return you the associated solution (sum of the combined
-      //  numbers that make that solution).
+
+      // upper_f: maps a profit value to a combined number, initially this
+      // means that giving an item profit will return the combined number of
+      // the item. After, this means that giving z will return you the
+      // associated solution (sum of the combined numbers that make that
+      // solution).
       vector<P> upper_f(t, 0);
-      // The algorithms have an lowercase d, an uppercase D, and a d with
+      // The algorithm have an lowercase d, an uppercase D, and a d with
       // subscript, we use "d_" to denote the d with subscript.
       // The d_ array maps the index of an item to its combined number
       // representation. 
@@ -749,13 +750,15 @@ namespace hbm {
       // For some instances it can be orders of magnitude bigger than
       // t (the relaxed optimal solution).
       vector<I> upper_c(t, 0);
-      map<P, I> upper_e;
+      //map<P, I> upper_e;
+      forward_list<I> upper_e;
+      auto last_z_value = upper_e.before_begin();
 
       vector<I> upper_d(t, 0);
       for (I j = 1; j <= n; ++j) {
         // inverted indexes initialization
         upper_c[c[j]] = j;
-        upper_e[j] = c[j];
+        last_z_value = upper_e.insert_after(last_z_value, c[j]);
 
         // combined numbers for items, and upper_f is
         // initialized with them
@@ -772,7 +775,8 @@ namespace hbm {
       // Initially, an index like the items index. But iterates until
       // m, instead of n.
       W j = 0;
-      // Unknown variable, seems the key to undertanding this algorithm.
+      // The index in a pool of solutions. Key for understanding the
+      // algorithm.
       W m = n;
       HBM_STOP_TIMER(eip->vector_alloc_time);
 
@@ -797,7 +801,11 @@ namespace hbm {
         // last j because is simpler to skip a j that you know is
         // repeated on the future than do the small j and control to
         // avoid the all bigger ones.
-        i = upper_e[j];
+        if (upper_e.empty()) {
+          break;
+        }
+        i = upper_e.front();
+        upper_e.pop_front();
         if (upper_c[i] != j) continue;
 
         // Combination of items with existing solutions?
@@ -810,27 +818,23 @@ namespace hbm {
           // extracts z back from the new solution.
           d = upper_f[i] + d_[k];
           z = d - (d/t)*t;
-          //if (z != (i + c[k])) cout << "z != (i + c[k])" << endl;
 
-          //step_2d: // unused label
           if (z != 0 && (upper_f[z] == 0 || upper_f[z] > d)) {
             m = m + 1;
             upper_c[z] = m;
-            upper_e[m] = z;
+            //upper_e[m] = z;
+            last_z_value = upper_e.insert_after(last_z_value, z);
             upper_f[z] = d;
             // THIS LINE WAS MISSING FROM THE ARTICLE
             upper_d[z] = k;
-            //goto step_2c;
           }
         }
       }
-      //step_3: unused step
+
       z = t - 1;
-      //step_3a: // unused label
+
       bool only_best_item_used = false;
       while (z + t*b < upper_f[z]) {
-        //goto step_3b;
-        //step_3b:
         z = z - 1;
         if (z == c1*(b/a1)) {
           x[1] = b/a1;
@@ -841,33 +845,38 @@ namespace hbm {
       }
 
       if (!only_best_item_used) {
+        // Store at x[n + 1] how much of the the capacity was left unfilled
+        // by the optimal solution.
         x[n + 1] = (z + t*b - upper_f[z])/t;
 
         // As c is more used as the array of item profit values than a simple
         // variable, we use c to denote the array, and c_ to denote the variable.
         P c_ = z;
 
-        //goto step_3c;
-        //step_3c:
-        //step_3d: // unused label
+        // c_ begins with the optimal solution profit and then it's decremented
+        // for every item we put on the x array. It's a typical backtrack for
+        // assembling the solution (only that this one is by the profit, not
+        // by the weight).
         do {
           k = upper_d[c_];
           x[k] = x[k] + 1;
           // This part is a little different from greendp1 because we are
           // avoiding underflow (the P type used by c_ can be unsigned).
+          // I don't know in what circunstances c_ - c[k] is expected to
+          // be negative, but the original algorithm considered this a
+          // possibility.
           if (c_ < c[k]) {
             c_ = c_ + t - c[k];
           } else {
             c_ = c_ - c[k];
           }
         } while (c_ != 0);
-      }
 
-      //stop: // unused label
-      // Put the optimal solution on our format.
-      for (I l = 1; l <= n; ++l) {
-        if (x[l] > 0) {
-          sol.used_items.emplace_back(items[l-1], x[l], l);
+        // Put the optimal solution on our format.
+        for (I l = 1; l <= n; ++l) {
+          if (x[l] > 0) {
+            sol.used_items.emplace_back(items[l-1], x[l], l);
+          }
         }
       }
 
@@ -876,7 +885,6 @@ namespace hbm {
       //cout << "upper_d: " << upper_d << endl;
       //cout << "upper_c: " << upper_c << endl;
 
-      eip->upper_e_size = upper_e.size();
       eip->upper_f_size = upper_f.size();
       eip->upper_d_size = upper_d.size();
       eip->upper_c_size = upper_c.size();

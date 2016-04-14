@@ -670,6 +670,51 @@ namespace hbm {
       return;*/
     }
 
+    // We need a structure between a vector and a list. We want fast access
+    // to one point inside the container and to its end (could be done by
+    // list or vector). We want to clean from memory the elements
+    // already iterated by our iterator (list). We want to make better use of
+    // cache and do not allocate memory at every new item inserted at the
+    // container's end (vector). So the ideia is a vector of vectors,
+    // the inner vectors have a max size, and we can ask to clean an entire
+    // inner vector easily.
+    /*template <typename T>
+    class cavector {
+      vector< vector<T> > v;
+      size_t chunk_size;
+
+      cavector(size_t chunk_size) : chunk_size(chunk_size) {
+        v.emplace_back();
+        v.front().reserve(chunk_size);
+      }
+
+      template <class... Args>
+      void emplace_back (Args&&... args);
+        vec.back.
+      }
+
+      T& operator[] (size_t n) {
+        size_t i = size_type / chunk_size;
+        size_t j = size_type % chunk_size;
+        return v[i][j];
+      }
+
+      struct iterator {
+        size_t i{0}, j{0};
+
+        ++operator() {
+          if (++j == chunk_size) {
+            j = 0;
+            ++i;
+          }
+        }
+
+        operator*() {
+          return v[i][j];
+        }
+      };
+    };*/
+
     template<typename W, typename P, typename I>
     void mgreendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -750,15 +795,30 @@ namespace hbm {
       // For some instances it can be orders of magnitude bigger than
       // t (the relaxed optimal solution).
       vector<I> upper_c(t, 0);
-      //map<P, I> upper_e;
-      forward_list<I> upper_e;
-      auto last_z_value = upper_e.before_begin();
+
+      const size_t chunk_size = 10000;
+      size_t h = 0, l = 0;
+      vector< vector<P> > upper_e;
+      upper_e.emplace_back();
+      upper_e.front().reserve(chunk_size);
+      upper_e.front().emplace_back(0);
+      ++l;
+      //forward_list<P> upper_e;
+      //auto last_z_value = upper_e.before_begin();
+      //vector<P> upper_e;
+      //upper_e.push_back(0);
 
       vector<I> upper_d(t, 0);
       for (I j = 1; j <= n; ++j) {
         // inverted indexes initialization
         upper_c[c[j]] = j;
-        last_z_value = upper_e.insert_after(last_z_value, c[j]);
+        //last_z_value = upper_e.insert_after(last_z_value, c[j]);
+        //upper_e.push_back(c[j]);
+        if (upper_e.back().size() == chunk_size) {
+          upper_e.emplace_back();
+          upper_e.back().reserve(chunk_size);
+        }
+        upper_e.back().emplace_back(c[j]);
 
         // combined numbers for items, and upper_f is
         // initialized with them
@@ -801,11 +861,20 @@ namespace hbm {
         // last j because is simpler to skip a j that you know is
         // repeated on the future than do the small j and control to
         // avoid the all bigger ones.
-        if (upper_e.empty()) {
+        /*if (upper_e.empty()) {
           break;
         }
         i = upper_e.front();
-        upper_e.pop_front();
+        upper_e.pop_front();*/
+        //i = upper_e[j];
+        if (++l > chunk_size) {
+          l = 0;
+          // Clean chunk with index h, that will not be reference anymore
+          vector<I>().swap(upper_e[h]);
+          ++h;
+        }
+        i = upper_e[h][l];
+ 
         if (upper_c[i] != j) continue;
 
         // Combination of items with existing solutions?
@@ -823,7 +892,14 @@ namespace hbm {
             m = m + 1;
             upper_c[z] = m;
             //upper_e[m] = z;
-            last_z_value = upper_e.insert_after(last_z_value, z);
+            //last_z_value = upper_e.insert_after(last_z_value, z);
+            //upper_e.push_back(z);
+            if (upper_e.back().size() == chunk_size) {
+              upper_e.emplace_back();
+              upper_e.back().reserve(chunk_size);
+            }
+            upper_e.back().emplace_back(z);
+
             upper_f[z] = d;
             // THIS LINE WAS MISSING FROM THE ARTICLE
             upper_d[z] = k;

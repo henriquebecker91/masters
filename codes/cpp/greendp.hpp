@@ -796,13 +796,13 @@ namespace hbm {
       // t (the relaxed optimal solution).
       vector<I> upper_c(t, 0);
 
-      const size_t chunk_size = 10000;
+      // If the P value is 64 bits, this is about 7MiB
+      const size_t chunk_size = 1000000;
       size_t h = 0, l = 0;
       vector< vector<P> > upper_e;
       upper_e.emplace_back();
       upper_e.front().reserve(chunk_size);
       upper_e.front().emplace_back(0);
-      ++l;
       //forward_list<P> upper_e;
       //auto last_z_value = upper_e.before_begin();
       //vector<P> upper_e;
@@ -867,7 +867,7 @@ namespace hbm {
         i = upper_e.front();
         upper_e.pop_front();*/
         //i = upper_e[j];
-        if (++l > chunk_size) {
+        if (++l == chunk_size) {
           l = 0;
           // Clean chunk with index h, that will not be reference anymore
           vector<I>().swap(upper_e[h]);

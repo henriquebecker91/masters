@@ -67,20 +67,20 @@ greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run
 p_run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_greendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-p_test_greendp.out: test_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_greendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
-
 p_run_mgreendp.out: run_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_mgreendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-p_test_mgreendp.out: test_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_mgreendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+p_run_greendp1.out: run_greendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_greendp1.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-profile_greendp: p_run_greendp.out p_test_greendp.out p_run_mgreendp.out p_test_mgreendp.out
+p_run_mgreendp1.out: run_mgreendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_mgreendp1.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+
+profile_greendp: p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out
 	touch $@
 
 .PHONY: clean
 
 clean:
-	rm -f run_eduk.out run_per.out run_dom.out run_ukp5.out test_ukp5.out ukp5 run_gardp.out test_gardp.out gardp run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out greendp p_run_greendp.out p_test_greendp.out p_run_mgreendp.out p_test_mgreendp.out profile_greendp run_mgreendp1.out test_mgreendp1.out run_mgreendp1.out test_mgreendp1.out
+	rm -f run_eduk.out run_per.out run_dom.out run_ukp5.out test_ukp5.out ukp5 run_gardp.out test_gardp.out gardp run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out greendp p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out profile_greendp run_mgreendp1.out test_mgreendp1.out run_mgreendp1.out test_mgreendp1.out
 

@@ -88,10 +88,6 @@ namespace hbm {
   /// future, we have different stats between greendp and greendp1.
   template <typename W, typename P, typename I>
   struct greendp1_extra_info_t : greendp_extra_info_t<W, P, I> {
-    W upper_f_size;
-    W upper_d_size;
-    W upper_c_size;
-    W d_size;
     W t;
     W m;
 
@@ -99,10 +95,6 @@ namespace hbm {
       std::string s = greendp_extra_info_t<W, P, I>::gen_info();
       std::stringstream out("");
 
-      HBM_PRINT_VAR(upper_f_size);
-      HBM_PRINT_VAR(upper_d_size);
-      HBM_PRINT_VAR(upper_c_size);
-      HBM_PRINT_VAR(d_size);
       HBM_PRINT_VAR(t);
       HBM_PRINT_VAR(m);
 
@@ -670,51 +662,6 @@ namespace hbm {
       return;*/
     }
 
-    // We need a structure between a vector and a list. We want fast access
-    // to one point inside the container and to its end (could be done by
-    // list or vector). We want to clean from memory the elements
-    // already iterated by our iterator (list). We want to make better use of
-    // cache and do not allocate memory at every new item inserted at the
-    // container's end (vector). So the ideia is a vector of vectors,
-    // the inner vectors have a max size, and we can ask to clean an entire
-    // inner vector easily.
-    /*template <typename T>
-    class cavector {
-      vector< vector<T> > v;
-      size_t chunk_size;
-
-      cavector(size_t chunk_size) : chunk_size(chunk_size) {
-        v.emplace_back();
-        v.front().reserve(chunk_size);
-      }
-
-      template <class... Args>
-      void emplace_back (Args&&... args);
-        vec.back.
-      }
-
-      T& operator[] (size_t n) {
-        size_t i = size_type / chunk_size;
-        size_t j = size_type % chunk_size;
-        return v[i][j];
-      }
-
-      struct iterator {
-        size_t i{0}, j{0};
-
-        ++operator() {
-          if (++j == chunk_size) {
-            j = 0;
-            ++i;
-          }
-        }
-
-        operator*() {
-          return v[i][j];
-        }
-      };
-    };*/
-
     template<typename W, typename P, typename I>
     void mgreendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -731,10 +678,6 @@ namespace hbm {
       steady_clock::time_point begin;
       #endif
 
-      // I tried to implement the algorithm in a way that anyone can verify
-      // this is the same algorithm described at the paper. The goto construct
-      // is used because of this. The only ommited goto's are the ones that
-      // jump to the next step (that are plainly and clearly unecessary here).
       // BEFORE STEP 1 (notation already introduced by article)
       HBM_START_TIMER();
       auto &items = ukpi.items;
@@ -745,12 +688,16 @@ namespace hbm {
       HBM_STOP_TIMER(eip->sort_time);
 
       HBM_START_TIMER();
-      // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
       const I n = eip->n = static_cast<I>(items.size());
+      // We use b to represent the capacity, as in the article, because
+      // there's already three distinct 'c' variables on the algorithm
+      // (as described in the article).
       const W b = eip->c = ukpi.c;
 
+      // Items weight array.
       vector<W> a(n + 1);
       a[0] = 0; // Does not exist, notation begins at 1
+      // Items profit array.
       vector<P> c(n + 1);
       c[0] = 0; // Does not exist, notation begins at 1
 
@@ -762,17 +709,23 @@ namespace hbm {
         c[i+1] = it.p;
       }
 
-      P t = (c1*b)/a1 + 1;
-      P i, k, d, &z = sol.opt;
+      // The constant 't' is a value strictly greater than the optimal solution
+      // value. It's used to multiply the items weight, this way we can codify
+      // both profit and weight in a single number (p + t*w = x, where x is a
+      // combined number). To extract them back use: p = x % t; w = x / t. We
+      // will refer to these numbers (that represents both a weight and a
+      // profit) as combined numbers. The items are represented this way, as
+      // the solutions (that are simply the sum of many items).
+      const P t = (c1*b)/a1 + 1;
+
+      // z: A solution profit value. The algorithm will end with the
+      //    optimal solution value inside this variable.
+      P &z = sol.opt;
       HBM_STOP_TIMER(eip->linear_comp_time);
 
       HBM_START_TIMER();
       // STEP 1
-      // We will refer to a combined number as a number that represents
-      // both a weight and a profit. The items are represented this way,
-      // as the solutions (that are simply the sum of many items).
-
-      // upper_f: maps a profit value to a combined number, initially this
+      // The upper_f maps a profit value to a combined number, initially this
       // means that giving an item profit will return the combined number of
       // the item. After, this means that giving z will return you the
       // associated solution (sum of the combined numbers that make that
@@ -790,128 +743,183 @@ namespace hbm {
       // upper_c maps profit values to indexes, and upper_e maps
       // indexes to profit values. The problem is: the indexes don't
       // are item indexes, they don't end at n, they end at 'm'.
-      // I don't yet know what 'm' means, and specially I don't know
-      // its upper bound (because of this upper_e is a map). 
-      // For some instances it can be orders of magnitude bigger than
-      // t (the relaxed optimal solution).
+      // The 'm' variable is the number of solutions generated by the
+      // algorithm. So the indexes aren't only item indexes, but are
+      // solution indexes.
       vector<I> upper_c(t, 0);
 
-      // If the P value is 64 bits, this is about 7MiB
+      // For upper_e we need a structure between a vector and a list. We want
+      // fast access to one point inside the container and to its end (could be
+      // done by list or vector). We want to clean from memory the elements
+      // already iterated by our iterator in a O(1) way (list). We want to make
+      // better use of cache and do not allocate memory at every new item
+      // inserted at the container's end (vector). So the ideia is a vector of
+      // vectors, the inner vectors have a max size, and we can ask to clean an
+      // entire inner vector (i.e. chunk) easily. I let the vector and
+      // forward_list versions commented to allow alternating between them. The
+      // forward_list version has the smallest memory footprint but don't have
+      // a very good performance. The vector version has slight better time
+      // than the chunk-based version, but it will consume many and many GiB
+      // easily, where the chunk based memory footprint can be tweaked by
+      // chunk_size and have a good performance with a very small memory
+      // footprint. The vector version performance also depends on the
+      // re-allocation strategy, and the initial reserved amount.
+      // If the P value is 64 bits, a 1000000 chunk_size is about 7MiB.
+      // TODO: make this a configurable parameter
+      // chunk-based upper_e code below
       const size_t chunk_size = 1000000;
       size_t h = 0, l = 0;
       vector< vector<P> > upper_e;
       upper_e.emplace_back();
       upper_e.front().reserve(chunk_size);
       upper_e.front().emplace_back(0);
+
+      // forward_list upper_e code below
       //forward_list<P> upper_e;
       //auto last_z_value = upper_e.before_begin();
+      //last_z_value = upper_e.insert_after(last_z_value, 0);
+
+      // vector upper_e code below
       //vector<P> upper_e;
       //upper_e.push_back(0);
 
+      // This array (upper_d) is used to backtrack the optimal solution.
+      // It maps solution profits (z) to the index of the last item used in
+      // that solution.
       vector<I> upper_d(t, 0);
+
       for (I j = 1; j <= n; ++j) {
         // inverted indexes initialization
         upper_c[c[j]] = j;
-        //last_z_value = upper_e.insert_after(last_z_value, c[j]);
-        //upper_e.push_back(c[j]);
         if (upper_e.back().size() == chunk_size) {
           upper_e.emplace_back();
           upper_e.back().reserve(chunk_size);
         }
         upper_e.back().emplace_back(c[j]);
 
-        // combined numbers for items, and upper_f is
-        // initialized with them
+        // forward_list upper_e code below
+        //last_z_value = upper_e.insert_after(last_z_value, c[j]);
+
+        // vector code below
+        //upper_e.push_back(c[j]);
+
+        // Combined numbers for items (d_), and upper_f is initialized with
+        // them (in upper_f they are single item solutions).
         d_[j] = c[j] + t*a[j];
         upper_f[c[j]] = d_[j];
  
-        // This array should continue to be populated after,
-        // but Greenberg forgot about it. It's different from
-        // upper_c, upper_c receives m values after, and
-        // upper_d receives k values.
+        // This array (upper_d) is initialized like upper_c, but after upper_c
+        // will receive m values (index of solutions), and upper_d receives k
+        // values (index of items).
         upper_d[c[j]] = j;
       }
-      vector<W> x(n + 2, 0); // It's indexed until x + 1
-      // Initially, an index like the items index. But iterates until
-      // m, instead of n.
+      // The index of the current solution.
       W j = 0;
-      // The index in a pool of solutions. Key for understanding the
-      // algorithm.
+      // The number of solutions (optimal or not) generated by the algorithm.
       W m = n;
       HBM_STOP_TIMER(eip->vector_alloc_time);
 
-      // j begins at 1, m begins at n. Seems like a loop between the
-      // items at first, but m can grow. My hypothesis is that m is
-      // associated with the number of solutions. But it's all distinct
-      // solutions? Or is all undominated ones? Can't m be fatorial
-      // if this hypothesis is right?
+      // The j is the index of the current solution (initially we will consider
+      // every single item as an single item solution). The m is the total
+      // number of solutions generated. The m value will increase while the
+      // algorithm executes, as we will iterate over the existing solutions
+      // with k and generate new solutions combining the current solution k
+      // with the items. When j reaches m we have generated enough solutions
+      // relevant to find one optimal solution between them, and we can stop.
+      HBM_START_TIMER();
       while (++j <= m) {
-        // We get the profit of item j (as i and from upper_e), and then
-        // we get j back (from upper_c[i]). In all the algorithm, upper_c
-        // and upper_e are kept as inverted indexes, how could this
-        // juggling don't give the same number back?
-        // ANSWER: there can be items or solutions with the same profit
-        // but different index. Ex:
-        // upper_e[10] = 100, upper_c[100] = 10
-        // upper_e[11] = 100, upper_c[100] = 11
-        // then upper_e[10] = 100, and upper_c[100] = 11
-        // So, seems like we are skipping equivalent solutions here,
-        // we will get only 'j' values that haven't a bigger 'j' value
-        // with the same profit value. I suppose that we get only the
-        // last j because is simpler to skip a j that you know is
-        // repeated on the future than do the small j and control to
-        // avoid the all bigger ones.
-        /*if (upper_e.empty()) {
-          break;
-        }
-        i = upper_e.front();
-        upper_e.pop_front();*/
-        //i = upper_e[j];
+        // chunk-based upper_e code below
         if (++l == chunk_size) {
           l = 0;
-          // Clean chunk with index h, that will not be reference anymore
+          // Clean chunk with index h, that will not be referenced anymore
           vector<I>().swap(upper_e[h]);
           ++h;
         }
-        i = upper_e[h][l];
+        P z_curr_sol = upper_e[h][l];
  
-        if (upper_c[i] != j) continue;
+        // forward_list upper_e code below
+        //if (upper_e.empty()) break;
+        //P z_curr_sol = upper_e.front();
+        //upper_e.pop_front();
 
-        // Combination of items with existing solutions?
-        // upper_d is like d in ukp5, and stores the index of the last
-        // item used in a solution? So, iterating until upper_d is the
-        // same as pruning symmetric solutions?
-        k = 0;
-        while (++k <= upper_d[i]) {
+        // vector upper_e code below
+        //P z_curr_sol = upper_e[j];
+
+        // Skips a solution if there's already another solution with the same
+        // profit value and a greater position index (j). Don't make sense to
+        // create new solutions from two solutions with the same profit value,
+        // we will process only one solution for each solution tied with the
+        // same profit.
+        if (upper_c[z_curr_sol] != j) continue;
+
+        // This loop combines existing solutions with new items generating more
+        // solutions.
+        // As upper_d is like 'd' in ukp5, and stores the index of the last
+        // item used in a solution, iterating until upper_d is the same as
+        // pruning symmetric solutions? Seems so.
+        P k = 0;
+        while (++k <= upper_d[z_curr_sol]) {
           // Combines the solution with z == i with the item k, and
           // extracts z back from the new solution.
-          d = upper_f[i] + d_[k];
+          // d is the combined number for the newly generated solution
+          P d = upper_f[z_curr_sol] + d_[k];
           z = d - (d/t)*t;
 
+          // We will only save the newly generated solution d, if its profit
+          // (z) is bigger than zero and there isn't a solution with that
+          // profit saved at upper_f, or the solution with the same profit
+          // already saved at upper_f has more weight than ours (it can be
+          // invalid, or simply a solution with more weight for the same
+          // profit).
           if (z != 0 && (upper_f[z] == 0 || upper_f[z] > d)) {
+            // increment the number of solutions by one
             m = m + 1;
-            upper_c[z] = m;
-            //upper_e[m] = z;
-            //last_z_value = upper_e.insert_after(last_z_value, z);
-            //upper_e.push_back(z);
+            // chunk-based upper_e code below
             if (upper_e.back().size() == chunk_size) {
               upper_e.emplace_back();
               upper_e.back().reserve(chunk_size);
             }
             upper_e.back().emplace_back(z);
 
+            // forward_list upper_e code below
+            //last_z_value = upper_e.insert_after(last_z_value, z);
+
+            // vector upper_e code below
+            //upper_e.push_back(z);
+
+            upper_c[z] = m;
             upper_f[z] = d;
-            // THIS LINE WAS MISSING FROM THE ARTICLE
+            // THIS LINE WAS MISSING FROM THE ORIGINAL ARTICLE
             upper_d[z] = k;
           }
         }
       }
+      HBM_STOP_TIMER(eip->dp_time);
 
+      // We start with the greatest possible value for the optimal
+      // solution, and then we decrement until finding a valid solution
+      // with that profit value.
+      HBM_START_TIMER();
       z = t - 1;
+      // The values for the decision variables. If x[k] == y, then
+      // there's y copies of the item k on an optimal solution.
+      // The x[n+1] stores how much empty space there's in an optimal
+      // solution (the difference between the weight of the optimal
+      // solution we found and the capacity of the instance knapsack). 
+      vector<W> x(n + 2, 0); // It's indexed until x + 1
 
       bool only_best_item_used = false;
-      while (z + t*b < upper_f[z]) {
+      // If upper_f[z] is greater than z + t*b, then the combined number
+      // returned by upper_f[z] isn't a valid solution. The reason for that
+      // is simple: the profit value of upper_f[z] is equal to z
+      // (z + t*b < z + t*b' == upper_f[z]), so if upper_f[z] is bigger
+      // than z + t*b, is because b' is bigger than b, and then the solution
+      // is heavier than the knapsack capacity (i.e. an invalid solution).
+      while (upper_f[z] > z + t*b) {
         z = z - 1;
+        // If we end up with z being perfectly divisible by the best item
+        // profit, then it's clear that filling the knapsack with copies
+        // of the best item is an optimal solution.
         if (z == c1*(b/a1)) {
           x[1] = b/a1;
           x[n + 1] = b - a1*(b/a1);
@@ -926,7 +934,8 @@ namespace hbm {
         x[n + 1] = (z + t*b - upper_f[z])/t;
 
         // As c is more used as the array of item profit values than a simple
-        // variable, we use c to denote the array, and c_ to denote the variable.
+        // variable, we use c to denote the array, and c_ to denote the
+        // variable.
         P c_ = z;
 
         // c_ begins with the optimal solution profit and then it's decremented
@@ -934,7 +943,7 @@ namespace hbm {
         // assembling the solution (only that this one is by the profit, not
         // by the weight).
         do {
-          k = upper_d[c_];
+          I k = upper_d[c_];
           x[k] = x[k] + 1;
           // This part is a little different from greendp1 because we are
           // avoiding underflow (the P type used by c_ can be unsigned).
@@ -949,22 +958,14 @@ namespace hbm {
         } while (c_ != 0);
 
         // Put the optimal solution on our format.
-        for (I l = 1; l <= n; ++l) {
-          if (x[l] > 0) {
-            sol.used_items.emplace_back(items[l-1], x[l], l);
+        for (I k = 1; k <= n; ++k) {
+          if (x[k] > 0) {
+            sol.used_items.emplace_back(items[k-1], x[k], k);
           }
         }
       }
+      HBM_STOP_TIMER(eip->sol_time);
 
-      //cout << "upper_e: " << upper_e << endl;
-      //cout << "upper_f: " << upper_f << endl;
-      //cout << "upper_d: " << upper_d << endl;
-      //cout << "upper_c: " << upper_c << endl;
-
-      eip->upper_f_size = upper_f.size();
-      eip->upper_d_size = upper_d.size();
-      eip->upper_c_size = upper_c.size();
-      eip->d_size = d_.size();
       eip->t = t;
       eip->m = m;
       #ifdef HBM_PROFILE
@@ -1026,24 +1027,18 @@ namespace hbm {
 
       HBM_START_TIMER();
       // STEP 1
-      // TODO: check type after algorithm is completed. See if vector can't
-      // be used.
-      // We do not set every value of f[1..t-1] to zero, it's too much,
-      // we simply will return zero for a non defined position.
-      //map<P, P> upper_f;
-      //map<P, I> upper_c;
       vector<P> upper_f(t, 0);
       vector<I> upper_c(t, 0);
       // The algorithms have an lowercase d, an uppercase D, and a d with
       // subscript, we use "d_" to denote the d with subscript.
       myvector<P> d_;
       d_.resize(n + 1);
-      //map<P, P> d_;
       d_[0] = 0; // Does not exist, notation begins at 1
-      //map<P, I> upper_d;
-      map<P, I> upper_e;
       vector<I> upper_d(t, 0);
-      //vector<I> upper_e(2*t, 0);
+      // Here we use a map for upper_e, this is terrible inneficient,
+      // but is the structure with the closest notation to the one used
+      // on the article.
+      map<P, I> upper_e;
       for (I j = 1; j <= n; ++j) {
         d_[j] = c[j] + t*a[j];
         upper_c[c[j]] = j;
@@ -1052,10 +1047,11 @@ namespace hbm {
         upper_f[c[j]] = d_[j];
       }
       vector<W> x(n + 2, 0); // It's indexed until x + 1
-      W j = 0; // TODO: check type after algorithm is completed.
-      W m = n; // TODO: check type after algorithm is completed.
+      W j = 0;
+      W m = n;
       HBM_STOP_TIMER(eip->vector_alloc_time);
 
+      HBM_START_TIMER();
       step_2a:
       j = j + 1;
       if (j > m) goto step_3;
@@ -1097,6 +1093,8 @@ namespace hbm {
       // Because the goto above, the code below can only be accessed by jumping
       // directly into step_3.
       step_3:
+      HBM_STOP_TIMER(eip->dp_time);
+      HBM_START_TIMER();
       z = t - 1;
       // As c is more used as the array of item profit values than a simple
       // variable, we use c to denote the array, and c_ to denote the variable.
@@ -1144,12 +1142,8 @@ namespace hbm {
           sol.used_items.emplace_back(items[l-1], x[l], l);
         }
       }
+      HBM_STOP_TIMER(eip->sol_time);
 
-      eip->upper_e_size = upper_e.size();
-      eip->upper_f_size = upper_f.size();
-      eip->upper_d_size = upper_d.size();
-      eip->upper_c_size = upper_c.size();
-      eip->d_size = d_.size();
       eip->t = t;
       eip->m = m;
 

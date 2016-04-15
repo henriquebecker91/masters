@@ -457,22 +457,11 @@ namespace hbm {
       #endif
     }
 
-    // Map Find With Default
-    // The only advantage over operator[] is to avoid creating default
-    // constructed values at the indexed position.
-    /*template <typename Map, typename Key, typename Value>
-    const Value& mfwd(const Map &m, const Key &k, const Value &default_value) {
-      auto ptr = m.find(k);
-      if (m.end() == ptr) {
-        return default_value;
-      } else {
-        return ptr->second;
-      }
-    }*/
-
+    /// The second algorithm presented at "On Equivalent Knapsack Problems",
+    /// (H.  Greenberg).
     template<typename W, typename P, typename I>
     void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
-      /*// Extra Info Pointer == eip
+      // Extra Info Pointer == eip
       greendp2_extra_info_t<W, P, I>* eip =
         new greendp2_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
@@ -501,30 +490,86 @@ namespace hbm {
 
       HBM_START_TIMER();
       // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
-      const I n = eip->n = static_cast<I>(items.size());
+      // In this algorithm 'n' can change, as we can remove items of the
+      // item list.
+      I n = eip->n = static_cast<I>(items.size());
       const W b = eip->c = ukpi.c;
+
+      const W a1 = items.front().w;
+      const P c1 = items.front().p;
 
       vector<W> a(n + 1);
       a[0] = 0; // Does not exist, notation begins at 1
       vector<P> c(n + 1);
       c[0] = 0; // Does not exist, notation begins at 1
 
-      const W a1 = items.front().w;
-      const P c1 = items.front().p;
       for (I i = 0; i < n; ++i) {
         item_t<W, P> it = items[i];
         a[i+1] = it.w;
         c[i+1] = it.p;
       }
 
+      myvector<long double> d_;
+      d_.resize(n + 1);
+      d_[0] = 0;
+      d_[1] = 0;
       for (I j = 2; j <= n; ++j) {
-        // I don't know if this (a1/c1) should be rounded down or not.
-        // In the article parentheses are used, not brackets. At the rest of
-        // the article brackets are used when values are rounded down.
-        // Seems like we need to use floating point here.
+        // I don't know if this (a1/c1) should be rounded down or not. In the
+        // article parentheses are used, not brackets. At the rest of the
+        // article brackets are used when values are rounded down. Seems like
+        // we need to use floating point here.
         d_[j] = a[j] - static_cast<P>((a1/static_cast<long double>(c1))*c[j]);
       }
-      P k, &z = sol.opt;
+
+      vector<bool> items_to_remove(n + 1, false);
+      I qt_items_to_remove = 0;
+      for (I j = 2; j <= n; ++j) {
+        if (c[j] % c1 == 0) {
+          items_to_remove[j] = true;
+          ++qt_items_to_remove;
+          continue;
+        }
+        for (I i = 3; i <= n; ++i) {
+          if (i == j) continue;
+          if (c[i] % c1 == c[j] % c1) {
+            if (d_[i] < d_[j]) {
+              items_to_remove[j] = true;
+              ++qt_items_to_remove;
+              break;
+            } else if (d_[i] == d_[j] && c[i] <= c[j]) {
+              items_to_remove[j] = true;
+              ++qt_items_to_remove;
+              break;
+            }
+          }
+        }
+      }
+
+      // Scope to guarantee vector deallocation.
+      {
+        const I old_n = n;
+        n -= qt_items_to_remove;
+
+        vector<W> a_;
+        a_.reserve(n + 1);
+        a_.push_back(0);
+
+        vector<P> c_;
+        c_.reserve(n + 1);
+        c_.push_back(0);
+
+        for (I j = 1; j <= old_n; ++j) {
+          if (!items_to_remove[j]) {
+            a_.push_back(a[j]);
+            c_.push_back(c[j]);
+          }
+        }
+
+        a_.swap(a);
+        c_.swap(c);
+      }
+
+      /*P k, &z = sol.opt;
       HBM_STOP_TIMER(eip->linear_comp_time);
 
       HBM_START_TIMER();
@@ -662,6 +707,8 @@ namespace hbm {
       return;*/
     }
 
+    /// The modernized version of the first algorithm presented at "On
+    /// Equivalent Knapsack Problems", (H.  Greenberg).
     template<typename W, typename P, typename I>
     void mgreendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -974,6 +1021,8 @@ namespace hbm {
       return;
     }
 
+    /// The first algorithm presented at "On Equivalent Knapsack Problems",
+    /// (H. Greenberg). See mgreendp1 for a explained version.
     template<typename W, typename P, typename I>
     void greendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -1153,6 +1202,8 @@ namespace hbm {
       return;
     }
 
+    // The dynamic programming algorithm presented at "A Better Step-off
+    // Algorithm for the Knapsack Problem" (H. Greenberg).
     template<typename W, typename P, typename I>
     void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -1391,6 +1442,27 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
+    struct greendp2_wrap : wrapper_t<W, P, I> {
+      virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
+        // Calls the overloaded version with the third argument as a bool
+        hbm_greendp_impl::greendp2(ukpi, sol, already_sorted);
+
+        return;
+      }
+
+      virtual const std::string& name(void) const {
+        static const std::string name = "greendp2";
+        return name;
+      }
+    };
+
+    template<typename W, typename P, typename I = size_t>
+    void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
+                  int argc, argv_t argv) {
+      simple_wrapper(greendp2_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    }
+
+    template<typename W, typename P, typename I>
     struct greendp1_wrap : wrapper_t<W, P, I> {
       virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
         // Calls the overloaded version with the third argument as a bool
@@ -1432,6 +1504,36 @@ namespace hbm {
       simple_wrapper(greendp_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
   }
+
+  /// Solves an UKP instance by one of the dynamic programming algorithm
+  /// presented at "On Equivalent Knapsack Problems" from H. Greenberg (this is
+  /// the one presented as "Algorithm 2"), and stores the results at sol.
+  ///
+  /// @note IMPORTANT: only works with integers, as it relies on the rounding
+  ///   behaviour of integers on divisions.
+  /// @param ukpi The UKP instance to be solved.
+  /// @param sol The object where the results will be written.
+  /// @param already_sorted If the ukpi.items vector needs to be sorted by
+  ///   non-decreasing efficiency. An if there is more than one most efficient
+  ///   item, the one with the smallest profit (or weight) should be the first.
+  template<typename W, typename P, typename I>
+  void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    hbm_greendp_impl::greendp2(ukpi, sol, already_sorted);
+  }
+
+  /// An overloaded function, it's used as argument to test_common functions.
+  ///
+  /// The only parameter recognized is "--already-sorted". If this parameter is
+  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
+  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  ///
+  /// @see main_take_path
+  /// @see greendp2(instance_t<W, P> &, solution_t<W, P, I> &, bool)
+  template<typename W, typename P, typename I>
+  void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
+    hbm_greendp_impl::greendp2(ukpi, sol, argc, argv);
+  }
+
 
   /// Solves an UKP instance by one of the dynamic programming algorithm
   /// presented at "On Equivalent Knapsack Problems" from H. Greenberg (this is

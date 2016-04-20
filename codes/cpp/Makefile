@@ -67,7 +67,13 @@ run_greendp2.out: run_greendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 test_greendp2.out: test_greendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ test_greendp2.cpp $(CFLAGS) $(DEFS)
 
-greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out
+run_mgreendp2.out: run_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_mgreendp2.cpp $(CFLAGS) $(DEFS)
+
+test_mgreendp2.out: test_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ test_mgreendp2.cpp $(CFLAGS) $(DEFS)
+
+greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2 test_mgreendp2
 	touch $@
 
 p_run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
@@ -85,11 +91,14 @@ p_run_mgreendp1.out: run_mgreendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 p_run_greendp2.out: run_greendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ run_greendp2.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-profile_greendp: p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out
+p_run_mgreendp2.out: run_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_mgreendp2.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+
+profile_greendp: p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2.out
 	touch $@
 
 .PHONY: clean
 
 clean:
-	rm -f run_eduk.out run_per.out run_dom.out  run_ukp5.out test_ukp5.out ukp5  run_gardp.out test_gardp.out gardp  run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_mgreendp1.out test_mgreendp1.out run_mgreendp2.out test_mgreendp2.out greendp  p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out profile_greendp
+	rm -f run_eduk.out run_per.out run_dom.out  run_ukp5.out test_ukp5.out ukp5  run_gardp.out test_gardp.out gardp  run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out greendp  p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2 profile_greendp
 

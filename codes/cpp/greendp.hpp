@@ -11,6 +11,7 @@
 #include <algorithm>  // For reverse
 #include <boost/math/common_factor_rt.hpp>  // For boost::math::gcd
 #include <chrono> // For steady_clock::
+#include <boost/rational.hpp> // For rational<T> used at greendp2
 
 #ifndef HBM_PROFILE_PRECISION
   #define HBM_PROFILE_PRECISION 5
@@ -88,8 +89,8 @@ namespace hbm {
   /// future, we have different stats between greendp and greendp1.
   template <typename W, typename P, typename I>
   struct greendp1_extra_info_t : greendp_extra_info_t<W, P, I> {
-    W t;
-    W m;
+    W t; ///< Value of constant t (it's constant for each instance).
+    W m; ///< Final value of variable m (number of generated solutions).
 
     std::string gen_info(void) {
       std::string s = greendp_extra_info_t<W, P, I>::gen_info();
@@ -106,11 +107,66 @@ namespace hbm {
   struct mgreendp1_extra_info_t : greendp1_extra_info_t<W, P, I> {};
 
   template <typename W, typename P, typename I>
-  struct greendp2_extra_info_t : greendp1_extra_info_t<W, P, I> {};
+  struct greendp2_extra_info_t : extra_info_t {
+    #ifdef HBM_PROFILE
+    double sort_time{0};        ///< Time used sorting items.
+    double vector_alloc_time{0};///< Time used allocating vectors for DP.
+    double linear_comp_time{0}; ///< Time used by linear time preprocessing.
+    double dp_time{0};     ///< Time used creating partial solutions.
+    double sol_time{0};    ///< Time used to assemble solution.
+    double total_time{0};  ///< Time used by all the algorithm.
+    #endif //HBM_PROFILE
+    I n{0}; ///< Instance number of items.
+    I n2{0};///< Number of items not excluded before starting.
+    W c{0}; ///< Instance capacity.
+    W m; ///< Final value of variable m (number of generated solutions).
+
+    virtual std::string gen_info(void) {
+      std::stringstream out("");
+
+      HBM_PRINT_VAR(c);
+      HBM_PRINT_VAR(n);
+      HBM_PRINT_VAR(n2);
+      HBM_PRINT_VAR(m);
+
+      #ifdef HBM_PROFILE
+      const double sum_time = sort_time + vector_alloc_time +
+        linear_comp_time + dp_time + sol_time;
+
+      std::streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
+      const int two_first_digits_and_period = 3;
+      const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
+      std::ios_base::fmtflags old_flags = out.setf(std::ios::fixed, std:: ios::floatfield);
+      char old_fill = out.fill(' ');
+
+      #ifndef HBM_PRINT_TIME
+        #define HBM_PRINT_TIME(name, var)\
+          out << name << " time: " << var << "s (";\
+          out << std::setw(percent_size) << (var/total_time)*100.0;\
+          out << "%)" << std::endl
+      #endif
+
+      HBM_PRINT_TIME("Sort", sort_time);
+      HBM_PRINT_TIME("Vect", vector_alloc_time);
+      HBM_PRINT_TIME("O(n)", linear_comp_time);
+      HBM_PRINT_TIME("dp  ", dp_time);
+      HBM_PRINT_TIME("sol ", sol_time);
+      HBM_PRINT_TIME("Sum ", sum_time);
+      HBM_PRINT_TIME("All ", total_time);
+
+      out.fill(old_fill);
+      out.setf(old_flags);
+      out.precision(old_precision);
+      #endif //HBM_PROFILE
+
+      return out.str();
+    }
+  };
 
   namespace hbm_greendp_impl {
     using namespace std;
     using namespace std::chrono;
+    using namespace boost;
     using namespace boost::math;
 
     /// Compute the gcd for a variable quantity of numbers.
@@ -314,7 +370,7 @@ namespace hbm {
       // Extra Info Pointer == eip
       mgreendp_extra_info_t<W, P, I>* eip = new mgreendp_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
-      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
       #ifdef HBM_PROFILE
       // Used to compute the time all the execution algorithm.
@@ -457,15 +513,15 @@ namespace hbm {
       #endif
     }
 
-    /// The second algorithm presented at "On Equivalent Knapsack Problems",
-    /// (H.  Greenberg).
+    /// The modernized version (without goto) of the second algorithm presented
+    /// at "On Equivalent Knapsack Problems", (H.  Greenberg).
     template<typename W, typename P, typename I>
-    void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    void mgreendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
       greendp2_extra_info_t<W, P, I>* eip =
         new greendp2_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
-      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
       #ifdef HBM_PROFILE
       // Used to compute the time all the execution algorithm.
@@ -492,7 +548,7 @@ namespace hbm {
       // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
       // In this algorithm 'n' can change, as we can remove items of the
       // item list.
-      I n = eip->n = static_cast<I>(items.size());
+      const I n = eip->n = static_cast<I>(items.size());
       const W b = eip->c = ukpi.c;
 
       const W a1 = items.front().w;
@@ -509,18 +565,29 @@ namespace hbm {
         c[i+1] = it.p;
       }
 
-      myvector<long double> d_;
+      // PARAGRAPH ALGORITHM 2, before step 1
+      myvector< rational<P> > d_;
       d_.resize(n + 1);
-      d_[0] = 0;
-      d_[1] = 0;
+      const rational<P> frac_a1_c1 = rational<P>(a1, c1);
       for (I j = 2; j <= n; ++j) {
-        // I don't know if this (a1/c1) should be rounded down or not. In the
-        // article parentheses are used, not brackets. At the rest of the
-        // article brackets are used when values are rounded down. Seems like
-        // we need to use floating point here.
-        d_[j] = a[j] - static_cast<P>((a1/static_cast<long double>(c1))*c[j]);
+        // On the article this line of the algorithm includes divisions that
+        // aren't rounded down. This would call for floating pointer
+        // arithmetic. However, those values are compared for equality later.
+        // On the article's example, the numbers are shown as fractions, what
+        // implies that absolute precision can be necessary. With this in mind,
+        // I choose to represent the values of d_ as fractions.
+        d_[j] = a[j] - (frac_a1_c1*c[j]);
+        // this value is always non-negative (proof follows):
+        // previous knowledge: c1/a1 >= cj/aj
+        // we can derive:
+        // c1 >= (cj/aj)*a1 (multiply by a1)
+        // c1*aj >= cj*a1   (multiply by aj, basic efficiency comparation)
+        // c1*aj/cj >= a1   (divide by cj)
+        // aj/cj >= a1/c1   (divide by c1, inverse of the first statement)
+        // aj >= (a1/c1)*cj (aj - (a1/c1)*cj is always non-negative)
       }
 
+      // I reordered the tests to make them clear.
       vector<bool> items_to_remove(n + 1, false);
       I qt_items_to_remove = 0;
       for (I j = 2; j <= n; ++j) {
@@ -529,7 +596,12 @@ namespace hbm {
           ++qt_items_to_remove;
           continue;
         }
-        for (I i = 3; i <= n; ++i) {
+        // The step one of the article don't define the range of 'i'
+        // (an item index variable). I do believe that i=1 is excluded
+        // because otherwise d_[1] would be referenced (and it's undefined).
+        // I also believes that 'i' == 'j' can be skipped, as the conditions
+        // for exclusion only evaluate to true if the items are different.
+        for (I i = 2; i <= n; ++i) {
           if (i == j) continue;
           if (c[i] % c1 == c[j] % c1) {
             if (d_[i] < d_[j]) {
@@ -545,166 +617,465 @@ namespace hbm {
         }
       }
 
+      eip->n2 = n - qt_items_to_remove;
+      // The number of items that weren't excluded by step one.
+      I m;
       // Scope to guarantee vector deallocation.
       {
-        const I old_n = n;
-        n -= qt_items_to_remove;
+        m = n - qt_items_to_remove;
 
         vector<W> a_;
-        a_.reserve(n + 1);
+        a_.reserve(m + 1);
         a_.push_back(0);
 
         vector<P> c_;
-        c_.reserve(n + 1);
+        c_.reserve(m + 1);
         c_.push_back(0);
 
-        for (I j = 1; j <= old_n; ++j) {
+        myvector< rational<P> > tmp_d_;
+        tmp_d_.reserve(m + 1);
+        tmp_d_.push_back(0);
+
+        for (I j = 1; j <= n; ++j) {
           if (!items_to_remove[j]) {
             a_.push_back(a[j]);
             c_.push_back(c[j]);
+            tmp_d_.push_back(d_[j]);
           }
         }
 
         a_.swap(a);
         c_.swap(c);
+        tmp_d_.swap(d_);
       }
-
-      /*P k, &z = sol.opt;
       HBM_STOP_TIMER(eip->linear_comp_time);
+      //I m = n; // TEMPORARY, TODO: REMOVE AFTER
 
+      // We need to declare the variables before we start jumping
+      P c_, i, x, y;
+      I j, k;
+      rational<P> d;
+      //step_1: // unused step
       HBM_START_TIMER();
-      // STEP 1
-      // TODO: check type after algorithm is completed. See if vector can't
-      // be used.
-      // We do not set every value of f[1..t-1] to zero, it's too much,
-      // we simply will return zero for a non defined position.
-      map<P, P> upper_g;
-      map<P, I> upper_c;
-      //vector<P> upper_f(t, 0);
-      //vector<I> upper_c(t, 0);
-      // The algorithms have an lowercase d, an uppercase D, and a d with
-      // subscript, we use "d_" to denote the d with subscript.
-      myvector<P> d_;
-      d_.resize(n + 1);
-      //map<P, P> d_;
-      d_[0] = 0; // Does not exist, notation begins at 1
-      map<P, I> upper_d;
-      map<P, I> upper_e;
-      map<P, I> y;
-      //vector<I> upper_d(t, 0);
-      for (I j = 1; j <= n; ++j) {
-        // We will use c_ to denote c' ("c prime").
-        c_[]
-        y_[]
-        upper_c[c[j]] = j;
-        upper_d[c[j]] = j;
-        upper_e[j] = c[j];
-        upper_f[c[j]] = d_[j];
+      myvector<P> c_prime; // We will call c' as c_prime
+      c_prime.resize(m + 1);
+      // As there's an array 'y' and a variable 'y', we will call
+      // the array 'y_'
+      //map<P, P> y_;
+      // Every uppercase letter will be upper_x
+      //map<P, rational<P> > upper_g;
+      //map<P, I> upper_c;
+      //map<P, I> upper_d;
+      //map<I, P> upper_e;
+
+      // This isn't explicity said on the algorithm, but all of the vectors
+      // size (except by upper_e) upper bound size is c1. This is because x
+      // is never greater than c1 - 1.
+      //const P t = (c1*b)/a1 + 1;
+      vector<P> y_(c1, 0);
+      // Every uppercase letter will be upper_x
+      vector<rational<P> > upper_g(c1, 0);
+      vector<I> upper_c(c1, 0);
+      vector<I> upper_d(c1, 0);
+      //map<I, P> upper_e;
+      vector<P> upper_e;
+      upper_e.push_back(0); // positiom 0
+      upper_e.push_back(0); // position 1
+
+      const rational<P> infinity(numeric_limits<P>::max(), 1);
+      for (P k = 1; k < c1; ++k) {
+        // The positions where k == c_prime[j] for j=2..m will be overwritten
+        upper_g[k] = infinity;
       }
-      vector<W> x(n + 2, 0); // It's indexed until x + 1
-      W j = 0; // TODO: check type after algorithm is completed.
-      W m = n; // TODO: check type after algorithm is completed.
-      HBM_STOP_TIMER(eip->vector_alloc_time);
+
+      for (I j = 2; j <= m; ++j) {
+        c_prime[j] = c[j] - (c[j]/c1)*c1;
+        upper_g[c_prime[j]] = d_[j];
+        y_[c_prime[j]] = c[j];
+        upper_c[c_prime[j]] = j;
+        upper_d[c_prime[j]] = j;
+        upper_e.push_back(c_prime[j]);
+      }
+
+      j = 1;
 
       step_2a:
       j = j + 1;
       if (j > m) goto step_3;
 
       //step_2b: // unused label
-      //i = mfwd(upper_e, j, static_cast<size_t>(0));
       i = upper_e[j];
-      if (upper_c[i] != j) {
-        goto step_2a;
-      } else {
-        k = 0;
-      }
+      if (upper_c[i] != j) goto step_2a;
+      k = 1;
 
       step_2c:
       k = k + 1;
-      if (k > upper_d[i]) {
-        goto step_2a;
-      } else {
-        if (k > n) cout << "k: " << endl;
-        d = upper_f[i] + d_[k];
-        z = d - (d/t)*t;
-      }
+      if (k > upper_d[i]) goto step_2a;
+      d = upper_g[i] + d_[k];
+      y = y_[i] + c[k];
+      x = y - (y/c1)*c1;
 
-      //step_2d: // unused label
-      if (z == 0 || (0 < upper_f[z] && upper_f[z] <= d)) {
+      //step_2d: //unused label
+      if (x == 0 || d > upper_g[x] || (d == upper_g[x] && y >= y_[x])) {
         //goto step_2c;
       } else {
         m = m + 1;
-        //if (upper_c.count(z)) cout << "old m: " << upper_c[z] << endl << "new m: " << m << endl;
-        upper_c[z] = m;
-        upper_e[m] = z;
-        upper_f[z] = d;
-        // THIS LINE WAS MISSING FROM THE ARTICLE
-        upper_d[z] = k;
+        //auto &out = cout;
+        upper_c[x] = m;
+        upper_e.push_back(x);
+        upper_g[x] = d;
+        upper_d[x] = k;
+        y_[x] = y;
         //goto step_2c;
       }
+      
       goto step_2c;
 
-      // Because the goto above, the code below can only be accessed by jumping
-      // directly into step_3.
       step_3:
-      z = t - 1;
-      // As c is more used as the array of item profit values than a simple
-      // variable, we use c to denote the array, and c_ to denote the variable.
-      P c_;
+      // We initialize the vector here, as x[1] is already used on the next
+      // step.
+      vector<W> x_(m + 1, 0);  
+      sol.opt = (c1*b)/a1;
+      P &z = sol.opt;
+
       step_3a:
-      if (z + t*b < upper_f[z]) {
-        goto step_3b;
-      } else {
-        x[n + 1] = (z + t*b - upper_f[z])/t;
-        c_ = z;
-        goto step_3c;
-      }
+      do {
+        x = z - (z/c1)*c1;
+        if (z < y_[x]) {
+          // The article says: "If x1 < 0, G(x) does not produce F(z)."
+          // This means that the method failed and can't possibly
+          // find a solution?
+          cout << "negative x1: G(x) does not produce F(z)" << endl;
+          cout << "can't find a solution" << endl;
+          goto stop;
+        }
+        x_[1] = (z - y_[x])/c1;
 
-      step_3b:
-      z = z - 1;
-      if (z == c1*(b/a1)) {
-        goto step_3e;
-      } else {
-        goto step_3a;
-      }
+        //step_3b: //unused label
+        // As c is more used as the array of item profit values than a simple
+        // variable, we use c to denote the array, and c_ to denote the variable.
+        if (b < frac_a1_c1*z + upper_g[x]) {
+          //goto step_3c;
+          //step_3c:
+          z = z - 1;
+          if (z > c1*(b/a1)) goto step_3a;
+          else {
+            z = c1*(b/a1);
+            x_[1] = (b/a1);
+            // The algorithm don't give the next step here.
+            cout << "stopped as filled only by the best item" << endl;
+            goto stop;
+          }
+        } else {
+          c_ = z;
+          // The article asks to set x[j] = 0, j=2..n, on this step, we already
+          // did this before.
+          goto step_4a;
+        }
 
-      step_3c:
-      k = upper_d[c_];
-      x[k] = x[k] + 1;
+      } while (true);
 
-      //step_3d: // unused label
-      c_ = c_ - c[k];
-      if (c_ < 0) {
-        c_ = c_ + t;
-      } else if (c_ > 0) {
-        goto step_3c;
-      } else {
-        goto stop;
-      }
+      step_4a:
+      do {
+        k = upper_d[x];
+        x_[k] = x_[k] + 1;
+        c_ = y_[x] - c[k];
 
-      step_3e:
-      x[1] = b/a1;
-      x[n + 1] = b - a1*(b/a1);
+        //step_4b: // unused label
+        if (c_ == 0) break;
+
+        x = c_ - (c_/c1)*c1;
+      } while (true);
 
       stop:
       // Put the optimal solution on our format.
-      for (I l = 1; l <= n; ++l) {
-        if (x[l] > 0) {
-          sol.used_items.emplace_back(items[l-1], x[l], l);
+      for (I k = 1; k <= m; ++k) {
+        if (x_[k] > 0) {
+          sol.used_items.emplace_back(item_t<W, P>(a[k], c[k]), x_[k], k);
+        }
+      }
+      eip->m = m;
+      //cout << "m: " << eip->m << endl;
+    }
+
+    /// The second algorithm presented at "On Equivalent Knapsack Problems",
+    /// (H.  Greenberg).
+    template<typename W, typename P, typename I>
+    void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+      // Extra Info Pointer == eip
+      greendp2_extra_info_t<W, P, I>* eip =
+        new greendp2_extra_info_t<W, P, I>();
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
+
+      #ifdef HBM_PROFILE
+      // Used to compute the time all the execution algorithm.
+      steady_clock::time_point all_greendp1_begin = steady_clock::now();
+
+      // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
+      steady_clock::time_point begin;
+      #endif
+
+      // I tried to implement the algorithm in a way that anyone can verify
+      // this is the same algorithm described at the paper. The goto construct
+      // is used because of this. The only ommited goto's are the ones that
+      // jump to the next step (that are plainly and clearly unecessary here).
+      // BEFORE STEP 1 (notation already introduced by article)
+      HBM_START_TIMER();
+      auto &items = ukpi.items;
+      // In this paper the items are sorted by non-decreasing efficiency
+      // and the ties are solved by ordering by non-increasing weight
+      // (or profit).
+      if (!already_sorted) sort_by_eff(items);
+      HBM_STOP_TIMER(eip->sort_time);
+
+      HBM_START_TIMER();
+      // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
+      // In this algorithm 'n' can change, as we can remove items of the
+      // item list.
+      const I n = eip->n = static_cast<I>(items.size());
+      const W b = eip->c = ukpi.c;
+
+      const W a1 = items.front().w;
+      const P c1 = items.front().p;
+
+      vector<W> a(n + 1);
+      a[0] = 0; // Does not exist, notation begins at 1
+      vector<P> c(n + 1);
+      c[0] = 0; // Does not exist, notation begins at 1
+
+      for (I i = 0; i < n; ++i) {
+        item_t<W, P> it = items[i];
+        a[i+1] = it.w;
+        c[i+1] = it.p;
+      }
+
+      // PARAGRAPH ALGORITHM 2, before step 1
+      myvector< rational<P> > d_;
+      d_.resize(n + 1);
+      const rational<P> frac_a1_c1 = rational<P>(a1, c1);
+      for (I j = 2; j <= n; ++j) {
+        // On the article this line of the algorithm includes divisions that
+        // aren't rounded down. This would call for floating pointer
+        // arithmetic. However, those values are compared for equality later.
+        // On the article's example, the numbers are shown as fractions, what
+        // implies that absolute precision can be necessary. With this in mind,
+        // I choose to represent the values of d_ as fractions.
+        d_[j] = a[j] - (frac_a1_c1*c[j]);
+        // this value is always non-negative (proof follows):
+        // previous knowledge: c1/a1 >= cj/aj
+        // we can derive:
+        // c1 >= (cj/aj)*a1 (multiply by a1)
+        // c1*aj >= cj*a1   (multiply by aj, basic efficiency comparation)
+        // c1*aj/cj >= a1   (divide by cj)
+        // aj/cj >= a1/c1   (divide by c1, inverse of the first statement)
+        // aj >= (a1/c1)*cj (aj - (a1/c1)*cj is always non-negative)
+      }
+
+      // I reordered the tests to make them clear.
+      vector<bool> items_to_remove(n + 1, false);
+      I qt_items_to_remove = 0;
+      for (I j = 2; j <= n; ++j) {
+        if (c[j] % c1 == 0) {
+          items_to_remove[j] = true;
+          ++qt_items_to_remove;
+          continue;
+        }
+        // The step one of the article don't define the range of 'i'
+        // (an item index variable). I do believe that i=1 is excluded
+        // because otherwise d_[1] would be referenced (and it's undefined).
+        // I also believes that 'i' == 'j' can be skipped, as the conditions
+        // for exclusion only evaluate to true if the items are different.
+        for (I i = 2; i <= n; ++i) {
+          if (i == j) continue;
+          if (c[i] % c1 == c[j] % c1) {
+            if (d_[i] < d_[j]) {
+              items_to_remove[j] = true;
+              ++qt_items_to_remove;
+              break;
+            } else if (d_[i] == d_[j] && c[i] <= c[j]) {
+              items_to_remove[j] = true;
+              ++qt_items_to_remove;
+              break;
+            }
+          }
         }
       }
 
-      eip->upper_e_size = upper_e.size();
-      eip->upper_f_size = upper_f.size();
-      eip->upper_d_size = upper_d.size();
-      eip->upper_c_size = upper_c.size();
-      eip->d_size = d_.size();
-      eip->t = t;
+      eip->n2 = n - qt_items_to_remove;
+      // The number of items that weren't excluded by step one.
+      I m;
+      // Scope to guarantee vector deallocation.
+      {
+        m = n - qt_items_to_remove;
+
+        vector<W> a_;
+        a_.reserve(m + 1);
+        a_.push_back(0);
+
+        vector<P> c_;
+        c_.reserve(m + 1);
+        c_.push_back(0);
+
+        myvector< rational<P> > tmp_d_;
+        tmp_d_.reserve(m + 1);
+        tmp_d_.push_back(0);
+
+        for (I j = 1; j <= n; ++j) {
+          if (!items_to_remove[j]) {
+            a_.push_back(a[j]);
+            c_.push_back(c[j]);
+            tmp_d_.push_back(d_[j]);
+          }
+        }
+
+        a_.swap(a);
+        c_.swap(c);
+        tmp_d_.swap(d_);
+      }
+      HBM_STOP_TIMER(eip->linear_comp_time);
+      //I m = n; // TEMPORARY, TODO: REMOVE AFTER
+
+      // We need to declare the variables before we start jumping
+      P c_, i, x, y;
+      I j, k;
+      rational<P> d;
+      //step_1: // unused step
+      HBM_START_TIMER();
+      myvector<P> c_prime; // We will call c' as c_prime
+      c_prime.resize(m + 1);
+      // Every uppercase letter will be upper_x
+      //map<P, rational<P> > upper_g;
+      //map<P, I> upper_c;
+      //map<P, I> upper_d;
+      //map<I, P> upper_e;
+
+      // The x variable used to index all arrays but upper_e have (c1 - 1) as
+      // an upper bound. So the arrays upper bound size is c1.
+
+      // As there's an array 'y' and a variable 'y', we will call
+      // the array 'y_'
+      vector<P> y_(c1, 0);
+      // Every uppercase letter will be upper_x
+      vector<rational<P> > upper_g(c1, 0);
+      vector<I> upper_c(c1, 0);
+      vector<I> upper_d(c1, 0);
+      map<I, P> upper_e;
+      //vector<P> upper_e;
+      //upper_e.push_back(0); // positiom 0
+      //upper_e.push_back(0); // position 1
+
+      const rational<P> infinity(numeric_limits<P>::max(), 1);
+      for (P k = 1; k < c1; ++k) {
+        // The positions where k == c_prime[j] for j=2..m will be overwritten
+        upper_g[k] = infinity;
+      }
+
+      for (I j = 2; j <= m; ++j) {
+        c_prime[j] = c[j] - (c[j]/c1)*c1;
+        upper_g[c_prime[j]] = d_[j];
+        y_[c_prime[j]] = c[j];
+        upper_c[c_prime[j]] = j;
+        upper_d[c_prime[j]] = j;
+        upper_e[j] = c_prime[j];
+      }
+
+      j = 1;
+
+      step_2a:
+      j = j + 1;
+      if (j > m) goto step_3;
+
+      //step_2b: // unused label
+      i = upper_e[j];
+      if (upper_c[i] != j) goto step_2a;
+      k = 1;
+
+      step_2c:
+      k = k + 1;
+      if (k > upper_d[i]) goto step_2a;
+      d = upper_g[i] + d_[k];
+      y = y_[i] + c[k];
+      x = y - (y/c1)*c1;
+
+      //step_2d: //unused label
+      if (x == 0 || d > upper_g[x] || (d == upper_g[x] && y >= y_[x])) {
+        //goto step_2c;
+      } else {
+        m = m + 1;
+        upper_c[x] = m;
+        //upper_e.push_back(x);
+        upper_e[m] = x;
+        upper_g[x] = d;
+        upper_d[x] = k;
+        y_[x] = y;
+        //goto step_2c;
+      }
+      
+      goto step_2c;
+      // Because the goto above we only get on step_3 jumping directly to it.
+
+      step_3:
+      // We initialize the vector here, as x[1] is already used on the next
+      // step.
+      vector<W> x_(m + 1, 0);  
+      sol.opt = (c1*b)/a1;
+      P &z = sol.opt;
+
+      step_3a:
+      x = z - (z/c1)*c1;
+      if (z < y_[x]) {
+        // The article says: "If x1 < 0, G(x) does not produce F(z)."
+        // This means that the method failed and can't possibly
+        // find a solution?
+        cout << "negative x1: G(x) does not produce F(z)" << endl;
+        cout << "can't find a solution" << endl;
+        goto stop;
+      }
+      x_[1] = (z - y_[x])/c1;
+
+      //step_3b: //unused label
+      // As c is more used as the array of item profit values than a simple
+      // variable, we use c to denote the array, and c_ to denote the variable.
+      if (b < frac_a1_c1*z + upper_g[x]) {
+        goto step_3c;
+      } else {
+        c_ = z;
+        // The article asks to set x[j] = 0, j=2..n, on this step, we already
+        // did this before.
+        goto step_4a;
+      }
+
+      step_3c:
+      z = z - 1;
+      if (z > c1*(b/a1)) goto step_3a;
+      else {
+        z = c1*(b/a1);
+        x_[1] = (b/a1);
+        // The algorithm don't give the next step here.
+        cout << "stopped as filled only by the best item" << endl;
+        goto stop;
+      }
+
+      step_4a:
+      k = upper_d[x];
+      x_[k] = x_[k] + 1;
+      c_ = y_[x] - c[k];
+
+      //step_4b: // unused label
+      if (c_ > 0) {
+        x = c_ - (c_/c1)*c1;
+        goto step_4a;
+      }
+
+      stop:
+      // Put the optimal solution on our format.
+      for (I k = 1; k <= m; ++k) {
+        if (x_[k] > 0) {
+          sol.used_items.emplace_back(item_t<W, P>(a[k], c[k]), x_[k], k);
+        }
+      }
       eip->m = m;
-      #ifdef HBM_PROFILE
-      eip->total_time = difftime_between_now_and(all_greendp1_begin);
-      #endif
-      return;*/
     }
 
     /// The modernized version of the first algorithm presented at "On
@@ -715,7 +1086,7 @@ namespace hbm {
       mgreendp1_extra_info_t<W, P, I>* eip =
         new mgreendp1_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
-      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
       #ifdef HBM_PROFILE
       // Used to compute the time all the execution algorithm.
@@ -1029,7 +1400,7 @@ namespace hbm {
       greendp1_extra_info_t<W, P, I>* eip =
         new greendp1_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
-      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
       #ifdef HBM_PROFILE
       // Used to compute the time all the execution algorithm.
@@ -1209,7 +1580,7 @@ namespace hbm {
       // Extra Info Pointer == eip
       greendp_extra_info_t<W, P, I>* eip = new greendp_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
-      sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
       #ifdef HBM_PROFILE
       // Used to compute the time all the execution algorithm.
@@ -1442,6 +1813,27 @@ namespace hbm {
     }
 
     template<typename W, typename P, typename I>
+    struct mgreendp2_wrap : wrapper_t<W, P, I> {
+      virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
+        // Calls the overloaded version with the third argument as a bool
+        hbm_greendp_impl::mgreendp2(ukpi, sol, already_sorted);
+
+        return;
+      }
+
+      virtual const std::string& name(void) const {
+        static const std::string name = "mgreendp2";
+        return name;
+      }
+    };
+
+    template<typename W, typename P, typename I = size_t>
+    void mgreendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
+                  int argc, argv_t argv) {
+      simple_wrapper(mgreendp2_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    }
+
+    template<typename W, typename P, typename I>
     struct greendp2_wrap : wrapper_t<W, P, I> {
       virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
         // Calls the overloaded version with the third argument as a bool
@@ -1505,6 +1897,29 @@ namespace hbm {
     }
   }
 
+  /// A rewritten version of the second algorithm presented at "On Equivalent
+  /// Knapsack Problems" (H. Greenberg), an attemp to adapt the algorithm to
+  /// structured programming.
+  ///
+  /// @see greendp2
+  template<typename W, typename P, typename I>
+  void mgreendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    hbm_greendp_impl::mgreendp2(ukpi, sol, already_sorted);
+  }
+
+  /// An overloaded function, it's used as argument to test_common functions.
+  ///
+  /// The only parameter recognized is "--already-sorted". If this parameter is
+  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
+  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  ///
+  /// @see main_take_path
+  /// @see mgreendp2(instance_t<W, P> &, solution_t<W, P, I> &, bool)
+  template<typename W, typename P, typename I>
+  void mgreendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
+    hbm_greendp_impl::mgreendp2(ukpi, sol, argc, argv);
+  }
+
   /// Solves an UKP instance by one of the dynamic programming algorithm
   /// presented at "On Equivalent Knapsack Problems" from H. Greenberg (this is
   /// the one presented as "Algorithm 2"), and stores the results at sol.
@@ -1533,7 +1948,6 @@ namespace hbm {
   void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_greendp_impl::greendp2(ukpi, sol, argc, argv);
   }
-
 
   /// Solves an UKP instance by one of the dynamic programming algorithm
   /// presented at "On Equivalent Knapsack Problems" from H. Greenberg (this is

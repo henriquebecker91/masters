@@ -91,6 +91,11 @@ namespace hbm {
   struct greendp1_extra_info_t : greendp_extra_info_t<W, P, I> {
     W t; ///< Value of constant t (it's constant for each instance).
     W m; ///< Final value of variable m (number of generated solutions).
+    /// GCD of all profit values. If this is bigger than one, then all the
+    /// computations used profits divided by gcd_n, and at the end of the
+    /// algorithm, z and the optimal solution items were returned to they
+    /// original value to be displayed correctly.
+    P gcd_c;
 
     std::string gen_info(void) {
       std::string s = greendp_extra_info_t<W, P, I>::gen_info();
@@ -98,6 +103,7 @@ namespace hbm {
 
       HBM_PRINT_VAR(t);
       HBM_PRINT_VAR(m);
+      HBM_PRINT_VAR(gcd_c);
 
       return s + out.str();
     }
@@ -112,6 +118,7 @@ namespace hbm {
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
     double linear_comp_time{0}; ///< Time used by linear time preprocessing.
+    double dom_time{0};    ///< Time used dominance tests.
     double dp_time{0};     ///< Time used creating partial solutions.
     double sol_time{0};    ///< Time used to assemble solution.
     double total_time{0};  ///< Time used by all the algorithm.
@@ -120,6 +127,11 @@ namespace hbm {
     I n2{0};///< Number of items not excluded before starting.
     W c{0}; ///< Instance capacity.
     W m; ///< Final value of variable m (number of generated solutions).
+    /// GCD of all profit values. If this is bigger than one, then all the
+    /// computations used profits divided by gcd_n, and at the end of the
+    /// algorithm, z and the optimal solution items were returned to they
+    /// original value to be displayed correctly.
+    P gcd_c;
 
     virtual std::string gen_info(void) {
       std::stringstream out("");
@@ -131,7 +143,7 @@ namespace hbm {
 
       #ifdef HBM_PROFILE
       const double sum_time = sort_time + vector_alloc_time +
-        linear_comp_time + dp_time + sol_time;
+        linear_comp_time + dp_time + dom_time + sol_time;
 
       std::streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
       const int two_first_digits_and_period = 3;
@@ -149,6 +161,7 @@ namespace hbm {
       HBM_PRINT_TIME("Sort", sort_time);
       HBM_PRINT_TIME("Vect", vector_alloc_time);
       HBM_PRINT_TIME("O(n)", linear_comp_time);
+      HBM_PRINT_TIME("Dom ", linear_comp_time);
       HBM_PRINT_TIME("dp  ", dp_time);
       HBM_PRINT_TIME("sol ", sol_time);
       HBM_PRINT_TIME("Sum ", sum_time);
@@ -162,6 +175,9 @@ namespace hbm {
       return out.str();
     }
   };
+
+  template <typename W, typename P, typename I>
+  struct mgreendp2_extra_info_t : greendp2_extra_info_t<W, P, I> {};
 
   namespace hbm_greendp_impl {
     using namespace std;
@@ -181,11 +197,11 @@ namespace hbm {
         return *begin;
       }
 
-      T acc = gcd(*begin, *(begin+1));
+      T acc = boost::math::gcd(*begin, *(begin+1));
       ++begin;
 
       for (; begin != end && acc > 1; ++begin) {
-        acc = gcd(acc, *begin);
+        acc = boost::math::gcd(acc, *begin);
       }
 
       return acc;
@@ -334,17 +350,10 @@ namespace hbm {
       b.reserve(items.size());
       b.push_back(0);
 
-      //const P bi_g = gcd(bi.w, bi.p);
-      //const item_t<W, P> bi_n(bi.w / bi_g, bi.p / bi_g);
       for (size_t i = 1; i < n; ++i) {
         const item_t<W, P> &it = items[i];
         b.push_back(bi.p*it.w - it.p*bi.w);
-        //const P it_g = gcd(it.w, it.p);
-        //const item_t<W, P> it_n(it.w / it_g, it.p / it_g);
-        //cout << "it_g: " << it_g << endl;
-        //cout << "b_n[" << i << "]: " << bi_n.p*it_n.w - it_n.p*bi_n.w << endl;
       }
-      //cout << "bi_g: " << bi_g << endl;
 
       return b;
     }
@@ -518,8 +527,8 @@ namespace hbm {
     template<typename W, typename P, typename I>
     void mgreendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
-      greendp2_extra_info_t<W, P, I>* eip =
-        new greendp2_extra_info_t<W, P, I>();
+      mgreendp2_extra_info_t<W, P, I>* eip =
+        new mgreendp2_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
       sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
@@ -531,10 +540,6 @@ namespace hbm {
       steady_clock::time_point begin;
       #endif
 
-      // I tried to implement the algorithm in a way that anyone can verify
-      // this is the same algorithm described at the paper. The goto construct
-      // is used because of this. The only ommited goto's are the ones that
-      // jump to the next step (that are plainly and clearly unecessary here).
       // BEFORE STEP 1 (notation already introduced by article)
       HBM_START_TIMER();
       auto &items = ukpi.items;
@@ -545,14 +550,10 @@ namespace hbm {
       HBM_STOP_TIMER(eip->sort_time);
 
       HBM_START_TIMER();
-      // CHANGING DATA STRUCTURES TO HAVE A NOTATION SIMILAR TO THE ARTICLE
       // In this algorithm 'n' can change, as we can remove items of the
-      // item list.
+      // item list. We will use eip->n2 to denote the new n.
       const I n = eip->n = static_cast<I>(items.size());
       const W b = eip->c = ukpi.c;
-
-      const W a1 = items.front().w;
-      const P c1 = items.front().p;
 
       vector<W> a(n + 1);
       a[0] = 0; // Does not exist, notation begins at 1
@@ -564,6 +565,12 @@ namespace hbm {
         a[i+1] = it.w;
         c[i+1] = it.p;
       }
+      const P gcd_c = gcd_n<typename vector<P>::iterator, P>
+                           (c.begin() + 1, c.end());
+      if (gcd_c > 1) for (P &cj: c) cj /= gcd_c;
+      eip->gcd_c = gcd_c;
+      const W a1 = a[1];
+      const P c1 = c[1];
 
       // PARAGRAPH ALGORITHM 2, before step 1
       myvector< rational<P> > d_;
@@ -575,7 +582,10 @@ namespace hbm {
         // arithmetic. However, those values are compared for equality later.
         // On the article's example, the numbers are shown as fractions, what
         // implies that absolute precision can be necessary. With this in mind,
-        // I choose to represent the values of d_ as fractions.
+        // I chose to represent the values of d_ as fractions.
+        // UPDATE: When executing this algorithm over the example provided
+        // on the paper, the optimal solution is reached after comparing
+        // two equal fractions (absolute precision is necessary).
         d_[j] = a[j] - (frac_a1_c1*c[j]);
         // this value is always non-negative (proof follows):
         // previous knowledge: c1/a1 >= cj/aj
@@ -585,8 +595,16 @@ namespace hbm {
         // c1*aj/cj >= a1   (divide by cj)
         // aj/cj >= a1/c1   (divide by c1, inverse of the first statement)
         // aj >= (a1/c1)*cj (aj - (a1/c1)*cj is always non-negative)
+        // Meaning of d_: d_ seems to be the difference between how
+        // much the item would weight if it had the same efficiency as the best
+        // item, and the actual weight of the item. If it had the same
+        // efficiency as the best item, this would mean its efficiency would be
+        // greater, and for the same profit the weight would be smaller (so the
+        // difference with its original weight is always non-negative).
       }
+      HBM_STOP_TIMER(eip->linear_comp_time);
 
+      HBM_START_TIMER();
       // I reordered the tests to make them clear.
       vector<bool> items_to_remove(n + 1, false);
       I qt_items_to_remove = 0;
@@ -599,8 +617,9 @@ namespace hbm {
         // The step one of the article don't define the range of 'i'
         // (an item index variable). I do believe that i=1 is excluded
         // because otherwise d_[1] would be referenced (and it's undefined).
-        // I also believes that 'i' == 'j' can be skipped, as the conditions
-        // for exclusion only evaluate to true if the items are different.
+        // I also believe that 'i' == 'j' can be skipped, as the conditions
+        // for exclusion only evaluate to true if the items are different
+        // (i.e. skipping i == j makes no difference).
         for (I i = 2; i <= n; ++i) {
           if (i == j) continue;
           if (c[i] % c1 == c[j] % c1) {
@@ -617,12 +636,13 @@ namespace hbm {
         }
       }
 
-      eip->n2 = n - qt_items_to_remove;
       // The number of items that weren't excluded by step one.
+      // And after, the number os solutions generated.
       I m;
+      // Here we remove the items maked for removal.
       // Scope to guarantee vector deallocation.
       {
-        m = n - qt_items_to_remove;
+        m = eip->n2 = n - qt_items_to_remove;
 
         vector<W> a_;
         a_.reserve(m + 1);
@@ -648,40 +668,56 @@ namespace hbm {
         c_.swap(c);
         tmp_d_.swap(d_);
       }
-      HBM_STOP_TIMER(eip->linear_comp_time);
-      //I m = n; // TEMPORARY, TODO: REMOVE AFTER
+      HBM_STOP_TIMER(eip->dom_time);
 
-      // We need to declare the variables before we start jumping
-      P c_, i, x, y;
-      I j, k;
+      HBM_START_TIMER();
+      P x, y;
       rational<P> d;
       //step_1: // unused step
-      HBM_START_TIMER();
-      myvector<P> c_prime; // We will call c' as c_prime
+      // We will call c' as c_prime. The c_prime saves the value of
+      // c[j] % c1 on position j. It's updated for j=2..n (the initial
+      // items) and after this isn't changed anymore.
+      myvector<P> c_prime;
       c_prime.resize(m + 1);
+      // This isn't explicity said on the algorithm, but the size of all
+      // vectors (except by upper_e) is c1. This is because x (the variable
+      // used to index all vectors except by upper_e) is always smaller than c1
+      // (as it's modulo c1).
       // As there's an array 'y' and a variable 'y', we will call
-      // the array 'y_'
-      //map<P, P> y_;
-      // Every uppercase letter will be upper_x
-      //map<P, rational<P> > upper_g;
-      //map<P, I> upper_c;
-      //map<P, I> upper_d;
-      //map<I, P> upper_e;
-
-      // This isn't explicity said on the algorithm, but all of the vectors
-      // size (except by upper_e) upper bound size is c1. This is because x
-      // is never greater than c1 - 1.
-      //const P t = (c1*b)/a1 + 1;
+      // the array 'y_'.
+      // y_ saves the profit value of solutions (z's), the key to access the
+      // value is the saved value (z) % c1.
       vector<P> y_(c1, 0);
-      // Every uppercase letter will be upper_x
+      // Every uppercase letter will be upper_x.
+      // Each of the three vectors below store info related to a solution.
+      // If the solution profit value is z, the info is stored at position
+      // z % c1 of the array. The upper_g stores a fraction (meaning what?),
+      // the upper_c stores the index of the solution on upper_e, and upper_d
+      // stores the last item used to make the solution.
       vector<rational<P> > upper_g(c1, 0);
       vector<I> upper_c(c1, 0);
       vector<I> upper_d(c1, 0);
-      //map<I, P> upper_e;
-      vector<P> upper_e;
-      upper_e.push_back(0); // positiom 0
-      upper_e.push_back(0); // position 1
 
+      // For upper_e we need a structure between a vector and a list. We want
+      // fast access to one point inside the container and to its end (could be
+      // done by list or vector). We want to clean from memory the elements
+      // already iterated by our iterator in a O(1) way (list). We want to make
+      // better use of cache and do not allocate memory at every new item
+      // inserted at the container's end (vector). So the ideia is a vector of
+      // vectors, the inner vectors have a max size, and we can ask to clean an
+      // entire inner vector (i.e. chunk) easily.
+      // If the P value is 64 bits, a 1000000 chunk_size is about 7MiB.
+      // TODO: make this a configurable parameter
+      // chunk-based upper_e code below
+      const size_t chunk_size = 1000000;
+      size_t h = 0, l = 0;
+      vector< vector<P> > upper_e;
+      upper_e.emplace_back();
+      upper_e.front().reserve(chunk_size);
+      upper_e.front().emplace_back(0);
+      HBM_STOP_TIMER(eip->vector_alloc_time);
+
+      HBM_START_TIMER();
       const rational<P> infinity(numeric_limits<P>::max(), 1);
       for (P k = 1; k < c1; ++k) {
         // The positions where k == c_prime[j] for j=2..m will be overwritten
@@ -689,113 +725,196 @@ namespace hbm {
       }
 
       for (I j = 2; j <= m; ++j) {
-        c_prime[j] = c[j] - (c[j]/c1)*c1;
+        c_prime[j] = c[j] % c1;
         upper_g[c_prime[j]] = d_[j];
         y_[c_prime[j]] = c[j];
         upper_c[c_prime[j]] = j;
         upper_d[c_prime[j]] = j;
-        upper_e.push_back(c_prime[j]);
+
+        if (upper_e.back().size() == chunk_size) {
+          upper_e.emplace_back();
+          upper_e.back().reserve(chunk_size);
+        }
+        upper_e.back().emplace_back(c_prime[j]);
       }
 
-      j = 1;
+      // Iterate through the generated solutions, and combine them with items
+      // to generate new solutions. The initial solutions are single items
+      // solutions (already present at the upper_* arrays). The 'm' variable
+      // stores the number of generated solutions (begins at n, the number
+      // of single item solutions).
+      for (I j = 2; j <= m; ++j) {
+        if (++l == chunk_size) {
+          l = 0;
+          // Clean chunk with index h, that will not be referenced anymore
+          vector<I>().swap(upper_e[h]);
+          ++h;
+        }
+        P i = upper_e[h][l];
 
-      step_2a:
-      j = j + 1;
-      if (j > m) goto step_3;
+        // If this solution 'i' isn't the last already generated solution to
+        // have the same 'profit value % c1' then we skip it.
+        if (upper_c[i] != j) continue;
 
-      //step_2b: // unused label
-      i = upper_e[j];
-      if (upper_c[i] != j) goto step_2a;
-      k = 1;
+        //step_2c:
+        // Iterate the items, generating new solutions with symmetry pruning.
+        // Combine a solution 'i' with the item 'k' (where k is always equal to
+        // or lower than the lowest index of an item on solution 'i').
+        for (I k = 2; k <= upper_d[i]; ++k) {
+          d = upper_g[i] + d_[k];
+          y = y_[i] + c[k];
+          x = y % c1;
 
-      step_2c:
-      k = k + 1;
-      if (k > upper_d[i]) goto step_2a;
-      d = upper_g[i] + d_[k];
-      y = y_[i] + c[k];
-      x = y - (y/c1)*c1;
+          //step_2d:
+          // x != 0: if x == 0 then the solution profit is perfect divisible
+          //  by c1, and you will not use that solution (because using
+          //  multiple copies of the best item will be better).
+          // d <= upper_g[x]: d is 'the weight of the solution -(minus)
+          //  the weight of a relaxed solution with the same profit value
+          //  (i.e. multiple copies of the best item, with the last copy
+          //  possibly fractionary). 'd' will be smaller for lighter solutions
+          //  or more efficient solutions. This way we are trying to obtain
+          //  the most efficient solution for the periodic capacity value x. If
+          //  the most efficient solution for y % c1 = x is upper_g[x] then we
+          //  can backtrack that solution and combine with copies of c1 (for
+          //  the remaining profit).
+          // (d != upper_g[x] || y < y_[x]): if d is different from upper_g[x]
+          //  then we can be safe upper_g[x] is bigger than d; if d is equal to
+          //  upper_g[x] (they are equally efficient?), we will chose the one
+          //  with the smaller profit value (and consequently smaller weight),
+          //  that can be combined with more copies of the best item (or
+          //  combined with more solutions).
+          if (x != 0 && d <= upper_g[x] && (d != upper_g[x] || y < y_[x])) {
+            y_[x] = y;
+            upper_g[x] = d;
+            upper_d[x] = k;
 
-      //step_2d: //unused label
-      if (x == 0 || d > upper_g[x] || (d == upper_g[x] && y >= y_[x])) {
-        //goto step_2c;
-      } else {
-        m = m + 1;
-        //auto &out = cout;
-        upper_c[x] = m;
-        upper_e.push_back(x);
-        upper_g[x] = d;
-        upper_d[x] = k;
-        y_[x] = y;
-        //goto step_2c;
+            // the code below is equivalent to: upper_e[m] = x
+            if (upper_e.back().size() == chunk_size) {
+              upper_e.emplace_back();
+              upper_e.back().reserve(chunk_size);
+            }
+            upper_e.back().emplace_back(x);
+
+            upper_c[x] = ++m;
+          }
+        }
       }
-      
-      goto step_2c;
+      // m isn't modified anymore, we can save it
+      eip->m = m;
+      HBM_STOP_TIMER(eip->dp_time);
 
-      step_3:
-      // We initialize the vector here, as x[1] is already used on the next
-      // step.
-      vector<W> x_(m + 1, 0);  
+      //step_3:
+      HBM_START_TIMER();
+      vector<W> x_(m + 1, 0);
+      // z is initialized with the best possible value (an upper bound,
+      // the relaxed solution of the problem rounded down).
       sol.opt = (c1*b)/a1;
       P &z = sol.opt;
 
-      step_3a:
+      // As c is more used as the array of item profit values than a simple
+      // variable, we use c to denote the array, and c_ to denote the variable
+      // used to backtrack the found optimal solution.
+      P c_ = 0;
       do {
-        x = z - (z/c1)*c1;
-        if (z < y_[x]) {
+        x = z % c1;
+        // If y_[x] is bigger than z, then y_[x] = z + w*c1, with w > 0; (as
+        // the two are in the same modulo c1 residue, and y_[x] is greater).
+        // As z begins at the upper bound and it's decremented one unit at
+        // time, the only way to missing the z + w*c1 value (that's in the same
+        // modulo c1 residue), is that z have begun smaller than y_[x] and,
+        // therefore, y_[x] stores a solution over the upper bound (invalid).
+        if (y_[x] > z) {
           // The article says: "If x1 < 0, G(x) does not produce F(z)."
-          // This means that the method failed and can't possibly
-          // find a solution?
+          // This means that the periodic solution to the position
+          // c1 has a profit bigger than the upper bound. This is possible
+          // because the loop that generates new solutions don't care about
+          // the solution weight, so invalid solutions (bigger than the
+          // capacity) can be generated. This is done by design, the ideia
+          // of this algorithm is to compute all optimal solutions (without
+          // the best item) to the modulo residue c1. These solutions can be
+          // smaller than c1 or multiple times bigger, but only the most
+          // efficient solution with the same 'solution profit % c1' (i.e.
+          // module residue) will be saved. After we have all the optimal
+          // solutions for the c1 module residue, we can guess profit values
+          // (beggining with the upper bound and descending). We get the
+          // module residue corresponding to the guess profit value, and
+          // combine it with copies of the best item until filling
+          // the capacity. The problem is that the optimal solution for an
+          // specific module residue 'x' can be only reached for capacities
+          // bigger than 'b', and therefore we can't solve the problem
+          // combining copies of the best item with a periodic solution
+          // (optimal solution for a specific module residue value).
+          // To solve an instance that ends on this branch of the algorithm
+          // we would need to use another algorithm that don't assumes
+          // that the c1 periodicity is reached within the 'b' capacity value.
           cout << "negative x1: G(x) does not produce F(z)" << endl;
           cout << "can't find a solution" << endl;
-          goto stop;
+          cout << "see comment on this 'if' for a detailed explanation" << endl;
+          HBM_STOP_TIMER(eip->sol_time);
+          #ifdef HBM_PROFILE
+          eip->total_time = difftime_between_now_and(all_greendp1_begin);
+          #endif
+          z = 0;
+          return;
         }
+        // We fill any remaining profit with copies of the best item.
         x_[1] = (z - y_[x])/c1;
 
-        //step_3b: //unused label
-        // As c is more used as the array of item profit values than a simple
-        // variable, we use c to denote the array, and c_ to denote the variable.
-        if (b < frac_a1_c1*z + upper_g[x]) {
-          //goto step_3c;
-          //step_3c:
-          z = z - 1;
-          if (z > c1*(b/a1)) goto step_3a;
-          else {
-            z = c1*(b/a1);
-            x_[1] = (b/a1);
-            // The algorithm don't give the next step here.
-            cout << "stopped as filled only by the best item" << endl;
-            goto stop;
-          }
-        } else {
+        // frac_a1_c1*z == a1*(z/c1) == how many would weight this solution
+        // if it was made entirely of copies of the best item (and allowing
+        // to fraction the best item). upper_g[x] == the difference between
+        // the real weight of the solution, and the weight if it was made of
+        // copies of the best item (and allowing to fraction it).
+        // frac_a1_c1*z + upper_g == the true weight of the solution
+        // Here we are simply cheking if the weight of the current solution
+        // is smaller than the capacity (i.e. if the current solution is
+        // valid).
+        if (frac_a1_c1*z + upper_g[x] <= b) {
+          // If the solution is valid, begin the backtrack procedure to
+          // assemble the solution.
           c_ = z;
-          // The article asks to set x[j] = 0, j=2..n, on this step, we already
-          // did this before.
-          goto step_4a;
+          break;
+        } else {
+          // If the solution isn't valid, inspect the next one (the one with
+          // profit one unity smaller).
+          z = z - 1;
+          // If no valid solution with bigger profit than a solution composed
+          // entirely of copies the best item (not allowing fractions) was
+          // found, then the optimal solution is composed entirely of copies
+          // of the best item.
+          if (z <= c1*(b/a1)) {
+            z = c1*(b/a1);
+            sol.used_items.emplace_back(items[0], b/a1, 1);
+            return;
+          }
         }
-
       } while (true);
 
-      step_4a:
-      do {
-        k = upper_d[x];
-        x_[k] = x_[k] + 1;
+      while (c_ != 0) {
+        // Backtrack procedure to assemble the subset of the found optimal
+        // solution that isn't composed of copies of the best item.
+        // Quantity of the best item already included before.
+        I k = upper_d[x];
+        ++x_[k];
         c_ = y_[x] - c[k];
+        x = c_ % c1;
+      }
 
-        //step_4b: // unused label
-        if (c_ == 0) break;
-
-        x = c_ - (c_/c1)*c1;
-      } while (true);
-
-      stop:
+      if (gcd_c > 1) for (P &cj: c) cj *= gcd_c;
+      z *= gcd_c;
+      //stop:
       // Put the optimal solution on our format.
-      for (I k = 1; k <= m; ++k) {
+      for (I k = 1; k <= eip->n2; ++k) {
         if (x_[k] > 0) {
           sol.used_items.emplace_back(item_t<W, P>(a[k], c[k]), x_[k], k);
+          sol.y_opt += x_[k]*a[k];
         }
       }
-      eip->m = m;
-      //cout << "m: " << eip->m << endl;
+      HBM_STOP_TIMER(eip->sol_time);
+      #ifdef HBM_PROFILE
+      eip->total_time = difftime_between_now_and(all_greendp1_begin);
+      #endif
     }
 
     /// The second algorithm presented at "On Equivalent Knapsack Problems",
@@ -836,9 +955,6 @@ namespace hbm {
       const I n = eip->n = static_cast<I>(items.size());
       const W b = eip->c = ukpi.c;
 
-      const W a1 = items.front().w;
-      const P c1 = items.front().p;
-
       vector<W> a(n + 1);
       a[0] = 0; // Does not exist, notation begins at 1
       vector<P> c(n + 1);
@@ -849,7 +965,15 @@ namespace hbm {
         a[i+1] = it.w;
         c[i+1] = it.p;
       }
+      const P gcd_c = gcd_n<typename vector<P>::iterator, P>
+                           (c.begin() + 1, c.end());
+      if (gcd_c > 1) for (P &cj: c) cj /= gcd_c;
+      eip->gcd_c = gcd_c;
+      const W a1 = a[1];
+      const P c1 = c[1];
+      HBM_STOP_TIMER(eip->linear_comp_time);
 
+      HBM_START_TIMER();
       // PARAGRAPH ALGORITHM 2, before step 1
       myvector< rational<P> > d_;
       d_.resize(n + 1);
@@ -933,9 +1057,9 @@ namespace hbm {
         c_.swap(c);
         tmp_d_.swap(d_);
       }
-      HBM_STOP_TIMER(eip->linear_comp_time);
-      //I m = n; // TEMPORARY, TODO: REMOVE AFTER
+      HBM_STOP_TIMER(eip->dom_time);
 
+      HBM_START_TIMER();
       // We need to declare the variables before we start jumping
       P c_, i, x, y;
       I j, k;
@@ -964,7 +1088,9 @@ namespace hbm {
       //vector<P> upper_e;
       //upper_e.push_back(0); // positiom 0
       //upper_e.push_back(0); // position 1
+      HBM_STOP_TIMER(eip->vector_alloc_time);
 
+      HBM_START_TIMER();
       const rational<P> infinity(numeric_limits<P>::max(), 1);
       for (P k = 1; k < c1; ++k) {
         // The positions where k == c_prime[j] for j=2..m will be overwritten
@@ -1011,16 +1137,20 @@ namespace hbm {
         y_[x] = y;
         //goto step_2c;
       }
-      
+
       goto step_2c;
       // Because the goto above we only get on step_3 jumping directly to it.
 
       step_3:
+      HBM_STOP_TIMER(eip->dp_time);
+      HBM_START_TIMER();
       // We initialize the vector here, as x[1] is already used on the next
       // step.
-      vector<W> x_(m + 1, 0);  
+      vector<W> x_(m + 1, 0);
       sol.opt = (c1*b)/a1;
       P &z = sol.opt;
+      // m isn't modified anymore, we can save it
+      eip->m = m;
 
       step_3a:
       x = z - (z/c1)*c1;
@@ -1052,8 +1182,8 @@ namespace hbm {
       else {
         z = c1*(b/a1);
         x_[1] = (b/a1);
-        // The algorithm don't give the next step here.
         cout << "stopped as filled only by the best item" << endl;
+        // The algorithm don't give the next step here.
         goto stop;
       }
 
@@ -1069,13 +1199,20 @@ namespace hbm {
       }
 
       stop:
+      if (gcd_c > 1) for (P &cj: c) cj *= gcd_c;
+      z *= gcd_c;
       // Put the optimal solution on our format.
       for (I k = 1; k <= m; ++k) {
         if (x_[k] > 0) {
           sol.used_items.emplace_back(item_t<W, P>(a[k], c[k]), x_[k], k);
+          sol.y_opt += x_[k]*a[k];
         }
       }
-      eip->m = m;
+
+      HBM_STOP_TIMER(eip->sol_time);
+      #ifdef HBM_PROFILE
+      eip->total_time = difftime_between_now_and(all_greendp1_begin);
+      #endif
     }
 
     /// The modernized version of the first algorithm presented at "On
@@ -1119,13 +1256,17 @@ namespace hbm {
       vector<P> c(n + 1);
       c[0] = 0; // Does not exist, notation begins at 1
 
-      const W a1 = items.front().w;
-      const P c1 = items.front().p;
       for (I i = 0; i < n; ++i) {
         item_t<W, P> it = items[i];
         a[i+1] = it.w;
         c[i+1] = it.p;
       }
+      const P gcd_c = gcd_n<typename vector<P>::iterator, P>
+                           (c.begin() + 1, c.end());
+      if (gcd_c > 1) for (P &cj: c) cj /= gcd_c;
+      eip->gcd_c = gcd_c;
+      const W a1 = a[1];
+      const P c1 = c[1];
 
       // The constant 't' is a value strictly greater than the optimal solution
       // value. It's used to multiply the items weight, this way we can codify
@@ -1135,6 +1276,8 @@ namespace hbm {
       // profit) as combined numbers. The items are represented this way, as
       // the solutions (that are simply the sum of many items).
       const P t = (c1*b)/a1 + 1;
+      // the real upper bound t value is dependent on gdc_c
+      eip->t = (c1*gcd_c*b)/a1 + 1;
 
       // z: A solution profit value. The algorithm will end with the
       //    optimal solution value inside this variable.
@@ -1152,7 +1295,7 @@ namespace hbm {
       // The algorithm have an lowercase d, an uppercase D, and a d with
       // subscript, we use "d_" to denote the d with subscript.
       // The d_ array maps the index of an item to its combined number
-      // representation. 
+      // representation.
       myvector<P> d_;
       d_.resize(n + 1);
       d_[0] = 0; // Does not exist, notation begins at 1
@@ -1205,7 +1348,9 @@ namespace hbm {
       // It maps solution profits (z) to the index of the last item used in
       // that solution.
       vector<I> upper_d(t, 0);
+      HBM_STOP_TIMER(eip->vector_alloc_time);
 
+      HBM_START_TIMER();
       for (I j = 1; j <= n; ++j) {
         // inverted indexes initialization
         upper_c[c[j]] = j;
@@ -1225,7 +1370,7 @@ namespace hbm {
         // them (in upper_f they are single item solutions).
         d_[j] = c[j] + t*a[j];
         upper_f[c[j]] = d_[j];
- 
+
         // This array (upper_d) is initialized like upper_c, but after upper_c
         // will receive m values (index of solutions), and upper_d receives k
         // values (index of items).
@@ -1235,7 +1380,6 @@ namespace hbm {
       W j = 0;
       // The number of solutions (optimal or not) generated by the algorithm.
       W m = n;
-      HBM_STOP_TIMER(eip->vector_alloc_time);
 
       // The j is the index of the current solution (initially we will consider
       // every single item as an single item solution). The m is the total
@@ -1244,7 +1388,6 @@ namespace hbm {
       // with k and generate new solutions combining the current solution k
       // with the items. When j reaches m we have generated enough solutions
       // relevant to find one optimal solution between them, and we can stop.
-      HBM_START_TIMER();
       while (++j <= m) {
         // chunk-based upper_e code below
         if (++l == chunk_size) {
@@ -1254,7 +1397,7 @@ namespace hbm {
           ++h;
         }
         P z_curr_sol = upper_e[h][l];
- 
+
         // forward_list upper_e code below
         //if (upper_e.empty()) break;
         //P z_curr_sol = upper_e.front();
@@ -1312,6 +1455,8 @@ namespace hbm {
           }
         }
       }
+      // m isn't modified anymore, we can save it
+      eip->m = m;
       HBM_STOP_TIMER(eip->dp_time);
 
       // We start with the greatest possible value for the optimal
@@ -1323,7 +1468,7 @@ namespace hbm {
       // there's y copies of the item k on an optimal solution.
       // The x[n+1] stores how much empty space there's in an optimal
       // solution (the difference between the weight of the optimal
-      // solution we found and the capacity of the instance knapsack). 
+      // solution we found and the capacity of the instance knapsack).
       vector<W> x(n + 2, 0); // It's indexed until x + 1
 
       bool only_best_item_used = false;
@@ -1374,18 +1519,18 @@ namespace hbm {
             c_ = c_ - c[k];
           }
         } while (c_ != 0);
+      }
 
-        // Put the optimal solution on our format.
-        for (I k = 1; k <= n; ++k) {
-          if (x[k] > 0) {
-            sol.used_items.emplace_back(items[k-1], x[k], k);
-          }
+      z *= gcd_c;
+      // Put the optimal solution on our format.
+      for (I k = 1; k <= n; ++k) {
+        if (x[k] > 0) {
+          sol.used_items.emplace_back(items[k-1], x[k], k);
+          sol.y_opt += x[k]*items[k-1].w;
         }
       }
       HBM_STOP_TIMER(eip->sol_time);
 
-      eip->t = t;
-      eip->m = m;
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_greendp1_begin);
       #endif
@@ -1433,15 +1578,22 @@ namespace hbm {
       vector<P> c(n + 1);
       c[0] = 0; // Does not exist, notation begins at 1
 
-      const W a1 = items.front().w;
-      const P c1 = items.front().p;
       for (I i = 0; i < n; ++i) {
         item_t<W, P> it = items[i];
         a[i+1] = it.w;
         c[i+1] = it.p;
       }
+      const P gcd_c = gcd_n<typename vector<P>::iterator, P>
+                           (c.begin() + 1, c.end());
+      if (gcd_c > 1) for (P &cj: c) cj /= gcd_c;
+      eip->gcd_c = gcd_c;
+      const W a1 = a[1];
+      const P c1 = c[1];
 
       P t = (c1*b)/a1 + 1;
+      // the real upper bound t value is dependent on gdc_c
+      eip->t = (c1*gcd_c*b)/a1 + 1;
+
       P i, k, d, &z = sol.opt;
       HBM_STOP_TIMER(eip->linear_comp_time);
 
@@ -1513,6 +1665,8 @@ namespace hbm {
       // Because the goto above, the code below can only be accessed by jumping
       // directly into step_3.
       step_3:
+      // As m isn't modified anymore, we save it here
+      eip->m = m;
       HBM_STOP_TIMER(eip->dp_time);
       HBM_START_TIMER();
       z = t - 1;
@@ -1556,16 +1710,15 @@ namespace hbm {
       x[n + 1] = b - a1*(b/a1);
 
       stop:
+      z *= gcd_c;
       // Put the optimal solution on our format.
       for (I l = 1; l <= n; ++l) {
         if (x[l] > 0) {
           sol.used_items.emplace_back(items[l-1], x[l], l);
+          sol.y_opt += x[l]*items[l-1].w;
         }
       }
       HBM_STOP_TIMER(eip->sol_time);
-
-      eip->t = t;
-      eip->m = m;
 
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_greendp1_begin);

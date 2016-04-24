@@ -73,7 +73,7 @@ run_mgreendp2.out: run_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 test_mgreendp2.out: test_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ test_mgreendp2.cpp $(CFLAGS) $(DEFS)
 
-greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2 test_mgreendp2
+greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out
 	touch $@
 
 p_run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)

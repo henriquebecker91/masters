@@ -65,7 +65,7 @@ namespace hbm {
       HBM_PRINT_TIME("Sort", sort_time);
       HBM_PRINT_TIME("Vect", vector_alloc_time);
       HBM_PRINT_TIME("O(n)", linear_comp_time);
-      HBM_PRINT_TIME("dp  ", dp_time);
+      HBM_PRINT_TIME("DP  ", dp_time);
       HBM_PRINT_TIME("bd  ", bound_time);
       HBM_PRINT_TIME("sol ", sol_time);
       HBM_PRINT_TIME("Sum ", sum_time);
@@ -88,24 +88,65 @@ namespace hbm {
   /// Same as greendp_extra_info_t, created only as a contingence if, in the
   /// future, we have different stats between greendp and greendp1.
   template <typename W, typename P, typename I>
-  struct greendp1_extra_info_t : greendp_extra_info_t<W, P, I> {
+  struct greendp1_extra_info_t : extra_info_t {
+    #ifdef HBM_PROFILE
+    double sort_time{0};        ///< Time used sorting items.
+    double vector_alloc_time{0};///< Time used allocating vectors for DP.
+    double linear_comp_time{0}; ///< Time used by linear time preprocessing.
+    double dp_time{0};     ///< Time used creating partial solutions.
+    double sol_time{0};    ///< Time used to assemble solution.
+    double total_time{0};  ///< Time used by all the algorithm.
+    #endif //HBM_PROFILE
+    I n{0};      ///< Instance number of items.
+    W c{0};      ///< Instance capacity.
     W t; ///< Value of constant t (it's constant for each instance).
     W m; ///< Final value of variable m (number of generated solutions).
     /// GCD of all profit values. If this is bigger than one, then all the
     /// computations used profits divided by gcd_n, and at the end of the
-    /// algorithm, z and the optimal solution items were returned to they
+    /// algorithm, z, t, and the optimal solution items were returned to they
     /// original value to be displayed correctly.
     P gcd_c;
 
     std::string gen_info(void) {
-      std::string s = greendp_extra_info_t<W, P, I>::gen_info();
       std::stringstream out("");
 
+      HBM_PRINT_VAR(n);
+      HBM_PRINT_VAR(c);
       HBM_PRINT_VAR(t);
       HBM_PRINT_VAR(m);
       HBM_PRINT_VAR(gcd_c);
 
-      return s + out.str();
+      #ifdef HBM_PROFILE
+      const double sum_time = sort_time + vector_alloc_time +
+        linear_comp_time + dp_time + sol_time;
+
+      std::streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
+      const int two_first_digits_and_period = 3;
+      const int percent_size = two_first_digits_and_period+HBM_PROFILE_PRECISION;
+      std::ios_base::fmtflags old_flags = out.setf(std::ios::fixed, std:: ios::floatfield);
+      char old_fill = out.fill(' ');
+
+      #ifndef HBM_PRINT_TIME
+        #define HBM_PRINT_TIME(name, var)\
+          out << name << " time: " << var << "s (";\
+          out << std::setw(percent_size) << (var/total_time)*100.0;\
+          out << "%)" << std::endl
+      #endif
+
+      HBM_PRINT_TIME("Sort", sort_time);
+      HBM_PRINT_TIME("Vect", vector_alloc_time);
+      HBM_PRINT_TIME("O(n)", linear_comp_time);
+      HBM_PRINT_TIME("DP  ", dp_time);
+      HBM_PRINT_TIME("sol ", sol_time);
+      HBM_PRINT_TIME("Sum ", sum_time);
+      HBM_PRINT_TIME("All ", total_time);
+
+      out.fill(old_fill);
+      out.setf(old_flags);
+      out.precision(old_precision);
+      #endif //HBM_PROFILE
+
+      return out.str();
     }
   };
 
@@ -161,8 +202,8 @@ namespace hbm {
       HBM_PRINT_TIME("Sort", sort_time);
       HBM_PRINT_TIME("Vect", vector_alloc_time);
       HBM_PRINT_TIME("O(n)", linear_comp_time);
-      HBM_PRINT_TIME("Dom ", linear_comp_time);
-      HBM_PRINT_TIME("dp  ", dp_time);
+      HBM_PRINT_TIME("Dom ", dom_time);
+      HBM_PRINT_TIME("DP  ", dp_time);
       HBM_PRINT_TIME("sol ", sol_time);
       HBM_PRINT_TIME("Sum ", sum_time);
       HBM_PRINT_TIME("All ", total_time);

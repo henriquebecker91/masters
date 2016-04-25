@@ -1,0 +1,10 @@
+Twelve pages. 1961. Authors: P. C. Gilmore and R. E. Gomory
+Published on: Operations Research, Vol. 9, No. 6 (Nov. - Dec., 1961), pp. 849-859
+PDF of good quality.
+
+I didn't revise all the article, as my interest is simple that it's cited by "An Exact Algorithm For Large Unbounded Knapsack Problems" as a source for a knapsack solving algorithm.
+
+It doesn't present a complete step-by-step algorithm for the unbounded knapsack problem. It only presents a very basic function that model the problem (F_{s+i}(x) = max_{r}(r*b_{s+1} + F_{s}(x - r*l_{s+1})), where l is the weights array, and b is the profits array, r varies between 0 and the capacity divided by the weight of item s, and s varies between m, that is the number of items, and 0).
+
+The article also cites "The Decomposition Algorithm for Linear Programs" from Dantzig (saying that the previously presented function is very similar to the one presented by Dantzig). This paper is behind a paywall, and seems to be focused on simplex. This line of pursuit is going to be abandoned.
+

@@ -1136,6 +1136,19 @@ namespace hbm {
         // As upper_d is like 'd' in ukp5, and stores the index of the last
         // item used in a solution, iterating until upper_d is the same as
         // pruning symmetric solutions? Seems so.
+        // The loop don't have a clear stop condition (what stops m from
+        // growing forever and faster than k?), but two things happen to make
+        // the loop stop: 1º) as we limit the items that we combine to generate
+        // new solutions to items equally or more efficient than the ones
+        // already on the current solution, each solution will generate less
+        // and less new solutions. 2º) because we don't avoid the creation of
+        // invalid solutions (with weight bigger than capacity) and because the
+        // way we extract the solution profit value (by modulo t), the invalid
+        // solutions will "wrap-around" at the profit upper bound ('t') and
+        // will be recognized as solutions with less profit than the upper
+        // bound (even if this isn't true), but with more weight than
+        // previoulsy created solutions, so the invalid solutions that clash
+        // with valid solutions will not be created and m won't be incremented.
         P k = 0;
         while (++k <= upper_d[z_curr_sol]) {
           // Combines the solution with z == i with the item k, and

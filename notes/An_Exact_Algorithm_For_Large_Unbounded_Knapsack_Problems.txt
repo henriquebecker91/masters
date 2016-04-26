@@ -2,13 +2,22 @@ Six pages. 1990. Authors: Silvano MARTELLO and Paolo TOTH
 PDF of decent quality.
 
 Of the dynamic programming methods cited by the article:
-Hirschberg and Wong (1976) and Kannan (1980): in the end of the paper reading priority queue, as their solution is for an very special case (only two items).
-Gilmore and Gomory (1966): Only cites the most basic recurrence function that model the problem. Don't give an algorithm.
-Hu (1969): Only presents the most basic/naive algorithm. It's a textbook, and it's not worried over efficiency.
-Garfinkel and Nemhauser (1972): Implemented, UKP5 was based on it. The original is many orders of magnitude slower than UKP5.
-Greenberg and Feldman (1980): Found after creating UKP5. Is very similar to UKP5 and have almost the same times. The main difference is to use a very distinct periodicity bound (that makes it to not use the best item while solving the DP). This difference make it significantly slower on SAW instances.
-Greenberg (1986): Two algorithms are presented. Both were implemented and studied until a reasonable understanding of the inner workings of both was obtained. They seem to be toy algorithms created to test new ideias that were novel at the time. Their times seems to be better than "Garfinkel and Nemhauser (1972)" but much worse than UKP5/"Greenberg and Feldman (1980)". One of the methods (the faster of the two) don't work for all instances.
-Martello and Toth (1977b): As they assert, the method presented on the article isn't efficient, so the paper was moved to the end of the paper reading priority queue.
+* Hirschberg and Wong (1976) and Kannan (1980): in the end of the paper reading priority queue, as their solution is for an very special case (only two items).
+* Gilmore and Gomory (1966): Only cites the most basic recurrence function that model the problem. Don't give an algorithm.
+* Hu (1969): Only presents the most basic/naive algorithm. It's a textbook, and it's not worried over efficiency.
+* Garfinkel and Nemhauser (1972): Implemented, UKP5 was based on it. The original is many orders of magnitude slower than UKP5.
+* Greenberg and Feldman (1980): Found after creating UKP5. Is very similar to UKP5 and have almost the same times. The main difference is to use a very distinct periodicity bound (that makes it to not use the best item while solving the DP). This difference make it significantly slower on SAW instances.
+* Greenberg (1986): Two algorithms are presented. Both were implemented and studied until a reasonable understanding of the inner workings of both was obtained. They seem to be toy algorithms created to test new ideias that were novel at the time. Their times seems to be better than "Garfinkel and Nemhauser (1972)" but much worse than UKP5/"Greenberg and Feldman (1980)". One of the methods (the faster of the two) don't work for all instances.
+* Magazine, Nemhauser and Trotter (1975): As they say, the article seems to discuss special cases, not our interest.
 
-FIND "Branch and bound algorithms for the solution of the general unidimensional knapsack problem"
+Of the branch and bound methods cited by the article:
+* Martello and Toth (1977b): aka "Branch and bound algorithms for the solution of the general unidimensional knapsack problem". They assert that the method presented on the article isn't efficient, so the paper was moved to the end of the paper reading priority queue. But at the same time, is interesting to see if they did compare with something (seems like the article that introduced MTU). As don't seem to exist a PDF of it on the internet, I emailed Martello himself asking for a copy of the paper. UPDATE: In 'Algorithms for knapsack problems', p. 251, it's said by Martello: "Enumeration methods have been proposed by Gilmore and Gomory [26], Cabot [81] and Martello and Toth [51]. This last method experimentally turned out to be the fastest (see Martello and Toth [49, 51]).", where [51] is the same as "Martello and Toth (1977b)". Also, "Enumeration methods" seems to be a jargon in 1960~1990 for branch and bound methods.
+* Gilmore and Gomory (1963): We will wait for an answer from Martello about the paper above. We want to see if their paper compares with this method.
+* Cabot (1970): We will wait for an answer from Martello about the paper above (Martello and Toth, 1977b). We want to see if their paper compares with this method.
+Balas and Zemel, 1980: 0-1 knapsack problem, not UKP, not our interest.
+
+
+
+
+
 

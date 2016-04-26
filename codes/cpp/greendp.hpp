@@ -2098,8 +2098,10 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
-  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  /// given the ukpi.items will NOT be sorted by non-decreasing efficiency. If
+  /// it's ommited the ukpi.items will be sorted by non-decreasing efficiency.
+  /// If more than one item have the same efficiency, then those items will be
+  /// sorted by weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see greendp(instance_t<W, P> &, solution_t<W, P, I> &, bool)
@@ -2121,8 +2123,10 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
-  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  /// given the ukpi.items will NOT be sorted by non-decreasing efficiency. If
+  /// it's ommited the ukpi.items will be sorted by non-decreasing efficiency.
+  /// If more than one item have the same efficiency, then those items will be
+  /// sorted by weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see mgreendp(instance_t<W, P> &, solution_t<W, P, I> &, bool)
@@ -2150,8 +2154,10 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
-  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  /// given the ukpi.items will NOT be sorted by non-increasing efficiency. If
+  /// it's ommited the ukpi.items will be sorted by non-increasing efficiency.
+  /// If more than one item have the same efficiency, then those items will be
+  /// sorted by weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see greendp1(instance_t<W, P> &, solution_t<W, P, I> &, bool)
@@ -2173,8 +2179,10 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
-  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  /// given the ukpi.items will NOT be sorted by non-increasing efficiency. If
+  /// it's ommited the ukpi.items will be sorted by non-increasing efficiency.
+  /// If more than one item have the same efficiency, then those items will be
+  /// sorted by weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see mgreendp1(instance_t<W, P> &, solution_t<W, P, I> &, bool)
@@ -2202,8 +2210,10 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
-  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  /// given the ukpi.items will NOT be sorted by non-increasing efficiency. If
+  /// it's ommited the ukpi.items will be sorted by non-increasing efficiency.
+  /// If more than one item have the same efficiency, then those items will be
+  /// sorted by weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see greendp2(instance_t<W, P> &, solution_t<W, P, I> &, bool)
@@ -2225,8 +2235,10 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items isn't sorted by non-decreasing weight. If it's
-  /// ommited the ukpi.items is sorted by non-decreasing weight.
+  /// given the ukpi.items will NOT be sorted by non-increasing efficiency. If
+  /// it's ommited the ukpi.items will be sorted by non-increasing efficiency.
+  /// If more than one item have the same efficiency, then those items will be
+  /// sorted by weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see mgreendp2(instance_t<W, P> &, solution_t<W, P, I> &, bool)

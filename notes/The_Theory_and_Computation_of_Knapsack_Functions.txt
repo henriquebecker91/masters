@@ -1,0 +1,6 @@
+32 pages. 1966. Authors: P. C. Gilmore and R. E. Gomory
+PDF of bad quality.
+
+The "Algorithm 1.B (Ordered Step-off)" (page 15, or 1059) is basically the same algorithm that UKP5.
+The "Algorithm 1.C (Periodic Step-off)" (page 17, or 1061) is an 'improved' version of UKP5 on the sense that uses it less memory, and probably has a very similar time. Further study is needed (make an implementation).
+

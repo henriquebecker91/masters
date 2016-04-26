@@ -16,8 +16,7 @@ Of the branch and bound methods cited by the article:
 * Cabot (1970): We will wait for an answer from Martello about the paper above (Martello and Toth, 1977b). We want to see if their paper compares with this method.
 Balas and Zemel, 1980: 0-1 knapsack problem, not UKP, not our interest.
 
+WE DID NOT IMPLEMENT MTU2 BASED ON THIS PAPER: the last line of the article says "The Fortran code of MTU2 will be included in Martello and Toth (1990)." where "Martello and Toth (1990)" is "S. Martello and P. Toth (1990), Knapsack Problems: Algorithms and Computer Implementations, Wiley, Chichester.". We used this book (page 100).
 
-
-
-
+The first batch of tests executed by Martello seems riculously easy, even absurd. What sense there's on making instances with until 250000 items, if the weights can only vary between 1 and 1000? One simple procedure This test seems completely biased.
 

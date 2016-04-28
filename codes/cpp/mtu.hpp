@@ -117,30 +117,41 @@ namespace hbm {
     #endif //HBM_CHECK_OVERFLOW
 
     template<typename W, typename P>
-    inline P u0(const item_t<W, P> &bi) {
-      /* Overflow will not be tested here. We will test it before MTU1/MTU2
-       * begins (one time per call) and then decide what to do. Theorically
-       * if the multiplication between the best item profit by the capacity
-       * don't overflows then no overflow will occur on MTU1/2.
-       * #ifdef HBM_CHECK_OVERFLOW
-      P ret;
-      if (HBM_CHECK_OVERFLOW(bi.w, bi.p, ret)) {
-      } else {
-        cout << "The computation of the u0 bound has overflowed." << endl;
-        cout << "Overflow values: bi.w = " << bi.w << ", bi.p = " << bi.p
-             << endl;
-        
-      }
-      #elif*/
-      //return (c*p)/;
-    }
+    inline P u3(
+      const item_t<W, P> &bi,
+      const item_t<W, P> &bi2,
+      const item_t<W, P> &bi3,
+      const W &c
+    ) {
+      // The numbers at the right are the equation reference number on
+      // "Knapsack Problems" from S. Martello and P. Toth (section 3.6).
+      // Auxiliar values
+      W c_ = c % bi.w;                              // 3.18
+      W c_prime = c_ % bi2.w;                       // 3.22
+      P z_prime = (c/bi.w)*bi.p + (c_/bi2.w)*bi2.p; // 3.21
 
-    inline P u1_(const vector<W> &w, const vector<P> &p) {
-      //return ;
-    }
+      // u0 computation
+      P u0 = z_prime + (c_prime*bi3.p)/bi3.w; // 3.23
 
-    inline P u3(const vector<W> &w, const vector<P> &p) {
-      return max(u1_, u0);
+      // u1_ computation (all bellow is 3.25)
+      // We use the remainder of bi.w (rem) to simulate the
+      // rounding-up of a result used in the article.
+      W w2_less_c_prime = bi2.w - c_prime;
+      W rem = w2_less_c_prime % bi1.w;
+      W quo = w2_less_c_prime / bi1.w;
+      W res = rem ? quo + 1 : quo;
+
+      // On the equation immediatly below, p2/w2 is shown as a fraction
+      // multiplying the rest of the equation. So there's no round down in the
+      // equation but there's one round down here (assuming that W and P are
+      // integers). This is safe to do because this value is subtracted by an
+      // already rounded value (integer) and then the result is rounded down
+      // (would have thrown away the truncated value anyway).
+      P l = ((c_prime + res*bi.w1)*bi2.p)/bi2.w;
+      P u1_ = z_prime + (l - res*bi.p);
+
+      // u3 computation
+      return max(u1_, u0); // 3.26
     }
 
     // TODO: quick comment on the method
@@ -157,9 +168,13 @@ namespace hbm {
 
       const W c = eip->c = ukpi.c;
       const I n = eip->n = ukpi.items.size();
+      const auto &items = ukpi.items;
 
-      P z = 0, z_ = 0;
-      W c_ = c;
+      if (!already_sorted) {
+        sort_by_eff(ukpi.items);
+      }
+
+      // Put items on article's notation
       vector<W> w;
       w.reserve(n + 2);
       vector<P> p;
@@ -168,10 +183,58 @@ namespace hbm {
         w.push_back(it.w);
         p.push_back(it.p);
       }
+
+      // We need to initialize some variables before we start jumping.
+      W y;
+      P u;
+
+      // 1. Initialize
+      step_1:
+      P z = 0, z_ = 0;
+      W c_ = c;
+
+      // TODO: At the end verify if this can be done without adding this
+      // dummy item.
       w.push_back(numeric_limits<W>::max());
       p.push_back(0);
 
-      vector<W> x(n+1, 0);
+      vector<W> x_(n+1, 0);
+      P upper_u = u3(items[0], items[1], items[2], c);
+
+      myvector<W> m;
+      m.resize(n+1); // This resize don't initialize the m contents with zero
+
+      m[n] = w[n + 1]; // Changing the dummy item would change there
+      for (I k = n - 1; k > 0; --k) m[k] = min(m[k + 1], w[k + 1]);
+
+      I j = 1;
+
+      // 2. build a new current solution
+      step_2:
+      while (w[j] > c_)
+        if (z >= z_ + (c_*p[j+1])/w[j+1]) goto step_5; else ++j;
+
+      y = c_/w[j];
+      u = ((c_ - y*w[j])*p[j+1])/w[j+1];
+
+      if (z >= z_ + y*p[j] + u) goto step_5;
+      if (u == 0) goto step_4;
+
+      // 3. save the current solution
+      step_3:
+      c_ = c_ - y*w[j];
+      z_ = z_ + y*p[j];
+      x_[j] = y;
+      j = j + 1;
+      if (c_ >= m[j-1]) goto 2;
+      if (z >= z_) goto 5;
+      y = 0;
+
+      // 4. update the best solution so far
+      step_4:
+      z = z_ + y*p[j];
+      for (I k = 1; k < j; ++k) x[k] = x_[k];
+      // STOPPED WORK HERE
 
       // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
       steady_clock::time_point begin;

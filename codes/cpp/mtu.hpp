@@ -71,12 +71,12 @@ namespace hbm {
   };
 
   template <typename W, typename P, typename I>
-  struct mtu1_extra_info_t : mtu2_extra_info_t<W, P, I> {};
+  struct mtu2_extra_info_t : mtu1_extra_info_t<W, P, I> {};
 
   namespace hbm_mtu_impl {
     using namespace std;
     using namespace std::chrono;
-    using namespace boost::math;
+    using namespace boost;
 
     #ifdef HBM_CHECK_OVERFLOW
     // Overflow check for multiplying two numbers, built-in style. We are
@@ -123,8 +123,9 @@ namespace hbm {
       const item_t<W, P> &bi3,
       const W &c
     ) {
-      // The numbers at the right are the equation reference number on
+      // The numbers at the right are the equations reference number on
       // "Knapsack Problems" from S. Martello and P. Toth (section 3.6).
+
       // Auxiliar values
       W c_ = c % bi.w;                              // 3.18
       W c_prime = c_ % bi2.w;                       // 3.22
@@ -137,17 +138,18 @@ namespace hbm {
       // We use the remainder of bi.w (rem) to simulate the
       // rounding-up of a result used in the article.
       W w2_less_c_prime = bi2.w - c_prime;
-      W rem = w2_less_c_prime % bi1.w;
-      W quo = w2_less_c_prime / bi1.w;
+      W rem = w2_less_c_prime % bi.w;
+      W quo = w2_less_c_prime / bi.w;
       W res = rem ? quo + 1 : quo;
 
-      // On the equation immediatly below, p2/w2 is shown as a fraction
-      // multiplying the rest of the equation. So there's no round down in the
-      // equation but there's one round down here (assuming that W and P are
-      // integers). This is safe to do because this value is subtracted by an
-      // already rounded value (integer) and then the result is rounded down
-      // (would have thrown away the truncated value anyway).
-      P l = ((c_prime + res*bi.w1)*bi2.p)/bi2.w;
+      // On the equation immediatly below, at the book, p2/w2 is shown as a
+      // fraction multiplying the rest of the equation. So there's no round
+      // down in the equation but there's one round down here (assuming that
+      // W and P are integers). This is safe to do because this value is
+      // subtracted by an already rounded value (integer) and then the result
+      // is rounded down (would have thrown away the smaller than on value
+      // anyway).
+      P l = ((c_prime + res*bi.w)*bi2.p)/bi2.w;
       P u1_ = z_prime + (l - res*bi.p);
 
       // u3 computation
@@ -164,7 +166,11 @@ namespace hbm {
 
       #ifdef HBM_PROFILE
       // Used to compute the time all the execution algorithm.
-      steady_clock::time_point all_mtu2_begin = steady_clock::now();
+      steady_clock::time_point all_mtu1_begin = steady_clock::now();
+
+      // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
+      steady_clock::time_point begin;
+      #endif
 
       const W c = eip->c = ukpi.c;
       const I n = eip->n = ukpi.items.size();
@@ -179,24 +185,29 @@ namespace hbm {
       w.reserve(n + 2);
       vector<P> p;
       p.reserve(n + 2);
+      w.push_back(0); // not exist notation begins at 1
+      p.push_back(0); // not exist notation begins at 1
       for (auto &it : items) {
         w.push_back(it.w);
         p.push_back(it.p);
       }
 
       // We need to initialize some variables before we start jumping.
-      W y;
+      W y, i;
       P u;
+      I h;
+      myvector<W> x;
+      x.resize(n+1); // This resize don't initialize the m contents with zero
 
       // 1. Initialize
-      step_1:
+      //step_1: // unused step
       P z = 0, z_ = 0;
       W c_ = c;
 
       // TODO: At the end verify if this can be done without adding this
       // dummy item.
-      w.push_back(numeric_limits<W>::max());
       p.push_back(0);
+      w.push_back(numeric_limits<W>::max());
 
       vector<W> x_(n+1, 0);
       P upper_u = u3(items[0], items[1], items[2], c);
@@ -212,7 +223,7 @@ namespace hbm {
       // 2. build a new current solution
       step_2:
       while (w[j] > c_)
-        if (z >= z_ + (c_*p[j+1])/w[j+1]) goto step_5; else ++j;
+        if (z >= z_ + (c_*p[j+1])/w[j+1]) goto step_5; else j = j + 1;
 
       y = c_/w[j];
       u = ((c_ - y*w[j])*p[j+1])/w[j+1];
@@ -221,27 +232,71 @@ namespace hbm {
       if (u == 0) goto step_4;
 
       // 3. save the current solution
-      step_3:
+      //step_3: // unused step
       c_ = c_ - y*w[j];
       z_ = z_ + y*p[j];
       x_[j] = y;
       j = j + 1;
-      if (c_ >= m[j-1]) goto 2;
-      if (z >= z_) goto 5;
+      if (c_ >= m[j-1]) goto step_2;
+      if (z >= z_) goto step_5;
       y = 0;
 
       // 4. update the best solution so far
       step_4:
       z = z_ + y*p[j];
       for (I k = 1; k < j; ++k) x[k] = x_[k];
-      // STOPPED WORK HERE
+      x[j] = y;
+      for (I k = j + 1; k <= n; ++k) x[k] = 0;
+      if (z == upper_u) goto stop;
 
-      // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
-      steady_clock::time_point begin;
-      #endif
+      // 5. backtrack
+      step_5:
+      i = 0; // We use zero as an sentinel value
+      for (I k = j - 1; k > 0; --k) if (x_[k] > 0) { i = k; break; }
+      if (i == 0) goto stop; // "if no such i then return"
+      c_ = c_ + w[i];
+      z_ = z_ - p[i];
+      x_[i] = x_[i] - 1;
+      if (z >= z_ + (c_*p[i+1])/w[i+1]) {
+        c_ = c_ + w[i]*x_[i];
+        z_ = z_ + p[i]*x_[i];
+        x_[i] = 0;
+        j = i;
+        goto step_5;
+      }
+      j = i + 1;
+      if (c_ - w[i] >= m[i]) goto step_2;
+      h = i;
 
-      // METHOD CODE
+      // 6. try to replace one item of type i with items of type h
+      step_6:
+      h = h + 1;
+      if (z >= z_ + (c_*p[h])/w[h]) goto step_5;
+      if (w[h] == w[i]) goto step_6;
+      if (w[h] > w[i] ) {
+        if (w[h] > c_ || z >= z_ + p[h]) goto step_6;
+        z = z_ + p[h];
+        for (I k = 1; k <= n; ++k) x[k] = x_[k];
+        x[h] = 1;
+        if (z == upper_u) goto stop;
+        i = h;
+        goto step_6;
+      } else {
+        if (c_ - w[h] < m[h-1]) goto step_6;
+        j = h;
+        goto step_2;
+      }
 
+      stop:
+      sol.opt = 0;
+
+      for (I k = 1; k <= n; ++k) {
+        if (x[k] > 0) {
+          sol.used_items.emplace_back(item_t<W, P>(w[k], p[k]), x[k], k);
+          sol.opt += x[k]*p[k];
+          sol.y_opt += x[k]*w[k];
+        }
+      }
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_mtu2_begin);
       #endif
@@ -286,7 +341,7 @@ namespace hbm {
     struct mtu1_wrap : wrapper_t<W, P, I> {
       virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
         // Calls the overloaded version with the third argument as a bool
-        hbm_mtu1_impl::mtu1(ukpi, sol, already_sorted);
+        hbm_mtu_impl::mtu1(ukpi, sol, already_sorted);
 
         return;
       }
@@ -296,6 +351,16 @@ namespace hbm {
         return name;
       }
     };
+
+    template<typename W, typename P, typename I = size_t>
+    void mtu1(
+      instance_t<W, P> &ukpi,
+      solution_t<W, P, I> &sol,
+      int argc,
+      argv_t argv
+    ) {
+      simple_wrapper(mtu1_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    }
 
     template<typename W, typename P, typename I>
     struct mtu2_wrap : wrapper_t<W, P, I> {
@@ -311,6 +376,16 @@ namespace hbm {
         return name;
       }
     };
+
+    template<typename W, typename P, typename I = size_t>
+    void mtu2(
+      instance_t<W, P> &ukpi,
+      solution_t<W, P, I> &sol,
+      int argc,
+      argv_t argv
+    ) {
+      simple_wrapper(mtu2_wrap<W, P, I>(), ukpi, sol, argc, argv);
+    }
   }
   // -------------------- EXTERNAL FUNCTIONS --------------------
 

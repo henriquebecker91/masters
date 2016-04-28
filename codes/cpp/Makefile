@@ -1,13 +1,27 @@
+# CHECKLIST FOR ADDING NEW METHODS TO THIS MAKEFILE:
+# 1º) Add the run_*.out and test_*.out compilation rules (follow the same
+# 		fashion already used, i.e. copy-paste and change relevant filenames),
+# 		give preference to "run_" before "test_";
+# 2º) Create a rule that compiles both the run and the test binary using
+# 		the name of the algorithm as the rule name. Put the group rule
+# 		after the run_/test_ rules.
+# 3º) Add the run_*.out, the test_*.out, and the name of the group rule to the
+#			file removal on "clean";
+# 4º) Add the group name to the "all" rule below.
+
 all: run_eduk.out run_per.out run_dom.out ukp5 gardp greendp
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
-# This makes easies to debug overflow errors.
+# This makes easies to debug overflow errors, but only works if the overflow
+# is from signed numbers.
 CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 #
 LBOOST=-lboost_filesystem -lboost_system 
 H_DEPS=ukp_common.hpp test_common.hpp
-UKP5_DEPS=ukp5.hpp periodicity.hpp dominance.hpp
 DEFS=-DHBM_XOR_SWAP
+
+# ukp5 specific
+UKP5_DEPS=ukp5.hpp periodicity.hpp dominance.hpp
 UKP5_DEFS=$(DEFS) -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS
 
 run_eduk.out: run_eduk.cpp eduk.hpp wrapper.hpp $(H_DEPS)
@@ -97,8 +111,17 @@ p_run_mgreendp2.out: run_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
 profile_greendp: p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2.out
 	touch $@
 
+run_mtu1.out: run_mtu1.cpp mtu.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ run_mtu1.cpp $(CFLAGS) $(DEFS)
+
+test_mtu1.out: test_mtu1.cpp mtu.hpp wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ test_mtu1.cpp $(CFLAGS) $(DEFS)
+
+mtu1: run_mtu1.out test_mtu1.out
+	touch $@
+
 .PHONY: clean
 
 clean:
-	rm -f run_eduk.out run_per.out run_dom.out  run_ukp5.out test_ukp5.out ukp5  run_gardp.out test_gardp.out gardp  run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out greendp  p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2 profile_greendp
+	rm -f run_eduk.out run_per.out run_dom.out  run_ukp5.out test_ukp5.out ukp5  run_gardp.out test_gardp.out gardp  run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out greendp  p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2 profile_greendp  run_mtu1.out test_mtu1.out mtu1
 

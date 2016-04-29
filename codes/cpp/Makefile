@@ -123,5 +123,5 @@ mtu1: run_mtu1.out test_mtu1.out
 .PHONY: clean
 
 clean:
-	rm -f run_eduk.out run_per.out run_dom.out  run_ukp5.out test_ukp5.out ukp5  run_gardp.out test_gardp.out gardp  run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out greendp  p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2 profile_greendp  run_mtu1.out test_mtu1.out mtu1
+	rm -f run_eduk.out run_per.out run_dom.out  run_ukp5.out test_ukp5.out ukp5  run_gardp.out test_gardp.out gardp  run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out greendp  p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2.out profile_greendp  run_mtu1.out test_mtu1.out mtu1
 

@@ -259,7 +259,7 @@ namespace hbm {
       x_[i] = x_[i] - 1;
       if (z >= z_ + (c_*p[i+1])/w[i+1]) {
         c_ = c_ + w[i]*x_[i];
-        z_ = z_ + p[i]*x_[i];
+        z_ = z_ - p[i]*x_[i];
         x_[i] = 0;
         j = i;
         goto step_5;
@@ -289,7 +289,7 @@ namespace hbm {
 
       stop:
       sol.opt = 0;
-
+      sol.y_opt = 0;
       for (I k = 1; k <= n; ++k) {
         if (x[k] > 0) {
           sol.used_items.emplace_back(item_t<W, P>(w[k], p[k]), x[k], k);

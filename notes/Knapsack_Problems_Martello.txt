@@ -1,0 +1,9 @@
+306 pages. 1990. Authors: Silvano Martello & Paulo Toth
+PDF of poor quality (no OCR).
+
+p.100, definition 3.1: "Given an instance of UKP, relative to item types set N, item type k \in N is dominated if the optimal solution value does no change when k is removed from N."
+
+Theorem 3.2 (p.101): simple/multiple dominance.
+
+Corollary 3.1 (p.101): the most basic algorithm for removing simple/multiple dominance (i.e. O(n^2)).
+

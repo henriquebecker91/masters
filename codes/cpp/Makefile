@@ -1,127 +1,134 @@
 # CHECKLIST FOR ADDING NEW METHODS TO THIS MAKEFILE:
-# 1º) Add the run_*.out and test_*.out compilation rules (follow the same
-# 		fashion already used, i.e. copy-paste and change relevant filenames),
-# 		give preference to "run_" before "test_";
+# 1º) Add the bin/run_*.out and bin/test_*.out compilation rules (follow the same
+#     fashion already used, i.e. copy-paste and change relevant filenames),
+#     give preference to "run_" before "test_";
 # 2º) Create a rule that compiles both the run and the test binary using
-# 		the name of the algorithm as the rule name. Put the group rule
-# 		after the run_/test_ rules.
-# 3º) Add the run_*.out, the test_*.out, and the name of the group rule to the
-#			file removal on "clean";
-# 4º) Add the group name to the "all" rule below.
+#     the name of the algorithm as the rule name. Put the group rule
+#     after the run_/test_ rules.
+# 2.5º) Optionally group similar algorithms on a bigger group.
+# 3º) Add the group name to the "all" rule below.
+# Exceptions: If the method don't solve UKP (ex.: run_per.out and run_dom.out);
+# or if the method is too slow to solve the instances on <repo_root>/data/ukp/
+# on a reasonable time (ex.: eduk); then don't create a test_*.out rule, nor a
+# group rule. Also, if it's a profile version don't add it to the 'all' rule
+# (it's 'all except debug/profile build' in truth).
 
-all: run_eduk.out run_per.out run_dom.out ukp5 gardp greendp
+all: bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
 # This makes easies to debug overflow errors, but only works if the overflow
 # is from signed numbers.
-CFLAGS=-std=c++11 -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 #
+CFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 #
 LBOOST=-lboost_filesystem -lboost_system 
-H_DEPS=ukp_common.hpp test_common.hpp
+H_DEPS=lib/ukp_common.hpp lib/test_common.hpp bin
 DEFS=-DHBM_XOR_SWAP
 
 # ukp5 specific
-UKP5_DEPS=ukp5.hpp periodicity.hpp dominance.hpp
+UKP5_DEPS=lib/ukp5.hpp lib/periodicity.hpp lib/dominance.hpp
 UKP5_DEFS=$(DEFS) -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS
 
-run_eduk.out: run_eduk.cpp eduk.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_eduk.cpp $(CFLAGS) $(DEFS)
+bin:
+	mkdir bin
 
-run_per.out: run_per.cpp periodicity.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_per.cpp $(CFLAGS) $(DEFS)
+bin/run_eduk.out: mains/run_eduk.cpp lib/eduk.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_eduk.cpp $(CFLAGS) $(DEFS)
 
-run_dom.out: run_dom.cpp dominance.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_dom.cpp $(CFLAGS) $(DEFS)
+bin/run_per.out: mains/run_per.cpp lib/periodicity.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_per.cpp $(CFLAGS) $(DEFS)
 
-run_ukp5.out: run_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
-	$(CC) -o $@ run_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
+bin/run_dom.out: mains/run_dom.cpp lib/dominance.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_dom.cpp $(CFLAGS) $(DEFS)
 
-test_ukp5.out: test_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
-	$(CC) -o $@ test_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
+bin/run_ukp5.out: mains/run_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
+	$(CC) -o $@ mains/run_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
 
-ukp5: run_ukp5.out test_ukp5.out
+bin/test_ukp5.out: mains/test_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
+	$(CC) -o $@ mains/test_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
+
+bin/ukp5: bin/run_ukp5.out bin/test_ukp5.out
 	touch $@
 
-run_gardp.out: run_gardp.cpp gardp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_gardp.cpp $(CFLAGS) $(DEFS)
+bin/run_gardp.out: mains/run_gardp.cpp lib/gardp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_gardp.cpp $(CFLAGS) $(DEFS)
 
-test_gardp.out: test_gardp.cpp gardp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_gardp.cpp $(CFLAGS) $(DEFS)
+bin/test_gardp.out: mains/test_gardp.cpp lib/gardp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_gardp.cpp $(CFLAGS) $(DEFS)
 
-gardp: run_gardp.out test_gardp.out
+bin/gardp: bin/run_gardp.out bin/test_gardp.out
 	touch $@
 
-run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_greendp.cpp $(CFLAGS) $(DEFS)
+bin/run_greendp.out: mains/run_greendp.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_greendp.cpp $(CFLAGS) $(DEFS)
 
-test_greendp.out: test_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_greendp.cpp $(CFLAGS) $(DEFS)
+bin/test_greendp.out: mains/test_greendp.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_greendp.cpp $(CFLAGS) $(DEFS)
 
-run_mgreendp.out: run_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_mgreendp.cpp $(CFLAGS) $(DEFS)
+bin/run_mgreendp.out: mains/run_mgreendp.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mgreendp.cpp $(CFLAGS) $(DEFS)
 
-test_mgreendp.out: test_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_mgreendp.cpp $(CFLAGS) $(DEFS)
+bin/test_mgreendp.out: mains/test_mgreendp.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_mgreendp.cpp $(CFLAGS) $(DEFS)
 
-run_greendp1.out: run_greendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_greendp1.cpp $(CFLAGS) $(DEFS)
+bin/run_greendp1.out: mains/run_greendp1.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_greendp1.cpp $(CFLAGS) $(DEFS)
 
-test_greendp1.out: test_greendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_greendp1.cpp $(CFLAGS) $(DEFS)
+bin/test_greendp1.out: mains/test_greendp1.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_greendp1.cpp $(CFLAGS) $(DEFS)
 
-run_mgreendp1.out: run_mgreendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_mgreendp1.cpp $(CFLAGS) $(DEFS)
+bin/run_mgreendp1.out: mains/run_mgreendp1.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mgreendp1.cpp $(CFLAGS) $(DEFS)
 
-test_mgreendp1.out: test_mgreendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_mgreendp1.cpp $(CFLAGS) $(DEFS)
+bin/test_mgreendp1.out: mains/test_mgreendp1.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_mgreendp1.cpp $(CFLAGS) $(DEFS)
 
-run_greendp2.out: run_greendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_greendp2.cpp $(CFLAGS) $(DEFS)
+bin/run_greendp2.out: mains/run_greendp2.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_greendp2.cpp $(CFLAGS) $(DEFS)
 
-test_greendp2.out: test_greendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_greendp2.cpp $(CFLAGS) $(DEFS)
+bin/test_greendp2.out: mains/test_greendp2.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_greendp2.cpp $(CFLAGS) $(DEFS)
 
-run_mgreendp2.out: run_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_mgreendp2.cpp $(CFLAGS) $(DEFS)
+bin/run_mgreendp2.out: mains/run_mgreendp2.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mgreendp2.cpp $(CFLAGS) $(DEFS)
 
-test_mgreendp2.out: test_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_mgreendp2.cpp $(CFLAGS) $(DEFS)
+bin/test_mgreendp2.out: mains/test_mgreendp2.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_mgreendp2.cpp $(CFLAGS) $(DEFS)
 
-greendp: run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out
+bin/greendp: bin/run_greendp.out bin/test_greendp.out bin/run_mgreendp.out bin/test_mgreendp.out bin/run_greendp1.out bin/test_greendp1.out bin/run_mgreendp1.out bin/test_mgreendp1.out bin/run_greendp2.out bin/test_greendp2.out bin/run_mgreendp2.out bin/test_mgreendp2.out
 	touch $@
 
-p_run_greendp.out: run_greendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_greendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+bin/p_run_greendp.out: mains/run_greendp.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_greendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-p_run_mgreendp.out: run_mgreendp.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_mgreendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+bin/p_run_mgreendp.out: mains/run_mgreendp.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mgreendp.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-p_run_greendp1.out: run_greendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_greendp1.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+bin/p_run_greendp1.out: mains/run_greendp1.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_greendp1.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-p_run_mgreendp1.out: run_mgreendp1.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_mgreendp1.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+bin/p_run_mgreendp1.out: mains/run_mgreendp1.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mgreendp1.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-p_run_greendp2.out: run_greendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_greendp2.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+bin/p_run_greendp2.out: mains/run_greendp2.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_greendp2.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-p_run_mgreendp2.out: run_mgreendp2.cpp greendp.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_mgreendp2.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
+bin/p_run_mgreendp2.out: mains/run_mgreendp2.cpp lib/greendp.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mgreendp2.cpp $(CFLAGS) $(DEFS) -DHBM_PROFILE
 
-profile_greendp: p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2.out
+bin/profile_greendp: bin/p_run_greendp.out bin/p_run_mgreendp.out bin/p_run_greendp1.out bin/p_run_mgreendp1.out bin/p_run_greendp2.out bin/p_run_mgreendp2.out
 	touch $@
 
-run_mtu1.out: run_mtu1.cpp mtu.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ run_mtu1.cpp $(CFLAGS) $(DEFS)
+bin/run_mtu1.out: mains/run_mtu1.cpp lib/mtu.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mtu1.cpp $(CFLAGS) $(DEFS)
 
-test_mtu1.out: test_mtu1.cpp mtu.hpp wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ test_mtu1.cpp $(CFLAGS) $(DEFS)
+bin/test_mtu1.out: mains/test_mtu1.cpp lib/mtu.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_mtu1.cpp $(CFLAGS) $(DEFS)
 
-mtu1: run_mtu1.out test_mtu1.out
+bin/mtu1: bin/run_mtu1.out bin/test_mtu1.out
 	touch $@
 
 .PHONY: clean
 
 clean:
-	rm -f run_eduk.out run_per.out run_dom.out  run_ukp5.out test_ukp5.out ukp5  run_gardp.out test_gardp.out gardp  run_greendp.out test_greendp.out run_mgreendp.out test_mgreendp.out run_greendp1.out test_greendp1.out run_mgreendp1.out test_mgreendp1.out run_greendp2.out test_greendp2.out run_mgreendp2.out test_mgreendp2.out greendp  p_run_greendp.out p_run_mgreendp.out p_run_greendp1.out p_run_mgreendp1.out p_run_greendp2.out p_run_mgreendp2.out profile_greendp  run_mtu1.out test_mtu1.out mtu1
+	rm -f bin/*
 

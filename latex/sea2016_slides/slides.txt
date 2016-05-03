@@ -1,0 +1,57 @@
+Front Slide
+	Name
+	University
+	Event name
+	Date
+
+What is UKP?
+	UKP is an acronym for Unbounded Knapsack Problem
+	#It's a variant of the classic 0-1/bounded knapsack problem, where there's no restriction on the quantity of each item present on the solution.
+	Very similar to BKP or 0-1 KP, the only difference: no item quantity restriction
+
+UKP Model
+	Copy latex equations
+
+(U)KP Jargon
+	The efficiency of an item j is pj/wj
+	The smallest items are the ones tied with the lowest weight (this is because in real world problems this is a "size", and the solution is constrained in 1/2/3 dimensions, and not a "weight")
+	The best item is the smallest between the most efficient ones
+	Two item with the same profit and weight are the same
+
+
+UKP Basic Knowledge (or Well-Know UKP aspects)
+	UKP is faster to solve than BKP and 0-1 KP (one less restriction to control, faster to solve)
+	UKP is yet NP-complete (CHECK IF NP-Hard IS MORE ADEQUATE)
+	UKP instances can be converted to BKP/0-1KP instances (but this is inefficient).
+
+UKP Basic Knowledge (or Well-Know UKP aspects)
+	UKP can be solved on pseudo-polynomial time O(nc) by Dynamic Programming (DP)
+	For instances with a great number of items, often the solution is mainly comprised by efficient items
+	The heuristics and approximative algorithms give results very close to the optimal.
+
+MOTIVATION:
+
+History Highlights
+	The UKP was referenced simply as "the knapsack problem" on many old papers[REFERÊNCIAS] (what can make bibliographic revision a little more complex)
+	1966-19XX: Many DP algorithms are proposed. The majority of those papers reference UKP as "a/the knapsack problem".
+	19XX-
+	AAAA: The concept of a functional DP algorithm for UKP is presented.
+	BBBB: An implementation of this concept is presented.
+	CCCC: An hybrid algorithm combining B&B with the functional DP is presented.
+
+History
+	DP era
+		Many exact DP solutions are presented on pseudo-code form.
+		Example: Show many works (one topic)
+		No instances suggested, No comparisons made.
+	B&B era
+		Solving very large "easy instances" the fastest way (B&B).
+		Example: 
+		Random/"Weak/Strong correlated" instances. Comparison only between B&B methods.
+
+
+	
+	
+
+
+

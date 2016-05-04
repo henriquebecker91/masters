@@ -1,3 +1,45 @@
+==================== Only headers ====================
+
+(The presentation is 30 minutes, and any remaining time will be used for questions. So the best ideia is to limit the slides to about 15. This takes on account: the time limit; the author's fluency on english;)
+(Tadeu's opinion is to make this a presentation about the paper content (not a survey or history).)
+
+Front page			(not included on the counting)
+Outline				(necessary? not included on the counting)
+
+> Introduction			(Section, Section outline)
+What is UKP?			(indispensable)
+Linear Programming Model	(indispensable)
+UKP Jargon			(? will be necessary?)
+
+> Prior Work
+Methods on Solving UKP		(indispensable)
+PYSsUKP/EDUK2 (State-of-art)	(indispensable)
+
+> T
+UKP5				()
+
+The algorithm (transcript)	()
+
+GG66				()
+
+> Results and Analysis		(Section, not slide)
+
+The instances			(present the basics about the dataset)
+
+Computational results		(present the image with all instances only)
+
+Solution dominance		(Simple DP and the dominances)
+
+Hard vs Easy & DP vs B&B	(expose core problem of the PYAsUKP's article methodology) vs Hybrid
+
+Final remarks
+
+References			(not included on the counting)
+
+Questions?			(not included on the counting)
+
+==================== Slides ====================
+
 Front Slide
 	Name
 	University
@@ -18,7 +60,6 @@ UKP Model
 	The best item is the smallest between the most efficient ones
 	Two item with the same profit and weight are the same
 
-
 UKP Basic Knowledge (or Well-Know UKP aspects)
 	UKP is faster to solve than BKP and 0-1 KP (one less restriction to control, faster to solve)
 	UKP is yet NP-complete (CHECK IF NP-Hard IS MORE ADEQUATE)
@@ -29,7 +70,7 @@ UKP Basic Knowledge (or Well-Know UKP aspects)
 	For instances with a great number of items, often the solution is mainly comprised by efficient items
 	The heuristics and approximative algorithms give results very close to the optimal.
 
-MOTIVATION:
+==================== DICARDED ====================
 
 History Highlights
 	The UKP was referenced simply as "the knapsack problem" on many old papers[REFERÊNCIAS] (what can make bibliographic revision a little more complex)
@@ -48,10 +89,5 @@ History
 		Solving very large "easy instances" the fastest way (B&B).
 		Example: 
 		Random/"Weak/Strong correlated" instances. Comparison only between B&B methods.
-
-
-	
-	
-
 
 

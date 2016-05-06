@@ -228,7 +228,8 @@ namespace hbm {
       HBM_PRINT_TIME("O(n)", lctime);
       HBM_PRINT_TIME("pha1", p1time);
       HBM_PRINT_TIME("pha2", p2time);
-      HBM_PRINT_TIME("pha2", sum_time);
+      HBM_PRINT_TIME("sum ", sum_time);
+      // The two spaces below (between All and time) are intentional
       out << "All  time: " << total_time << "s" << endl;
 
       out.fill(old_fill);

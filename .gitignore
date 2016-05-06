@@ -5,6 +5,8 @@
 # c++
 *.out
 *.o
+# C++ generated binaries
+codes/cpp/bin/
 
 # haskell
 *.hi
@@ -26,6 +28,10 @@ data/results/tmp/
 *.log
 *.blg
 latex/**/*.pdf
+# latex (slides)
+*.nav
+*.snm
+*.toc
 
 # R workspace
 .RData

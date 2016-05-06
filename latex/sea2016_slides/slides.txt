@@ -61,7 +61,7 @@ What is UKP?
 	UKP is an acronym for Unbounded Knapsack Problem
 	Very similar to BKP or 0-1 KP
 		But with an "unbounded" quantity of each item available
-	Subproblem of CSP/BPP when using a column generation method to solve
+	Subproblem of the column generation technique (often used to solve CSP/BPP)
 
 UKP Model
 	Copy latex equations
@@ -70,10 +70,11 @@ UKP Model
 
 Methods on Solving UKP
 	Dynamic Programming (DP): Strong correlation between 'n' and 'c' and the time to solve.
-	Branch and Bound (B&B): Strong correlation between instance item distribution and time to solve.
+	Branch and Bound (B&B): Strong correlation between instance's item distribution and time to solve.
 
 PYAsUKP/EDUK2 (State-of-art)
-	EDUK2 is the algorithm, PYAsUKP is the only known implementation.
+	"EDUK [...] seems to be the most efficient dynamic programming based method available at the moment." 
+	EDUK2 is the algorithm, PYAsUKP is the only known implementation (OCaml). (As the algorithm uses many functional concepts the authors found that it would be so much easier to implement the algorithm on a functional language. Even if c++ is the de facto language for scientific computing.)
 	Hybrid: Tries to solve by B&B, if fails to solve quickly then defaults to DP. (Only hybrid method known.)
 
 > UKP5
@@ -86,16 +87,19 @@ UKP5 Code
 	(copy-paste the latex code)
 
 GG66
-	"Ordered Step-Off" algorithm of Gilmore and Gomore (1966).
+	"Ordered Step-Off": algorithm of Gilmore and Gomore (1966).
 	Found after sending this paper to the conference. (We notified the conference chair, but the paper was already submited for printing.)
 	Basically the same algorithm than UKP5. (only uses the own vector for storing the profit of the best solution, instead of one single variable)
+
+GG66 Code
+	Image?
 
 > Experiments and Results
 
 The instances
-	A set of 4540 "hard" instances proposed in [PYAsUKP]. (Hard is a little complex to define here. They were instances that )
-	Used the same tool and similar parameters to generate them.
-	Five different classes of instances.
+	A set of 4540 "hard" instances proposed in [PYAsUKP]. (Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
+	Used the same tool and similar parameters to generate them. (The tool is the own pyasukpt, that isn't only an implementation of the EDUK2 but also a implementation of many instance generators.)
+	Five different classes of instances. (We adopted the same five classes used on PYAsUKP, and only augmented one of the classes because with the hardwere evolution it had become too easy to solve.)
 
 Times table
 

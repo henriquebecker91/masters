@@ -1,120 +1,88 @@
 \documentclass{beamer}
 
-\usepackage[T1]{fontenc}
-\usepackage[brazil]{babel}
-\usepackage[utf8]{inputenc}
+\usetheme{Antibes}
+%\usetheme{split}
+% this is a template for slides using beamer package
+% adapted from slides written by Ramon Medrado
+% first version: Ana Bazzan
+\usecolortheme[RGB={120,0,0}]{structure}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+%\usepackage[utf8]{inputenc}   % pacote para acentuao
+\usepackage[latin1]{inputenc}
 
-% Choose the Inf theme
-\usetheme{Inf}
-
-% Define the title with \title[short title]{long title}
-% Short title is optional
-\title[UKP5: a New Algorithm for the UKP]
-      {UKP5: a New Algorithm for the Unbounded Knapsack Problem}
-
-% Optional subtitle
-\subtitle{15th International Symposium on Experimental Algorithms - SEA 2016}
-
-\date{Wednesday, June 8 2016}
-
-% Author information
-\author{Henrique Becker}
-\institute{Federal University of Rio Grande do Sul (UFRGS),\\
-Porto Alegre, Brazil\\
-hbecker@inf.ufrgs.br\\
-\url{http://ppgc.inf.ufrgs.br/}
-}
+\beamertemplateballitem
 
 \begin{document}
+\title{seu t�tulo aqui}
+\author{nomes autores\\
+Instituto de Inform�tica\\
+Universidade Federal do Rio Grande do Sul
+}
+\logo{\includegraphics[scale=0.3]{inf}}
+\date{\today}
+\frame{\titlepage}
+\frame{\frametitle{Outline}\tableofcontents}
 
-% Command to create title page
-\InfTitlePage
 
-\begin{frame}
-  \frametitle{Outline}
-  \tableofcontents
-\end{frame}
-
-\section{Detalhes}
-
-\frame{
-    \frametitle{História}
-
-    \begin{itemize}
-        \item O Instituto de Informática mudou de logotipo quando completou 20 anos
-        \item Entretanto os templates para slides continuaram os mesmos
-        \item Um manual de identidade visual veio junto com o artigo
-        \item Esse template que você vê é baseado nele
-    \end{itemize}
+\section{Introduction}
+\subsection{Motivation}
+\subsubsection*{bla bla}
+\frame{\frametitle{title}
+%\begin{beamerboxesrounded}[shadow=true]{bla bla}  % use this if you like beamer boxes
+\begin{itemize}
+\item  bla bla bla
+\begin{itemize}
+\item ...
+\item ...
+\end{itemize}
+\end{itemize}
+%\end{beamerboxesrounded}
+}
+\subsection{Problems}
+\frame{\frametitle{bla}
+\begin{beamerboxesrounded}[shadow=true]{using boxes here...}
+\begin{itemize}
+\item 
+\end{itemize}
+\end{beamerboxesrounded}	
 }
 
-\frame{
-    \frametitle{Listas}
-
-    \begin{enumerate}
-        \item Listas não numeradas você já viu no slide anterior
-        \item Listas numeradas também são possíveis
-        \begin{itemize}
-            \item Assim como ambos os tipos em vários níveis
-        \end{itemize}
-    \end{enumerate}
+\section{other section}
+\frame{\frametitle{...}
+\begin{beamerboxesrounded}[shadow=true]{...}
+\begin{itemize}
+\item ...
+\end{itemize}
+\end{beamerboxesrounded}	
 }
 
-\section{Outra seção}
-\subsection{Primeira subseção}
-
+\section{Conclusions and Future Work}
 \frame{
-    \frametitle{Seções}
-
-    \begin{itemize}
-        \item O número a esquerda do cabeçalho marca a seção atual
-        \item Logo a direita ele é seguido por:
-        \begin{itemize}
-            \item nome da seção
-            \item subseção
-            \item título do slide
-        \end{itemize}
-    \end{itemize}
+\begin{beamerboxesrounded}[shadow=true]{Conclusions}
+\begin{itemize}
+\item In this paper ...
+\begin{itemize}
+\item ...
+\item ...
+\end{itemize}
+\item ...
+\end{itemize}. 
+\end{beamerboxesrounded}
 }
 
-\section{Blocos}
 
-\begin{frame}[plain]
- \sectionpage
-\end{frame}
+
 
 \frame{
-    \frametitle{Teoremas}
+\frametitle{Acknowledgments}
+inclua sua imagem aqui
 
-    \begin{theorem}
-        foo
-    \end{theorem}
-    \begin{proof}
-        bar
-    \end{proof}
+\includegraphics[scale=0.55]{inf} 
 }
 
-\frame{
-    \frametitle{Exemplos}
-
-    \begin{exampleblock}{exemplo}
-        foo
-    \end{exampleblock}
-}
-
-\frame{
-    \frametitle{Alertas}
-
-    \begin{alertblock}{alerta}
-        foo
-    \end{alertblock}
-}
-
-\section*{}
-
-\begin{frame}
-    \frametitle{Obrigado!}
-    \InfContacts
-\end{frame}
 
 \end{document}
+
+
+
+

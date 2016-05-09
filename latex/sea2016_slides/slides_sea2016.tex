@@ -10,13 +10,13 @@
 \usepackage{algpseudocode}
 
 \beamertemplateballitem
+% To number the references.
+\setbeamertemplate{bibliography item}{\insertbiblabel}
 
 % TODO:
-% Configure bigger spacing between list items.
-% Add the examples of DP and B&B, add references to them.
 % Create table? (Use many criteria? compute overall average; compute class average, then overal average; compute subclass averages, then overall average; compute subclass averages, then class aversages, then overall average)'
-% Add the class names to slide with instaces?
 % Check all references.
+% Configure bigger spacing between list items.
 % Add material to questions?
 % Change color theme?
 
@@ -37,12 +37,12 @@
 \section{Introduction}
 \frame{\frametitle{What is UKP?}
 \begin{itemize}
-\item UKP is an acronym for Unbounded Knapsack Problem
-\item Very similar to BKP or 0-1 KP
+\item UKP is an acronym for Unbounded Knapsack Problem.
+\item Very similar to BKP or 0-1 KP.
 \begin{itemize}
-\item But with an "unbounded" quantity of each item available
+\item But with an ``unbounded'' quantity of each item available.
 \end{itemize}
-\item Subproblem of the column generation technique (often used to solve CSP/BPP)
+\item Subproblem of the column generation technique (often used to solve CSP/BPP).
 \end{itemize}
 }
 
@@ -59,17 +59,21 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \frame{\frametitle{Methods on Solving UKP}
 \begin{beamerboxesrounded}[shadow=true]{Dynamic Programming (DP)}
 Strong correlation between 'n' and 'c' and the time to solve.\\
-Ex.: 
+
+\small
+Ex.: Garfinkel\cite{gar72},  T.C. Hu\cite{tchu}, G\&G\cite{gg66}, Greenberg \& Feldman\cite{greenberg_improved_ukp5}, Greenberg\cite{greenberg_2}, EDUK\cite{eduk}.
 \end{beamerboxesrounded}	
 \begin{beamerboxesrounded}[shadow=true]{Branch and Bound (B\&B)}
-Strong correlation between instance's item distribution and time to solve.\\
-Ex.:
+Strong correlation between instance's distribution and time to solve.\\
+
+\small
+Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{beamerboxesrounded}	
 }
 
 \frame{\frametitle{PYAsUKP/EDUK2 (State-of-art)}
-\begin{beamerboxesrounded}[shadow=true]{REFERENCE}
-``EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''
+\begin{beamerboxesrounded}[shadow=true]{Knapsack Problems, 2004}
+``EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p. 223]{knapsackproblems2004}
 \end{beamerboxesrounded}
 \begin{itemize}
 \item EDUK2 is the algorithm, PYAsUKP is the only known implementation (OCaml). %(As the algorithm uses many functional concepts the authors found that it would be so much easier to implement the algorithm on a functional language. Even if c++ is the de facto language for scientific computing.)
@@ -80,7 +84,7 @@ Ex.:
 \section{UKP5}
 \frame{\frametitle{UKP5}
 \begin{itemize}
-\item Simple DP algorithm based on [Garfinkel].
+\item Simple DP algorithm based on the algorithm presented on \cite{gar72} (Garfinkel \& Nemhauser).
 \begin{itemize}
   \item \textbf{Symmetry pruning} % symmetric solutions are pruned in a more efficient fashion than in~\cite{gar72};
   \item \textbf{Sparsity} % not every position of the optimal solutions value array has to be computed;
@@ -110,9 +114,9 @@ Ex.:
   \State \(opt \gets 0\)\label{init_opt}
 
   \For{\(y \gets w_{min}, c\)}\label{main_ext_loop_begin}%\Comment{Can end early because of periodicity check}
-    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}%\Comment{Handles sparsity and pruning of dominated solutions}
-    	\State \textbf{continue}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
-    \EndIf\label{if_less_than_opt_end}
+%    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}%\Comment{Handles sparsity and pruning of dominated solutions}
+    	\State \textbf{If} \(g[y] \leq opt\) \textbf{then skips to next iteration}\label{if_less_than_opt_begin}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
+%    \EndIf\label{if_less_than_opt_end}
     
     \State \(opt \gets g[y]\)\label{update_opt}
     
@@ -131,7 +135,7 @@ Ex.:
 
 \frame{\frametitle{GG66}
 \begin{itemize}
-\item "Ordered Step-Off": algorithm of Gilmore and Gomore (1966).
+\item ``Ordered Step-Off'': algorithm of Gilmore and Gomore (1966)\cite{gg66}.
 \item Found after sending this paper to the conference.%(We notified the conference chair, but the paper was already submited for printing.)
 \item Basically the same algorithm than UKP5.%(only uses the own vector for storing the profit of the best solution, instead of one single variable)
 \end{itemize}
@@ -179,9 +183,16 @@ Algorithm 1.B (Ordered Step-off)
 
 \frame{\frametitle{The instances}
 \begin{itemize}
-\item A set of 4540 "hard" instances proposed in [PYAsUKP]. %(Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B\&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
+\item A set of 4540 ``hard'' instances proposed in \cite{pya} (EDUK2 paper). %(Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B\&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
 \item Used the same tool and similar parameters to generate them. %(The tool is the own pyasukpt, that isn't only an implementation of the EDUK2 but also a implementation of many instance generators.)
 \item Five different classes of instances.%(We adopted the same five classes used on PYAsUKP, and only augmented one of the classes because with the hardwere evolution it had become too easy to solve.)
+\begin{itemize}
+	\item Instances with no collective dominance;
+	\item Instances with postponed periodicity;
+	\item Strong correlated (profit and weight);
+	\item SAW (proved to be hard to solved by B\&B\cite{chung});
+	\item Subset~sum instances;
+\end{itemize}
 \end{itemize}
 }
 
@@ -199,14 +210,14 @@ Algorithm 1.B (Ordered Step-off)
 \begin{itemize}
 \item PYAsUKP is mainly a DP method. %(the cases where the B\&B don't solve the instance instantly, it don't affect the PYAsUKP time very much)
 \item The benchmark proposed at PYAsUKP's paper focused hard-to-solve-by-B\&B instances. %(Instances with similar profit-to-weight ratio; them most efficient items being the ones with the biggest weight; etc..)
-\item PYAsUKP compared its results against the ones from a B\&B method, and against no DP method. % (the method was MTU2)
+\item PYAsUKP results were compared against the ones from a B\&B method, and against no other DP method. % (the method was MTU2)
 \end{itemize}
 }
 
 \frame{\frametitle{Final remarks}
 \begin{itemize}
-\item The algorithm isn't novel, but is "faster" than the "state-of-art" %(At least for the instances proposed by authors of the state-of-art themselves)
-\item Except by PYAsUKP, DP algorithms were abandoned with almost no empiric evidence %(No paper presenting a DP algorithm compared computational results with another DP algorithm. And no paper presenting a B\&B algorithm compared to DP (only to other B\&B).)
+\item The algorithm isn't novel, but is ``faster'' than the ``state-of-art''. %(At least for the instances proposed by authors of the state-of-art themselves)
+\item Except by PYAsUKP, DP algorithms were abandoned with almost no empiric evidence. %(No paper presenting a DP algorithm compared computational results with another DP algorithm. And no paper presenting a B\&B algorithm compared to DP (only to other B\&B).)
 \item A clear definition of the usefulness of each approach is necessary %(We need to know for what instance sizes and other instance characteristics each approach is better, and we need to base this on solid empiric evidence.)
 \end{itemize}
 }
@@ -214,26 +225,24 @@ Algorithm 1.B (Ordered Step-off)
 \frame{\frametitle{Future Works}
 \begin{beamerboxesrounded}[shadow=true]{A survey on the UKP}
 \begin{itemize}
-\item Improve the benchmark dataset %(include very big and random instances; include instances generated by the CPS/BPP column generation; create instances so hard that will make UKP5 take more than 1000s)
-\item Test old algorithms that are provided with no computational results %(many were already implemented after we send the paper)
-\item Point that UKP5/GG66 are the same algorithm, and apologize %(avoid that the misconception created by our article become long-lived)
+\item Improve the benchmark dataset. %(include very big and random instances; include instances generated by the CPS/BPP column generation; create instances so hard that will make UKP5 take more than 1000s)
+\item Test old algorithms that were presented with no computational results. %(many were already implemented after we send the paper)
+\item Point that UKP5/GG66 are the same algorithm, and apologize. %(avoid that the misconception created by our article become long-lived)
 \end{itemize}
 \end{beamerboxesrounded}	
 }
 
-\frame{\frametitle{References}
-}
-
 \frame{\frametitle{Questions?}
+\center
+This is, if we have time yet.\\
+(Sorry for my terrible pronunciation.)
 }
 
-\begin{comment}
-\frame{
-\frametitle{Acknowledgments}
-inclua sua imagem aqui
+\bibliographystyle{splncs03.bst}
 
-}
-\end{comment}
+\begin{frame}[allowframebreaks]{References}
+\bibliography{slides_sea2016.bib}
+\end{frame}
 
 \end{document}
 

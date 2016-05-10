@@ -121,7 +121,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 
   \For{\(y \gets w_{min}, c\)}\label{main_ext_loop_begin}\Comment{Iterate the stored solutions}
 %    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}%\Comment{Handles sparsity and pruning of dominated solutions}
-    	\State \textbf{If} \(g[y] \leq opt\) \textbf{then skips to next iteration}%\label{if_less_than_opt_begin}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
+    	\State \textbf{if} \(g[y] \leq opt\) \textbf{then skips to next iteration}%\label{if_less_than_opt_begin}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
 %    \EndIf\label{if_less_than_opt_end}
     
     \State \(opt \gets g[y]\)\label{update_opt}
@@ -143,7 +143,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \begin{itemize}
 \setlength\itemsep{1.5em}
 \item ``Ordered Step-Off'': algorithm of Gilmore and Gomore (1966)\cite{gg66}.
-\item Found after sending this paper to the conference.%(We notified the conference chair, but the paper was already submited for printing.)
+\item Found after sending this paper to the symposium.%(We notified the conference chair, but the paper was already submited for printing.)
 \item Basically the same algorithm than UKP5.%(only uses the own vector for storing the profit of the best solution, instead of one single variable)
 \end{itemize}
 }
@@ -156,7 +156,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \frame{\frametitle{GG66 Code 2}
 Algorithm 1.B (Ordered Step-off)
 \begin{itemize}
-\item[I.] Reorder the lenghts so that \(\pi_1/l_1 \leq \pi_2/l_2 \leq \dots \leq \pi_m/l_m\). Initialize \(F^*(x) = 0\), for \(0 \leq x \leq L\), \(l^*(0) = 1\) and \(x_2 = 0\).
+\item[I.] Reorder the lengths so that \(\pi_1/l_1 \leq \pi_2/l_2 \leq \dots \leq \pi_m/l_m\). Initialize \(F^*(x) = 0\), for \(0 \leq x \leq L\), \(l^*(0) = 1\) and \(x_2 = 0\).
 \item[II.] \begin{itemize}
 	\item[1] Let \(j = l^*(x_2)\).
 	\item[2] If \(x_2 + l_j \leq L\) then let \(V = \pi_{j} + F^*(x_2)\) and go to II.3. Otherwise go to II.4.
@@ -235,7 +235,7 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 %Weighted average of the classes averages (as subclasses averages): 46.88 %46.8856431027
 \end{frame}
 
-\frame{\frametitle{Times graph}
+\frame{\frametitle{Times charts}
 \centering
 \includegraphics[scale=0.6]{six_plots.png} 
 }

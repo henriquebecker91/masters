@@ -191,17 +191,44 @@ Algorithm 1.B (Ordered Step-off)
 \end{itemize}
 }
 
-\frame{\frametitle{PYAsUKP times / UKP5 time}
-% PUT CODE HERE
+\begin{frame}
+\frametitle{Times table}
+\begin{tabular}{llllll}
+%\multicolumn{2}{l}{} & \multicolumn{4}{l}{UKP5} & \multicolumn{4}{l}{PYAsUKP}\\
+        &  & UKP5 & PYA & UKP5 & PYA\\ \hline
+Class & Nº	& avg & avg & sd & sd \\ \hline
+W.C.D. & 2000 	& \textbf{1.55} & 34.11 & \textbf{1.94} & 82.35 \\ \hline
+S.S. & 400 	& \textbf{0.08} & 6.39 & \textbf{0.20} & 55.33 \\ \hline
+S.C. & 240 	& \textbf{0.34} & 52.46 & \textbf{0.36} & 110.24 \\ \hline
+SAW & 1100	& \textbf{3.10} & 15.43 & \textbf{5.35} & 31.82 \\ \hline
+P.P. & 800 	& \textbf{5.01} & 121.71 & \textbf{3.81} & 173.30 \\
+Class & Nº	& min & min & max & max \\ \hline
+W.C.D. & 2000 	& 0.02 & \textbf{0.00} & \textbf{13.17} & 667.80 \\ \hline
+S.S. & 400 	& 0.01 & \textbf{0.00} & \textbf{1.42} & 726.34 \\ \hline
+S.C. & 240 	& 0.04 & \textbf{0.00} & \textbf{1.13} & 721.88 \\ \hline
+SAW & 1100 	& 0.09 & \textbf{0.01} & \textbf{21.93} & 192.03 \\ \hline
+P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
+%W.C.D. & 2000 & 1.5581567411 & 1.9448457081 & 0.0288475 & 13.1754 & 34.117780105 & 82.3560955348 & 0 & 667.80327 \\ \hline
+%S.S. & 400 & 0.08 & 0.20 & 0.01 & 1.42 & 6.39 & 55.33 & 0.00 & 726.34 \\ \hline
+%S.C. & 240 & 0.3468662025 & 0.3618682953 & 0.046731 & 1.13176 & 52.4671329583 & 110.2489829781 & 0 & 721.88659 \\ \hline
+%SAW & 1100 & 3.1080885875 & 5.3562777737 & 0.0984506 & 21.9394 & 15.4338201 & 31.828562601 & 0.01333 & 192.03665 \\ \hline
+%P.P. & 800 & 5.0175573 & 3.8174543896 & 0.549045 & 14.9801 & 121.7176255625 & 173.3084120879 & 0.01 & 828.89325 \\
+\end{tabular}
 % Create table? (Use many criteria? compute overall average; compute class average, then overal average; compute subclass averages, then overall average; compute subclass averages, then class aversages, then overall average)'
 %Average of all instances: 18.5 % 18.5046187167
 %Average of the classes averages (not-weighted): 55.65 % 55.6568069177
 %Average of the subclasses average (not-weighted): 63.12 % 63.1277717668
 %Weighted average of the classes averages (as subclasses averages): 46.88 %46.8856431027
-}
+\end{frame}
 
 \frame{\frametitle{Times graph}
-% PUT CODE HERE
+\centering
+\includegraphics[scale=0.6]{six_plots.png} 
+}
+
+\frame{\frametitle{Times graph II}
+\centering
+\includegraphics[scale=0.35]{all.png} 
 }
 
 \section{Analysis and Final Remarks}

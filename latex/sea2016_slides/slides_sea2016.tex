@@ -7,7 +7,7 @@
 \usepackage[utf8]{inputenc}
 
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 
 \beamertemplateballitem
 % To number the references.
@@ -30,33 +30,44 @@
 \section{Introduction}
 \frame{\frametitle{What is UKP?}
 \begin{itemize}
-\setlength\itemsep{1.5em}
-\item UKP is an acronym for Unbounded Knapsack Problem.
+%\setlength\itemsep{1.5em}
+%\item UKP is an acronym for Unbounded Knapsack Problem.
 \item Very similar to BKP or 0-1 KP.
 \begin{itemize}
 \item But with an ``unbounded'' quantity of each item available.
 \end{itemize}
-\item Subproblem of the column generation technique (often used to solve CSP/BPP).
 \end{itemize}
-}
-
-\frame{\frametitle{UKP Model}
-\LARGE
+\large
 \begin{align}
   maximize &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
 subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
             &x_i \in \mathbb{N}_0\label{eq:x_integer}
 \end{align}
+\normalsize
+\begin{itemize}
+\vspace{-7mm}
+\item Subproblem of the column generation technique (often used to solve CSP/BPP).
+\end{itemize}
 }
+
+%\frame{\frametitle{UKP Model}
+%\LARGE
+%\begin{align}
+%  maximize &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
+%subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
+%            &x_i \in \mathbb{N}_0\label{eq:x_integer}
+%\end{align}
+%}
 
 \section{Prior Work}
 \frame{\frametitle{Methods on Solving UKP}
 \begin{beamerboxesrounded}[shadow=true]{Dynamic Programming (DP)}
-Strong correlation between 'n' and 'c' and the time to solve.\\
+Strong correlation between variables \textbf{n} \& \textbf{c} and the time to solve.\\
 
 \small
 Ex.: Garfinkel\cite{gar72},  T.C. Hu\cite{tchu}, G\&G\cite{gg66}, Greenberg \& Feldman\cite{greenberg_improved_ukp5}, Greenberg\cite{greenberg_2}, EDUK\cite{eduk}.
 \end{beamerboxesrounded}	
+\vspace{2mm}
 \begin{beamerboxesrounded}[shadow=true]{Branch and Bound (B\&B)}
 Strong correlation between instance's distribution and time to solve.\\
 
@@ -65,7 +76,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{beamerboxesrounded}	
 }
 
-\frame{\frametitle{PYAsUKP/EDUK2 (State-of-art)}
+\frame{\frametitle{EDUK2/PYAsUKP (State-of-art)}
 \begin{beamerboxesrounded}[shadow=true]{Knapsack Problems, 2004}
 ``EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p. 223]{knapsackproblems2004}
 \end{beamerboxesrounded}
@@ -90,7 +101,8 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 }
 
 \frame{\frametitle{UKP5 Code}
-\scriptsize
+%\scriptsize
+\small
 %\begin{algorithm}
 %\caption{UKP5 -- Computation of $opt$}\label{alg:ukp5}
 \begin{algorithmic}[1]
@@ -98,7 +110,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
   \State \(g \gets\) array of \(c + w_{max}\) positions each one initialized with \(0\)\label{create_g}
   \State \(d \gets\) array of \(c + w_{max}\) positions each one initialized with \(n\)\label{create_d}
   
-  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}%\Comment{Stores one-item solutions}
+  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}\Comment{Creates all single-item solutions}
     \If{\(g[w_i] < p_i\)}
       \State \(g[w_i] \gets p_i\)
       \State \(d[w_i] \gets i\)
@@ -107,14 +119,14 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 
   \State \(opt \gets 0\)\label{init_opt}
 
-  \For{\(y \gets w_{min}, c\)}\label{main_ext_loop_begin}%\Comment{Can end early because of periodicity check}
+  \For{\(y \gets w_{min}, c\)}\label{main_ext_loop_begin}\Comment{Iterate the stored solutions}
 %    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}%\Comment{Handles sparsity and pruning of dominated solutions}
-    	\State \textbf{If} \(g[y] \leq opt\) \textbf{then skips to next iteration}\label{if_less_than_opt_begin}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
+    	\State \textbf{If} \(g[y] \leq opt\) \textbf{then skips to next iteration}%\label{if_less_than_opt_begin}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
 %    \EndIf\label{if_less_than_opt_end}
     
     \State \(opt \gets g[y]\)\label{update_opt}
     
-    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}%\Comment{Creates new solutions (never symmetric)}
+    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}\Comment{Combine current solution with items}
       \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
         \State \(g[y + w_i] \gets g[y] + p_i\)
         \State \(d[y + w_i] \gets i\)
@@ -140,6 +152,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \includegraphics[scale=0.175]{gg66.png} 
 }
 
+\begin{comment}
 \frame{\frametitle{GG66 Code 2}
 Algorithm 1.B (Ordered Step-off)
 \begin{itemize}
@@ -156,8 +169,9 @@ Algorithm 1.B (Ordered Step-off)
 \end{itemize}
 \end{itemize}
 }
+\end{comment}
 
-\frame{\frametitle{GG66 Code 2}
+\frame{\frametitle{GG66 Code (changed notation)}
 Algorithm 1.B (Ordered Step-off)
 \begin{itemize}
 \item[I.] Reorder the lenghts so that \(p_1/w_1 \leq p_2/w_2 \leq \dots \leq p_n/w_n\). Initialize \(F^*(y') = 0\), for \(0 \leq y' \leq c\), \(l^*(0) = 1\) and \(y = 0\).
@@ -256,7 +270,7 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \begin{itemize}
 \item Improve the benchmark dataset. %(include very big and random instances; include instances generated by the CPS/BPP column generation; create instances so hard that will make UKP5 take more than 1000s)
 \item Test old algorithms that were presented with no computational results. %(many were already implemented after we send the paper)
-\item Point that UKP5/GG66 are the same algorithm, and apologize. %(avoid that the misconception created by our article become long-lived)
+\item Point that UKP5/GG66 are the same algorithm.%, and apologize. %(avoid that the misconception created by our article become long-lived)
 \end{itemize}
 \end{beamerboxesrounded}	
 }
@@ -264,7 +278,7 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \frame{\frametitle{Questions?}
 \center
 This is, if we have time yet.\\
-(Sorry for my terrible pronunciation.)
+%(Sorry for my terrible pronunciation.)
 }
 
 \bibliographystyle{splncs03.bst}

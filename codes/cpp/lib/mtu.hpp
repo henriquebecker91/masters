@@ -472,16 +472,21 @@ namespace hbm {
         }
         non_core_start = v;
 
-        // We do not need to clean the x solution array, inner_mtu1 already
-        // does this.
-        //memset(x.data(), 0, k*sizeof(W));
-        // We do not need to clean z, inner_mtu1 also does this for us.
-        //z = 0;
-
+        // We do not need to clean the x solution array or the z variable,
+        // inner_mtu1 already does this for us.
         inner_mtu1(core_w, core_p, k-1, c, z, x);
       } 
 
-      sol.opt = z;
+      sol.opt = 0;
+      sol.y_opt = 0;
+      for (I j = 1; j < k; ++j) {
+        if (x[j] > 0) {
+          auto item = item_t<W, P>(core_w[j], core_p[j]);
+          sol.used_items.emplace_back(item, x[j], j);
+          sol.opt += x[j]*core_p[j];
+          sol.y_opt += x[j]*core_w[j];
+        }
+      }
 
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_mtu2_begin);

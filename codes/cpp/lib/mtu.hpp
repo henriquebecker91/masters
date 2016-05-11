@@ -202,11 +202,6 @@ namespace hbm {
       const auto &w = w_;
       const auto &p = p_;
 
-      /*for (I j = 1; j <= n + 100; ++j) {
-        cout << "w[" << j << "]: " << w[j] << endl;
-        cout << "p[" << j << "]: " << p[j] << endl;
-      }*/
-
       vector<W> x_(n+1, 0);
       P upper_u = u3(bi, bi2, bi3, c);
 
@@ -220,11 +215,8 @@ namespace hbm {
 
       // 2. build a new current solution
       step_2:
-      while (w[j] > c_) {
-        //cout << "p[" << j+1 << "]: " << p[j+1] << endl;
-        //cout << "w[" << j+1 << "]: " << w[j+1] << endl;
+      while (w[j] > c_)
         if (z >= z_ + (c_*p[j+1])/w[j+1]) goto step_5; else j = j + 1;
-      }
 
       y = c_/w[j];
       u = ((c_ - y*w[j])*p[j+1])/w[j+1];
@@ -386,10 +378,10 @@ namespace hbm {
         sort_by_eff(items.begin(), items.end(), v);
       }
 
-      // The core will be kept a profit and a weight array, to avoid having
+      // The core will be kept as a profit and a weight array, to avoid having
       // to convert for each call to inner_mtu1. The arrays are of size 'n + 2'
-      // because: 1º) notation starts at 1; 2º) inner_mtu1 adds a dummy
-      // item at the end.
+      // because: 1º) notation starts at 1; 2º) inner_mtu1 adds a dummy item at
+      // the end.
       myvector<W> core_p;
       core_p.resize(n + 2); // this resize don't initialize any values
       core_p[0] = 0; // position does not exist, notation begins at 1
@@ -401,8 +393,6 @@ namespace hbm {
         aux_item = items[i];
         core_w[j] = aux_item.w;
         core_p[j] = aux_item.p;
-        //cout << "core_p[" << j << "]: " << core_p[j] << endl;
-        //cout << "core_w[" << j << "]: " << core_w[j] << endl;
       }
 
       // MTU2 describe some steps on a high level. We tried to implemet those
@@ -425,7 +415,6 @@ namespace hbm {
       x.resize(n + 1);
       memset(x.data(), 0, (v+1)*sizeof(W));
 
-      //cout << "inner_mtu1(core_w, core_p, " << v << ", " << c << ", " << z << ", x)" << endl;
       inner_mtu1(core_w, core_p, v, c, z, x);
 
       P upper_u3 = u3(items[0], items[1], items[2], c);
@@ -433,14 +422,14 @@ namespace hbm {
       I non_core_start = 0;
       size_t non_core_size = non_core.size();
 
-      I k = v;
-      while (z != upper_u3 && non_core.size() > v) {
-        P u, pj;
-        W wj;
+      // k: Index of the next position to be written on core_w/core_p,
+      //    takes in consideration that both begins at index 1.
+      I k = v + 1;
+      while (z != upper_u3 && non_core.size() > non_core_start) {
         for (size_t j = non_core_start; j < non_core_size; ++j) {
-          pj = non_core[j].p;
-          wj = non_core[j].w;
-          u = pj + u1(items[0], items[1], c - wj);
+          P pj = non_core[j].p;
+          W wj = non_core[j].w;
+          P u = pj + u1(items[0], items[1], c - wj);
           if (u > z) u = pj + u3(items[0], items[1], items[2], c - wj);
           // the 'if' below can't be an 'else' of the 'if' above, don't try
           // the variable 'u' changes value on the 'if' above
@@ -454,7 +443,7 @@ namespace hbm {
         // the v first items that were added to core, and that are not part
         // of non_core anymore), and update the relevant variables.
         {
-          aux_non_core.resize(non_core_size - qt_items_to_remove);
+          aux_non_core.resize(non_core_size - non_core_start - qt_items_to_remove);
 
           for (size_t j = non_core_start, i = 0; j < non_core_size; ++j) {
             if (!items_to_remove[j]) { 
@@ -480,8 +469,6 @@ namespace hbm {
           aux_item = non_core[i];
           core_w[k] = aux_item.w;
           core_p[k] = aux_item.p;
-          //cout << "core_w[" << k << "]: " << core_w[k] << endl;
-          //cout << "core_p[" << k << "]: " << core_p[k] << endl;
         }
         non_core_start = v;
 

@@ -21,6 +21,12 @@ CC=g++
 # is from signed numbers.
 CFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -g -O0 #-O3 #
 LBOOST=-lboost_filesystem -lboost_system 
+# In 11/05/2016, with gcc 6.1.1 and boost 1.60.0-4, the multiprecision library
+# gave compiler errors (seems like new gcc checks noticed a bug on boost).
+# The only way to compile with boost is using -fpermissive, when boost
+# releases its next version this can be removed.
+# See: https://svn.boost.org/trac/boost/ticket/12181
+LBOOST += -fpermissive
 H_DEPS=lib/ukp_common.hpp lib/test_common.hpp bin
 DEFS=-DHBM_XOR_SWAP
 

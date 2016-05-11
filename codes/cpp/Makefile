@@ -19,7 +19,7 @@ CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
 # This makes easies to debug overflow errors, but only works if the overflow
 # is from signed numbers.
-CFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 #
+CFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -g -O0 #-O3 #
 LBOOST=-lboost_filesystem -lboost_system 
 H_DEPS=lib/ukp_common.hpp lib/test_common.hpp bin
 DEFS=-DHBM_XOR_SWAP
@@ -125,6 +125,15 @@ bin/test_mtu1.out: mains/test_mtu1.cpp lib/mtu.hpp lib/wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ mains/test_mtu1.cpp $(CFLAGS) $(DEFS)
 
 bin/mtu1: bin/run_mtu1.out bin/test_mtu1.out
+	touch $@
+
+bin/run_mtu2.out: mains/run_mtu2.cpp lib/mtu.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_mtu2.cpp $(CFLAGS) $(DEFS)
+
+bin/test_mtu2.out: mains/test_mtu2.cpp lib/mtu.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_mtu2.cpp $(CFLAGS) $(DEFS)
+
+bin/mtu2: bin/run_mtu2.out bin/test_mtu2.out
 	touch $@
 
 .PHONY: clean

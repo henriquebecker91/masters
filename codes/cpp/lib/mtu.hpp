@@ -317,6 +317,60 @@ namespace hbm {
       #endif
     }
 
+    // Sorting method internally used by MTU2. Instead of putting the k most
+    // efficient items on the beggining of the vector, it will put all the
+    // items with the k-1 greatest efficiencies (i.e. if there's more than one
+    // item with the same efficiency, this can be more than k items). If
+    // no two items have the same efficiency, the first of the k-esim efficient
+    // items is also sorted, otherwise 
+    // The items vector is expected to be indexed base 0 (zero), and to have at
+    // least one element.
+    // The return is the size of the group made of the items with the k
+    // greatest efficiencies (i.e. the number of sorted items).
+    template<typename V, typename I>
+    inline I mtu2_sort_k_most_efficient(V &items, const I &k) {
+      const I n = items.size();
+      // As we compute the number of different efficiencies found by comparing
+      // an element with the previous one, the first efficiency is never
+      // accounted for. We start with one less to account for it.
+      I qt_effs_to_find = k - 1;
+      I sort_first_n = 1;
+      I i = 1;
+
+      auto &out = cout;
+      while (qt_effs_to_find && sort_first_n < n) {
+        HBM_PRINT_VAR(qt_effs_to_find);
+        HBM_PRINT_VAR(sort_first_n);
+        sort_first_n += qt_effs_to_find;
+        sort_first_n = min(sort_first_n, n);
+        sort_by_eff(items, sort_first_n);
+        for (; i < sort_first_n; ++i) {
+          if (!items[i-1].has_same_eff_that(items[i])) --qt_effs_to_find;
+        }
+      }
+
+      return i;
+    }
+
+    // When the item list is already sorted, we yet need to get to know the
+    // index of the k-esim most efficient item. This is used to define the
+    // next_slice_size on mtu2.
+    // The items vector is expected to be indexed base 0 (zero), and to have at
+    // least one element.
+    // The return is the size of the group made of the items with the k
+    // greatest efficiencies.
+    /*template<typename V, typename I>
+    inline I mtu2_get_r_from_sorted(V &items, const I &k) {
+      I qt_effs_found = 1;
+      I k_esim_index = 1;
+
+      for (; r_index < k &&  <  ) {
+          if (!items[i-1].has_same_eff_that(items[i])) --qt_effs_to_find;
+      }
+
+      return k_esim_index;
+    }*/
+
     // MTU2 method. Uses inner_mtu1 internally. Is the same algorithm
     // described on "Knapsack Problems" p. 100 (Martello and Toth)
     // but, as the algorithm described on the book is on a very high-level
@@ -348,11 +402,11 @@ namespace hbm {
         return;
       }
       I v = max(static_cast<I>(100), n/100);
+      I next_slice_size = v;
 
       if (!already_sorted) {
-        // The G, E, and overlined E sets are unecessary. The code does the
-        // almost the same as partial ordering the first 'v' elements.
-        sort_by_eff(items.begin(), items.end(), v);
+        next_slice_size = mtu2_sort_k_most_efficient(items, v);
+        cout << "next_slice_size: " << next_slice_size << endl;
       }
 
       // The core will be kept as a profit and a weight array, to avoid having
@@ -366,7 +420,7 @@ namespace hbm {
       core_w.resize(n + 2); // this resize don't initialize any values
       core_w[0] = 0; // position does not exist, notation begins at 1
       item_t<W, P> aux_item;
-      for (I i = 0, j = 1; i < v; ++i, ++j) {
+      for (I i = 0, j = 1; i < next_slice_size; ++i, ++j) {
         aux_item = items[i];
         core_w[j] = aux_item.w;
         core_p[j] = aux_item.p;
@@ -408,6 +462,7 @@ namespace hbm {
       // can remove both the items that were added to the core and the items
       // that were marked for removal on one sinle pass.
       I non_core_start = 0;
+
       // non_core_size: to avoid calling non_core.size(). non_core_size
       // is always updated immediatly after non_core changes size.
       size_t non_core_size = non_core.size();
@@ -422,8 +477,8 @@ namespace hbm {
       while (z != upper_u3 && non_core_size > non_core_start) {
         // On this for loop we mark for removal the dominated items.
         for (size_t j = non_core_start; j < non_core_size; ++j) {
-          P pj = non_core[j].p;
-          W wj = non_core[j].w;
+          const P &pj = non_core[j].p;
+          const W &wj = non_core[j].w;
           P u = pj + u1(items[0], items[1], c - wj);
           if (u > z) u = pj + u3(items[0], items[1], items[2], c - wj);
           // the 'if' below can't be an 'else' of the 'if' above, don't try
@@ -457,16 +512,18 @@ namespace hbm {
         // Now we get the v most efficient items on non_core, and add them to
         // the core. We do not remove those items of non_core, but we set
         // non_core_start that will remove them for us on the next loop.
+        next_slice_size = v;
         if (!already_sorted) {
-          sort_by_eff(non_core.begin(), non_core.end(), v);
+          next_slice_size = mtu2_sort_k_most_efficient(non_core, v);
+          cout << "next_slice_size: " << next_slice_size << endl;
         }
-        const I next_slice_size = min(v, non_core_size);
+        next_slice_size = min(next_slice_size, non_core_size);
         for (I i = 0; i < next_slice_size; ++i, ++k) {
           aux_item = non_core[i];
           core_w[k] = aux_item.w;
           core_p[k] = aux_item.p;
         }
-        non_core_start = v;
+        non_core_start = next_slice_size;
 
         // Finally, we solve the core problem again, using MTU1, and then
         // start the process again.

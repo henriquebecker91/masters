@@ -23,7 +23,7 @@ namespace hbm {
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
     double linear_comp_time{0}; ///< Time used by linear time preprocessing.
-    double dp_time{0};     ///< Time used creating partial solutions.
+    double bb_time{0};     ///< Time used creating partial solutions.
     double sol_time{0};    ///< Time used to assemble solution.
     double total_time{0};  ///< Time used by all the algorithm.
     #endif //HBM_PROFILE
@@ -38,7 +38,7 @@ namespace hbm {
 
       #ifdef HBM_PROFILE
       const double sum_time = sort_time + vector_alloc_time +
-        linear_comp_time + dp_time + sol_time;
+        linear_comp_time + bb_time + sol_time;
 
       std::streamsize old_precision = out.precision(HBM_PROFILE_PRECISION);
       const int two_first_digits_and_period = 3;
@@ -56,7 +56,7 @@ namespace hbm {
       HBM_PRINT_TIME("Sort", sort_time);
       HBM_PRINT_TIME("Vect", vector_alloc_time);
       HBM_PRINT_TIME("O(n)", linear_comp_time);
-      HBM_PRINT_TIME("DP  ", dp_time);
+      HBM_PRINT_TIME("B&B ", bb_time);
       HBM_PRINT_TIME("sol ", sol_time);
       HBM_PRINT_TIME("Sum ", sum_time);
       HBM_PRINT_TIME("All ", total_time);
@@ -77,44 +77,6 @@ namespace hbm {
     using namespace std;
     using namespace std::chrono;
     using namespace boost;
-
-    /*#ifdef HBM_CHECK_OVERFLOW
-    // Overflow check for multiplying two numbers, built-in style. We are
-    // considering that the A/B/C types can be signed or unsigned, but the
-    // values of both variables 'a' and 'b' will be non-negative. Also, this
-    // is slow, and only used if someone want to compile with overflow check
-    // enabled and isn't on g++/icc (for those two compiler we use a built-in
-    // compiler function).
-    inline bool mul_overflow_check<A, B, C>(const A &a, const B &b, C &c) {
-      c = a*b;
-      C max = numeric_limits<C>::max();
-      if (b != 0 && a > max / b) {
-        return true;
-      }
-      return false;
-    }
-      // Stolen from: https://sourceforge.net/p/predef/wiki/Compilers/
-      #if defined(__GNUC__)
-        #if defined(__GNUC_PATCHLEVEL__)
-          #define __GNUC_VERSION__ (__GNUC__ * 10000 \
-                                    + __GNUC_MINOR__ * 100 \
-                                    + __GNUC_PATCHLEVEL__)
-        #else
-          #define __GNUC_VERSION__ (__GNUC__ * 10000 \
-                                    + __GNUC_MINOR__ * 100)
-        #endif
-      #endif
-
-      #if __GNUC_VERSION__ >= 50000
-        // Will save the multiplication of 'a' and 'b' in 'c', and return
-        // non-zero on the case of an overflow (and zero otherwise).
-        #undef HBM_CHECK_OVERFLOW
-        #define HBM_CHECK_OVERFLOW(a, b, c) __builtin_mull_overflow(a, b, &c)
-      #elif
-        // Same working as described the alternative version described above.
-        #define HBM_CHECK_OVERFLOW(a, b, c) mul_overflow_check(a, b, c)
-      #endif
-    #endif //HBM_CHECK_OVERFLOW*/
 
     // "Knapsack Problems" p. 93, equation 3.19 
     template<typename W, typename P>
@@ -167,10 +129,20 @@ namespace hbm {
       return max(u1_, u0); // 3.26
     }
 
-    // TODO: write short note
-    // Note that this method has index notation beggining on 1.
+    // The mtu1 code without any wrappers. Used internally by mtu1 and
+    // mtu2. Takes the weights and profits list, the number of items,
+    // the capacity, the variable where to store the optimal value
+    // and the vector where to store the optimal solution found.
+    // Both z and x are cleaned before use, x has to have the correct size
+    // ('n' or greater) but can be unintialized.
+    // Note that this method has index notation beggining on 1 (both
+    // w_ and p_ are expected to begin at 1 and go until n).
     // It's expected that the size of w and p exceeds n by at least one
-    // position (i.e. w and p have at least size n+1).
+    // position (i.e. w and p have at least size n+1). This is because
+    // inner_mtu1 writes a dummy item at the n+1 position (the data
+    // originally on that position is lot, be warned).
+    // This code assumes that w_ and p_ are sorted by non-increasing
+    // efficiency.
     template<typename W, typename P, typename I>
     void inner_mtu1(
       myvector<W> &w_,
@@ -183,7 +155,7 @@ namespace hbm {
       const item_t<W, P>  bi(w_[1], p_[1]),
                           bi2(w_[2], p_[2]),
                           bi3(w_[3], p_[3]);
-
+      // Variables needs to be initialized before we start jumping.
       W y, i;
       P u;
       I h;
@@ -194,8 +166,6 @@ namespace hbm {
       P z_ = 0;
       W c_ = c;
 
-      // TODO: At the end verify if this can be done without adding this
-      // dummy item.
       w_[n+1] = numeric_limits<W>::max();
       p_[n+1] = 0;
       // Avoid changing w_ and p_ for the rest of the algorithm.
@@ -208,7 +178,7 @@ namespace hbm {
       myvector<W> m;
       m.resize(n+1); // This resize don't initialize the m contents with zero
 
-      m[n] = w[n + 1]; // Changing the dummy item would change there
+      m[n] = w[n + 1];
       for (I k = n - 1; k > 0; --k) m[k] = min(m[k + 1], w[k + 1]);
 
       I j = 1;
@@ -284,7 +254,7 @@ namespace hbm {
       return;
     }
 
-    // TODO: quick comment on the method
+    // A wrapper around inner_mtu1.
     template<typename W, typename P, typename I>
     void mtu1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -308,7 +278,8 @@ namespace hbm {
         sort_by_eff(ukpi.items);
       }
 
-      // Put items on article's notation
+      // The arrays are of size 'n + 2' because: 1º) notation starts at 1;
+      // 2º) inner_mtu1 adds a dummy item at the end.
       myvector<W> w;
       w.resize(n + 2);
       w[0] = 0; // position does not exist, notation begins at 1
@@ -322,10 +293,12 @@ namespace hbm {
         p[j] = it.p;
       }
 
-      // We need to initialize some variables before we start jumping.
       myvector<W> x;
-      x.resize(n+1); // This resize don't initialize the m contents with zero
+      // This resize don't initialize the m contents with zero, inner_mtu1
+      // will already clean the array for us.
+      x.resize(n+1);
 
+      // Variable z will be overwritten by inner_mtu1 too.
       P z;
       inner_mtu1(w, p, n, c, z, x);
 
@@ -338,12 +311,16 @@ namespace hbm {
           sol.y_opt += x[k]*w[k];
         }
       }
+      assert(z == sol.opt);
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_mtu2_begin);
       #endif
     }
 
-    // TODO: quick comment on the method
+    // MTU2 method. Uses inner_mtu1 internally. Is the same algorithm
+    // described on "Knapsack Problems" p. 100 (Martello and Toth)
+    // but, as the algorithm described on the book is on a very high-level
+    // pseudocode, the translation to optimized C++ can be hard to follow.
     template<typename W, typename P, typename I>
     void mtu2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
@@ -395,10 +372,10 @@ namespace hbm {
         core_p[j] = aux_item.p;
       }
 
-      // MTU2 describe some steps on a high level. We tried to implemet those
+      // MTU2 describe some steps on a high level. We tried to implement those
       // on the most efficient fashion possible. One of the high-level steps
       // that are hard to manage in an efficient fashion is keeping non_core
-      // update, it have elements removed frequently (from front and any
+      // updated, as it has elements removed frequently (from front and any
       // position in the middle of it).
       myvector< item_t<W, P> > non_core;
       non_core.resize(n - v);
@@ -408,24 +385,43 @@ namespace hbm {
       // time. And we are optimizing this algorithm for time.
       myvector<char> items_to_remove(non_core.size(), 0);
       size_t qt_items_to_remove = 0;
+      // This vector is used to assist the removal of items from non_core,
+      // between the loops we will copy the elements that aren't marked
+      // to be removed from non_core to aux_non_core, and then swap both.
       myvector< item_t<W, P> > aux_non_core;
 
-      // The solution vector.
+      // The solution vector. We don't initialize it. The inner_mtu1
+      // procedure will alredy do it for us.
       myvector<W> x;
       x.resize(n + 1);
-      memset(x.data(), 0, (v+1)*sizeof(W));
 
+      // Solve for the core problem for the first time.
       inner_mtu1(core_w, core_p, v, c, z, x);
 
       P upper_u3 = u3(items[0], items[1], items[2], c);
 
+      // non_core_start: When we copy elements from non_core to core we need
+      // remove them from non_core, but simply doing so would not be efficient.
+      // This way, when we copy elements from non_core to core, we set
+      // non_core_start to be the index of the first element that wasn't
+      // copied. After we will mark dominated items for removal, and then we
+      // can remove both the items that were added to the core and the items
+      // that were marked for removal on one sinle pass.
       I non_core_start = 0;
+      // non_core_size: to avoid calling non_core.size(). non_core_size
+      // is always updated immediatly after non_core changes size.
       size_t non_core_size = non_core.size();
 
       // k: Index of the next position to be written on core_w/core_p,
-      //    takes in consideration that both begins at index 1.
+      //    takes in consideration that both vectors start at index 1.
       I k = v + 1;
-      while (z != upper_u3 && non_core.size() > non_core_start) {
+
+      // We stop when our current solution hits the upper bound
+      // (z == upper_u3), or when the core problem uses all undominated items
+      // (non_core_size <= non_core_start). When the last elements from
+      // non_core were already copied to core_w/core_p, then
+      // non_core_size > non_core_start.
+      while (z != upper_u3 && non_core_size > non_core_start) {
         for (size_t j = non_core_start; j < non_core_size; ++j) {
           P pj = non_core[j].p;
           W wj = non_core[j].w;
@@ -546,15 +542,16 @@ namespace hbm {
   }
   // -------------------- EXTERNAL FUNCTIONS --------------------
 
-  /// Solves an UKP instance by the 
-  /// TODO: ALGORITH_NAME presented at PAPER_NAME
-  /// , and stores the results at sol.
+  /// Solves an UKP instance by the MTU1 algorithm presented at the book
+  /// "Knapsack Problems" (from Martello and Toth) p. 96, and stores the
+  /// results at sol.
   ///
-  /// @note TODO: it only work with integers? there's some other caveat?
+  /// @note Ony work for integer weight and profit. Depends on the natural
+  ///   rounding-down of integers division.
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
-  ///   TODO: what kind of ordering?
+  ///   non-decreasing efficiency.
   template<typename W, typename P, typename I>
   void mtu1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
     hbm_mtu_impl::mtu1(ukpi, sol, already_sorted);
@@ -575,15 +572,16 @@ namespace hbm {
     hbm_mtu_impl::mtu1(ukpi, sol, argc, argv);
   }
 
-  /// Solves an UKP instance by the 
-  /// TODO: ALGORITH_NAME presented at PAPER_NAME
-  /// , and stores the results at sol.
+  /// Solves an UKP instance by the MTU2 algorithm presented at the book
+  /// "Knapsack Problems" (from Martello and Toth) p. 100, and stores the
+  /// results at sol.
   ///
-  /// @note TODO: it only work with integers? there's some other caveat?
+  /// @note Ony work for integer weight and profit. Depends on the natural
+  ///   rounding-down of integers division.
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
-  ///   TODO: what kind of ordering?
+  ///   non-decreasing efficiency.
   template<typename W, typename P, typename I>
   void mtu2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
     hbm_mtu_impl::mtu2(ukpi, sol, already_sorted);

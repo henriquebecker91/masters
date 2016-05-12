@@ -42,8 +42,25 @@ namespace hbm {
   /// to touch it if you want to tweak the UKP5 inner workings.
   template <typename I>
   struct ukp5_conf_t {
+    /// Remove simple/multiple dominated items from the item list, before
+    /// starting UKP5. Note that this process add a O(n^2) overhead
+    /// (the real cost of this preprocessing depends on the number of
+    /// simple/multiple dominated items; if there's none, the process
+    /// is O(n^2), if there's many dominated items, the overhead can be
+    /// significantly smaller).
     bool apply_smdom{false};
+    /// If the removal of simple/multiple items must happen before or after
+    /// sorting the items, only has effect if apply_smdom is true. If all
+    /// the items are ordered before applying dominance, a better dominance
+    /// algorithm can be used. If there's few dominated items, it's better
+    /// to apply dominance after the sort or even not apply dominance at all.
+    /// If there's many dominated items, applying dominance before the sort
+    /// can reduce the sort cost (less items to sort).
     bool apply_smdom_before_sort{true};
+    /// If true uses the value of sort_percent to determine how many of the
+    /// most efficient items will be pulled to the vector beggining. If false,
+    /// uses sort_k_most_eff to determine how many of the most efficient
+    /// items will be pulled to the vector beggining
     bool use_percent{true};
     union {
       double sort_percent{1.0};
@@ -60,6 +77,11 @@ namespace hbm {
       nsd_path, ///< Path where non_skipped_d will be dumped.
       dqt_path; ///< Path where qt_i_in_dy will be dumped.
 
+    /// If true, compute the y* bound (see periodicity.hpp) and, if it is
+    /// smaller than the capacity, use it on the place of the capacity.
+    /// Fill the difference between the bound and the capacity with
+    /// copies of the best item. Note that setting this option to
+    /// true will yet give an exact optimal solution.
     bool use_y_star_per{true};
 
     /// Write human-readable object representation to a stream.

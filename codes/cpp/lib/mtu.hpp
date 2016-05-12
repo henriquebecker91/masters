@@ -418,10 +418,9 @@ namespace hbm {
 
       // We stop when our current solution hits the upper bound
       // (z == upper_u3), or when the core problem uses all undominated items
-      // (non_core_size <= non_core_start). When the last elements from
-      // non_core were already copied to core_w/core_p, then
-      // non_core_size > non_core_start.
+      // (non_core_size <= non_core_start).
       while (z != upper_u3 && non_core_size > non_core_start) {
+        // On this for loop we mark for removal the dominated items.
         for (size_t j = non_core_start; j < non_core_size; ++j) {
           P pj = non_core[j].p;
           W wj = non_core[j].w;
@@ -435,9 +434,10 @@ namespace hbm {
           }
         }
 
-        // Here we remove the dominated items from non_core (together with
-        // the v first items that were added to core, and that are not part
-        // of non_core anymore), and update the relevant variables.
+        // Here we remove the dominated items from non_core (that were marked
+        // for removal on the loop above), and also remove the v first items
+        // that were added to core (and that are not part of non_core anymore).
+        // Then we update the relevant variables (ex.: non_core_size).
         {
           aux_non_core.resize(non_core_size - non_core_start - qt_items_to_remove);
 
@@ -468,11 +468,14 @@ namespace hbm {
         }
         non_core_start = v;
 
+        // Finally, we solve the core problem again, using MTU1, and then
+        // start the process again.
         // We do not need to clean the x solution array or the z variable,
         // inner_mtu1 already does this for us.
         inner_mtu1(core_w, core_p, k-1, c, z, x);
       } 
 
+      // Here we put the solution on the sol (solution_t) structure.
       sol.opt = 0;
       sol.y_opt = 0;
       for (I j = 1; j < k; ++j) {

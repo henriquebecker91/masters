@@ -333,34 +333,22 @@ namespace hbm {
       // an element with the previous one, the first efficiency is never
       // accounted for. We start with one less to account for it.
       I qt_effs_to_find = k - 1;
-      I sort_first_n = 1;
+      I qt_sorted_items = 0;
+      // If there's at least k different efficiences on the range, i ends up
+      // as the index for the first item with the k-esim efficiency.
       I i = 1;
 
-      // TODO: the calls to sort_by_eff can degenerate in a way that we can
-      // have it called hundreds/thousands/... of times to sort only one
-      // element at time. The degenerate case is probably very hard to find
-      // on a real instance. It would need that a great number of items shared
-      // the 'k-1'-esim efficiency, or that we had thousands of different
-      // efficiencies and each efficiency had thousands of items with that
-      // exact efficiency. This is the most efficient way if we gamble that
-      // the degenerate case is rare. If we have motives to believe the
-      // opposite, the best way would be putting a lower bound in the number
-      // of items that can be sorted at a time. Ex.: if we want to find only
-      // six more efficiencies, we will sort at least the next hundred items,
-      // even if this is probably unecessary, to avoid calling sort_by_eff
-      // many times to sort six items at each call.
       // TODO: this method is already degenerated for subset-sum, mtu1 can
-      // solve an instance in 0.008s and mtu2 will need 1.2s because of the
+      // solve an instance in 0.008s and mtu2 will need 0.34s because of the
       // overhead of this sorting function. Needs to get the original
       // fortran code and check how it implemented the act of finding
       // the k-esim efficiency and selected the items smaller than it.
-      while (qt_effs_to_find && sort_first_n < n) {
-        sort_first_n += qt_effs_to_find;
-        sort_first_n = min(sort_first_n, n);
-        sort_by_eff(items.begin(), items.end(), sort_first_n);
-        for (; i < sort_first_n; ++i) {
+      while (qt_effs_to_find && qt_sorted_items < n) {
+        sort_by_eff(items.begin() + qt_sorted_items, items.end(), k);
+        for (I limit = min(n, qt_sorted_items + k); qt_effs_to_find && i < limit; ++i) {
           if (!items[i-1].has_same_eff_that(items[i])) --qt_effs_to_find;
         }
+        qt_sorted_items += k;
       }
 
       // To be completely faithful to MTU2, we need to include the first item

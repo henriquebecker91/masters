@@ -78,7 +78,7 @@ namespace hbm {
 
     /// The standard ordering for items.
     ///
-    /// The condition x \< y is true if the item x is more efficient
+    /// The condition x \< y is true iff the item x is more efficient
     /// than y (x.p/x.w \> y.p/y.w) or, if the efficiencies are equal,
     /// the condition x.w \< y.w is true.
     ///
@@ -462,11 +462,7 @@ namespace hbm {
 
     template<typename W, typename P, typename I>
     void sort_by_eff(vector< item_t<W, P> > &items, I sort_k_most_eff) {
-      hbm_ukp_common_impl::sort_by_eff(items.begin(), items.end(), sort_k_most_eff);
-    }
-
-    template<typename W, typename P, typename I>
-    void sort_by_eff(myvector< item_t<W, P> > &items, I sort_k_most_eff) {
+      // Without this the most efficient element was put first
       hbm_ukp_common_impl::sort_by_eff(items.begin(), items.end(), sort_k_most_eff);
     }
 
@@ -565,12 +561,6 @@ namespace hbm {
   /// @param sort_k_most_eff A integer between 0 and items.size()+1.
   template<typename W, typename P, typename I>
   void sort_by_eff(std::vector< item_t<W, P> > &items, I sort_k_most_eff) {
-    hbm_ukp_common_impl::sort_by_eff(items, sort_k_most_eff);
-  }
-
-  /// Overloaded version for the myvector type.
-  template<typename W, typename P, typename I>
-  void sort_by_eff(myvector< item_t<W, P> > &items, I sort_k_most_eff) {
     hbm_ukp_common_impl::sort_by_eff(items, sort_k_most_eff);
   }
 

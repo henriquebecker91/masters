@@ -13,13 +13,13 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (it's 'all except debug/profile build' in truth).
 
-all: bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
 # This makes easies to debug overflow errors, but only works if the overflow
 # is from signed numbers.
-CFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -O0 #
+CFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -Og #
 LBOOST=-lboost_filesystem -lboost_system 
 # In 11/05/2016, with gcc 6.1.1 and boost 1.60.0-4, the multiprecision library
 # gave compiler errors (seems like new gcc checks noticed a bug on boost).
@@ -36,6 +36,12 @@ UKP5_DEFS=$(DEFS) -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS
 
 bin:
 	mkdir bin
+
+bin/ukp2sukp.out: mains/ukp2sukp.cpp lib/ukp_common.hpp bin
+	$(CC) -o $@ mains/ukp2sukp.cpp $(CFLAGS)
+
+bin/sukp2ukp.out: mains/sukp2ukp.cpp lib/ukp_common.hpp bin
+	$(CC) -o $@ mains/sukp2ukp.cpp $(CFLAGS)
 
 bin/run_eduk.out: mains/run_eduk.cpp lib/eduk.hpp lib/wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ mains/run_eduk.cpp $(CFLAGS) $(DEFS)

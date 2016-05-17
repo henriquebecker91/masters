@@ -6,11 +6,11 @@ cc MAIN is the main program for hbm_mtu1.
 c
 c  Discussion:
 c
-c    TODO
+c    Calls MTU1 over the filename passed as the first command line arg.
 c
 c  Licensing:
 c
-c    TODO
+c    Public Domain. Unlicense.
 c
 c  Modified:
 c
@@ -22,101 +22,106 @@ c    Henrique Becker
 c
       implicit none
 
-      integer n
-c      parameter ( n = 8 )
-      integer jdim
-c      parameter ( jdim = n + 3 )
+      integer :: n    ! Quantity of items on the read instance.
+      integer :: jdim ! Size of MTU2 arrays, must be at least n+1.
+      integer :: i    ! Loop variable.
 
-      integer c
-      integer i
-c      real    xo(jdim)
-c      real    rr(jdim)
-c      integer po(jdim)
-c      integer wo(jdim)
-c      integer pp(jdim)
+      integer :: c    ! Capacity of the read instance.
+
+      integer, allocatable :: p(:) ! Item profits of the read instance.
+      integer, allocatable :: w(:) ! Item weights of the read instance.
+      integer, allocatable :: x(:) ! Quantity of the items on solution.
+      integer :: z    ! Solution value.
+      integer :: mass ! Size of the found solution.
+
+      integer :: jck  ! Boolean. The instance should be checked?
+      integer :: jfo  ! Boolean. Return exact result?
+      integer :: jub  ! Output. Upper bound.
+
+      ! Five arrays used internally by MTU2.
       real, allocatable :: xo(:)
       real, allocatable :: rr(:)
       integer, allocatable :: po(:)
       integer, allocatable :: wo(:)
       integer, allocatable :: pp(:)
-      integer jck
-      integer jfo
-      integer jub
-      integer mass
-      integer profit
-c      integer p(jdim)      
-c      integer w(jdim)
-c      integer x(jdim)
-      integer, allocatable :: p(:)      
-      integer, allocatable :: w(:)
-      integer, allocatable :: x(:)
-      integer z
 
-c      data p(1:n) / 350, 400, 450,  20,  70,   8,   5,   5 /
+      ! Variables needed to read the time used
+      integer :: t1, t2, clock_rate, clock_max, max_sec
+      real    :: ttime
 
-c      data w(1:n) /  25,  35,  45,   5,  25,   3,   2,   2 /
+      ! Variables used to parse the command-line
+      character(len=255) :: fname
+      integer :: argc
 
-c      c = 104
+      argc = command_argument_count()
+      if (argc .ne. 1) then
+        write (*,*) 'usage: <binary_path> <instance_filename>'
+        write (*,*) 'Number of parameters received: ', argc
+        write (*,*) 'Aborting.'
+        call exit(1)
+      end if
 
-      call read_ukp_instance('ss.sukp', n, c, w, p )
+      call get_command_argument(1, fname)
+      call read_sukp_instance(fname, n, c, w, p)
+      jdim = n + 1
 
-      allocate( xo(n) )
-      allocate( rr(n) )
-      allocate( po(n) )
-      allocate( wo(n) )
-      allocate( pp(n) )
-      allocate( x(n) )
+c      write ( *, '(a)' ) ' '
+c      write ( *, '(a)' ) '  MTU2 solves the UKP.'
+c      write ( *, '(a)' ) ' '
+c      write ( *, '(a,i6)' ) '  Knapsack capacity is ', c
 
-      jfo = 1
-      jck = 1
+c      call knapsack_reorder ( n, p, w )
 
-      write ( *, '(a)' ) ' '
-      write ( *, '(a)' ) 'TEST02'
-      write ( *, '(a)' ) '  MT2 solves the 0/1 knapsack problem.'
-      write ( *, '(a)' ) ' '
-      write ( *, '(a,i6)' ) '  Knapsack capacity is ', c
+c      write ( *, '(a)' ) ' '
+c      write ( *, '(a)' ) '  Object  Profit    Mass'
+c      write ( *, '(a)' ) ' '
+c      do i = 1, n
+c        write ( *, '(2x,i6,2x,i6,2x,i6)' ) 
+c     &  i, p(i), w(i)
+c      end do
 
-      call knapsack_reorder ( n, p, w )
+      jfo = 1 ! We want an exact solution.
+      jck = 1 ! We don't want input checking (to not mess the times).
 
-      write ( *, '(a)' ) ' '
-      write ( *, '(a)' ) '  Object  Profit    Mass'
-      write ( *, '(a)' ) ' '
-      do i = 1, n
-        write ( *, '(2x,i6,2x,i6,2x,i6)' ) 
-     &  i, p(i), w(i)
-      end do
+      call system_clock (t1, clock_rate, clock_max)
 
-c      call mt2 ( n, p, w, c, z, x, jdim, jfo, jfs, jck, jub,
-c     &  ia1, ia2, ia3, ia4, ra )
-      call timestamp ( )
+      allocate( xo(jdim) )
+      allocate( rr(jdim) )
+      allocate( po(jdim) )
+      allocate( wo(jdim) )
+      allocate( pp(jdim) )
+      allocate( x(jdim) )
       call mtu2 (n,p,w,c,z,x,jdim,jfo,jck,jub,po,wo,xo,rr,pp)
-      call timestamp ( )
 
-      write ( *, '(a)' ) ' '
-      write ( *, '(a)' ) '  Contents of Knapsack'
-      write ( *, '(a)' ) ' '
-      write ( *, '(a)' ) '  Object  Profit    Mass'
-      write ( *, '(a)' ) ' '
+      call system_clock (t2, clock_rate, clock_max)
+      ttime = real(t2 - t1)/real(clock_rate)
+      max_sec = clock_max/clock_rate
+
+      write (*, '(a)') ' '
+      write (*, '(a)') ' Optimal Solution Breakdown:'
+      write (*, '(a)') ' '
+      write (*, '(a)') '  Object  Quant.  Profit    Mass'
+      write (*, '(a)') ' '
       mass = 0
       do i = 1, n
         if ( x(i) .ge. 1 ) then
-          mass = mass + w(i)
-          write ( *, '(2x,i6,2x,i6,2x,i6)' ) i, p(i), w(i)
+          mass = mass + w(i)*x(i)
+          write (*, '(2x,i6,2x,i6,2x,i6,2x,i6)') i, x(i), p(i), w(i)
         end if
       end do
 
-      write ( *, '(a)' ) ' '
-      write ( *, '(8x,2x,i6,2x,i6)' ) z, mass
+      write (*, '(a)') ' '
+      write (*, '(16x,2x,i6,2x,i6)') z, mass
 
+      write (*,*) 'Seconds: ', ttime
+      write (*,*) 'Max number of seconds before wrap: ', max_sec
       stop
-c      end
       contains
 
-      subroutine read_ukp_instance ( fname, n, c, w, p )
-
+      subroutine read_sukp_instance(fname, n, c, w, p)
 c*********************************************************************72
 c
-cc read_ukp_instance Takes a filename and reads an UKP instance from it.
+cc read_sukp_instance Takes filename and reads a sUKP instance from it.
 c
 c  Licensing:
 c
@@ -132,11 +137,11 @@ c    Henrique Becker
 c
 c  Parameters:
 c
-c    fname
-c    n
-c    c
-c    w
-c    p
+c    fname Input, Name of the file with an sUKP instance.
+c    n Output, Size of the instance
+c    c Output, Knapsack capacity of the instance
+c    w Output, item weights
+c    p Output, item profits
 c
       implicit none
 
@@ -149,14 +154,11 @@ c
 
       open(1,file=fname)
       read(1,*) n
-      write (*,*) n
       read(1,*) c
-      write (*,*) c
       allocate( w(n) )
       allocate( p(n) )
       do i=1,n
         read (1,*) tmp1,tmp2
-        write (*,*) tmp1,tmp2
         w(i) = tmp1
         p(i) = tmp2
       end do
@@ -167,7 +169,6 @@ c
       end program
 
       subroutine timestamp ( )
-
 c*********************************************************************72
 c
 cc TIMESTAMP prints out the current YMDHMS date as a timestamp.
@@ -243,7 +244,6 @@ c
       end
 
       subroutine knapsack_reorder ( n, p, w )
-
 c*********************************************************************72
 c
 cc KNAPSACK_REORDER reorders knapsack data by "profit density".

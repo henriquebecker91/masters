@@ -265,7 +265,7 @@ namespace hbm {
     // If you decided to use the ukp format, but instead of "normal" numbers
     // you decided to use another base or encode they differently (as
     // infinite precision rationals maybe?) you need to change the regex
-    // bellow to something that matches your number encoding format.
+    // below to something that matches your number encoding format.
     const string nb("([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)");
 
     const string comm_s("[[:blank:]]*(#.*)?");
@@ -309,7 +309,7 @@ namespace hbm {
 
         getline(in, line);
         while (in.good() && regex_match(line, comm)) {
-          cout << warn_blank_in_data << endl;
+          cerr << warn_blank_in_data << endl;
           getline(in, line);
         }
         io_guard(in, exp);
@@ -394,6 +394,101 @@ namespace hbm {
           throw ukp_read_error(strange_line + "(" + line + ")");
         }
       }
+    }
+
+    // Made to avoid converting the numbers to an intermediary type, where
+    // they could lose precision.
+    template<typename I = size_t>
+    void ukp2sukp(istream &in, ostream &out) {
+      static const string strange_line =
+        "error: read_ukp_instance: Found a strange line inside data section: ";
+
+      static const string m_exp     = "n/m: <number>";
+      static const string c_exp     = "c: <number>";
+      static const string begin_exp = "begin data";
+      static const string item_exp  = "<number> <number>";
+      static const string end_exp   = "end data";
+
+      static const string mline_s       = bs + "[mn]:" + bs + nb + comm_s;
+      static const string cline_s       = bs + "c:" + bs + nb + comm_s;
+      static const string begin_data_s  = bs + "begin" + bp + "data" + comm_s;
+      static const string item_s        = bs + nb + bp + nb + comm_s;
+      static const string end_data_s    = bs + "end" + bp + "data" + comm_s;
+
+      static const regex mline      (mline_s, icase);
+      static const regex cline      (cline_s, icase);
+      static const regex begin_data (begin_data_s, extended | icase | nosubs);
+      static const regex item       (item_s, icase | optimize);
+      static const regex end_data   (end_data_s, extended | icase | nosubs);
+
+      smatch what;
+      string line;
+
+      get_noncomment_line(in, line, m_exp);
+      try_match(mline, line, m_exp, what);
+
+      I n;
+      from_string(what[1], n);
+      out << what[1] << endl;
+
+      get_noncomment_line(in, line, c_exp);
+      try_match(cline, line, c_exp, what);
+
+      out << what[1] << endl;
+
+      get_noncomment_line(in, line, begin_exp);
+      try_match(begin_data, line, begin_exp, what);
+
+      for (I i = 0; i < n; ++i) {
+        get_noncomm_line_in_data(in, line, item_exp);
+
+        if (regex_match(line, what, item)) {
+          out << what[1] << " " << what[2] << endl;
+        } else {
+          if (regex_match(line, end_data)) {
+            warn_about_premature_end(n, i);
+            break;
+          } else {
+            throw ukp_read_error(strange_line + "(" + line + ")");
+          }
+        }
+      }
+
+      get_noncomm_line_in_data(in, line, end_exp);
+
+      if (!regex_match(line, end_data)) {
+        if (regex_match(line, item)) {
+          warn_about_no_end(n);
+        } else {
+          throw ukp_read_error(strange_line + "(" + line + ")");
+        }
+      }
+    }
+
+    // Made to avoid converting the numbers to an intermediary type, where
+    // they could lose precision.
+    template<typename I = size_t>
+    void sukp2ukp(istream &in, ostream &out) {
+      string line;
+      I n;
+
+      in >> line;
+      n = from_string(line);
+      out << "n: " << n << endl;
+
+      in >> line;
+      out << "c: " << line << endl;
+      line.clear();
+
+      out << "begin data" << endl;
+      for (I i = 0; i < n; ++i) {
+        in >> line;
+        out << line << endl;
+        line.clear();
+      }
+      out << "end data" << endl;
+
+      return;
     }
 
     template<typename W, typename P, typename I = size_t>
@@ -520,7 +615,7 @@ namespace hbm {
   ///
   /** A description of the ukp format follows:
   \verbatim
-  <number of itens>
+  <number of items>
   <knapsack capacity>
   <weight of first item> <profit of first item>
   <weight of second item> <profit of second item>
@@ -545,6 +640,18 @@ namespace hbm {
   template<typename W, typename P, typename I = size_t>
   void write_sukp_instance(std::ostream &out, instance_t<W, P> &ukpi) {
     hbm_ukp_common_impl::write_sukp_instance(out, ukpi);
+  }
+
+  // TODO document
+  template<typename I = size_t>
+  void ukp2sukp(istream &in, ostream &out) {
+    hbm_ukp_common_impl::ukp2sukp(in, out);
+  }
+
+  // TODO document
+  template<typename I = size_t>
+  void sukp2ukp(istream &in, ostream &out) {
+    hbm_ukp_common_impl::sukp2ukp(in, out);
   }
 
   /// @brief Sort partially the items by non-increasing efficiency and,

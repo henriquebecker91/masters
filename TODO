@@ -2,27 +2,12 @@ Algorithm For Knapsack Problems Pisinger p. 153 implement algorithm PMIN to test
 
 RANDOMIZE ITEM ORDER ON .UKP FILES, AND THEN EXECUTE PYASUKP AND UKP5 OVER THEM
 
-MAKES ALL ARGC/ARGC WRAPPERS TO CONSIDER THE FIRST TWO ARGUMENTS
-UPDATE DOCUMENTATION OF THAT
-STOP SKIPPING THE FIRST TWO ARGUMENTS ON RUN_UKP
-CHANGE PYASUKP BENCHMARK TO RECEIVE ARGC/ARGV AND HIJACK IT, IT WILL CREATE A NEW ARGV WHERE argv[1] IS THE INSTANCE NAME (ALL OTHER PARAMETERS FOLLOW) AND WILL PASS ARGC+1 TO THE FUNCTIONS
-
 ../../data/ukp/myinst/fhd_c_1000000_wmin_1_wmax_c.ukp
 This instance has a highly anomalous behaviour. The sort time isn't dominant (0.01% of total time), only phase1 has a significant time fraction (~99.95%), but the phase1 time gets down from 81s to 34s if the sort is changed from sorting all the items to partially sort the first 10% of the items. This happens because: the solution have 16 items (of 6 different types), the first 14 items make 5 of the different types and are all in the 10%, and the last two items are of a terribly inneficient item type (almost the last element when ordered by efficiency) but have weight 1. Maybe would be interesting to sort the first x% by efficiency and the last (100-x)% by non-decreasing weight. This is an heuristic for the items that would probably be in the solution, the most efficient ones, and the lighter ones (that fill the gaps).
 ../../data/ukp/myinst/frh_1000000.ukp
 Ok, this instance is even more anomalous. The phase1 uses ~99% of the algorithm time, all the items used in the optimal solution get the same index if all the items are sorted, or if only 10% most efficient are put on the beggining. But the total times reduces from 22s to 9s if we only order the first 10%. The order of the elements that aren't present in the optimal solution affects the algotithm time. WE NEED TO GENERATE THE G AND D ARRAY CHARTS (SPECIALLY D) FOR THE SOLUTION WITH ONLY 10% ORDERED FOR THOSE TWO DATASETS AND COMPARE
 qt_inner_loop_executions/c)/n: 0.0105049
 THIS MEANS THAT WE USE ONLY 0.01% OF WHAT WOULD BE A WORST CASE COMPLEXITY (O(c*n))
-
-SORT_PERCENT
-APPLY_DOMINANCE
-WHEN_TO_APPLY_DOMINANCE
-THE SORT_PERCENT MUST BE CALCULATED OVER THE AFTER DOMINANCE OF THE BEFORE DOMINANCE VALUES?
-
-CHECK_PERIODICITY? USE TYPE_TRAITS TO CALL DIFFERENT VERSIONS?
-ALWAYS PROFILE? WHAT COULD BE THE PROBLEM? CHECK TIME DIFFERENCE
-
-REMOVE XOR SWAP?
 
 ## Will probably be done before deadline
 
@@ -37,8 +22,6 @@ REMOVE XOR SWAP?
 
 ## Will be done after deadline
 
-* Comment every type and function with doxygen documentation syntax 
-* Study about the noexcept modifier and verify if the functions should be using it.
 * Maybe item_t needs a third templaye type, both W and P will be converted to this third type before multiplying them. This allows to use an bigger type in computations that are prone to overflow the P type without having to use a bigger P everywhere (what can slow the algorithm unecessary).
 * Create a variant of solution_t called solution_prfl_t. Create a run_ukp/main_take_path variant called run_ukp_prfl. It's exactly as main_take_path but with the run_ukp parameters and solution_prfl_t instead of solution_t. Overload main_take_path to call run_ukp or run_ukp_prfl based on the result type (solution_t o solution_prfl_t). 
 * Check notation used here (https://en.wikipedia.org/wiki/Global_optimization) and consider using it on the proof.

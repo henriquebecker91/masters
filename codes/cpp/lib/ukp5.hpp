@@ -469,12 +469,13 @@ namespace hbm {
     /// @param ukpi The UKP instance.
     /// @param g This vector will be used to store the profit value of
     ///   knapsack solutions. It can't have non-zero values, or the wrong
-    ///   size (less than c+w_max-w_min).
+    ///   size (less than c+w_max-w_min). NOTE: if HBM_INIT_G_BY_CHUNKS is
+    ///   enabled, then only the first (w_max*2)+1 positions need to be
+    ///   zeroed, the rest will be zeroed by the algorithm.
     /// @param d This vector will be used to store the index of the last
     ///   item used to compose a solution whose profit value is stored at g.
     ///   The data of this vector makes reference to the order of ukpi.items.
-    ///   It can't have non-zero values, or the wrong size (less than
-    ///   c+w_max-w_min).
+    ///   It can be unintialized, but have to be of size c+w_max-w_min at least.
     /// @param sol This procedure sets the fields opt and y_opt of the
     ///   sol parameter. If HBM_CHECK_PERIODICITY is defined, the field
     ///   extra_info is expect to be set (already point to a valid
@@ -585,7 +586,6 @@ namespace hbm {
             d[ny] = ix;
           }
         }
-
       }
 
       #ifdef HBM_CHECK_PERIODICITY

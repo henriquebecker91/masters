@@ -29,6 +29,7 @@ data/results/tmp/
 *.blg
 latex/**/*.pdf
 # latex (slides)
+*.vrb
 *.nav
 *.snm
 *.toc

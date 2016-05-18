@@ -16,7 +16,7 @@
 \begin{document}
 
 \title{UKP5: a New Algorithm for the Unbounded Knapsack Problem}
-\author{Henrique Becker\footnote{From the Universidade Federal do Rio Grande do Sul\label{ft:ufrgs}} and Luciana S. Buriol\textsuperscript{\ref{ft:ufrgs}}\\
+\author{Henrique Becker\footnote{Universidade Federal do Rio Grande do Sul, Brazil\label{ft:ufrgs}} and Luciana S. Buriol\textsuperscript{\ref{ft:ufrgs}}\\
 15th International Symposium on Experimental Algorithms\\
 (SEA 2016)
 }
@@ -46,7 +46,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \normalsize
 \begin{itemize}
 \vspace{-7mm}
-\item Subproblem of the column generation technique (often used to solve CSP/BPP).
+\item Subproblem of the column generation technique applied to the Cutting Stock Problem or the Bin Packing Problem.
 \end{itemize}
 }
 
@@ -82,7 +82,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{beamerboxesrounded}
 \begin{itemize}
 \item EDUK2 is the algorithm, PYAsUKP is the only known implementation (OCaml). %(As the algorithm uses many functional concepts the authors found that it would be so much easier to implement the algorithm on a functional language. Even if c++ is the de facto language for scientific computing.)
-\item \textbf{Hybrid Approach}: Tries to solve by B\&B, if fails to solve quickly then defaults to DP. %(Only hybrid method known.)
+\item \textbf{Hybrid Approach}: Tries to solve by B\&B, if it fails to solve quickly with B\&B, then switches to DP. %(Only hybrid method known.)
 \end{itemize}
 }
 
@@ -206,7 +206,7 @@ Algorithm 1.B (Ordered Step-off)
 }
 
 \begin{frame}
-\frametitle{Times table}
+\frametitle{Times table (seconds)}
 \begin{tabular}{llllll}
 %\multicolumn{2}{l}{} & \multicolumn{4}{l}{UKP5} & \multicolumn{4}{l}{PYAsUKP}\\
         &  & UKP5 & PYA & UKP5 & PYA\\ \hline
@@ -259,7 +259,7 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \frame{\frametitle{Final remarks}
 \begin{itemize}
 \setlength\itemsep{1.5em}
-\item The algorithm isn't novel, but is ``faster'' than the ``state-of-art''. %(At least for the instances proposed by authors of the state-of-art themselves)
+\item The algorithm isn't novel, but is ``faster'' than the ``state-of-the-art''. %(At least for the instances proposed by authors of the state-of-art themselves)
 \item Except by PYAsUKP, DP algorithms were abandoned with almost no empiric evidence. %(No paper presenting a DP algorithm compared computational results with another DP algorithm. And no paper presenting a B\&B algorithm compared to DP (only to other B\&B).)
 \item A clear definition of the usefulness of each approach is necessary. %(We need to know for what instance sizes and other instance characteristics each approach is better, and we need to base this on solid empiric evidence.)
 \end{itemize}
@@ -277,8 +277,13 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 
 \frame{\frametitle{Questions?}
 \center
-This is, if we have time yet.\\
+%This is, if we have time yet.\\
 %(Sorry for my terrible pronunciation.)
+\Large
+Thank you for your attention.
+
+\normalsize
+Contact: hbecker@inf.ufrgs.br, henriquebecker91@gmail.com
 }
 
 \bibliographystyle{splncs03.bst}

@@ -86,6 +86,59 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{itemize}
 }
 
+\frame{\frametitle{Symmetry Pruning}
+\begin{itemize}
+\item Solutions are symmetric when they are represented differently, but are equivalent.
+\item For example: \(\{ 2, 1, 3, 1 \} \equiv \{ 3, 2, 1, 1 \}\)
+\item Symmetry Pruning is to avoid the costs of finding the same solution by many different paths.
+\end{itemize}
+}
+
+\frame{\frametitle{Sparsity}
+\begin{itemize}
+\item Naive DP algorithms solve the UKP for every capacity in~\([1,c]\) (or \([w_{min},c]\)).
+\item Ex.: for the weights 7, 10, 5; no solution will have weight exactly: 6, 8, 9, 11, 13, 16, ...
+\item The optimal solution for those capacities will be the optimal solution already found for a previous capacity.
+\end{itemize}
+}
+
+\frame{\frametitle{Dominated Solutions Pruning}
+\begin{itemize}
+\item If \(w_s \leq w_t\) and \(p_s > p_t\) then \(s\) dominates \(t\).
+\item Follows that \(s \cup \{i\}\) will dominate \(t \cup \{i\}\) for any item \(i\).
+\item Therefore, we can create new solutions only from~\(s\) and ignore~\(t\).
+\end{itemize}
+}
+
+\frame{\frametitle{Time/Memory Tradeoff}
+\begin{itemize}
+\item On many instances, 99\% of the UKP5 time is used on the inner ``for'' of a double loop.
+\item Testing if the item weight is within the array boundaries is inside this ``for''.
+\item This test can be removed if we use \(w_max\) extra memory.
+\end{itemize}
+}
+
+\frame{\frametitle{Periodicity}
+\begin{itemize}
+\item The item with the biggest profit-to-weight ratio is often called ``best item''.
+\item The optimal solution of instances with big capacities have a lower bound on the quantity of best items.
+\item This means we can compute a smaller knapsack and combine with \(x\) copies of the best item.
+\end{itemize}
+}
+
+\section{UKP5}
+\frame{\frametitle{UKP5}
+\begin{itemize}
+\item Simple DP algorithm based on the algorithm presented on \cite{gar72} (Garfinkel \& Nemhauser).
+\item Implements all five previously presented techniques
+\begin{itemize}
+\item G\&N implemented ``Symmetry Pruning'' on a less efficient fashion.
+\item G\&N suggested a periodicity check, but don't inserted it on the algorithm.
+\end{itemize}
+\end{itemize}
+}
+
+\begin{comment}
 \section{UKP5}
 \frame{\frametitle{UKP5}
 \begin{itemize}
@@ -99,6 +152,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{itemize}
 \end{itemize}
 }
+\end{comment}
 
 \frame{\frametitle{UKP5 Code}
 %\scriptsize

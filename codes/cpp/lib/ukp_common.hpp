@@ -396,8 +396,6 @@ namespace hbm {
       }
     }
 
-    // Made to avoid converting the numbers to an intermediary type, where
-    // they could lose precision.
     template<typename I = size_t>
     void ukp2sukp(istream &in, ostream &out) {
       static const string strange_line =
@@ -429,7 +427,7 @@ namespace hbm {
 
       I n;
       from_string(what[1], n);
-      out << what[1] << endl;
+      out << n << endl;
 
       get_noncomment_line(in, line, c_exp);
       try_match(cline, line, c_exp, what);
@@ -443,7 +441,7 @@ namespace hbm {
         get_noncomm_line_in_data(in, line, item_exp);
 
         if (regex_match(line, what, item)) {
-          out << what[1] << " " << what[2] << endl;
+          out << line << endl;
         } else {
           if (regex_match(line, end_data)) {
             warn_about_premature_end(n, i);
@@ -465,24 +463,23 @@ namespace hbm {
       }
     }
 
-    // Made to avoid converting the numbers to an intermediary type, where
-    // they could lose precision.
     template<typename I = size_t>
     void sukp2ukp(istream &in, ostream &out) {
       string line;
       I n;
 
-      in >> line;
-      n = from_string(line);
+      getline(in, line);
+      from_string(line, n);
       out << "n: " << n << endl;
+      line.clear();
 
-      in >> line;
+      getline(in, line);
       out << "c: " << line << endl;
       line.clear();
 
       out << "begin data" << endl;
       for (I i = 0; i < n; ++i) {
-        in >> line;
+        getline(in, line);
         out << line << endl;
         line.clear();
       }
@@ -642,16 +639,52 @@ namespace hbm {
     hbm_ukp_common_impl::write_sukp_instance(out, ukpi);
   }
 
-  // TODO document
+  /// Reads an instance of UKP on the 'ukp' format from a stream and
+  ///   writes the same instance on the 'sukp' format to other stream.
+  ///
+  /// See the read_*_instance functions documentation for information on the
+  ///   sukp and ukp format specifics.
+  /// 
+  /// @note With exception of 'n', all other numeric values are never converted
+  ///   from string to a numeric representation. In other words, any
+  ///   number-like string will be copied from one instance format to another
+  ///   without any conversion. It's done this way to avoid losing precision.
+  /// @note This method converts 'n' to a variable of type I, and use
+  ///   it to define how many items will be read. This means that if the
+  ///   instance is inconsistent and has more than n items, the excess will
+  ///   be lost.
+  /// @see read_sukp_instance
+  /// @see read_ukp_instance
+  ///
+  /// @param in The input stream from where the instance will be read.
+  /// @param out The output stream where the instance will be written.
   template<typename I = size_t>
-  void ukp2sukp(istream &in, ostream &out) {
-    hbm_ukp_common_impl::ukp2sukp(in, out);
+  void ukp2sukp(std::istream &in, std::ostream &out) {
+    hbm_ukp_common_impl::ukp2sukp<I>(in, out);
   }
 
-  // TODO document
+  /// Reads an instance of UKP on the 'sukp' format from a stream and
+  ///   writes the same instance on the 'ukp' format to other stream.
+  ///
+  /// See the read_*_instance functions documentation for information on the
+  ///   sukp and ukp format specifics.
+  /// 
+  /// @note With exception of 'n', all other numeric values are never converted
+  ///   from string to a numeric representation. In other words, any
+  ///   number-like string will be copied from one instance format to another
+  ///   without any conversion. It's done this way to avoid losing precision.
+  /// @note This method converts 'n' to a variable of type I, and use
+  ///   it to define how many items will be read. This means that if the
+  ///   instance is inconsistent and has more than n items, the excess will
+  ///   be lost.
+  /// @see read_sukp_instance
+  /// @see read_ukp_instance
+  ///
+  /// @param in The input stream from where the instance will be read.
+  /// @param out The output stream where the instance will be written.
   template<typename I = size_t>
-  void sukp2ukp(istream &in, ostream &out) {
-    hbm_ukp_common_impl::sukp2ukp(in, out);
+  void sukp2ukp(std::istream &in, std::ostream &out) {
+    hbm_ukp_common_impl::sukp2ukp<I>(in, out);
   }
 
   /// @brief Sort partially the items by non-increasing efficiency and,

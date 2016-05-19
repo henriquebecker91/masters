@@ -13,6 +13,29 @@
 % To number the references.
 \setbeamertemplate{bibliography item}{\insertbiblabel}
 
+\usepackage{tikz}
+\newcommand{\drawhvector}[5]{
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin}] (\x,0) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
+	}
+}
+
+\newcommand{\drawhvectornotext}[5]{
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin}] (\x,0) rectangle +\rs;
+		%\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
+	}
+}
+
 \begin{document}
 
 \title{UKP5: a New Algorithm for the Unbounded Knapsack Problem}
@@ -88,18 +111,99 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 
 \frame{\frametitle{Symmetry Pruning}
 \begin{itemize}
-\item Solutions are symmetric when they are represented differently, but are equivalent.
-\item For example: \(\{ 2, 1, 3, 1 \} \equiv \{ 3, 2, 1, 1 \}\)
+\item Solutions are symmetric when they are equivalent, but generated or represented in different ways.
+\item For example: \(\{ 5, 4, 6 \} \equiv \{ 6, 5, 4 \}\)
 \item Symmetry Pruning is to avoid the costs of finding the same solution by many different paths.
 \end{itemize}
+
+\center
+\edef \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\edef \origin {(6,5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(10.5, 0);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(9.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(10.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\def \origin {(6,1.5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\end{tikzpicture}
 }
 
 \frame{\frametitle{Sparsity}
 \begin{itemize}
-\item Naive DP algorithms solve the UKP for every capacity in~\([1,c]\) (or \([w_{min},c]\)).
-\item Ex.: for the weights 7, 10, 5; no solution will have weight exactly: 6, 8, 9, 11, 13, 16, ...
+\item Not every subproblem of capacity \([1,c-1]\) has to be solved.
+%Naive DP algorithms solve the UKP for every capacity in~\([1,c]\) (or \([w_{min},c]\)).
+\item Ex.: for the weights 7, 10, 5; no solution will weight exactly: 1-4, 6, 8, 9, 11, 13, 16, 18, 23 ...
 \item The optimal solution for those capacities will be the optimal solution already found for a previous capacity.
 \end{itemize}
+\center
+\edef \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\def \origin {(0,0)}
+\drawhvectornotext{\origin}{20}{\rx}{\ry}{\scale}
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, 0.5) {\(0\)};
+
+\draw[dashed, thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (5.5, 0.5) {\(5\)};
+
+\draw[dashed, thick] ++\origin +(0.5, 1) to [out=45,in=135] +(7.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (7.5, 0.5) {\(7\)};
+
+\draw[dashed, thick] ++\origin +(0.5, 1) to [out=45,in=135] +(10.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (10.5, 0.5) {\(10\)};
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(12.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (12.5, 0.5) {\(12\)};
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(14.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (14.5, 0.5) {\(14\)};
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(17.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (17.5, 0.5) {\(17\)};
+
+\draw[dashed, thick] ++\origin +(10.5, 0) to [out=315,in=225] +(20.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (20.5, 0.5) {\(20\)};
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(15.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (15.5, 0.5) {\(15\)};
+
+\draw[dashed, thick] ++\origin +(12.5, 1) to [out=45,in=135] +(19.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (19.5, 0.5) {\(19\)};
+
+\end{tikzpicture}
 }
 
 \frame{\frametitle{Dominated Solutions Pruning}
@@ -114,7 +218,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \begin{itemize}
 \item On many instances, 99\% of the UKP5 time is used on the inner ``for'' of a double loop.
 \item Testing if the item weight is within the array boundaries is inside this ``for''.
-\item This test can be removed if we use \(w_max\) extra memory.
+\item This test can be removed if we use \(w_{max}\) extra memory.
 \end{itemize}
 }
 

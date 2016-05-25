@@ -1,12 +1,35 @@
-\documentclass{article}
+\documentclass[a4paper,12pt]{article}
+\usepackage[a4paper,margin=1.0in]{geometry}
+
+\usepackage{verbatim}
+\usepackage[pdfborder={0 0 0 [0 0]}]{hyperref}
+
+\newcommand{\emailurl}[1]{\href{mailto:#1}{\nolinkurl{#1}}}
 
 \begin{document}
 
-\title{PROPOSAL NAME}
+\section*{Overview}
+\begin{tabular}{@{}p{3.5in}l}
+% O google pede pelo nome completo do "faculty member" nas recomendações.
+\multicolumn{2}{@{}l}{\textbf{Title}: PROPOSAL'S TITLE}\\
+\textbf{Name}: Luciana Salete Buriol & \textbf{Email}: \emailurl{buriol@inf.ufrgs.br}\\
+\textbf{Phone}: \verb!+!55 51 XXXX XXXX & \textbf{Date}: \today\\
+\multicolumn{2}{@{}l}{\textbf{Address}: FULL ADDRESS WITH CEP}\\
+\multicolumn{2}{@{}l}{\textbf{Affiliation}: Federal University of Rio Grande do Sul, Brazil}\\
+\multicolumn{2}{@{}l}{\textbf{First Google Contact}: NAME (\emailurl{EMAIL})}\\
+\multicolumn{2}{@{}l}{\textbf{Second Google Contact}: NAME (\emailurl{EMAIL})}\\
+\end{tabular}
 
-\maketitle
+\section*{Abstract}
 
-\section{Overview}
+\section*{Proposal}
+
+\section*{References}
+% CHECK WHAT BIBLIOGRAPHY STYLE TO USE, CONSIDER USING BIBITEM
+%\bibliographystyle{splncs03.bst}
+%\bibliography{ukp5.bib}
+
+\section*{Data Policy}
 
 \begin{comment}
 Google related material for research:
@@ -21,7 +44,7 @@ http://stxxl.sourceforge.net/
 http://stxxl.sourceforge.net/tags/master/
 
 Stack overflow (TPIE STXXL):
-http://stackoverflow.com/search?tab=relevance&q=tpie%20stxxl (only two results, nobody asked the difference between the two)
+http://stackoverflow.com/search?tab=relevance&q=tpie%19stxxl (only two results, nobody asked the difference between the two)
 http://stackoverflow.com/search?q=tpie (tpie returns 14 results on 24/05/2016, not all related to tpie)
 http://stackoverflow.com/search?q=stxxl (stxxl returns 187 results on 24/05/2016)
 

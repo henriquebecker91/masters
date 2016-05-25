@@ -13,6 +13,7 @@
 % To number the references.
 \setbeamertemplate{bibliography item}{\insertbiblabel}
 
+\usepackage{cancel}
 \usepackage{tikz}
 \newcommand{\drawhvector}[5]{
 	\edef \origin {#1}
@@ -109,6 +110,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{itemize}
 }
 
+\section{Optimizations applicable to UKP}
 \frame{\frametitle{Symmetry Pruning}
 \begin{itemize}
 \item Solutions are symmetric when they are equivalent, but generated or represented in different ways.
@@ -162,7 +164,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 
 \frame{\frametitle{Sparsity}
 \begin{itemize}
-\item Not every subproblem of capacity \([1,c-1]\) has to be solved.
+\item Not every subproblem of capacity \([1,c]\) has to be solved.
 %Naive DP algorithms solve the UKP for every capacity in~\([1,c]\) (or \([w_{min},c]\)).
 \item Ex.: for the weights 7, 10, 5; no solution will weight exactly: 1-4, 6, 8, 9, 11, 13, 16, 18, 23 ...
 \item The optimal solution for those capacities will be the optimal solution already found for a previous capacity.
@@ -212,6 +214,29 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \item Follows that \(s \cup \{i\}\) will dominate \(t \cup \{i\}\) for any item \(i\).
 \item Therefore, we can create new solutions only from~\(s\) and ignore~\(t\).
 \end{itemize}
+
+\center
+
+\edef \scale {0.5}
+
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\def \origin {(0,0)}
+
+\drawhvectornotext{\origin}{10}{\rx}{\ry}{\scale}
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, 0.5) {\(\dots\)};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (2.5, 0.5) {\(90\)};
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(7.5, 1);
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(10.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (7.5, 0.5) {\(95\)};
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(10.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (10.5, 0.5) {\(\dots\)};
+
+\end{tikzpicture}
 }
 
 \frame{\frametitle{Time/Memory Tradeoff}
@@ -220,11 +245,35 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \item Testing if the item weight is within the array boundaries is inside this ``for''.
 \item This test can be removed if we use \(w_{max}\) extra memory.
 \end{itemize}
+
+\center
+
+\edef \scale {0.58}
+
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\def \origin {(0,0)}
+
+\drawhvectornotext{\origin}{16}{\rx}{\ry}{\scale}
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, 0.5) {\dots};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (10.5, 0.5) {\(c\)};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (16.5, 0.5) {\dots};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (5.5, -1) {Valid Solutions};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (13.5, 2) {Invalid Solutions};
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(7.5, 1);
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(11.5, 1);
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(12.5, 0);
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(16.5, 0);
+
+\end{tikzpicture}
 }
 
 \frame{\frametitle{Periodicity}
 \begin{itemize}
-\item The item with the biggest profit-to-weight ratio is often called ``best item''.
+\item The item with the biggest profit-to-weight ratio is often called the ``best item''.
 \item The optimal solution of instances with big capacities have a lower bound on the quantity of best items.
 \item This means we can compute a smaller knapsack and combine with \(x\) copies of the best item.
 \end{itemize}
@@ -233,8 +282,8 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \section{UKP5}
 \frame{\frametitle{UKP5}
 \begin{itemize}
-\item Simple DP algorithm based on the algorithm presented on \cite{gar72} (Garfinkel \& Nemhauser).
-\item Implements all five previously presented techniques
+\item UKP5 is a simple DP algorithm based on the algorithm presented by Garfinkel \& Nemhauser\cite{gar72}.
+\item UKP5 implements all five previously presented techniques
 \begin{itemize}
 \item G\&N implemented ``Symmetry Pruning'' on a less efficient fashion.
 \item G\&N suggested a periodicity check, but don't inserted it on the algorithm.
@@ -398,10 +447,10 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \includegraphics[scale=0.6]{six_plots.png} 
 }
 
-\frame{\frametitle{Times graph II}
+\begin{frame}[plain]%\frametitle{Times charts}
 \centering
-\includegraphics[scale=0.35]{all.png} 
-}
+\includegraphics[scale=0.37]{all.png} 
+\end{frame}
 
 \section{Analysis and Final Remarks}
 

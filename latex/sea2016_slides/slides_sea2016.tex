@@ -1,19 +1,34 @@
 \documentclass{beamer}
 
-\usetheme{Antibes}
-\usepackage{verbatim}
-\usecolortheme[RGB={120,0,0}]{structure}
-\setbeamertemplate{blocks}[rounded][shadow=true]
 \usepackage[utf8]{inputenc}
+
+\beamertemplateballitem
+\usetheme{Antibes}
+	\usecolortheme[RGB={120,0,0}]{structure}
+	\setbeamertemplate{blocks}[rounded][shadow=true]
+%\setbeamertemplate{footline}{\insertframenumber/\inserttotalframenumber}
+	\setbeamerfont{page number in head/foot}{size=\large}
+	\setbeamertemplate{footline}[frame number]
+	\setbeamercovered{transparent=5}
+	\setbeamertemplate{navigation symbols}{}
+	% To number the references.
+	\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+\newcommand{\backupbegin}{
+   \newcounter{framenumberappendix}
+   \setcounter{framenumberappendix}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \addtocounter{framenumberappendix}{-\value{framenumber}}
+   \addtocounter{framenumber}{\value{framenumberappendix}} 
+}
 
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 
-\beamertemplateballitem
-% To number the references.
-\setbeamertemplate{bibliography item}{\insertbiblabel}
-
+\usepackage{verbatim}
 \usepackage{cancel}
+
 \usepackage{tikz}
 \newcommand{\drawhvector}[5]{
 	\edef \origin {#1}
@@ -25,7 +40,6 @@
 		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
 	}
 }
-
 \newcommand{\drawhvectornotext}[5]{
 	\edef \origin {#1}
 	\edef \xmax {#2}
@@ -44,12 +58,23 @@
 15th International Symposium on Experimental Algorithms\\
 (SEA 2016)
 }
-\logo{\includegraphics[scale=0.3]{inf}}
+%\logo{\includegraphics[scale=0.2]{inf}}
 \date{Wednesday, June 8}
 
-\frame{\titlepage}
+{
+	\setbeamertemplate{footline}{} 
+	\begin{frame}[noframenumbering]
+	\titlepage
+	\end{frame}
+}
 
-\frame{\frametitle{Outline}\tableofcontents}
+{
+	\setbeamertemplate{footline}{} 
+	\begin{frame}[noframenumbering]
+	\frametitle{Outline}
+	\tableofcontents
+	\end{frame}
+}
 
 \section{Introduction}
 \frame{\frametitle{What is UKP?}
@@ -86,7 +111,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \section{Prior Work}
 \frame{\frametitle{Methods on Solving UKP}
 \begin{beamerboxesrounded}[shadow=true]{Dynamic Programming (DP)}
-Strong correlation between variables \textbf{n} \& \textbf{c} and the time to solve.\\
+Strong correlation between \textbf{n} \& \textbf{c} and the time to solve.\\
 
 \small
 Ex.: Garfinkel\cite{gar72},  T.C. Hu\cite{tchu}, G\&G\cite{gg66}, Greenberg \& Feldman\cite{greenberg_improved_ukp5}, Greenberg\cite{greenberg_2}, EDUK\cite{eduk}.
@@ -100,8 +125,8 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{beamerboxesrounded}	
 }
 
-\frame{\frametitle{EDUK2/PYAsUKP (State-of-art)}
-\begin{beamerboxesrounded}[shadow=true]{Knapsack Problems, 2004}
+\frame{\frametitle{EDUK2/PYAsUKP (State-of-the-art)}
+\begin{beamerboxesrounded}[shadow=true]{Knapsack Problems, 2004, by Kellerer, Pferschy, and Pisinger.}
 ``EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p. 223]{knapsackproblems2004}
 \end{beamerboxesrounded}
 \begin{itemize}
@@ -221,22 +246,36 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 
 \begin{tikzpicture}[scale=\scale]
 
-\edef \rx {1}
-\edef \ry {1}
+\draw [<->, thick] (15,0) -- (0,0) -- (0,5);
 
-\def \origin {(0,0)}
+\draw [fill] (3, 3) circle [radius=0.1];
+\draw [fill] (6, 4) circle [radius=0.1];
+\draw [fill] (11, 5) circle [radius=0.1];
 
-\drawhvectornotext{\origin}{10}{\rx}{\ry}{\scale}
-\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, 0.5) {\(\dots\)};
-\node [scale=\scale, shift={\origin}, font=\LARGE] at (2.5, 0.5) {\(90\)};
-\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(7.5, 1);
-\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(10.5, 1);
-\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
-\node [scale=\scale, shift={\origin}, font=\LARGE] at (7.5, 0.5) {\(95\)};
-\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(10.5, 0);
-\node [scale=\scale, shift={\origin}, font=\LARGE] at (10.5, 0.5) {\(\dots\)};
+\draw [dashed] (15, 3) -- (3, 3) -- (3, 0);
+\draw [dashed] (15, 4) -- (6, 4) -- (6, 0);
+\draw [dashed] (15, 5) -- (11, 5) -- (11, 0);
+
+\draw [gray, fill] (4, 2.5) circle [radius=0.1];
+\draw [gray, fill] (4.8, 1.8) circle [radius=0.1];
+\draw [gray, fill] (4.6, 0.5) circle [radius=0.1];
+\draw [gray, fill] (6.2, 3.7) circle [radius=0.1];
+\draw [gray, fill] (9.5, 3.2) circle [radius=0.1];
+\draw [gray, fill] (9.5, 3.2) circle [radius=0.1];
+\draw [gray, fill] (8, 1) circle [radius=0.1];
+\draw [gray, fill] (8.7, 2.3) circle [radius=0.1];
+\draw [gray, fill] (13, 4.7) circle [radius=0.1];
+\draw [gray, fill] (11.5, 3.6) circle [radius=0.1];
+\draw [gray, fill] (12.7, 3.4) circle [radius=0.1];
+\draw [gray, fill] (14, 2.2) circle [radius=0.1];
+
+\node [below, font=\small] at (7.5, 0) {weight};
+\node [rotate=90, above, font=\small] at (0,2.5) {profit};
+%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
+%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
 
 \end{tikzpicture}
+
 }
 
 \frame{\frametitle{Time/Memory Tradeoff}
@@ -351,7 +390,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \setlength\itemsep{1.5em}
 \item ``Ordered Step-Off'': algorithm of Gilmore and Gomore (1966)\cite{gg66}.
 \item Found after sending this paper to the symposium.%(We notified the conference chair, but the paper was already submited for printing.)
-\item Basically the same algorithm than UKP5.%(only uses the own vector for storing the profit of the best solution, instead of one single variable)
+\item Very similar to UKP5.%(only uses the own vector for storing the profit of the best solution, instead of one single variable)
 \end{itemize}
 }
 
@@ -399,31 +438,32 @@ Algorithm 1.B (Ordered Step-off)
 
 \frame{\frametitle{The instances}
 \begin{itemize}
-\item A set of 4540 ``hard'' instances proposed in \cite{pya} (EDUK2 paper). %(Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B\&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
+\item A set of 4540 ``hard'' instances proposed in \cite{pya} (EDUK2 paper), with \(10^3 \leq n \leq 10^5\) and \(10^6 \leq c \leq 10^8\)  %(Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B\&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
 \item Used the same tool and similar parameters to generate them. %(The tool is the own pyasukpt, that isn't only an implementation of the EDUK2 but also a implementation of many instance generators.)
 \item Five different classes of instances.%(We adopted the same five classes used on PYAsUKP, and only augmented one of the classes because with the hardwere evolution it had become too easy to solve.)
 \begin{itemize}
-	\item Instances with no collective dominance;
-	\item Instances with postponed periodicity;
-	\item Strong correlated (profit and weight);
-	\item SAW (proved to be hard to solved by B\&B\cite{chung});
-	\item Subset~sum instances;
+	\item Instances with no collective dominance -- 2000;
+	\item Instances with postponed periodicity -- 800;
+	\item Strong correlated (profit and weight) -- 240;
+	\item SAW (proved to be hard to solved by B\&B\cite{chung}) -- 1100;
+	\item Subset~sum instances -- 400;
 \end{itemize}
 \end{itemize}
 }
 
 \begin{frame}
 \frametitle{Times table (seconds)}
+\center
 \begin{tabular}{llllll}
-%\multicolumn{2}{l}{} & \multicolumn{4}{l}{UKP5} & \multicolumn{4}{l}{PYAsUKP}\\
         &  & UKP5 & PYA & UKP5 & PYA\\ \hline
-Class & Nº	& avg & avg & sd & sd \\ \hline
+Class & \#	& avg & avg & sd & sd \\ \hline
 W.C.D. & 2000 	& \textbf{1.55} & 34.11 & \textbf{1.94} & 82.35 \\ \hline
 S.S. & 400 	& \textbf{0.08} & 6.39 & \textbf{0.20} & 55.33 \\ \hline
 S.C. & 240 	& \textbf{0.34} & 52.46 & \textbf{0.36} & 110.24 \\ \hline
 SAW & 1100	& \textbf{3.10} & 15.43 & \textbf{5.35} & 31.82 \\ \hline
 P.P. & 800 	& \textbf{5.01} & 121.71 & \textbf{3.81} & 173.30 \\
-Class & Nº	& min & min & max & max \\ \hline
+\pause
+Class & \#	& min & min & max & max \\ \hline
 W.C.D. & 2000 	& 0.02 & \textbf{0.00} & \textbf{13.17} & 667.80 \\ \hline
 S.S. & 400 	& 0.01 & \textbf{0.00} & \textbf{1.42} & 726.34 \\ \hline
 S.C. & 240 	& 0.04 & \textbf{0.00} & \textbf{1.13} & 721.88 \\ \hline
@@ -435,11 +475,6 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 %SAW & 1100 & 3.1080885875 & 5.3562777737 & 0.0984506 & 21.9394 & 15.4338201 & 31.828562601 & 0.01333 & 192.03665 \\ \hline
 %P.P. & 800 & 5.0175573 & 3.8174543896 & 0.549045 & 14.9801 & 121.7176255625 & 173.3084120879 & 0.01 & 828.89325 \\
 \end{tabular}
-% Create table? (Use many criteria? compute overall average; compute class average, then overal average; compute subclass averages, then overall average; compute subclass averages, then class aversages, then overall average)'
-%Average of all instances: 18.5 % 18.5046187167
-%Average of the classes averages (not-weighted): 55.65 % 55.6568069177
-%Average of the subclasses average (not-weighted): 63.12 % 63.1277717668
-%Weighted average of the classes averages (as subclasses averages): 46.88 %46.8856431027
 \end{frame}
 
 \frame{\frametitle{Times charts}
@@ -452,12 +487,17 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \includegraphics[scale=0.37]{all.png} 
 \end{frame}
 
+\frame{\frametitle{Times charts}
+\centering
+\includegraphics[scale=0.6]{six_plots.png} 
+}
+
 \section{Analysis and Final Remarks}
 
 \frame{\frametitle{Hard vs Easy -- DP vs B\&B}
 \begin{itemize}
 \setlength\itemsep{1.5em}
-\item PYAsUKP is mainly a DP method. %(the cases where the B\&B don't solve the instance instantly, it don't affect the PYAsUKP time very much)
+\item PYAsUKP is a DP method (with a short B\&B phase first). %(the cases where the B\&B don't solve the instance instantly, it don't affect the PYAsUKP time very much)
 \item The benchmark proposed at PYAsUKP's paper focused hard-to-solve-by-B\&B instances. %(Instances with similar profit-to-weight ratio; them most efficient items being the ones with the biggest weight; etc..)
 \item PYAsUKP results were compared against the ones from a B\&B method, and against no other DP method. % (the method was MTU2)
 \end{itemize}
@@ -466,7 +506,7 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \frame{\frametitle{Final remarks}
 \begin{itemize}
 \setlength\itemsep{1.5em}
-\item The algorithm isn't novel, but is ``faster'' than the ``state-of-the-art''. %(At least for the instances proposed by authors of the state-of-art themselves)
+\item The algorithm is very similar to an algorithm of 1966, but is ``faster'' than the ``state-of-the-art''. %(At least for the instances proposed by authors of the state-of-the-art themselves)
 \item Except by PYAsUKP, DP algorithms were abandoned with almost no empiric evidence. %(No paper presenting a DP algorithm compared computational results with another DP algorithm. And no paper presenting a B\&B algorithm compared to DP (only to other B\&B).)
 \item A clear definition of the usefulness of each approach is necessary. %(We need to know for what instance sizes and other instance characteristics each approach is better, and we need to base this on solid empiric evidence.)
 \end{itemize}
@@ -477,7 +517,7 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \begin{itemize}
 \item Improve the benchmark dataset. %(include very big and random instances; include instances generated by the CPS/BPP column generation; create instances so hard that will make UKP5 take more than 1000s)
 \item Test old algorithms that were presented with no computational results. %(many were already implemented after we send the paper)
-\item Point that UKP5/GG66 are the same algorithm.%, and apologize. %(avoid that the misconception created by our article become long-lived)
+\item Point that UKP5/GG66 are very similar.%, and apologize. %(avoid that the misconception created by our article become long-lived)
 \end{itemize}
 \end{beamerboxesrounded}	
 }
@@ -495,9 +535,13 @@ Contact: hbecker@inf.ufrgs.br, henriquebecker91@gmail.com
 
 \bibliographystyle{splncs03.bst}
 
+\backupbegin
+\setbeamertemplate{footline}{}
 \begin{frame}[allowframebreaks]{References}
+\small
 \bibliography{slides_sea2016.bib}
 \end{frame}
+\backupend
 
 \end{document}
 

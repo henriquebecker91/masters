@@ -1,0 +1,115 @@
+Slide 1
+	SAY THAT I'M A MASTER'S STUDENT.
+	I'm Henrique Becker from the Universidade Federal do Rio Grande do Sul, Brzil, and I will present you the work of my paper, <READ TITLE>. My coauthor and advisor Dr. Luciana Buriol hasn't come to the conference.
+
+Slide 2
+	This presentation will partially follow the paper organization. With great simplification.
+
+Slide 3
+	<READ FIRST PHRASE SAYING THE ACRONYMS OUT LOUD>
+	<READ SECOND LINE> So we can use how many copies of any item we need or want.
+	The linear programming formulation is one of the simplest ones.
+	We want to maximize the items profits ... while we avoid that the sum of the item weights is greater than the knapsack capacity.
+	We can't use fractions of the items. If we could this problem would not be NP-Hard.
+	CALL ATTENTION TO THE FACT THAT THE ONLY CHANGE FROM 0-1 KP IS THE THIRD CONSTRAINT (INSTEAD OF BINARY IS THE NATURALS)
+	This knapsack variant is specially important, because <READS THIRD LINE>.
+
+
+Slide 4
+	So.. There's two main approachs to solving the knapasack problem,
+	The Dynamic Programming, and the Branch-and-bound.
+	Dynamic programming is pseudo-polynomial over the item quantity and the knapsack capacity.
+	Branch and Bound depends more on the item distribution, in other words, how is the correlation between the profits and weights. It can solve some instances with big number of items and big capacities almost instantly, but its worst case is exponential.
+
+Slide 5
+	At 2004 EDUK was considered the best dynamic programming algorithm.
+	At 2009 EDUK2 was presented and had better results than its precedessor.
+	CALL ATTENTION TO THE FACT THAT OCAML IS FUNCTIONAL
+	<READS TWO LAST LINES> EDUK2 is also the only know hybrid approach for solving the problem.
+
+Slide 6
+	So now we will talk about some opmizations applicable to the UKP.
+	<READS FIRST LINE>
+	For example: If we take those numbers as the weights of three items (and no two items have the same weight), those two solutions are the same.
+	<READS THIRD LINE>
+	This image shows all the paths we can find this solution (points at the second line). And this show only one path to each solution, representing the use of solution pruning.
+
+Slide 7
+	<READS FIRST LINE, SAY CAPACITY INSTEAD OF C>
+	<READ THE SECOND LINE, POINT THE BLANKS WHILE SAYING>
+	<READS THIRD LINE, say: this reuse allows us to save some computing, specially if the item with minimal weight is big>
+
+Slide 8
+	If the weight of a solution s is smaller or equal to the weight of a solution t, and the profit of this solution s is bigger than the profit of t, then s dominates t.
+	Follows that if we add an item i to s and the same item to t, modified s will remain dominating modified t.
+	Dominated solutions can be discarded without lost to the optimal solution value.
+	So we can avoid generating any solutions from t, and other dominated solutions.
+	In this image we see a solution with profit ninety before a solution with profit eight-seven, we can safely ignore this solution and don't combine it with other items to generate new solutions.
+
+Slide 9
+	<READ THE SLIDE>
+	So.. <POINTS TO IMAGE> those are valid solutions, this is the position where we would store a solution with the same weight of the capacity, this are invalid solutions we generated... for big capacities and number of items we save a good number of tests.
+
+Slide 10
+	<READS SLIDE>
+	For example, if the best item weight is one hundred units and we compute a bound where is there at least five copies of the best item, we can compute the optimal solution of a knapsack with the original capacity less 5 hundred and add 5 copies of the best item. It will remain optimal.
+
+Slide 11
+	<READS FIRST LINE> That isn't named.
+	<READS SECOND LINE> Symmetry pruning, sparsity, periodicity, dominated solutions pruning and time/memory tradeoff.
+	What G&N algorithm had was: <READS LAST LINES>
+
+Slide 12
+	This is a very simplified version of the UKP5, it don't shows the periodicity check. But all the other four optimizations are show here.
+
+Slide 13
+	<READS SLIDE>
+	(after last line) ... except for one or two implementation details.
+	I have communicated this to the conference chair immediatly after finding it but was not possible to retract the paper anymore.
+
+Slide 14
+	This is a sreenshoot of the algorithm on the original paper.
+
+Slide 15
+	Here's the version with the notation changed to what we are using now.
+	Is not immediate to see this, but this portion is the UKP5 inner loop, and this one is the outer loop.
+
+Slide 16
+	Now we will talk about the datase wwe used to compare UKP5 and PYAsUKP.
+	<READS SLIDE WITH SMALL COMMENTS>
+
+Slide 17
+	This is a condensed version of the results.
+	We can see UKP5 had better results on average, on the standard deviation and in the maximal time to solve an instance. And those results are at least one order of magnitude better than PYAsUKP results. The only point were PYASUKP always wins is on the minimal time to solve an instance. This is because there's always one or more instances that are instantly solved by PYAsUKP branch and bound phase.
+
+Slide 18
+	This is a time chart divided by instance class.
+
+Slide 19
+	This is the time chart of all instances.
+	The gray points are UKP5, the black points are PYAsUKP.
+	The x axis is the instance number when ordered by the pyasukp time.
+	The y axis is the instance's time to solve. It's on logarithmic scale.
+	All below the black line is the instances UKP5 solved faster than PYASUKP.
+	All over the black line is the instances UKP5 solved slower than PYAsUKP.
+	We can see that UKP5 never takes more than twenty seconds <RETURNS TWO SLIDES>, and that PYAsUKP has instances where it takes about fourteen minutes <RETURNS TWO SLIDES AGAIN>.
+
+Slide 20
+	Why those results. Our hypotheses follow.
+	<READS SLIDE>
+
+Slide 21
+	So.. on summary we can say:
+	<READS FIRST LINE>
+	<READS SECOND LINE> No DP paper on UKP before PYAsUKP has show any computational results.
+	<READS THIRD LINE> When to use DP and when to use B&B.
+
+Slide 22
+	<FIRST LINE> with instances that are hard for DP and easy for B&B.
+	<SECOND LINE> We already implemented many of the algorithms of old papers to test and compare.
+	<THIRD LINE> We need to fix this mistake on our next publication.
+
+Slide 23
+Slide 24
+Slide 25
+Slide 26

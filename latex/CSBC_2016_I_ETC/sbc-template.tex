@@ -32,22 +32,24 @@
 \begin{abstract}
 In this extended abstract % resumo extendido -- short paper?
 we present UKP5, an algorithm for solving the unbounded knapsack problem. 
-UKP5 is based on dynamic programming, but implemented in a non traditional way: instead of looking backward for stored values of subproblems, it stores incremental lower bounds forward. 
+%UKP5 is based on dynamic programming, but implemented in a non traditional way: instead of looking backward for stored values of subproblems, it stores incremental lower bounds forward. 
 %UKP5 uses sparsity, periodicity, and dominance for speeding up computation. 
 UKP5 is considerably simpler than EDUK2, the state-of-the-art algorithm for solving the problem. 
 %Moreover, it can be naturally implemented using the imperative paradigm, differently from EDUK2. 
 We run UKP5 and EDUK2 on a benchmark of 4540 hard instances proposed by the authors of EDUK2. 
 The results reveal that UKP5 outperforms EDUK2, being 47 times faster on the average.
+An extended version of this paper was recently presented in the Symposium on Experimental Algorithms 2016\cite{ukp5_sea}.
 \end{abstract}
 
 \begin{resumo}
 Nesse resumo extendido nós apresentamos o UKP5, um algoritmo para solucionar o \emph{unbounded knapsack problem} (problema da mochila com repetições).
-O UKP5 é baseado em programação dinâmica, mas implementado de uma forma não-tradicional: ao invés de olhar para trás para usar soluções de subproblemas previamente computados, ele armazena limites inferiores a frente.
+%O UKP5 é baseado em programação dinâmica, mas implementado de uma forma não-tradicional: ao invés de olhar para trás para usar soluções de subproblemas previamente computados, ele armazena limites inferiores a frente.
 %UKP5 uses sparsity, periodicity, and dominance for speeding up computation. 
 O UKP5 é consideravelmente mais simples que o EDUK2, o algoritmo do estado da arte para solucionar o problema.
 %Moreover, it can be naturally implemented using the imperative paradigm, differently from EDUK2. 
 Nós executamos o UKP5 e o EDUK2 em uma bateria de testes contendo 4540 instâncias conside-radas difíceis pelos autores do EDUK2.
 Os resultados mostram que o UKP5 é, em média, 47 vezes mais rápido que o EDUK2.
+Uma versão extendida desse artigo foi recentemente apresentada no Symposium on Experimental Algorithms 2016\cite{ukp5_sea}.
 \end{resumo}
 
 \section{Introduction}

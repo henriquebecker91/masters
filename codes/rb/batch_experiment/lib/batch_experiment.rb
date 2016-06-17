@@ -4,9 +4,15 @@ require 'pathname'
 # The main module, the two main utility methods offered are ::batch and
 # ::experiment.
 module BatchExperiment
-  # The default callable object used by #batch to convert a command into a
-  # filename.
-  module FilenameSanitizer
+  # The default callable object used by Comm2FnameConverter to convert
+  # a command into a filename. Comm2FnameConverter don't create a sanitized
+  # filename from the command string (it uses its first argument to do this,
+  # whose default is FnameSanitizer).
+  # Note that this is a pure function, so if the same command appears more than
+  # one time, it will get the same name, it's Comm2FnameConverter that gives
+  # multiple instances of the same command different names (by suffixing with
+  # numbers).
+  module FnameSanitizer
     def self.call(command)
       fname = command.strip
       fname.gsub!(/[^[:alnum:]]/, '_')
@@ -15,6 +21,53 @@ module BatchExperiment
       fname.gsub!(/_$/, '')
       fname
     end
+  end
+
+  # Converts a command to a filename using a given sanitizer, gives different
+  # names to different calls with the same arguments. Example: if a call with
+  # "sleep 1" yields "sleep_1", the second call with the same argument yields
+  # "sleep_1.2", and so on. Note that this is done by remembering what the
+  # object was already called with, the object is don't inspect the filesystem
+  # to check if that name was or wasn't used.
+  class Comm2FnameConverter
+    # Creates a new Comm2FnameConverter, with no memory of any previous calls.
+    #
+    # @param sanitizer [#call] Callable object used to create a filename from
+    #   the arguments passed to Comm2FnameConverter.call. This class expects
+    #   that sanitizer has no internal state, so when an instance of this class
+    #   is cloned, there's no problem with sharing the sanitizer between the
+    #   clones.
+    #   Default: FnameSanitizer.
+    def initialize(sanitizer = FnameSanitizer)
+      @num_times_seen = {}
+      @sanitizer = sanitizer
+    end
+
+    # Takes a command, creates a fname for it, if this fname was already seen
+    # before, returns the fname + ".N", where N is the number of times fname
+    # was already seen.
+    #
+    # @param comm [String] A system command.
+    # @return [String] The sanitized filename created from that command.
+    def call(comm)
+      fname = sanitizer.call(comm)
+      if num_times_seen.include? fname
+        num_times_seen[fname] += 1
+        fname << ".#{already_seen[fname]}"
+      else
+        num_times_seen[fname] = 1
+      end
+
+      fname.clone
+    end
+
+    def initialize_clone(old)
+      @num_times_seen = old.num_times_seen.clone
+    end
+
+    # To allow the initialize_clone implementation.
+    protected
+    attr_reader :num_times_seen
   end
 
   # Internal use only. DO NOT DEPEND.
@@ -65,10 +118,10 @@ module BatchExperiment
   #   receiving a TERM signal. If the command hasn't stopped, waits
   #   post_timeout seconds before sending a KILL signal (give it a chance to
   #   end gracefully). Default: 5.
-  #   -- fname_sanitizer [#call] The call method of this object
-  #   should take a String and convert it (possibly losing information), to a
-  #   valid filename. Used over the commands to define the output files of
-  #   commands. Default: BatchExperiment::FilenameSanitizer
+  #   -- converter [#call] The call method of this object should take a String
+  #   and convert it (possibly losing information), to a valid filename. Used
+  #   over the commands to define the output files of commands.
+  #   Default: BatchExperiment::Comm2FnameConverter.new.
   #   -- skip_done_comms [FalseClass,TrueClass] Skip any command for what a
   #   corresponding '.out' file exists, except if both a '.out' and a
   #   '.unfinished' file exist, in the last case the command is executed.
@@ -79,23 +132,15 @@ module BatchExperiment
   #   Default: '.out'.
   #   -- err_ext [String] Extension to be used in place of '.err'.
   #   Default: '.err'.
-    # TODO: I think we can use the sanitizer for this, if qt_runs on experiment is bigger than one, then a different sanitizer is used, and the code relies on the assumption of the existence of ".N" suffixes
-    #   -- double_mgr [#call] An object called at each sanitized command name.
-    #   The output is concatened after the sanitized command name, and before
-    #   the ".out"/".err"/".unfinished" prefix, on files. The default is
-    #   DefaultDoubleMgr, that will output an empty string for the first time
-    #   of each sanitized command name
-  #   
   #
   # @return [String] Which commands were executed. Can be different from
   #   the 'commands' argument if commands are skipped (see :skip_done_comms).
   #
   # @note If the same command is executed over the same file more than one
-  #   time, then only the last execution will be saved (because the '.out',
-  #   '.err' and '.unfinished' files will be overwritten). But the parameter
-  #   conf\[:fname_sanitizer\] can be used to circumvent the restriction over
-  #   equal commands (if the object has state it can return a different
-  #   filename for every time it's called with the same argument).
+  #   time, then any run besides the first will have a numeric suffix.
+  #   Example: "sleep 1" -> "sleep_1", "sleep 1" -> "sleep_1.2".
+  #   For more info see the parameter conf\[:fname_sanitizer\], and its
+  #   default value BatchExperiment::Comm2FnameConverter.new.
   # @note This procedure makes use of the following linux commands: time (not
   #   the bash internal one, but the package one, i.e.
   #   https://www.archlinux.org/packages/extra/x86_64/time/); timeout (from
@@ -121,7 +166,7 @@ module BatchExperiment
     conf[:err_ext]          ||= '.err'
     conf[:busy_loop_sleep]  ||= 0.1
     conf[:post_timeout]     ||= 5
-    conf[:fname_sanitizer]  ||= BatchExperiment::FilenameSanitizer
+    conf[:converter]        ||= BatchExperiment::Comm2FnameConverter.new
     conf[:skip_done_comms]    = true if conf[:skip_done_comms].nil?
 
     # Initialize main variables
@@ -131,7 +176,7 @@ module BatchExperiment
     comms_executed = []
 
     commands.each do | command |
-      commfname = conf[:fname_sanitizer].call(command)
+      commfname = conf[:converter].call(command)
       out_fname = commfname + conf[:out_ext]
       err_fname = commfname + conf[:err_ext]
       lockfname = commfname + conf[:unfinished_ext]
@@ -198,15 +243,22 @@ module BatchExperiment
 
   # gencommff: GENerate COMMands For Files
   #
+  # INTERNAL USE ONLY. Creates a hash with the generated commands as keys,
+  # and store the template command and file for each one of them as the value
+  # (using a { comm: comm, file: file } structure).
+  #
   # @param comm [String] A string with 'patt' as a substring.
-  # @param patt [String] A string contained in 'comm'.
-  # @param files [Enumerable<String>] A list of strings to substitute patt at
-  #   comm.
-  # @return [Array<String>] Example: gencommff('echo STR', 'STR', ['a', 'b',
-  #   'c']) returns ['echo a', 'echo b', 'echo c'].
+  # @param patt [String,Regex] A pattern contained in 'comm'.
+  # @param files [Enumerable<String>] A list of strings to use in the place 
+  #   of patt at comm.
+  # @return [Array<String>] Example: gencommff('echo STR', 'STR', ['a', 'b'])
+  #   returns {'echo a' => { comm: 'echo STR', file: 'a' }, 'echo b' =>
+  #   { comm: 'echo STR', file: 'b'}}
   def self.gencommff(comm, patt, files)
-    ret = []
-    files.each { | f | ret << comm.gsub(patt, f) }
+    ret = {}
+    files.each do | f |
+      ret[comm.gsub(patt, f)] = { comm: comm, file: f }
+    end
     ret
   end
 
@@ -248,7 +300,11 @@ module BatchExperiment
   #   when they are used as column names. Improves Extractor reusability.
   # @param batch_conf [Hash] Configuration used to call batch. See the
   #   explanation for parameter 'conf' on the documentation of the batch
-  #   method. There are required fields for this hash parameter.
+  #   method. There are required fields for this hash parameter. Also, note
+  #   that the batch_conf\[:converter\] should allow cloning without sharing
+  #   mutable state. A converter clone is used by #experiment internally, it
+  #   has to obtain the same results as the original copy (that is passed to
+  #   batch).
   # @param conf [Hash] Lots of parameters. Here's a list:
   #   -- csvfname [String] The filename/filepath for the file that will contain
   #   the CSV data. Required field.
@@ -330,10 +386,10 @@ module BatchExperiment
     #conf[:skip_commands] defaults to false/nil
 
     # Get some of the batch config that we use inside here too.
-    out_ext           = batch_conf[:out_ext] || '.out'
-    unfinished_ext    = batch_conf[:unfinished_ext] || '.unfinished'
-    fname_sanitizer   = batch_conf[:fname_sanitizer]
-    fname_sanitizer ||= BatchExperiment::FilenameSanitizer
+    out_ext         = batch_conf[:out_ext] || '.out'
+    unfinished_ext  = batch_conf[:unfinished_ext] || '.unfinished'
+    converter       = batch_conf[:converter].clone
+    converter     ||= BatchExperiment::Comm2FnameConverter.new
 
     # Expand all commands, combining template and files.
     comms_sets = []
@@ -341,13 +397,24 @@ module BatchExperiment
       comms_sets << gencommff(comm_info[:command], comm_info[:pattern], files)
     end
 
+    expanded_comms = comm_sets.map { | h | h.keys }
+    # If each command should be run more than once
+    if conf[:qt_runs] > 1
+      # We replace each single command by an array of qt_runs copies, and then
+      # flatten the parent array, replacing each single command by qt_runs
+      # copies.
+      expanded_comms.map! do | a |
+        a.map! { | c | Array.new(qt_runs, c) }.flatten!
+      end
+    end
+
     comm_list = case conf[:comms_order]
     when :by_comm
-      comms_sets.flatten!
+      expanded_comms.flatten!
     when :by_file
-      intercalate(comms_sets)
+      intercalate(expanded_comms)
     when :random
-      comms_sets.flatten!.shuffle!(conf[:rng])
+      expanded_comms.flatten!.shuffle!(conf[:rng])
 
     # Execute the commands (or not).
     ret = batch(comm_list, batch_conf) unless conf[:skip_commands]
@@ -364,18 +431,12 @@ module BatchExperiment
     header = ['run_number'].concat(header) if conf[:qt_runs] > 1
     header = ['filename'].concat(header).join(conf[:separator])
 
-    # Build body (inspect all output files an make csv lines).
+    # Build body (inspect all output files and make csv lines).
     body = [header]
-    files.each_with_index do | inst_fname, j |
+    files.each do | inst_fname |
       line = []
-      comms_info.each_with_index do | comm_info, i |
-        command =
-          if conf[:ic_comms]
-            comm_list[(j * comms_info.size) + i]
-          else
-            comm_list[(i * files.size) + j]
-          end
-
+      comms_info.each do | comm_info |
+        command = comm_info.
         partial_fname = fname_sanitizer.call(command)
         out_fname = partial_fname + out_ext
         lockfname = partial_fname + unfinished_ext
@@ -389,6 +450,8 @@ module BatchExperiment
         end
       end
       line = intercalate(line) if conf[:ic_columns]
+      run_number = 
+      body << [run_number].concat(line) if conf[:qt_runs] > 1
       body << [inst_fname].concat(line).join(conf[:separator])
     end
     body = body.map! { | line | line << conf[:separator] }.join("\n")

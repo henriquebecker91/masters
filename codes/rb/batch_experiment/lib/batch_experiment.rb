@@ -79,6 +79,14 @@ module BatchExperiment
   #   Default: '.out'.
   #   -- err_ext [String] Extension to be used in place of '.err'.
   #   Default: '.err'.
+    # TODO: I think we can use the sanitizer for this, if qt_runs on experiment is bigger than one, then a different sanitizer is used, and the code relies on the assumption of the existence of ".N" suffixes
+    #   -- double_mgr [#call] An object called at each sanitized command name.
+    #   The output is concatened after the sanitized command name, and before
+    #   the ".out"/".err"/".unfinished" prefix, on files. The default is
+    #   DefaultDoubleMgr, that will output an empty string for the first time
+    #   of each sanitized command name
+  #   
+  #
   # @return [String] Which commands were executed. Can be different from
   #   the 'commands' argument if commands are skipped (see :skip_done_comms).
   #
@@ -242,34 +250,64 @@ module BatchExperiment
   #   explanation for parameter 'conf' on the documentation of the batch
   #   method. There are required fields for this hash parameter.
   # @param conf [Hash] Lots of parameters. Here's a list:
-  #   csvfname [String] The filename/filepath for the file that will contain
+  #   -- csvfname [String] The filename/filepath for the file that will contain
   #   the CSV data. Required field.
   #   separator [String] The separator used at the CSV file. Default: ';'.
-  #   ic_columns [TrueClass, FalseClass] Intercalate the data returned by the
+  #   -- ic_columns [TrueClass, FalseClass] Intercalate the data returned by the
   #   extractors. In other words, the csv line for some file will not present
   #   all fields of the first command, then all fields of the second command,
   #   etc, but instead will present the first field of all commands, the second
   #   field of all commands, and so on. Default: true.
-  #   ic_comms [TrueClass, FalseClass] Intercalate the commands execution.
-  #   Instead of executing the first command over all files first, execute all
-  #   the commands over the first file first. This was made to avoid
-  #   confounding (statistical concept). If something disrupts the processing
-  #   power for some period of time, the effect will probably be distributed
-  #   between commands. The risk some algorithm seems better or worse than it
-  #   really is will be reduced. For example: you are making tests at an
-  #   notebook, the notebook becomes unplugged for a short time. The cores will
-  #   probably enter in energy saving mode and affect the observed performance.
-  #   If this happens when all tested commands are the same, then will seem
-  #   that that an command had a worse performance. If this happens when the
-  #   commands are intercalated, then maybe some instances will seem harder
-  #   than others (what is less problematic). Default: true.
+  #   -- qt_runs [NilClass,Integer] If nil or one then each command is
+  #   executed once. If is a number bigger than one, the command is
+  #   executed that number of times, and each run besides the first will
+  #   generate files with a ".N" suffix. This suffix will be after the
+  #   command sanitized name, but before the ".out"/".err"/".unfinished"
+  #   suffix (ex.: sanitized_comm_name.2.out). If the output will be
+  #   gathered at a CSV file, there will be an extra column called run_number.
+  #   Every file will appear qt_runs times on the filename column and, for the
+  #   same file, the values on the run_number column will be the integer
+  #   numbers between 1 and qt_runs (both inclusive). If qt_runs is less than
+  #   one, a warning will be displayed and will execute as nil was passed as
+  #   argument. If comms_order is set to random, the N will remain being the
+  #   number of the execution (i.e. sanitized_comm_name.2.out refer to the
+  #   second run of the sanitized_comm_name command). Default: nil.
+  #   -- comms_order [:by_comm,:by_file,:random] The order the
+  #   commands will be executed. Case by_comm: will execute the first command
+  #   over all the files (using the files order), then will execute the
+  #   second command over all files, and so on. Case by_file: will execute
+  #   all the commands (using the comms_info order) over the first file,
+  #   then will execute all the comands over the second file, and so on.
+  #   Case random: will expand all the command/file combinations (replicating
+  #   the same command qt_run times) and then will apply shuffle to this array,
+  #   using the object passed to the rng parameter. This is a needed condition
+  #   for some statistical tests.
+  #   -- rng [Nil,#rand] An object that implements the #rand method (behaves
+  #   like an instance of the core Random class). If comms_order is random and
+  #   rng is nil, will issue a warning remembering the default that was used.
+  #   Default: Random.new(42).
+    #   ic_comms [TrueClass, FalseClass] Intercalate the commands execution.
+    #   Instead of executing the first command over all files first, execute all
+    #   the commands over the first file first. This was made to avoid
+    #   confounding (statistical concept). If something disrupts the processing
+    #   power for some period of time, the effect will probably be distributed
+    #   between commands. The risk some algorithm seems better or worse than it
+    #   really is will be reduced. For example: you are making tests at an
+    #   notebook, the notebook becomes unplugged for a short time. The cores will
+    #   probably enter in energy saving mode and affect the observed performance.
+    #   If this happens when all tested commands are the same, then will seem
+    #   that that an command had a worse performance. If this happens when the
+    #   commands are intercalated, then maybe some instances will seem harder
+    #   than others (what is less problematic). Default: true.
   #   skip_commands [TrueClass, FalseClass] If true, will not execute the
   #   commands and assume that the outputs are already saved. Will only execute
   #   the extractors over the already saved outputs, and create the CSV file
   #   from them. Default: false.
   #
   # @param files [Array<Strings>] The strings that will replace the :pattern
-  #   on :command, for every element in comms_info.
+  #   on :command, for every element in comms_info. Can be a filename, or
+  #   can be anything else (a numeric parameter, sh code, etc..), but we
+  #   refer to them as files for simplicity and uniformity.
   #
   # @return [NilClass,Array<String>] The return of the internal #batch
   #   call. Returns nil if conf[:skip_commands] was set to true.
@@ -283,24 +321,33 @@ module BatchExperiment
     # Initialize optional configurations with default values if they weren't
     # provided. Don't change the conf argument, only our version of conf.
     conf = conf.clone
-    conf[:separator]  ||= ';'
+    conf[:separator]    ||= ';'
     conf[:ic_columns]   = true if conf[:ic_columns].nil?
-    conf[:ic_comms]     = true if conf[:ic_comms].nil?
+    conf[:qt_runs]      ||= 1
+    conf[:comms_order]  ||= :by_comm
+    conf[:rng]          ||= Random.new(42)
+      #conf[:ic_comms]     = true if conf[:ic_comms].nil? # remove
     #conf[:skip_commands] defaults to false/nil
 
     # Get some of the batch config that we use inside here too.
-    out_ext = batch_conf[:out_ext] || '.out'
-    unfinished_ext = batch_conf[:unfinished_ext] || '.unfinished'
+    out_ext           = batch_conf[:out_ext] || '.out'
+    unfinished_ext    = batch_conf[:unfinished_ext] || '.unfinished'
     fname_sanitizer   = batch_conf[:fname_sanitizer]
     fname_sanitizer ||= BatchExperiment::FilenameSanitizer
 
-    # Create commands the templates and the file list.
+    # Expand all commands, combining template and files.
     comms_sets = []
     comms_info.each do | comm_info |
       comms_sets << gencommff(comm_info[:command], comm_info[:pattern], files)
     end
 
-    comm_list = conf[:ic_comms] ? intercalate(comms_sets) : comms_sets.flatten
+    comm_list = case conf[:comms_order]
+    when :by_comm
+      comms_sets.flatten!
+    when :by_file
+      intercalate(comms_sets)
+    when :random
+      comms_sets.flatten!.shuffle!(conf[:rng])
 
     # Execute the commands (or not).
     ret = batch(comm_list, batch_conf) unless conf[:skip_commands]
@@ -314,7 +361,8 @@ module BatchExperiment
       header << prefixed_names
     end
     header = intercalate(header) if conf[:ic_columns]
-    header = ['Filename'].concat(header).join(conf[:separator])
+    header = ['run_number'].concat(header) if conf[:qt_runs] > 1
+    header = ['filename'].concat(header).join(conf[:separator])
 
     # Build body (inspect all output files an make csv lines).
     body = [header]

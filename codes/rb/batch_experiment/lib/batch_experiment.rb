@@ -284,6 +284,30 @@ module BatchExperiment
     ret
   end
 
+  class ColumnSpecError < ArgumentError; end
+
+  def merge_headers(headers)
+    mer_size = headers.map { | h | h.size }.max
+    merged_h = Array.new(merged_h)
+    mer_size.times do | i |
+      headers.each do | h |
+        if h.size < i next
+        if merged_h[i].nil?
+          merged_h[i] = h[i]
+        elsif merged_h[i] != h[i]
+          fail ColumnSpecError, "Error: When using BatchExperiment::experiment"
+            + " all the extractors have to agree on the columns they share." 
+            + " In the specific case: the column nº #{i} was labeled as"
+            + " '#{merged_h[i]}' on one extractor, and '#{h[i]}' on another,"
+            + " this can be only a difference on notation ('time' vs 'Time'),"
+            + " or can mean that in the same column two different kinds of data"
+            + " are being presented. The program will be aborted. Check that."
+        end
+      end
+    end
+    merged_h
+  end
+
   # Takes N shell commands and M files/parameters, execute each command of the
   # N commands over the M files, save the output of each command/file
   # combination, use objects provided with the command to extract relevant
@@ -310,11 +334,11 @@ module BatchExperiment
   #   -- csvfname [String] The filename/filepath for the file that will contain
   #   the CSV data. Required field.
   #   separator [String] The separator used at the CSV file. Default: ';'.
-  #   -- ic_columns [TrueClass, FalseClass] Intercalate the data returned by the
-  #   extractors. In other words, the csv line for some file will not present
-  #   all fields of the first command, then all fields of the second command,
-  #   etc, but instead will present the first field of all commands, the second
-  #   field of all commands, and so on. Default: true.
+    #   -- ic_columns [TrueClass, FalseClass] Intercalate the data returned by the
+    #   extractors. In other words, the csv line for some file will not present
+    #   all fields of the first command, then all fields of the second command,
+    #   etc, but instead will present the first field of all commands, the second
+    #   field of all commands, and so on. Default: true.
   #   -- qt_runs [NilClass,Integer] If nil or one then each command is
   #   executed once. If is a number bigger than one, the command is
   #   executed that number of times, and each run besides the first will
@@ -424,16 +448,15 @@ module BatchExperiment
     ret = batch(expanded_comms, batch_conf) unless conf[:skip_commands]
 
     # Build header (first csv line, column names).
-    header = []
-    comms_info.each do | comm_info |
-      prefixed_names = comm_info[:extractor].names.map do | name |
-        (comm_info[:prefix] + ' ') << name
-      end
-      header << prefixed_names
-    end
-    header = intercalate(header) if conf[:ic_columns]
-    header = ['run_number'].concat(header) if conf[:qt_runs] > 1
-    header = ['filename'].concat(header).join(conf[:separator])
+    header = merge_headers(comm_info.map { | c | c[:extractor].names })
+#    comms_info.each do | comm_info |
+#      prefixed_names = comm_info[:extractor].names.map do | name |
+#        (comm_info[:prefix] + ' ') << name
+#      end
+#      header << prefixed_names
+#    end
+    header = ['algorithm', 'filename', 'run_number'].concat(header)
+    header.join!(conf[:separator])
 
     # We need to merge the hash's that compose comm_sets to query them.
     comm2origin = {}
@@ -445,6 +468,25 @@ module BatchExperiment
     end
 
     # Build body (inspect all output files and make csv lines).
+    # All the CVS file format has to be rethinked. Before, for the same file
+    # we had only one line, with the result of each algorithm over that file.
+    # Now we can have the multiple runs over the same file, and we want to
+    # preserve when each run happened. This way our new format will be:
+    #
+    # filename; algorithm_prefix; run_number; first extracted column; ...
+    #
+    # This means that the extractor have to agree on what is each column, two
+    # different extractors have to extract the same kind of data at each column
+    # (the first field returned by all extractors has to be, for example cpu
+    # time, then the second field has to be the optimal result, and so on).
+    # If one extractor extract more fields than the others this is not a
+    # problem, if the second biggest extractor (in number of fields) extract,
+    # for example, 4 fields, and the biggest extract 6 fields, the first 4
+    # fields extracted by the biggest extractor have to be the same as the
+    # ones on the second-biggest extractor. This way, all the lines will have
+    # data on the first four columns (not counting the filename, algorithm and
+    # run_number ones), and only lines provenient from the biggest extractor
+    # will have data on the fifth and sixth columns.
     body = [header]
     times_found = {}
     pre_body = {}

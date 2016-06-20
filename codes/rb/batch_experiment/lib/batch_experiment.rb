@@ -26,9 +26,9 @@ module BatchExperiment
   # Converts a command to a filename using a given sanitizer, gives different
   # names to different calls with the same arguments. Example: if a call with
   # "sleep 1" yields "sleep_1", the second call with the same argument yields
-  # "sleep_1.2", and so on. Note that this is done by remembering what the
-  # object was already called with, the object is don't inspect the filesystem
-  # to check if that name was or wasn't used.
+  # "sleep_1.2", and so on. Note that this is done by remembering previous
+  # calls, the object don't inspect the filesystem to check if that name
+  # was or wasn't used.
   class Comm2FnameConverter
     # Creates a new Comm2FnameConverter, with no memory of any previous calls.
     #
@@ -36,8 +36,7 @@ module BatchExperiment
     #   the arguments passed to Comm2FnameConverter.call. This class expects
     #   that sanitizer has no internal state, so when an instance of this class
     #   is cloned, there's no problem with sharing the sanitizer between the
-    #   clones.
-    #   Default: FnameSanitizer.
+    #   clones. Default: BatchExperiment::FnameSanitizer.
     def initialize(sanitizer = FnameSanitizer)
       @num_times_seen = {}
       @sanitizer = sanitizer
@@ -49,6 +48,10 @@ module BatchExperiment
     #
     # @param comm [String] A system command.
     # @return [String] The sanitized filename created from that command.
+    # @note Note that different arguments can be reduced to the same
+    #   sanitized filename and, if this happens, they will NOT overwrite
+    #   each other. Example: 'echo "abc"' -> 'echo_abc'; 'echo abc' ->
+    #   'echo_abc.2'.
     def call(comm)
       fname = sanitizer.call(comm)
       if num_times_seen.include? fname
@@ -70,7 +73,7 @@ module BatchExperiment
     attr_reader :num_times_seen
   end
 
-  # Internal use only. DO NOT DEPEND.
+  # INTERNAL USE ONLY.
   # Remove any finished commands from comms_running, insert the cpus
   # freed by the commands termination to the free_cpus, insert the
   # terminated commands on comms_executed.
@@ -95,7 +98,7 @@ module BatchExperiment
   # filenames are derived from the commands. Appending '.out' to one of the
   # partial filenames will give the filename were the command stdout was
   # redirected. The analogue is valid for '.err' and stderr. Right before a
-  # command begans to run, a "partial_filename.unfinished file is created.
+  # command begans to run, a 'partial_filename.unfinished' file is created.
   # After the command ends its execution this file is removed. If the command
   # ends its execution by means of a timeout the file is also removed. The file
   # only remains if the batch procedure is interrupted (script was killed,
@@ -104,7 +107,7 @@ module BatchExperiment
   #
   # @param commands [Array<String>] The shell commands.
   # @param conf [Hash] The configurations, as follows:
-  #   -- cpus_available [Array<Fixnum>] Cpu cores that can be used to run the
+  #   -- cpus_available [Array<Fixnum>] CPU cores that can be used to run the
   #   commands. Required parameter. The cpu numbers begin at 0, despite what
   #   htop tells you.
   #   -- timeout [Number] Number of seconds before killing a command. Required
@@ -112,8 +115,8 @@ module BatchExperiment
   #   -- time_fmt [String] A string in the time (external command) format. See
   #   http://linux.die.net/man/1/time. Default: 'ext_time: %e\next_mem: %M\n'.
   #   -- busy_loop_sleep [Number] How many seconds to wait before checking if
-  #   a command ended execution. This is max time a cpu will be vacant between
-  #   two commands. Default: 0.1.
+  #   a command ended execution. This time will be very close to the max time a
+  #   cpu will remain vacant between two commands. Default: 0.1 (1/10 second).
   #   -- post_timeout [Number] A command isn't guaranteed to end after
   #   receiving a TERM signal. If the command hasn't stopped, waits
   #   post_timeout seconds before sending a KILL signal (give it a chance to
@@ -124,10 +127,11 @@ module BatchExperiment
   #   Default: BatchExperiment::Comm2FnameConverter.new.
   #   -- skip_done_comms [FalseClass,TrueClass] Skip any command for what a
   #   corresponding '.out' file exists, except if both a '.out' and a
-  #   '.unfinished' file exist, in the last case the command is executed.
+  #   '.unfinished' file exist, in the last case the command is always
+  #   executed. If false, execute all commands and overwrite all ".out".
   #   Default: true.
   #   -- unfinished_ext [String] Extension to be used in place of
-  #   '.unfinished'.  Default: '.unfinished'.
+  #   '.unfinished'. Default: '.unfinished'.
   #   -- out_ext [String] Extension to be used in place of '.out'.
   #   Default: '.out'.
   #   -- err_ext [String] Extension to be used in place of '.err'.
@@ -154,8 +158,10 @@ module BatchExperiment
   #   conf\[:time_fmt\] to a empty string only a newline will be appended.
   def self.batch(commands, conf)
     # Throw exceptions if required configurations aren't provided.
-    fail 'conf[:cpus_available] not set' unless conf[:cpus_available]
-    fail 'conf[:timeout] not set' unless conf[:timeout]
+    if !conf[:cpus_available] then
+      fail ArgumentError, 'conf[:cpus_available] not set'
+    end
+    fail ArgumentError, 'conf[:timeout] not set' unless conf[:timeout]
 
     # Initialize optional configurations with default values if they weren't
     # provided. Don't change the conf argument, only our version of conf.
@@ -183,16 +189,16 @@ module BatchExperiment
 
       if conf[:skip_done_comms] && File.exists?(out_fname)
         if File.exists?(lockfname)
-          puts "found file #{out_fname}, but a #{lockfname} also exists"
-          puts "will execute command '#{command}' anyway"
+          puts "Found file #{out_fname}, but a #{lockfname} also exists:"
+          puts "Will execute command '#{command}' anyway."
         else
-          puts "found file #{commfname}, skipping command: #{command}"
+          puts "Found file #{commfname}, skipping command: #{command}"
           STDOUT.flush
           next
         end
       end
 
-      puts "waiting to execute command: #{command}"
+      puts "Waiting to execute command: #{command}"
       STDOUT.flush
 
       while free_cpus.empty? do
@@ -263,7 +269,8 @@ module BatchExperiment
     ret
   end
 
-  # Intercalate a variable number of variable sized arrays in one array.
+  # INTERNAL USE ONLY. Intercalate a variable number of variable sized arrays
+  # in one array.
   #
   # @param [Array<Array<Object>>] xss An array of arrays.
   # @return [Array<Object>] An array of the same size as the sum of the size
@@ -286,6 +293,14 @@ module BatchExperiment
 
   class ColumnSpecError < ArgumentError; end
 
+  # INTERNAL USE ONLY. Check if the headers can be combined, if they can
+  # return a shallow copy of the biggest header, otherwise throw an exception.
+  #
+  # @param headers [Array<Array<Comparable>>] An array of arrays of strings
+  #   (or any object that implements '!=').
+  # @return A shallow copy of the biggest inner array in headers. Only returns
+  #   if for each position on the biggest inner array has the same value as
+  #   that position on all the other arrays with at least that size.
   def merge_headers(headers)
     mer_size = headers.map { | h | h.size }.max
     merged_h = Array.new(merged_h)
@@ -318,11 +333,11 @@ module BatchExperiment
   #   needed to know how to deal with the command. Four required fields
   #   (all keys are symbols):
   #   command [String] A string with a sh shell command.
-  #   pattern [String] A substring of command, will be replace by the strings
+  #   pattern [String] A substring of command, will be replaced by the strings
   #   in the paramenter 'files'.
   #   extractor [#extract,#names] Object implementing the Extractor interface.
-  #   prefix [String] A string that will be used to prefix the extractor.names
-  #   when they are used as column names. Improves Extractor reusability.
+  #   prefix [String] A string that will be used on the 'algorithm' column
+  #   to identify the used command.
   # @param batch_conf [Hash] Configuration used to call batch. See the
   #   explanation for parameter 'conf' on the documentation of the batch
   #   method. There are required fields for this hash parameter. Also, note
@@ -334,25 +349,13 @@ module BatchExperiment
   #   -- csvfname [String] The filename/filepath for the file that will contain
   #   the CSV data. Required field.
   #   separator [String] The separator used at the CSV file. Default: ';'.
-    #   -- ic_columns [TrueClass, FalseClass] Intercalate the data returned by the
-    #   extractors. In other words, the csv line for some file will not present
-    #   all fields of the first command, then all fields of the second command,
-    #   etc, but instead will present the first field of all commands, the second
-    #   field of all commands, and so on. Default: true.
   #   -- qt_runs [NilClass,Integer] If nil or one then each command is
-  #   executed once. If is a number bigger than one, the command is
-  #   executed that number of times, and each run besides the first will
-  #   generate files with a ".N" suffix. This suffix will be after the
-  #   command sanitized name, but before the ".out"/".err"/".unfinished"
-  #   suffix (ex.: sanitized_comm_name.2.out). If the output will be
-  #   gathered at a CSV file, there will be an extra column called run_number.
-  #   Every file will appear qt_runs times on the filename column and, for the
-  #   same file, the values on the run_number column will be the integer
-  #   numbers between 1 and qt_runs (both inclusive). If qt_runs is less than
-  #   one, a warning will be displayed and will execute as nil was passed as
-  #   argument. If comms_order is set to random, the N will remain being the
-  #   number of the execution (i.e. sanitized_comm_name.2.out refer to the
-  #   second run of the sanitized_comm_name command). Default: nil.
+  #   executed once. If is a number bigger than one, the command is executed
+  #   that number of times. The batch_conf[:converter] will define the name
+  #   that will be given to each run. Every file will appear qt_runs times on
+  #   the filename column and, for the same file, the values on the run_number
+  #   column will be the integer numbers between 1 and qt_runs (both
+  #   inclusive). Default: nil.
   #   -- comms_order [:by_comm,:by_file,:random] The order the
   #   commands will be executed. Case by_comm: will execute the first command
   #   over all the files (using the files order), then will execute the
@@ -361,29 +364,16 @@ module BatchExperiment
   #   then will execute all the comands over the second file, and so on.
   #   Case random: will expand all the command/file combinations (replicating
   #   the same command qt_run times) and then will apply shuffle to this array,
-  #   using the object passed to the rng parameter. This is a needed condition
-  #   for some statistical tests.
+  #   using the object passed to the rng parameter. This last option is the
+  #   most adequate for statistical testing.
   #   -- rng [Nil,#rand] An object that implements the #rand method (behaves
   #   like an instance of the core Random class). If comms_order is random and
   #   rng is nil, will issue a warning remembering the default that was used.
   #   Default: Random.new(42).
-    #   ic_comms [TrueClass, FalseClass] Intercalate the commands execution.
-    #   Instead of executing the first command over all files first, execute all
-    #   the commands over the first file first. This was made to avoid
-    #   confounding (statistical concept). If something disrupts the processing
-    #   power for some period of time, the effect will probably be distributed
-    #   between commands. The risk some algorithm seems better or worse than it
-    #   really is will be reduced. For example: you are making tests at an
-    #   notebook, the notebook becomes unplugged for a short time. The cores will
-    #   probably enter in energy saving mode and affect the observed performance.
-    #   If this happens when all tested commands are the same, then will seem
-    #   that that an command had a worse performance. If this happens when the
-    #   commands are intercalated, then maybe some instances will seem harder
-    #   than others (what is less problematic). Default: true.
   #   skip_commands [TrueClass, FalseClass] If true, will not execute the
-  #   commands and assume that the outputs are already saved. Will only execute
-  #   the extractors over the already saved outputs, and create the CSV file
-  #   from them. Default: false.
+  #   commands and assume that the outputs are already saved (on ".out" files).
+  #   Will only execute the extractors over the already saved outputs, and
+  #   create the CSV file from them. Default: false.
   #
   # @param files [Array<Strings>] The strings that will replace the :pattern
   #   on :command, for every element in comms_info. Can be a filename, or
@@ -432,14 +422,14 @@ module BatchExperiment
     end
 
     # At this moment the expanded_comms is an array of arrays, each internal
-    # array has all the expanded commands of the same template over all the
-    # files.
+    # array has all the expanded commands of the one single command template
+    # over all the files.
     # After the code block below, the expanded_comms will be an one-level array
     # of the expanded commands, in the order they will be executed.
     expanded_comms = case conf[:comms_order]
-    when :by_comm # all executions of the first command template first
+    when :by_comm # all runs of the first command template first
       expanded_comms.flatten!
-    when :by_file # all executions over the first file first
+    when :by_file # all runs over the first file first
       intercalate(expanded_comms)
     when :random  # a random order
       expanded_comms.flatten!.shuffle!(conf[:rng])
@@ -448,72 +438,66 @@ module BatchExperiment
     ret = batch(expanded_comms, batch_conf) unless conf[:skip_commands]
 
     # Build header (first csv line, column names).
-    header = merge_headers(comm_info.map { | c | c[:extractor].names })
-#    comms_info.each do | comm_info |
-#      prefixed_names = comm_info[:extractor].names.map do | name |
-#        (comm_info[:prefix] + ' ') << name
-#      end
-#      header << prefixed_names
-#    end
-    header = ['algorithm', 'filename', 'run_number'].concat(header)
-    header.join!(conf[:separator])
+    header = ['algorithm', 'filename', 'run_number']
+    header << merge_headers(comms_info.map { | c | c[:extractor].names })
+    header = header.join(conf[:separator])
 
-    # We need to merge the hash's that compose comm_sets to query them.
+    # We need to merge the union of all comm_sets to query it.
     comm2origin = {}
     comm_sets.each do | h |
-      comm2origin.merge(h) do | k, v, v2|
+      comm2origin.merge(h) do | k, v, v2 |
         puts "WARNING: The command expansion '#{k}' was generated more than once. The first time was by the template '#{v[:comm]}' and the file '#{v[:file]}', and this time by template '#{v2[:comm]}' and the file '#{v2[:file]}'. Will report on CVS as this command was generated by the template '#{v[:comm]}' and the file '#{v[:file]}'."
         v
       end
     end
 
     # Build body (inspect all output files and make csv lines).
-    # All the CVS file format has to be rethinked. Before, for the same file
-    # we had only one line, with the result of each algorithm over that file.
-    # Now we can have the multiple runs over the same file, and we want to
-    # preserve when each run happened. This way our new format will be:
     #
-    # filename; algorithm_prefix; run_number; first extracted column; ...
+    # Body format: algorithm;filename;run_number;first extracted column; ...
     #
-    # This means that the extractor have to agree on what is each column, two
+    # This means that the extractors have to agree on what is each column, two
     # different extractors have to extract the same kind of data at each column
-    # (the first field returned by all extractors has to be, for example cpu
-    # time, then the second field has to be the optimal result, and so on).
-    # If one extractor extract more fields than the others this is not a
-    # problem, if the second biggest extractor (in number of fields) extract,
-    # for example, 4 fields, and the biggest extract 6 fields, the first 4
-    # fields extracted by the biggest extractor have to be the same as the
-    # ones on the second-biggest extractor. This way, all the lines will have
-    # data on the first four columns (not counting the filename, algorithm and
-    # run_number ones), and only lines provenient from the biggest extractor
-    # will have data on the fifth and sixth columns.
+    # (the first field returned by all extractors has to be, for example, cpu
+    # time, then the second field has to be the optimal result, and so on). If
+    # one extractor extract more fields than the others this is not a problem,
+    # if the second biggest extractor (in number of fields extract) will
+    # extract, for example, 4 fields, and the biggest extract 6 fields, the
+    # first 4 fields extracted by the biggest extractor have to be the same as
+    # the ones on the second-biggest extractor. This way, all the lines will
+    # have the kind of data on the first four columns (not counting the
+    # algorithm, filename and run_number ones), and only lines provenient from
+    # the biggest extractor will have data on the fifth and sixth columns.
     body = [header]
     times_found = {}
-    pre_body = {}
     expanded_comms.each do | exp_comm |
-      # In this point we need to group the results by template > file
-      # > run_number. Only after this we can traverse this hash > hash >
-      # array, to assemble the cvs.
-      partial_fname = converter.call(exp_comm)
+      run_info   = comm2origin[exp_comm]
+      algorithm  = run_info[:comm_info][:prefix]
+      filename   = run_info[:filename]
+
       times_found[exp_comm] ||= 0
       times_found[exp_comm]  += 1
+      run_number = times_found[exp_comm]
+
+      curr_line = [algorithm, filename, run_number]
+
+      partial_fname = converter.call(exp_comm)
       out_fname = partial_fname + out_ext
       lockfname = partial_fname + unfinished_ext
-      extractor = comm2origin[exp_comm][:comm_info][:extractor]
-      if File.exists?(out_fname) && !File.exists?(lockfname)
-        f_content = File.open(out_fname, 'r') { | f | f.read }
+      extractor = run_info[:comm_info][:extractor]
 
-        line << extractor.extract(f_content)
-      else
-        # if the file wasn't created insert a empty column set
-        # of the same size the true column set would be
-        line << extractor.names.map { | _ | '' }
+      if File.exists?(out_fname)
+        if File.exists?(lockfname)
+          puts "Ignored file '#{out_fname}' because there was a"
+             + "  '#{lockfname}' file in the same folder."
+        else
+          f_content = File.open(out_fname, 'r') { | f | f.read }
+          curr_line << extractor.extract(f_content)
+        end
       end
-      filename = comm2origin[exp_comm][:filename]
-      line = [times_found[exp_comm]].concat(line) if conf[:qt_runs] > 1
-      body << [filename].concat(line).join(conf[:separator])
+
+      body << curr_line.join(conf[:separator])
     end
-    body = body.map! { | line | line << conf[:separator] }.join("\n")
+    body = body.join(conf[:separator] + "\n")
 
     # Write CSV data into a CSV file.
     File.open(conf[:csvfname], 'w') { | f | f.write(body) }

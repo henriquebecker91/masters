@@ -11,7 +11,7 @@ Gem::Specification.new do | s |
     'lib/batch_experiment/extractor.rb',
     'lib/batch_experiment/sample_extractors.rb',
     'examples/sample_batch.rb',
-    'examples/ukp_batch.rb',
+    'examples/ukp_experiment.rb',
     'examples/bible.txt',
     'examples/taoteching.txt',
     'examples/experiment_example.rb',

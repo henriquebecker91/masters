@@ -13,36 +13,30 @@ comms_info = [{
   pattern: 'y',
   extractor: BatchExperiment::FirstLineExtractor,
   prefix: 'echo',
-#}, {
-#  command: 'wc FILE',
-#  pattern: 'FILE',
-#  extractor: BatchExperiment::WcExtractor,
-#  prefix: 'wc',
 }]
 
-execution_info = {
+batch_conf = {
   # IDs of the CPU cores that can be used for executing tests.
   cpus_available: [1, 2, 3],
   # Maximum number of seconds that a command can run. After this a kill command
   # (TERM signal) will be issued.
   timeout: 5,
+  # Object that gives the filename for storing the output of each run.
+  converter: BatchExperiment::Comm2FnameConverter.new,
 }
 
-conf = {
+experiment_conf = {
   # The name of the file where will be written the CSV data.
   csvfname: 'example.csv',
-  # The columns will be ordered by command. All the columns of the first
-  # command before the one from the second and so on.
-  ic_columns: false,
   # Number of times the same command will be executed over the same file.
   qt_runs: 5,
   # Order of the commands execution
   comms_order: :random, #:by_comm, #:by_file,
-  # Random seed
+  # Random seed (only used if comms_order is :random)
   rng: Random.new(0),
 }
 
 files = ['bible.txt', 'taoteching.txt']
 
-BatchExperiment::experiment(comms_info, execution_info, conf, files)
+BatchExperiment::experiment(comms_info, batch_conf, experiment_conf, files)
 

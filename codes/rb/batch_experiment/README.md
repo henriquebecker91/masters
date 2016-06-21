@@ -15,7 +15,7 @@ What conditions you need to use this tool:
 
 What is not needed:
 
-* To know how to program in ruby. Only taking less than 5 minutes to learn some basic syntax will suffice to run commands on multiple cores and save the results to files. However, there's an exception, if you want not only to execute the commands but want to extract and group some information from their output to a CVS, you will need to tell ruby how to do the extracting part.
+* To know how to program in ruby. Only taking less than 5 minutes to learn some basic syntax will suffice to run commands on multiple cores and save the results to files (using BatchExperiment::batch). However, if you want not only to execute the commands but want to extract and group some information from their output to a CVS (using BatchExperiment::experiment), you will need to tell ruby how to do the extracting part.
 
 ## How to use it
 
@@ -23,7 +23,7 @@ You will need to create a ruby script (copy, past and adapt one of the provided 
 
 ## Examples
 
-After installing the gem, you will have a examples folder (/home/YOUR_USER/.gem/ruby/RUBY_VERSION/gems/batch_experiment-GEM_VERSION/examples). The sample_batch.rb gives you a good ideia of how to use #batch (no csv creation). The example_batch.rb together with the lib/batch_experiment/sample_extractors.rb gives a good ideia of how to use #experiment with multiple commands and extractors (csv creation).
+After installing the gem, you will have a examples folder (/home/YOUR_USER/.gem/ruby/RUBY_VERSION/gems/batch_experiment-GEM_VERSION/examples). The sample_batch.rb gives you a good ideia of how to use ::batch (no csv creation).
 
 ```ruby
 #!/bin/ruby
@@ -49,6 +49,8 @@ conf = {
 
 BatchExperiment::batch(commands, conf)
 ```
+
+The experiment_example.rb (and the lib/batch_experiment/sample_extractors.rb) gives a good ideia of how to use #experiment with multiple commands and how to create an extractor (used to create a csv).
 
 This code was born in [this repository](https://github.com/henriquebecker91/masters/tree/master/codes/rb/batch_experiment).
 

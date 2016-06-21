@@ -2,7 +2,7 @@ module BatchExperiment
   # Module that defines the interface used for extracting info from other
   # programs output. You don't need to include it in your object, will suffice
   # that the object (that you will use to extract info from the output) has the
-  # ::names and ::extract methods defined.
+  # #names and #extract methods defined.
   module Extractor
     # Find a line in the following format: "field: value", return value. 
     #
@@ -13,7 +13,9 @@ module BatchExperiment
     # @return [String] The 'value' as a string or, if 'field' isn't found, an
     #   empty string.
     def self.get_field(lines, field)
-      lines.grep(/^#{field}: .*/).each { | l | return l.match(/:[\t ]+(.*)/)[1] }
+      lines.grep(/^#{field}: .*/).each do | l |
+        return l.match(/:[\t ]+(.*)/)[1]
+      end
       ''
     end
 
@@ -42,7 +44,7 @@ module BatchExperiment
     # @return [Array<String>] The strings that will be used to make the column
     #   names at the BatchExperiment.experiment method.
     def names
-      fail 'This method should have been overwritten by a subclass.'
+      raise 'This method should have been overwritten by a subclass.'
     end
 
     # Extract N values of some program output, where N is equal to #names.size.
@@ -62,7 +64,7 @@ module BatchExperiment
     #   and the line string elements don't end in linebreak.
     # @return [Array<String>] The N extracted values, as strings.
     def extract_from_lines(lines)
-      fail 'This method should have been overwritten by a subclass.'
+      raise 'This method should have been overwritten by a subclass.'
     end
   end
 end

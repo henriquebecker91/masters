@@ -1,6 +1,6 @@
 Gem::Specification.new do | s |
   s.name        = 'batch_experiment'
-  s.version     = '1.0.2'
+  s.version     = '2.0.0'
   s.licenses    = ['Unlicense']
   s.summary     = 'A ruby script that distributes system commands between cpu cores, and save their output.'
   s.description = ''
@@ -14,7 +14,7 @@ Gem::Specification.new do | s |
     'examples/ukp_batch.rb',
     'examples/bible.txt',
     'examples/taoteching.txt',
-    'examples/example_batch.rb',
+    'examples/experiment_example.rb',
     'examples/debug_batch.rb',
     'README.md',
   ]

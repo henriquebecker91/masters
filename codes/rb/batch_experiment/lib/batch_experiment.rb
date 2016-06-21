@@ -53,12 +53,12 @@ module BatchExperiment
     #   each other. Example: 'echo "abc"' -> 'echo_abc'; 'echo abc' ->
     #   'echo_abc.2'.
     def call(comm)
-      fname = sanitizer.call(comm)
-      if num_times_seen.include? fname
-        num_times_seen[fname] += 1
-        fname << ".#{already_seen[fname]}"
+      fname = @sanitizer.call(comm)
+      if @num_times_seen.include? fname
+        @num_times_seen[fname] += 1
+        fname << ".#{@num_times_seen[fname]}"
       else
-        num_times_seen[fname] = 1
+        @num_times_seen[fname] = 1
       end
 
       fname.clone
@@ -247,11 +247,10 @@ module BatchExperiment
     comms_executed
   end
 
-  # gencommff: GENerate COMMands For Files
-  #
-  # INTERNAL USE ONLY. Creates a hash with the generated commands as keys,
-  # and store (as the respective value) the comm_info hash and the file
-  # (using a { comm_info: X, filename: Y } structure).
+  # INTERNAL USE ONLY. gencommff: GENerate COMMands For Files.
+  # Creates a hash with the generated commands as keys, and store (as the
+  # respective value) the comm_info hash and the file (using a { comm_info: X,
+  # filename: Y } structure).
   #
   # @param comm_info [Hash] A hash structure following the same format
   #   that the elements of the comms_info array parameter of #experiment.
@@ -301,16 +300,16 @@ module BatchExperiment
   # @return A shallow copy of the biggest inner array in headers. Only returns
   #   if for each position on the biggest inner array has the same value as
   #   that position on all the other arrays with at least that size.
-  def merge_headers(headers)
+  def self.merge_headers(headers)
     mer_size = headers.map { | h | h.size }.max
-    merged_h = Array.new(merged_h)
+    merged_h = Array.new(mer_size)
     mer_size.times do | i |
       headers.each do | h |
-        if h.size < i next
+        next if h.size < i
         if merged_h[i].nil?
           merged_h[i] = h[i]
         elsif merged_h[i] != h[i]
-          fail ColumnSpecError, "Error: When using BatchExperiment::experiment"
+          raise ColumnSpecError, "Error: When using BatchExperiment::experiment"
             + " all the extractors have to agree on the columns they share." 
             + " In the specific case: the column nº #{i} was labeled as"
             + " '#{merged_h[i]}' on one extractor, and '#{h[i]}' on another,"
@@ -326,7 +325,7 @@ module BatchExperiment
   # Takes N shell commands and M files/parameters, execute each command of the
   # N commands over the M files, save the output of each command/file
   # combination, use objects provided with the command to extract relevant
-  # information from the output file, and group those information in a CVS
+  # information from the output file, and group those information in a CSV
   # file. Easier to understand seeing the sample_batch.rb example in action.
   #
   # @param comms_info [Array<Hash>] An array of hashs, each with the config
@@ -344,7 +343,7 @@ module BatchExperiment
   #   that the batch_conf\[:converter\] should allow cloning without sharing
   #   mutable state. A converter clone is used by #experiment internally, it
   #   has to obtain the same results as the original copy (that is passed to
-  #   batch).
+  #   BatchExperiment::batch).
   # @param conf [Hash] Lots of parameters. Here's a list:
   #   -- csvfname [String] The filename/filepath for the file that will contain
   #   the CSV data. Required field.
@@ -393,7 +392,6 @@ module BatchExperiment
     # provided. Don't change the conf argument, only our version of conf.
     conf = conf.clone
     conf[:separator]    ||= ';'
-    conf[:ic_columns]     = true if conf[:ic_columns].nil?
     conf[:qt_runs]      ||= 1
     conf[:comms_order]  ||= :by_comm
     conf[:rng]          ||= Random.new(42)
@@ -402,8 +400,8 @@ module BatchExperiment
     # Get some of the batch config that we use inside here too.
     out_ext         = batch_conf[:out_ext] || '.out'
     unfinished_ext  = batch_conf[:unfinished_ext] || '.unfinished'
-    converter       = batch_conf[:converter].clone
-    converter     ||= BatchExperiment::Comm2FnameConverter.new
+    converter = batch_conf[:converter].clone unless batch_conf[:converter].nil?
+    converter ||= BatchExperiment::Comm2FnameConverter.new
 
     # Expand all commands, combining command templates and files.
     comms_sets = []
@@ -411,13 +409,13 @@ module BatchExperiment
       comms_sets << gencommff(comm_info, files)
     end
 
-    expanded_comms = comm_sets.map { | h | h.keys }
+    expanded_comms = comms_sets.map { | h | h.keys }
     # If each command should be run more than once...
     if conf[:qt_runs] > 1
       # ... we replace each single command by an array of qt_runs copies,
       # and then flatten the parent array.
       expanded_comms.map! do | a |
-        a.map! { | c | Array.new(qt_runs, c) }.flatten!
+        a.map! { | c | Array.new(conf[:qt_runs], c) }.flatten!
       end
     end
 
@@ -432,7 +430,8 @@ module BatchExperiment
     when :by_file # all runs over the first file first
       intercalate(expanded_comms)
     when :random  # a random order
-      expanded_comms.flatten!.shuffle!(conf[:rng])
+      expanded_comms.flatten!.shuffle!(random: conf[:rng])
+    end
 
     # Execute the commands (or not).
     ret = batch(expanded_comms, batch_conf) unless conf[:skip_commands]
@@ -442,11 +441,11 @@ module BatchExperiment
     header << merge_headers(comms_info.map { | c | c[:extractor].names })
     header = header.join(conf[:separator])
 
-    # We need to merge the union of all comm_sets to query it.
+    # We need to merge the union of all comms_sets to query it.
     comm2origin = {}
-    comm_sets.each do | h |
-      comm2origin.merge(h) do | k, v, v2 |
-        puts "WARNING: The command expansion '#{k}' was generated more than once. The first time was by the template '#{v[:comm]}' and the file '#{v[:file]}', and this time by template '#{v2[:comm]}' and the file '#{v2[:file]}'. Will report on CVS as this command was generated by the template '#{v[:comm]}' and the file '#{v[:file]}'."
+    comms_sets.each do | h |
+      comm2origin.merge!(h) do | k, v, v2 |
+        puts "WARNING: The command expansion '#{k}' was generated more than once. The first time was by the template '#{v[:comm]}' and the file '#{v[:file]}', and this time by template '#{v2[:comm]}' and the file '#{v2[:file]}'. Will report on CSV as this command was generated by the template '#{v[:comm]}' and the file '#{v[:file]}'."
         v
       end
     end
@@ -458,12 +457,12 @@ module BatchExperiment
     # This means that the extractors have to agree on what is each column, two
     # different extractors have to extract the same kind of data at each column
     # (the first field returned by all extractors has to be, for example, cpu
-    # time, then the second field has to be the optimal result, and so on). If
-    # one extractor extract more fields than the others this is not a problem,
-    # if the second biggest extractor (in number of fields extract) will
-    # extract, for example, 4 fields, and the biggest extract 6 fields, the
-    # first 4 fields extracted by the biggest extractor have to be the same as
-    # the ones on the second-biggest extractor. This way, all the lines will
+    # time, the same applies for the remaining fields).
+    # If one extractor extract more fields than the others this is not a
+    # problem, if the second biggest extractor (in number of fields extract)
+    # will extract, for example, 4 fields, and the biggest extract 6 fields,
+    # the first 4 fields extracted by the biggest extractor have to be the same
+    # as the ones on the second-biggest extractor. This way, all the lines will
     # have the kind of data on the first four columns (not counting the
     # algorithm, filename and run_number ones), and only lines provenient from
     # the biggest extractor will have data on the fifth and sixth columns.

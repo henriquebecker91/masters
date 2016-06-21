@@ -13,11 +13,11 @@ comms_info = [{
   pattern: 'y',
   extractor: BatchExperiment::FirstLineExtractor,
   prefix: 'echo',
-}, {
-  command: 'wc FILE',
-  pattern: 'FILE',
-  extractor: BatchExperiment::WcExtractor,
-  prefix: 'wc',
+#}, {
+#  command: 'wc FILE',
+#  pattern: 'FILE',
+#  extractor: BatchExperiment::WcExtractor,
+#  prefix: 'wc',
 }]
 
 execution_info = {
@@ -34,6 +34,12 @@ conf = {
   # The columns will be ordered by command. All the columns of the first
   # command before the one from the second and so on.
   ic_columns: false,
+  # Number of times the same command will be executed over the same file.
+  qt_runs: 5,
+  # Order of the commands execution
+  comms_order: :random, #:by_comm, #:by_file,
+  # Random seed
+  rng: Random.new(0),
 }
 
 files = ['bible.txt', 'taoteching.txt']

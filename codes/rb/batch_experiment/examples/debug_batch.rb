@@ -1,6 +1,6 @@
 #!/bin/ruby
 
-require_relative '../lib/batch_experiment.rb'
+require 'batch_experiment'
 
 commands = []
 10000.times { | n | commands << "sleep 1 && echo #{n}" }

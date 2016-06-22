@@ -136,6 +136,12 @@ module BatchExperiment
   #   Default: '.out'.
   #   -- err_ext [String] Extension to be used in place of '.err'.
   #   Default: '.err'.
+  #   -- cwd [String] Command Working Directory. The path from where the
+  #   commands will be executed. Default: './' (i.e. the same directory from
+  #   where the ruby script was run).
+  #   -- output_dir [String] The folder used to save the
+  #   '.out'/'.err'/'.unfinished' files. Default: './' (i.e. the same directory
+  #   from where the ruby script was run).
   #
   # @return [String] Which commands were executed. Can be different from
   #   the 'commands' argument if commands are skipped (see :skip_done_comms).
@@ -174,6 +180,8 @@ module BatchExperiment
     conf[:post_timeout]     ||= 5
     conf[:converter]        ||= BatchExperiment::Comm2FnameConverter.new
     conf[:skip_done_comms]    = true if conf[:skip_done_comms].nil?
+    conf[:cwd]              ||= './'
+    conf[:output_dir]       ||= './'
 
     # Initialize main variables
     free_cpus = conf[:cpus_available].clone
@@ -183,9 +191,9 @@ module BatchExperiment
 
     commands.each do | command |
       commfname = conf[:converter].call(command)
-      out_fname = commfname + conf[:out_ext]
-      err_fname = commfname + conf[:err_ext]
-      lockfname = commfname + conf[:unfinished_ext]
+      out_fname = conf[:output_dir] + commfname + conf[:out_ext]
+      err_fname = conf[:output_dir] + commfname + conf[:err_ext]
+      lockfname = conf[:output_dir] + commfname + conf[:unfinished_ext]
 
       if conf[:skip_done_comms] && File.exists?(out_fname)
         if File.exists?(lockfname)
@@ -216,10 +224,11 @@ module BatchExperiment
         'sh', '-c', command
       )
 
+      cproc.cwd = conf[:cwd]
+
       File.open(lockfname, 'w') {} # empty on purpose
       out = File.open(out_fname, 'w')
       err = File.open(err_fname, 'w')
-
       cproc.io.stdout = out
       cproc.io.stderr = err
 
@@ -398,8 +407,9 @@ module BatchExperiment
     #conf[:skip_commands] defaults to false/nil
 
     # Get some of the batch config that we use inside here too.
-    out_ext         = batch_conf[:out_ext] || '.out'
+    out_ext         = batch_conf[:out_ext]        || '.out'
     unfinished_ext  = batch_conf[:unfinished_ext] || '.unfinished'
+    output_dir      = batch_conf[:output_dir]     || './'
     converter = batch_conf[:converter].clone unless batch_conf[:converter].nil?
     converter ||= BatchExperiment::Comm2FnameConverter.new
 
@@ -480,14 +490,14 @@ module BatchExperiment
       curr_line = [algorithm, filename, run_number]
 
       partial_fname = converter.call(exp_comm)
-      out_fname = partial_fname + out_ext
-      lockfname = partial_fname + unfinished_ext
+      out_fname = output_dir + partial_fname + out_ext
+      lockfname = output_dir + partial_fname + unfinished_ext
       extractor = run_info[:comm_info][:extractor]
 
       if File.exists?(out_fname)
         if File.exists?(lockfname)
           puts "Ignored file '#{out_fname}' because there was a"
-             + "  '#{lockfname}' file in the same folder."
+             + "  '#{lockfname}' file too."
         else
           f_content = File.open(out_fname, 'r') { | f | f.read }
           curr_line << extractor.extract(f_content)

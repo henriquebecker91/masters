@@ -15,11 +15,11 @@ What conditions you need to use this tool:
 
 What is not needed:
 
-* To know how to program in ruby. Only taking less than 5 minutes to learn some basic syntax will suffice to run commands on multiple cores and save the results to files (using BatchExperiment::batch). However, if you want not only to execute the commands but want to extract and group some information from their output to a CVS (using BatchExperiment::experiment), you will need to tell ruby how to do the extracting part.
+* To know how to program in ruby. Only taking less than 5 minutes to learn some basic syntax will suffice to run commands on multiple cores and save the results to files (using BatchExperiment::batch). However, if you want not only to execute the commands but want to extract and group some information from their output to a CSV (using BatchExperiment::experiment), you will need to tell ruby how to do the extracting part.
 
 ## How to use it
 
-You will need to create a ruby script (copy, past and adapt one of the provided examples), give it execution permissions ("chmod +x script.rb"), and execute it ("./script.rb"). It's good to remember that this will probably flood the folder from were you called the command with files containing the output of the commands. Also good to remember that the commands will be called from the folder where you called the script, so they probably will expect that any relative paths/filenames given to them to be relative to the current folder.
+You will need to create a ruby script (copy, past and adapt one of the provided examples), give it execution permissions ("chmod +x script.rb"), and execute it ("./script.rb"). It's good to remember that, if you didn't created a folder for the output files and set the :output_dir configuration to it, the script will probably flood your current folder with the output files. Also, good to remember that, if you didn't set the :cwd configuration, the commands will be called from the folder where you called the script, so they probably will expect that any relative paths/filenames given to them to be relative to the current folder.
 
 ## Examples
 
@@ -33,7 +33,7 @@ require 'batch_experiment'
 commands = [
   'sleep 2 && echo orange',
   'sleep 4 && echo banana',
-  'sleep 100 && echo "never gonna happen"',
+  'sleep 100 && echo "never gonna happen"', # killed by timeout
 ]
 
 conf = {

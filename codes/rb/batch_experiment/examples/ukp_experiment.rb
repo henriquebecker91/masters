@@ -25,6 +25,8 @@ execution_info = {
   cpus_available: [1, 2, 3],
   timeout: 10,
   post_timeout: 2,
+  cwd: '/home/henrique/AreaDeTrabalho/masters/data/ukp/',
+  output_dir: '/home/henrique/AreaDeTrabalho/tmp/',
 }
 
 conf = {
@@ -36,8 +38,6 @@ conf = {
 files = ['corepb.ukp', 'exnsd18.ukp', 'exnsd26.ukp', 'exnsdbis18.ukp', 'exnsd16.ukp', 'exnsd20.ukp', 'exnsdbis10.ukp', 'exnsds12.ukp']
 # If you don't execute the script from the ukp files folder you need to put the
 # folder relative or absolute path here (with trailing slash).
-path = '~/Aulas/mestrado/masters/data/ukp/'
-files.map! { | f | path + f }
 
 BatchExperiment::experiment(comms_info, execution_info, conf, files)
 

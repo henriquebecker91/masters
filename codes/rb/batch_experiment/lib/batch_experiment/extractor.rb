@@ -8,7 +8,7 @@ module BatchExperiment
     #
     # @param lines [Array<String>] Program output, broken in lines.
     # @param field [String] String to be found at the lines in the following
-    # pattern: 'field: value'.
+    #   pattern: 'field: value'.
     #
     # @return [String] The 'value' as a string or, if 'field' isn't found, an
     #   empty string.

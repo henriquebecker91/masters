@@ -6,7 +6,9 @@ cc MAIN is the main program for hbm_mtu1.
 c
 c  Discussion:
 c
-c    Calls MTU1 over the filename passed as the first command line arg.
+c    Calls MTU1 or MTU2 over the filename passed as the second command
+c    line arg (the first argument is 1 or 2, to specify if MTU1 or MTU2
+c    is to be called).
 c
 c  Licensing:
 c
@@ -24,7 +26,6 @@ c
 
       integer :: n    ! Quantity of items on the read instance.
       integer :: jdim ! Size of MTU2 arrays, must be at least n+1.
-      integer :: i    ! Loop variable.
 
       integer :: c    ! Capacity of the read instance.
 
@@ -50,21 +51,33 @@ c
       real    :: ttime
 
       ! Variables used to parse the command-line
+      character(len=255) :: mtu_version
       character(len=255) :: fname
       integer :: argc
 
+      ! Auxiliar variables loop variables used inside main
+      integer :: j
+      integer :: i
+      integer :: jpx
+      integer :: kf
+
       argc = command_argument_count()
-      if (argc .ne. 1) then
-        write (*,*) 'usage: <binary_path> <instance_filename>'
+      if (argc .ne. 2) then
+        write (*,*) 'usage: <binary_path> <1 or 2> <instance_filename>'
+        write (*,*) 'The first parameter define if MTU1 or MTU2 will be
+     *used. The second is a path to an instance in the .sukp format.'
         write (*,*) 'Number of parameters received: ', argc
         write (*,*) 'Aborting.'
         call exit(1)
       end if
 
-      call get_command_argument(1, fname)
+      call get_command_argument(1, mtu_version)
+      call get_command_argument(2, fname)
       call read_sukp_instance(fname, n, c, w, p)
       jdim = n + 1
 
+      ! Code for printing the instance. CAUTION: knapsack_reorder
+      ! changes the input of the algorithm.
 c      write ( *, '(a)' ) ' '
 c      write ( *, '(a)' ) '  MTU2 solves the UKP.'
 c      write ( *, '(a)' ) ' '
@@ -85,13 +98,58 @@ c      end do
 
       call system_clock (t1, clock_rate, clock_max)
 
+      allocate( x(jdim) )
       allocate( xo(jdim) )
       allocate( rr(jdim) )
       allocate( po(jdim) )
       allocate( wo(jdim) )
       allocate( pp(jdim) )
-      allocate( x(jdim) )
-      call mtu2 (n,p,w,c,z,x,jdim,jfo,jck,jub,po,wo,xo,rr,pp)
+
+      if (mtu_version .EQ. '1') then
+        z = 0
+        do j=1,n
+          rr(j) = float(p(j))/float(w(j))
+        end do
+        do j=1,n
+          pp(j) = j
+        end do
+        call sortr(n,rr,pp,jdim)
+        do j=1,n
+          i = pp(j)
+          po(j) = p(i)
+          wo(j) = w(i)
+        end do
+        call redu(n,po,wo,jdim,jpx,x)
+        kf = 0
+        j = jpx
+  220   kf = kf + 1
+        po(kf) = po(j)
+        wo(kf) = wo(j)
+        pp(kf) = pp(j)
+        j = x(j)
+        if (j .gt. 0) go to 220
+        if (kf .gt. 1) go to 230
+        xo(1) = c/wo(1)
+        z = po(1)*xo(1)
+        jub = z
+        go to 240
+  230   call mtu1(kf,po,wo,c,0.,z,xo,jdim,jub,x,rr)
+  240   do j=1,n
+          x(j) = 0
+        end do
+        do j=1,kf
+          i = pp(j)
+          x(i) = xo(j)
+        end do
+      else if (mtu_version .EQ. '2') then
+        call mtu2 (n,p,w,c,z,x,jdim,jfo,jck,jub,po,wo,xo,rr,pp)
+      else
+        write (*,*) 'The first parameter define if MTU1 or MTU2 will be
+     *used, it has to be 1 or 2.'
+        write (*,*) 'Value of first argument: ', mtu_version
+        write (*,*) 'Aborting.'
+        call exit(1)
+      end if
 
       call system_clock (t2, clock_rate, clock_max)
       ttime = real(t2 - t1)/real(clock_rate)
@@ -109,12 +167,12 @@ c      end do
           write (*, '(2x,i6,2x,i6,2x,i6,2x,i6)') i, x(i), p(i), w(i)
         end if
       end do
-
       write (*, '(a)') ' '
-      write (*, '(16x,2x,i6,2x,i6)') z, mass
 
-      write (*,*) 'Seconds: ', ttime
-      write (*,*) 'Max number of seconds before wrap: ', max_sec
+      write (*,'(a,i0)') 'opt: ', z
+      write (*,'(a,i0)') 'y_opt: ', mass
+      write (*,'(a,f19.9)') 'Seconds: ', ttime
+      write (*,'(a,i0)') 'Max number of seconds before wrap: ', max_sec
       stop
       contains
 

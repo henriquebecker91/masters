@@ -8,7 +8,7 @@ module BatchExperiment
     extend Extractor
     # (see BatchExperiment::Extractor#names)
     def self.names
-      ['first line', 'ext_time', 'ext_mem']
+      ['first_line', 'ext_time', 'ext_mem']
     end
 
     # (see BatchExperiment::Extractor#extract_from_lines)
@@ -33,7 +33,7 @@ module BatchExperiment
     extend Extractor
     # (see BatchExperiment::Extractor#names)
     def self.names
-      ['internal time', 'external time', 'external memory', 'opt']
+      ['internal_time', 'external_time', 'external_memory', 'opt']
     end
 
     # (see BatchExperiment::Extractor#extract_from_lines)
@@ -53,7 +53,7 @@ module BatchExperiment
     extend Extractor
     # (see BatchExperiment::Extractor#names)
     def self.names
-      ['internal time', 'external time', 'external memory', 'opt']
+      ['internal_time', 'external_time', 'external_memory', 'opt']
     end
 
     # (see BatchExperiment::Extractor#extract_from_lines)

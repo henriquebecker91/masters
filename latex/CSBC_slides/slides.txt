@@ -1,0 +1,178 @@
+==================== Only headers ====================
+
+(The presentation is 30 minutes, and any remaining time will be used for questions. So the best ideia is to limit the slides to about 15. This takes on account: the time limit; the author's fluency on english;)
+(Tadeu's opinion is to make this a presentation about the paper content (not a survey or history).)
+
+Front page			(not included on the counting)
+Outline				(necessary? not included on the counting)
+
+> Introduction			(Section, Section outline)
+What is UKP?			(indispensable)
+Linear Programming Model	(indispensable)
+#UKP Jargon			(? will be necessary?)
+
+> Prior Work
+Methods on Solving UKP		(indispensable)
+PYAsUKP/EDUK2 (State-of-art)	(indispensable)
+
+> UKP5
+UKP5				()
+
+The algorithm (transcript)	()
+
+GG66				()
+
+> Experiments and Results	(Section, not slide)
+
+The instances			(present the basics about the dataset)
+
+Times table			(table with condensed information)
+
+Times graph			(present the image with all instances only)
+
+> Analysis and Final Remarks
+
+Solution dominance		(Simple DP and the dominances)
+
+Hard vs Easy & DP vs B&B	(expose core problem of the PYAsUKP's article methodology) vs Hybrid
+
+Final remarks
+
+Future Works
+
+References			(not included on the counting)
+
+Questions?			(not included on the counting)
+
+==================== Slides ====================
+
+Front Slide
+	Name
+	University
+	Event name
+	Date
+
+Outline
+	Only the titles subsection titles
+
+> Introduction
+
+What is UKP?
+	UKP is an acronym for Unbounded Knapsack Problem
+	Very similar to BKP or 0-1 KP
+		But with an "unbounded" quantity of each item available
+	Subproblem of the column generation technique (often used to solve CSP/BPP)
+
+UKP Model
+	Copy latex equations
+
+> Prior Work
+
+Methods on Solving UKP
+	Dynamic Programming (DP): Strong correlation between 'n' and 'c' and the time to solve.
+	Branch and Bound (B&B): Strong correlation between instance's item distribution and time to solve.
+
+PYAsUKP/EDUK2 (State-of-art)
+	"EDUK [...] seems to be the most efficient dynamic programming based method available at the moment." 
+	EDUK2 is the algorithm, PYAsUKP is the only known implementation (OCaml). (As the algorithm uses many functional concepts the authors found that it would be so much easier to implement the algorithm on a functional language. Even if c++ is the de facto language for scientific computing.)
+	Hybrid: Tries to solve by B&B, if fails to solve quickly then defaults to DP. (Only hybrid method known.)
+
+> UKP5
+
+UKP5
+	DP algorithm based on [Garfinkel]
+	
+
+UKP5 Code
+	(copy-paste the latex code)
+
+GG66
+	"Ordered Step-Off": algorithm of Gilmore and Gomore (1966).
+	Found after sending this paper to the conference. (We notified the conference chair, but the paper was already submited for printing.)
+	Basically the same algorithm than UKP5. (only uses the own vector for storing the profit of the best solution, instead of one single variable)
+
+GG66 Code
+	Image?
+
+> Experiments and Results
+
+The instances
+	A set of 4540 "hard" instances proposed in [PYAsUKP]. (Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
+	Used the same tool and similar parameters to generate them. (The tool is the own pyasukpt, that isn't only an implementation of the EDUK2 but also a implementation of many instance generators.)
+	Five different classes of instances. (We adopted the same five classes used on PYAsUKP, and only augmented one of the classes because with the hardwere evolution it had become too easy to solve.)
+
+Times table
+
+Times graph
+
+> Analysis and Final Remarks
+
+#Solution dominance
+#	Applying dominance is discarding items that can't be on the optimal solution.
+#	DP algorithms as UKP5/GG66 can do that with almost no overhead while executing.
+
+Hard vs Easy & DP vs B&B
+	PYAsUKP is mainly a DP method. (the cases where the B&B don't solve the instance instantly, it don't affect the PYAsUKP time very much)
+	The benchmark proposed at PYAsUKP's paper focused hard-to-solve-by-B&B instances. (Instances with similar profit-to-weight ratio; them most efficient items being the ones with the biggest weight; etc..)
+	PYAsUKP compared its results against the ones from a B&B method, and against no DP method. (the method was MTU2)
+
+Final remarks
+	The algorithm isn't novel, but is "faster" than the "state-of-art" (At least for the instances proposed by authors of the state-of-art themselves)
+	Except by PYAsUKP, DP algorithms were abandoned with almost no empiric evidence (No paper presenting a DP algorithm compared computational results with another DP algorithm. And no paper presenting a B&B algorithm compared to DP (only to other B&B).)
+	A clear definition of the usefulness of each approach is necessary (We need to know for what instance sizes and other instance characteristics each approach is better, and we need to base this on solid empiric evidence.)
+
+Future Works
+	A survey on the UKP
+		Improve the benchmark dataset (include very big and random instances; include instances generated by the CPS/BPP column generation; create instances so hard that will make UKP5 take more than 1000s)
+		Test old algorithms that are provided with no computational results (many were already implemented after we send the paper)
+		Point that UKP5/GG66 are the same algorithm, and apologize (avoid that the misconception created by our article become long-lived)
+
+References
+
+Questions?
+
+==================== Consider including ====================
+
+Well-Know UKP aspects
+	UKP is NP-complete (CHECK IF NP-Hard IS MORE ADEQUATE)
+	UKP instances can be converted to BKP/0-1KP instances (but this is inefficient).
+	UKP can be solved on pseudo-polynomial time O(nc) by Dynamic Programming (DP)
+	The heuristics and approximative algorithms give results very close to the optimal.
+
+==================== DICARDED ====================
+
+(U)KP Jargon
+	The efficiency of an item j is pj/wj
+	The smallest items are the ones tied with the lowest weight (this is because in real world problems this is a "size", and the solution is constrained in 1/2/3 dimensions, and not a "weight")
+	The best item is the smallest between the most efficient ones
+	Two item with the same profit and weight are the same
+
+UKP Basic Knowledge (or Well-Know UKP aspects)
+	UKP is faster to solve than BKP and 0-1 KP (one less restriction to control, faster to solve)
+	UKP is yet NP-complete (CHECK IF NP-Hard IS MORE ADEQUATE)
+	UKP instances can be converted to BKP/0-1KP instances (but this is inefficient).
+
+UKP Basic Knowledge (or Well-Know UKP aspects)
+	UKP can be solved on pseudo-polynomial time O(nc) by Dynamic Programming (DP)
+	For instances with a great number of items, often the solution is mainly comprised by efficient items
+	The heuristics and approximative algorithms give results very close to the optimal.
+
+History Highlights
+	The UKP was referenced simply as "the knapsack problem" on many old papers[REFERÊNCIAS] (what can make bibliographic revision a little more complex)
+	1966-19XX: Many DP algorithms are proposed. The majority of those papers reference UKP as "a/the knapsack problem".
+	19XX-
+	AAAA: The concept of a functional DP algorithm for UKP is presented.
+	BBBB: An implementation of this concept is presented.
+	CCCC: An hybrid algorithm combining B&B with the functional DP is presented.
+
+History
+	DP era
+		Many exact DP solutions are presented on pseudo-code form.
+		Example: Show many works (one topic)
+		No instances suggested, No comparisons made.
+	B&B era
+		Solving very large "easy instances" the fastest way (B&B).
+		Example: 
+		Random/"Weak/Strong correlated" instances. Comparison only between B&B methods.
+
+

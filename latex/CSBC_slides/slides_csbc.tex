@@ -1,0 +1,549 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+
+\beamertemplateballitem
+\usetheme{Antibes}
+	\usecolortheme[RGB={120,0,0}]{structure}
+	\setbeamertemplate{blocks}[rounded][shadow=true]
+%\setbeamertemplate{footline}{\insertframenumber/\inserttotalframenumber}
+	\setbeamerfont{page number in head/foot}{size=\large}
+	\setbeamertemplate{footline}[frame number]
+	\setbeamercovered{transparent=5}
+	\setbeamertemplate{navigation symbols}{}
+	% To number the references.
+	\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+\newcommand{\backupbegin}{
+   \newcounter{framenumberappendix}
+   \setcounter{framenumberappendix}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \addtocounter{framenumberappendix}{-\value{framenumber}}
+   \addtocounter{framenumber}{\value{framenumberappendix}} 
+}
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{verbatim}
+\usepackage{cancel}
+
+\usepackage{tikz}
+\newcommand{\drawhvector}[5]{
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin}] (\x,0) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
+	}
+}
+\newcommand{\drawhvectornotext}[5]{
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin}] (\x,0) rectangle +\rs;
+		%\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
+	}
+}
+
+\begin{document}
+
+\title{UKP5: Solving the Unbounded Knapsack Problem}
+\author{Henrique Becker\footnote{Universidade Federal do Rio Grande do Sul, Brazil\label{ft:ufrgs}} and Luciana S. Buriol\textsuperscript{\ref{ft:ufrgs}}\\
+CSBC 2016 -- I ETC -- Encontro de Teoria da Computação 
+}
+%\logo{\includegraphics[scale=0.2]{inf}}
+\date{Tuesday, July 5}
+
+{
+	\setbeamertemplate{footline}{} 
+	\begin{frame}[noframenumbering]
+	\titlepage
+	\end{frame}
+}
+
+{
+	\setbeamertemplate{footline}{} 
+	\begin{frame}[noframenumbering]
+	\frametitle{Outline}
+	\tableofcontents
+	\end{frame}
+}
+
+\section{Introduction}
+\frame{\frametitle{What is UKP?}
+\begin{itemize}
+%\setlength\itemsep{1.5em}
+%\item UKP is an acronym for Unbounded Knapsack Problem.
+\item Very similar to BKP or 0-1 KP.
+\begin{itemize}
+\item But with an ``unbounded'' quantity of each item available.
+\end{itemize}
+\end{itemize}
+\large
+\begin{align}
+  maximize &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
+subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
+            &x_i \in \mathbb{N}_0\label{eq:x_integer}
+\end{align}
+\normalsize
+\begin{itemize}
+\vspace{-7mm}
+\item Subproblem of the column generation technique applied to the Cutting Stock Problem or the Bin Packing Problem.
+\end{itemize}
+}
+
+%\frame{\frametitle{UKP Model}
+%\LARGE
+%\begin{align}
+%  maximize &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
+%subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
+%            &x_i \in \mathbb{N}_0\label{eq:x_integer}
+%\end{align}
+%}
+
+\section{Prior Work}
+\frame{\frametitle{Methods on Solving UKP}
+\begin{beamerboxesrounded}[shadow=true]{Dynamic Programming (DP)}
+Strong correlation between \textbf{n} \& \textbf{c} and the time to solve.\\
+
+\small
+Ex.: Garfinkel\cite{gar72},  T.C. Hu\cite{tchu}, G\&G\cite{gg66}, Greenberg \& Feldman\cite{greenberg_improved_ukp5}, Greenberg\cite{greenberg_2}, EDUK\cite{eduk}.
+\end{beamerboxesrounded}	
+\vspace{2mm}
+\begin{beamerboxesrounded}[shadow=true]{Branch and Bound (B\&B)}
+Strong correlation between instance's distribution and time to solve.\\
+
+\small
+Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
+\end{beamerboxesrounded}	
+}
+
+\frame{\frametitle{EDUK2/PYAsUKP (State-of-the-art)}
+\begin{beamerboxesrounded}[shadow=true]{Knapsack Problems, 2004, by Kellerer, Pferschy, and Pisinger.}
+``EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p. 223]{knapsackproblems2004}
+\end{beamerboxesrounded}
+\begin{itemize}
+\item EDUK2 is the algorithm, PYAsUKP is the only known implementation (OCaml). %(As the algorithm uses many functional concepts the authors found that it would be so much easier to implement the algorithm on a functional language. Even if c++ is the de facto language for scientific computing.)
+\item \textbf{Hybrid Approach}: Tries to solve by B\&B, if it fails to solve quickly with B\&B, then switches to DP. %(Only hybrid method known.)
+\end{itemize}
+}
+
+\begin{comment}
+\section{Optimizations applicable to UKP}
+\frame{\frametitle{Symmetry Pruning}
+\begin{itemize}
+\item Solutions are symmetric when they are equivalent, but generated or represented in different ways.
+\item For example: \(\{ 5, 4, 6 \} \equiv \{ 6, 5, 4 \}\)
+\item Symmetry Pruning is to avoid the costs of finding the same solution by many different paths.
+\end{itemize}
+
+\center
+\edef \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\edef \origin {(6,5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(10.5, 0);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(9.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(10.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\def \origin {(6,1.5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Sparsity}
+\begin{itemize}
+\item Not every subproblem of capacity \([1,c]\) has to be solved.
+%Naive DP algorithms solve the UKP for every capacity in~\([1,c]\) (or \([w_{min},c]\)).
+\item Ex.: for the weights 7, 10, 5; no solution will weight exactly: 1-4, 6, 8, 9, 11, 13, 16, 18, 23 ...
+\item The optimal solution for those capacities will be the optimal solution already found for a previous capacity.
+\end{itemize}
+\center
+\edef \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\def \origin {(0,0)}
+\drawhvectornotext{\origin}{20}{\rx}{\ry}{\scale}
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, 0.5) {\(0\)};
+
+\draw[dashed, thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (5.5, 0.5) {\(5\)};
+
+\draw[dashed, thick] ++\origin +(0.5, 1) to [out=45,in=135] +(7.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (7.5, 0.5) {\(7\)};
+
+\draw[dashed, thick] ++\origin +(0.5, 1) to [out=45,in=135] +(10.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (10.5, 0.5) {\(10\)};
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(12.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (12.5, 0.5) {\(12\)};
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(14.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (14.5, 0.5) {\(14\)};
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(17.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (17.5, 0.5) {\(17\)};
+
+\draw[dashed, thick] ++\origin +(10.5, 0) to [out=315,in=225] +(20.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (20.5, 0.5) {\(20\)};
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(15.5, 0);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (15.5, 0.5) {\(15\)};
+
+\draw[dashed, thick] ++\origin +(12.5, 1) to [out=45,in=135] +(19.5, 1);
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (19.5, 0.5) {\(19\)};
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Dominated Solutions Pruning}
+\begin{itemize}
+\item If \(w_s \leq w_t\) and \(p_s > p_t\) then \(s\) dominates \(t\).
+\item Follows that \(s \cup \{i\}\) will dominate \(t \cup \{i\}\) for any item \(i\).
+\item Therefore, we can create new solutions only from~\(s\) and ignore~\(t\).
+\end{itemize}
+
+\center
+
+\edef \scale {0.5}
+
+\begin{tikzpicture}[scale=\scale]
+
+\draw [<->, thick] (15,0) -- (0,0) -- (0,5);
+
+\draw [fill] (3, 3) circle [radius=0.1];
+\draw [fill] (6, 4) circle [radius=0.1];
+\draw [fill] (11, 5) circle [radius=0.1];
+
+\draw [dashed] (15, 3) -- (3, 3) -- (3, 0);
+\draw [dashed] (15, 4) -- (6, 4) -- (6, 0);
+\draw [dashed] (15, 5) -- (11, 5) -- (11, 0);
+
+\draw [gray, fill] (4, 2.5) circle [radius=0.1];
+\draw [gray, fill] (4.8, 1.8) circle [radius=0.1];
+\draw [gray, fill] (4.6, 0.5) circle [radius=0.1];
+\draw [gray, fill] (6.2, 3.7) circle [radius=0.1];
+\draw [gray, fill] (9.5, 3.2) circle [radius=0.1];
+\draw [gray, fill] (9.5, 3.2) circle [radius=0.1];
+\draw [gray, fill] (8, 1) circle [radius=0.1];
+\draw [gray, fill] (8.7, 2.3) circle [radius=0.1];
+\draw [gray, fill] (13, 4.7) circle [radius=0.1];
+\draw [gray, fill] (11.5, 3.6) circle [radius=0.1];
+\draw [gray, fill] (12.7, 3.4) circle [radius=0.1];
+\draw [gray, fill] (14, 2.2) circle [radius=0.1];
+
+\node [below, font=\small] at (7.5, 0) {weight};
+\node [rotate=90, above, font=\small] at (0,2.5) {profit};
+%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
+%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
+
+\end{tikzpicture}
+
+}
+
+\frame{\frametitle{Time/Memory Tradeoff}
+\begin{itemize}
+\item On many instances, 99\% of the UKP5 time is used on the inner ``for'' of a double loop.
+\item Testing if the item weight is within the array boundaries is inside this ``for''.
+\item This test can be removed if we use \(w_{max}\) extra memory.
+\end{itemize}
+
+\center
+
+\edef \scale {0.58}
+
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\def \origin {(0,0)}
+
+\drawhvectornotext{\origin}{16}{\rx}{\ry}{\scale}
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, 0.5) {\dots};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (10.5, 0.5) {\(c\)};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (16.5, 0.5) {\dots};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (5.5, -1) {Valid Solutions};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (13.5, 2) {Invalid Solutions};
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(7.5, 1);
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(11.5, 1);
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(12.5, 0);
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(16.5, 0);
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Periodicity}
+\begin{itemize}
+\item The item with the biggest profit-to-weight ratio is often called the ``best item''.
+\item The optimal solution of instances with big capacities have a lower bound on the quantity of best items.
+\item This means we can compute a smaller knapsack and combine with \(x\) copies of the best item.
+\end{itemize}
+}
+\end{comment}
+
+\begin{comment}
+\section{UKP5}
+\frame{\frametitle{UKP5}
+\begin{itemize}
+\item UKP5 is a simple DP algorithm based on the algorithm presented by Garfinkel \& Nemhauser\cite{gar72}.
+\item UKP5 implements all five previously presented techniques
+\begin{itemize}
+\item G\&N implemented ``Symmetry Pruning'' on a less efficient fashion.
+\item G\&N suggested a periodicity check, but don't inserted it on the algorithm.
+\end{itemize}
+\end{itemize}
+}
+\end{comment}
+
+\section{UKP5}
+\frame{\frametitle{UKP5}
+\begin{itemize}
+\item UKP5 (this work's algorithm) is a simple DP algorithm based on the algorithm presented on \cite{gar72} (Garfinkel \& Nemhauser).
+\begin{itemize}
+  \item \textbf{Symmetry pruning}: existed in G\&N, improved on UKP5; % symmetric solutions are pruned in a more efficient fashion than in~\cite{gar72};
+  \item \textbf{Periodicity}: suggested (but not implemented) in G\&N; % the periodicity check suggested in~\cite{gar72} (but not implemented there) was adapted and implemented.
+  \item \textbf{Dominated solutions pruning}: most responsible for the performance difference; % dominated solutions are pruned;
+  \item \textbf{Sparsity}: optimization for instances with big \(w_{min}\); % not every position of the optimal solutions value array has to be computed;
+  \item \textbf{Time/memory tradeoff}: implementation detail; % the test \(w_i \leq y\) from the algorithm in~~\cite{gar72} was removed in cost of more O(\(w_{max}\)) memory;
+\end{itemize}
+\end{itemize}
+}
+
+\frame{\frametitle{UKP5 Code}
+%\scriptsize
+\small
+%\begin{algorithm}
+%\caption{UKP5 -- Computation of $opt$}\label{alg:ukp5}
+\begin{algorithmic}[1]
+\Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
+  \State \(g \gets\) array of \(c + w_{max}\) positions each one initialized with \(0\)\label{create_g}
+  \State \(d \gets\) array of \(c + w_{max}\) positions each one initialized with \(n\)\label{create_d}
+  
+  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}\Comment{Creates all single-item solutions}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \(d[w_i] \gets i\)
+    \EndIf
+  \EndFor\label{end_trivial_bounds}
+
+  \State \(opt \gets 0\)\label{init_opt}
+
+  \For{\(y \gets w_{min}, c\)}\label{main_ext_loop_begin}\Comment{Iterate the stored solutions}
+%    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}%\Comment{Handles sparsity and pruning of dominated solutions}
+    	\State \textbf{if} \(g[y] \leq opt\) \textbf{then skips to next iteration}%\label{if_less_than_opt_begin}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
+%    \EndIf\label{if_less_than_opt_end}
+    
+    \State \(opt \gets g[y]\)\label{update_opt}
+    
+    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}\Comment{Combine current solution with items}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
+        \State \(g[y + w_i] \gets g[y] + p_i\)
+        \State \(d[y + w_i] \gets i\)
+      \EndIf\label{if_new_lower_bound_end}
+    \EndFor\label{main_inner_loop_end}
+  \EndFor\label{main_ext_loop_end}
+  \State \textbf{return} \(opt\)
+\EndProcedure
+\end{algorithmic}
+%\end{algorithm}
+}
+
+\frame{\frametitle{GG66}
+\begin{itemize}
+\setlength\itemsep{1.5em}
+\item ``Ordered Step-Off'': algorithm of Gilmore and Gomore (1966)\cite{gg66}.
+\item Found after sending this paper to the conference.%(We notified the conference chair, but the paper was already submited for printing.)
+\item Very similar to UKP5.%(only uses the own vector for storing the profit of the best solution, instead of one single variable)
+\end{itemize}
+}
+
+\frame{\frametitle{GG66 Code}
+\includegraphics[scale=0.175]{gg66.png} 
+}
+
+\begin{comment}
+\frame{\frametitle{GG66 Code 2}
+Algorithm 1.B (Ordered Step-off)
+\begin{itemize}
+\item[I.] Reorder the lengths so that \(\pi_1/l_1 \leq \pi_2/l_2 \leq \dots \leq \pi_m/l_m\). Initialize \(F^*(x) = 0\), for \(0 \leq x \leq L\), \(l^*(0) = 1\) and \(x_2 = 0\).
+\item[II.] \begin{itemize}
+	\item[1] Let \(j = l^*(x_2)\).
+	\item[2] If \(x_2 + l_j \leq L\) then let \(V = \pi_{j} + F^*(x_2)\) and go to II.3. Otherwise go to II.4.
+	\item[3] If \(V \geq F^*(l_j+x_2)\) then let \(F^*(l_j+x_2) = V\), let \(l^*(l_j+x2) = j\), and go II.4. Otherwise go to II.4.
+	\item[4] If \(j < m\) then let \(j = j + 1\) and go to II.2. Otherwise go to III.1.
+\end{itemize}
+\item[III.] \begin{itemize}
+	\item[1] If \(x_2 < L\), let \(x_2 = x_2 + 1\) and go to III.2. Otherwise stop.
+	\item[2] If \(F^*(x_2) > F^*(x_2 - 1)\) go to II.1. Otherwise let \(F^*(x_2) = F^*(x_2-1)\), let \(l^*(x_2) = m + 1\), and go to III.1.
+\end{itemize}
+\end{itemize}
+}
+\end{comment}
+
+\frame{\frametitle{GG66 Code (changed notation)}
+Algorithm 1.B (Ordered Step-off)
+\begin{itemize}
+\item[I.] Reorder the lenghts so that \(p_1/w_1 \leq p_2/w_2 \leq \dots \leq p_n/w_n\). Initialize \(F^*(y') = 0\), for \(0 \leq y' \leq c\), \(l^*(0) = 1\) and \(y = 0\).
+\item[II.] \begin{itemize}
+	\item[1] Let \(i = l^*(y)\).
+	\item[2] If \(y + w_i \leq c\) then let \(v = p_i + F^*(y)\) and go to II.3. Otherwise go to II.4.
+	\item[3] If \(v \geq F^*(y+w_i)\) then let \(F^*(y+w_i) = v\), let \(l^*(y+w_i) = i\), and go II.4. Otherwise go to II.4.
+	\item[4] If \(i < n\) then let \(i = i + 1\) and go to II.2. Otherwise go to III.1.
+\end{itemize}
+\item[III.] \begin{itemize}
+	\item[1] If \(y < c\), let \(y = y + 1\) and go to III.2. Otherwise stop.
+	\item[2] If \(F^*(y) > F^*(y - 1)\) go to II.1. Otherwise let \(F^*(y) = F^*(y-1)\), let \(l^*(y) = n + 1\), and go to III.1.
+\end{itemize}
+\end{itemize}
+}
+
+\section{Experiments and Results}
+
+\frame{\frametitle{The instances}
+\begin{itemize}
+\item A set of 4540 ``hard'' instances proposed in \cite{pya} (EDUK2 paper), with \(10^3 \leq n \leq 10^5\) and \(10^6 \leq c \leq 10^8\)  %(Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B\&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
+\item Used the same tool and similar parameters to generate them. %(The tool is the own pyasukpt, that isn't only an implementation of the EDUK2 but also a implementation of many instance generators.)
+\item Five different classes of instances.%(We adopted the same five classes used on PYAsUKP, and only augmented one of the classes because with the hardwere evolution it had become too easy to solve.)
+\begin{itemize}
+	\item Instances with no collective dominance -- 2000;
+	\item Instances with postponed periodicity -- 800;
+	\item Strong correlated (profit and weight) -- 240;
+	\item SAW (proved to be hard to solved by B\&B\cite{chung}) -- 1100;
+	\item Subset~sum instances -- 400;
+\end{itemize}
+\end{itemize}
+}
+
+\begin{frame}
+\frametitle{Times table (seconds)}
+\center
+\begin{tabular}{llllll}
+        &  & UKP5 & PYA & UKP5 & PYA\\ \hline
+Class & \#	& avg & avg & sd & sd \\ \hline
+W.C.D. & 2000 	& \textbf{1.55} & 34.11 & \textbf{1.94} & 82.35 \\ \hline
+S.S. & 400 	& \textbf{0.08} & 6.39 & \textbf{0.20} & 55.33 \\ \hline
+S.C. & 240 	& \textbf{0.34} & 52.46 & \textbf{0.36} & 110.24 \\ \hline
+SAW & 1100	& \textbf{3.10} & 15.43 & \textbf{5.35} & 31.82 \\ \hline
+P.P. & 800 	& \textbf{5.01} & 121.71 & \textbf{3.81} & 173.30 \\
+\pause
+Class & \#	& min & min & max & max \\ \hline
+W.C.D. & 2000 	& 0.02 & \textbf{0.00} & \textbf{13.17} & 667.80 \\ \hline
+S.S. & 400 	& 0.01 & \textbf{0.00} & \textbf{1.42} & 726.34 \\ \hline
+S.C. & 240 	& 0.04 & \textbf{0.00} & \textbf{1.13} & 721.88 \\ \hline
+SAW & 1100 	& 0.09 & \textbf{0.01} & \textbf{21.93} & 192.03 \\ \hline
+P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
+%W.C.D. & 2000 & 1.5581567411 & 1.9448457081 & 0.0288475 & 13.1754 & 34.117780105 & 82.3560955348 & 0 & 667.80327 \\ \hline
+%S.S. & 400 & 0.08 & 0.20 & 0.01 & 1.42 & 6.39 & 55.33 & 0.00 & 726.34 \\ \hline
+%S.C. & 240 & 0.3468662025 & 0.3618682953 & 0.046731 & 1.13176 & 52.4671329583 & 110.2489829781 & 0 & 721.88659 \\ \hline
+%SAW & 1100 & 3.1080885875 & 5.3562777737 & 0.0984506 & 21.9394 & 15.4338201 & 31.828562601 & 0.01333 & 192.03665 \\ \hline
+%P.P. & 800 & 5.0175573 & 3.8174543896 & 0.549045 & 14.9801 & 121.7176255625 & 173.3084120879 & 0.01 & 828.89325 \\
+\end{tabular}
+\end{frame}
+
+\frame{\frametitle{Times charts}
+\centering
+\includegraphics[scale=0.6]{six_plots.png} 
+}
+
+\begin{frame}[plain]%\frametitle{Times charts}
+\centering
+\includegraphics[scale=0.37]{all.png} 
+\end{frame}
+
+\frame{\frametitle{Times charts}
+\centering
+\includegraphics[scale=0.6]{six_plots.png} 
+}
+
+\section{Analysis and Final Remarks}
+
+\frame{\frametitle{Hard vs Easy -- DP vs B\&B}
+\begin{itemize}
+\setlength\itemsep{1.5em}
+\item PYAsUKP is a DP method (with a short B\&B phase first). %(the cases where the B\&B don't solve the instance instantly, it don't affect the PYAsUKP time very much)
+\item The benchmark proposed at PYAsUKP's paper focused hard-to-solve-by-B\&B instances. %(Instances with similar profit-to-weight ratio; them most efficient items being the ones with the biggest weight; etc..)
+\item PYAsUKP results were compared against the ones from a B\&B method, and against no other DP method. % (the method was MTU2)
+\end{itemize}
+}
+
+\frame{\frametitle{Final remarks}
+\begin{itemize}
+\setlength\itemsep{1.5em}
+\item The algorithm is very similar to an algorithm of 1966, but is ``faster'' than the ``state-of-the-art''. %(At least for the instances proposed by authors of the state-of-the-art themselves)
+\item Except by PYAsUKP, DP algorithms were abandoned with almost no empiric evidence. %(No paper presenting a DP algorithm compared computational results with another DP algorithm. And no paper presenting a B\&B algorithm compared to DP (only to other B\&B).)
+\item A clear definition of the usefulness of each approach is necessary. %(We need to know for what instance sizes and other instance characteristics each approach is better, and we need to base this on solid empiric evidence.)
+\end{itemize}
+}
+
+\frame{\frametitle{Future Works}
+\begin{beamerboxesrounded}[shadow=true]{A survey on the UKP}
+\begin{itemize}
+\item Improve the benchmark dataset. %(include very big and random instances; include instances generated by the CPS/BPP column generation; create instances so hard that will make UKP5 take more than 1000s)
+\item Test old algorithms that were presented with no computational results. %(many were already implemented after we send the paper)
+\item Point that UKP5/GG66 are very similar.%, and apologize. %(avoid that the misconception created by our article become long-lived)
+\end{itemize}
+\end{beamerboxesrounded}	
+}
+
+\frame{\frametitle{Questions?}
+\center
+%This is, if we have time yet.\\
+%(Sorry for my terrible pronunciation.)
+\Large
+Thank you for your attention.
+
+\normalsize
+Contact: hbecker@inf.ufrgs.br, henriquebecker91@gmail.com
+}
+
+\bibliographystyle{splncs03.bst}
+
+\backupbegin
+\setbeamertemplate{footline}{}
+\begin{frame}[allowframebreaks]{References}
+\nocite{becker2016ukp5}
+\small
+\bibliography{slides_csbc.bib}
+\end{frame}
+\backupend
+
+\end{document}
+

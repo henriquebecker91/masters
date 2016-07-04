@@ -14,12 +14,17 @@ comms_info = [{
   # 683e27e2e5ee39b91edf298be077d1a30fe9dba4, "Added test for checking clock
   # precision on a plataform.".
   command:    'run_ukp5.out INST_FILE',
+  # The code for pyasukpt was the one on codes/ocaml/pyasukp_mail.tgz,
+  # compiled with "make edukt".
+  # command:    'pyasukpt INST_FILE',
   pattern:    'INST_FILE',
   extractor:  BatchExperiment::UKP5Extractor,
+  #extractor:  BatchExperiment::PyaExtractor,
   # We will use the prefix to distinguish between the 4 different setups
   # (the code is the same, but the environment changes, and there isn't
   # another place to store this info).
   prefix:     curr_env.to_s,
+  #prefix:     'pya_' + curr_env.to_s,
 }]
 
 # The notebook has four cores, the desktop has six cores. As one core has
@@ -36,6 +41,7 @@ cpus_available = {
 batch_info = {
   cpus_available: cpus_available[curr_env],
   timeout: 60,
+  #timeout: 999, # the timeout for pyasukpt
   post_timeout: 1,
   cwd: '/home/henrique/AreaDeTrabalho/instances_after_mail/',
   output_dir: '/home/henrique/AreaDeTrabalho/env_influence_output/',
@@ -43,6 +49,7 @@ batch_info = {
 
 experiment_info = {
   csvfname:     curr_env.to_s + '.csv',
+#  csvfname:     'pya_' + curr_env.to_s + '.csv',
   comms_order:  :random,
   qt_runs:      10,
 }

@@ -25,16 +25,16 @@ c
       implicit none
 
       integer :: n    ! Quantity of items on the read instance.
-      integer :: jdim ! Size of MTU2 arrays, must be at least n+1.
-
       integer :: c    ! Capacity of the read instance.
 
       integer, allocatable :: p(:) ! Item profits of the read instance.
       integer, allocatable :: w(:) ! Item weights of the read instance.
       integer, allocatable :: x(:) ! Quantity of the items on solution.
-      integer :: z    ! Solution value.
-      integer :: mass ! Size of the found solution.
 
+      integer :: z    ! Solution value.
+      integer :: mass ! Weight of the found optimal solution.
+
+      integer :: jdim ! Size of MTU arrays, must be at least n+1.
       integer :: jck  ! Boolean. The instance should be checked?
       integer :: jfo  ! Boolean. Return exact result?
       integer :: jub  ! Output. Upper bound.
@@ -70,9 +70,9 @@ c
         write (*,*) 'Aborting.'
         call exit(1)
       end if
-
       call get_command_argument(1, mtu_version)
       call get_command_argument(2, fname)
+
       call read_sukp_instance(fname, n, c, w, p)
       jdim = n + 1
 

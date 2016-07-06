@@ -445,7 +445,7 @@ namespace hbm {
       } else {
         next_slice_size = mtu2_sort_k_most_efficient(items, v);
       }
-      cout << "next_slice_size: " << next_slice_size << endl;
+      //cout << "next_slice_size: " << next_slice_size << endl;
 
       // The core will be kept as a profit and a weight array, to avoid having
       // to convert for each call to inner_mtu1. The arrays are of size 'n + 2'
@@ -519,13 +519,15 @@ namespace hbm {
           const W &wj = non_core[j].w;
           P u = pj + u1(items[0], items[1], c - wj);
           if (u > z) u = pj + u3(items[0], items[1], items[2], c - wj);
-          // the 'if' below can't be an 'else' of the 'if' above, don't try
+          // the 'if' below can't be an 'else' of the 'if' above, don't try!
           // the variable 'u' changes value on the 'if' above
           if (u <= z) {
             items_to_remove[j] = true;
             ++qt_items_to_remove;
           }
         }
+        // Ends the loop if all items are marked for removal.
+        if (non_core_start + qt_items_to_remove >= non_core_size) break;
 
         // Here we remove the dominated items from non_core (that were marked
         // for removal on the loop above), and also remove the v first items
@@ -555,7 +557,7 @@ namespace hbm {
         } else {
           next_slice_size = mtu2_sort_k_most_efficient(non_core, v);
         }
-        cout << "next_slice_size: " << next_slice_size << endl;
+        //cout << "next_slice_size: " << next_slice_size << endl;
         for (I i = 0; i < next_slice_size; ++i, ++k) {
           aux_item = non_core[i];
           core_w[k] = aux_item.w;

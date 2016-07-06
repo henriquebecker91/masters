@@ -338,11 +338,15 @@ namespace hbm {
       // as the index for the first item with the k-esim efficiency.
       I i = 1;
 
-      // TODO: this method is already degenerated for subset-sum, mtu1 can
-      // solve an instance in 0.008s and mtu2 will need 0.34s because of the
-      // overhead of this sorting function. Needs to get the original
-      // fortran code and check how it implemented the act of finding
-      // the k-esim efficiency and selected the items smaller than it.
+      // NOTE: The original fortran code make use of a very complex algorithm
+      // created by the same author ("A hybrid algorithm for finding the kth
+      // smallest of n elements in O(n) time", DOI: 10.1007/BF02288326).
+      // As our objective is to sort until the kth smallest element, we use
+      // the much simpler and specific code below. This code is optimal if
+      // all the items have different efficiencies. If all the items have
+      // the same efficiency the loop will execute n/k times; taking in
+      // account that k is defined with base on n, this means no more than
+      // 100 times.
       while (qt_effs_to_find && qt_sorted_items < n) {
         sort_by_eff(items.begin() + qt_sorted_items, items.end(), k);
         for (I limit = min(n, qt_sorted_items + k); qt_effs_to_find && i < limit; ++i) {
@@ -418,7 +422,13 @@ namespace hbm {
       const W c = eip->c = ukpi.c;
       const I n = eip->n = ukpi.items.size();
       auto &items = ukpi.items;
-      //already_sorted = true;
+
+      // This 'if' reduces unnecessary overhead when the instance is a
+      // subset-sum instance (all item efficiencies equal, no need to sort),
+      // at a low overhead for the other unsorted instances.
+      if (is_sorted(items.begin(), items.end())) {
+        already_sorted = true;
+      }
 
       P z;
       // v is the size the core problem begins and grows at each iteration.

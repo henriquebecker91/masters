@@ -119,25 +119,11 @@ c      end do
           po(j) = p(i)
           wo(j) = w(i)
         end do
-        call redu(n,po,wo,jdim,jpx,x)
-        kf = 0
-        j = jpx
-  220   kf = kf + 1
-        po(kf) = po(j)
-        wo(kf) = wo(j)
-        pp(kf) = pp(j)
-        j = x(j)
-        if (j .gt. 0) go to 220
-        if (kf .gt. 1) go to 230
-        xo(1) = c/wo(1)
-        z = po(1)*xo(1)
-        jub = z
-        go to 240
-  230   call mtu1(kf,po,wo,c,0.,z,xo,jdim,jub,x,rr)
-  240   do j=1,n
+        call mtu1(n,po,wo,c,0.,z,xo,jdim,jub,x,rr)
+        do j=1,n
           x(j) = 0
         end do
-        do j=1,kf
+        do j=1,n
           i = pp(j)
           x(i) = xo(j)
         end do

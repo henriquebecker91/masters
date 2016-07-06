@@ -1,6 +1,6 @@
 Gem::Specification.new do | s |
   s.name        = 'batch_experiment'
-  s.version     = '2.1.2'
+  s.version     = '2.1.3'
   s.licenses    = ['Unlicense']
   s.summary     = 'A ruby script that distributes system commands between cpu cores, and save their output.'
   s.description = ''
@@ -17,8 +17,8 @@ Gem::Specification.new do | s |
     'examples/experiment_example.rb',
     'examples/debug_batch.rb',
     'README.md',
+    '.yardopts',
   ]
   s.add_runtime_dependency 'childprocess', '~> 0.5'
   s.homepage    = 'https://rubygems.org/gems/batch_experiment'
-  s.rdoc_options << '--no-private'
 end

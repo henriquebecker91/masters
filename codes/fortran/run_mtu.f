@@ -22,33 +22,34 @@ c  Author:
 c
 c    Henrique Becker
 c
+      use iso_fortran_env
       implicit none
 
-      integer :: n    ! Quantity of items on the read instance.
-      integer :: c    ! Capacity of the read instance.
+      integer(int64) :: n    ! Quantity of items on the read instance.
+      integer(int64) :: c    ! Capacity of the read instance.
 
-      integer, allocatable :: p(:) ! Item profits of the read instance.
-      integer, allocatable :: w(:) ! Item weights of the read instance.
-      integer, allocatable :: x(:) ! Quantity of the items on solution.
+      integer(int64), allocatable :: p(:) ! Instance item profits.
+      integer(int64), allocatable :: w(:) ! Instance item weights.
+      integer(int64), allocatable :: x(:) ! # of each item on solution.
 
-      integer :: z    ! Solution value.
-      integer :: mass ! Weight of the found optimal solution.
+      integer(int64) :: z    ! Solution value.
+      integer(int64) :: mass ! Weight of the found optimal solution.
 
-      integer :: jdim ! Size of MTU arrays, must be at least n+1.
+      integer(int64) :: jdim ! Size of MTU arrays, must be at least n+1.
       integer :: jck  ! Boolean. The instance should be checked?
       integer :: jfo  ! Boolean. Return exact result?
-      integer :: jub  ! Output. Upper bound.
+      integer(int64) :: jub  ! Output. Upper bound.
 
       ! Five arrays used internally by MTU2.
-      real, allocatable :: xo(:)
-      real, allocatable :: rr(:)
-      integer, allocatable :: po(:)
-      integer, allocatable :: wo(:)
-      integer, allocatable :: pp(:)
+      real(real64), allocatable :: xo(:)
+      real(real64), allocatable :: rr(:)
+      integer(int64), allocatable :: po(:)
+      integer(int64), allocatable :: wo(:)
+      integer(int64), allocatable :: pp(:)
 
       ! Variables needed to read the time used
-      integer :: t1, t2, clock_rate, clock_max, max_sec
-      real    :: ttime
+      integer      :: t1, t2, clock_rate, clock_max, max_sec
+      real(real64) :: ttime
 
       ! Variables used to parse the command-line
       character(len=255) :: mtu_version
@@ -56,10 +57,10 @@ c
       integer :: argc
 
       ! Auxiliar variables loop variables used inside main
-      integer :: j
-      integer :: i
-      integer :: jpx
-      integer :: kf
+      integer(int64) :: j
+      integer(int64) :: i
+      integer(int64) :: jpx
+      integer(int64) :: kf
 
       argc = command_argument_count()
       if (argc .ne. 2) then
@@ -68,7 +69,7 @@ c
      *used. The second is a path to an instance in the .sukp format.'
         write (*,*) 'Number of parameters received: ', argc
         write (*,*) 'Aborting.'
-        call exit(1)
+        stop
       end if
       call get_command_argument(1, mtu_version)
       call get_command_argument(2, fname)
@@ -108,12 +109,14 @@ c      end do
       if (mtu_version .EQ. '1') then
         z = 0
         do j=1,n
-          rr(j) = float(p(j))/float(w(j))
+          rr(j) = real(p(j), real64)/real(w(j), real64)
         end do
         do j=1,n
           pp(j) = j
         end do
-        call sortr(n,rr,pp,jdim)
+        ! Unhappily, because the casting below, this means the program
+        ! don't work with a number of items bigger than an int32.
+        call sortr(n,rr,pp,real(jdim, real64))
         do j=1,n
           i = pp(j)
           po(j) = p(i)
@@ -134,7 +137,7 @@ c      end do
      *used, it has to be 1 or 2.'
         write (*,*) 'Value of first argument: ', mtu_version
         write (*,*) 'Aborting.'
-        call exit(1)
+        stop
       end if
 
       call system_clock (t2, clock_rate, clock_max)
@@ -161,6 +164,41 @@ c      end do
       write (*,'(a,i0)') 'Max number of seconds before wrap: ', max_sec
       stop
       contains
+
+      pure function iabs64(x) result(res)
+c*********************************************************************72
+c
+cc iabs64 Seems like f2008 don't have an int64 version of iabs.
+c
+c  Licensing:
+c
+c    Public Domain. Unlicense.
+c
+c  Modified:
+c
+c    TODO
+c
+c  Author:
+c
+c    Henrique Becker
+c
+c  Parameters:
+c
+c    x Input, Name of the file with an sUKP instance.
+c
+      use iso_fortran_env
+      implicit none
+      integer(int64), intent(in) :: x
+      integer(int64) :: res
+
+      if (x < 0) then
+        res = -x
+      else
+        res = x
+      endif
+
+      return
+      end function iabs64
 
       subroutine read_sukp_instance(fname, n, c, w, p)
 c*********************************************************************72
@@ -190,11 +228,11 @@ c
       implicit none
 
       character(len=*) :: fname
-      integer :: n
-      integer :: c
-      integer, allocatable :: w(:)
-      integer, allocatable :: p(:)
-      integer :: tmp1, tmp2, i
+      integer(int64) :: n
+      integer(int64) :: c
+      integer(int64), allocatable :: w(:)
+      integer(int64), allocatable :: p(:)
+      integer(int64) :: tmp1, tmp2, i
 
       open(1,file=fname)
       read(1,*) n
@@ -210,7 +248,6 @@ c
 
       return
       end
-      end program
 
       subroutine timestamp ( )
 c*********************************************************************72
@@ -416,8 +453,12 @@ C
 C ALL THE PARAMETERS BUT XO AND RR ARE INTEGER. ON RETURN OF MTU2
 C ALL THE INPUT PARAMETERS ARE UNCHANGED.
 C
-      INTEGER P(JDIM),W(JDIM),X(JDIM),PO(JDIM),WO(JDIM),PP(JDIM),C,Z
-      REAL    RR(JDIM),XO(JDIM)
+      use iso_fortran_env
+      implicit none
+      integer(int64) :: jdim,C,Z
+      INTEGER(int64) :: P(JDIM),X(JDIM),PO(JDIM)
+      INTEGER(int64) :: WO(JDIM),PP(JDIM),W(JDIM)
+      REAL(real64)    RR(JDIM),XO(JDIM)
       Z = 0
       IF ( JCK .EQ. 1 ) CALL CHMTU2(N,P,W,C,Z,JDIM)
       IF ( Z .LT. 0 ) RETURN
@@ -427,7 +468,7 @@ C
       KC = N
       IF ( N .LE. 200 ) GO TO 180
       DO 10 J=1,N
-        RR(J) = FLOAT(P(J))/FLOAT(W(J))
+        RR(J) = (P(J))/real(W(J), real64)
    10 CONTINUE
       KC = N/100
       IF ( KC .LT. 100 ) KC = 100
@@ -438,7 +479,7 @@ C
       IF = 0
       IL = N + 1
       DO 30 J=1,N
-        RR(J) = FLOAT(P(J))/FLOAT(W(J))
+        RR(J) = real(P(J), real64)/real(W(J), real64)
         IF ( RR(J) .LT. RK ) GO TO 30
         IF ( RR(J) .EQ. RK ) GO TO 20
         IF = IF + 1
@@ -515,14 +556,14 @@ C SOLUTION OF THE REDUCED CORE PROBLEM.
         IF ( LIM12 .GT. IB ) IB = LIM12
         IF ( IB .LE. Z ) GO TO 130
         DO 120 JJ=J,N
-          W(JJ) = IABS(W(JJ))
+          W(JJ) = iabs64(W(JJ))
   120   CONTINUE
         GO TO 180
   130 CONTINUE
       GO TO 160
   140 DO 150 J=1,N
         X(J) = 0
-        W(J) = IABS(W(J))
+        W(J) = iabs64(W(J))
   150 CONTINUE
   160 DO 170 J=1,K
         I = PP(J)
@@ -534,7 +575,7 @@ C
 C SOLUTION THROUGH COMPLETE SORTING.
 C
   180 DO 190 J=1,KC
-        RR(J) = FLOAT(P(J))/FLOAT(W(J))
+        RR(J) = real(P(J), real64)/real(W(J), real64)
   190 CONTINUE
       DO 200 J=1,N
         PP(J) = J
@@ -570,12 +611,17 @@ C REDUCTION OF THE PROBLEM.
         X(I) = XO(J)
   260 CONTINUE
       RETURN
+
       END
+
       SUBROUTINE CHMTU2(N,P,W,C,Z,JDIM)
 C
 C CHECK THE INPUT DATA.
 C
-      INTEGER P(JDIM),W(JDIM),C,Z
+      use iso_fortran_env
+      implicit none
+      integer(int64) JDIM
+      INTEGER(int64) P(JDIM),W(JDIM),C,Z
       IF ( N .GT. 1 .AND. N .LE. JDIM - 1 ) GO TO 10
       Z = - 1
       RETURN
@@ -636,8 +682,9 @@ C THE  K-TH  SMALLEST OF  N  ELEMENTS IN  O(N)  TIME" , BY
 C M. FISCHETTI AND S. MARTELLO, ANNALS OF OPERATIONAL
 C RESEARCH 13, 1988.
 C
+      use iso_fortran_env
       DIMENSION S(N),SS(N6)
-      INTEGER L(6),R(6),T(6)
+      INTEGER(int64) L(6),R(6),T(6)
       L(1) = 1
       R(1) = N
       T(1) = K
@@ -873,8 +920,9 @@ C SUBROUTINE TO COMPUTE THE CARDINALITY OF SET  A2 .
       END
       SUBROUTINE FORWD(NA,A,N6,SS,LEV,L,R,T,NXT,V,JFLAG)
 C SUBROUTINE TO PERFORM STATEMENTS  1 - 9 .
+      use iso_fortran_env
       DIMENSION A(NA),SS(N6)
-      INTEGER L(6),R(6),T(6)
+      INTEGER(int64) L(6),R(6),T(6)
       IL = L(LEV)
       IR = R(LEV)
       IT = T(LEV)
@@ -1155,9 +1203,10 @@ C  S. MARTELLO, P. TOTH, "BRANCH AND BOUND ALGORITHMS FOR THE SOLUTION
 C  OF THE GENERAL UNIDIMENSIONAL KNAPSACK PROBLEM", IN M. ROUBENS, ED.,
 C  "ADVANCES IN OPERATIONS RESEARCH", NORTH HOLLAND, 1977.
 C
-      INTEGER P(JDIM),W(JDIM),C,Z
-      INTEGER XX(JDIM),CWS,CWF,DIFF,R,S,S1,S2,T,PROFIT,PS
-      REAL    X(JDIM),MIN(JDIM)
+      use iso_fortran_env
+      INTEGER(int64) P(JDIM),W(JDIM),C,Z
+      INTEGER(int64) XX(JDIM),CWS,CWF,DIFF,R,S,S1,S2,T,PROFIT,PS
+      REAL(real64)    X(JDIM),MIN(JDIM)
 C
 C STEP 1.
 C
@@ -1186,7 +1235,8 @@ C
       W(N+1) = C + 1
       P(N+1) = 0
       LIM = IP + CWS*P(3)/W(3)
-      IF ( N .EQ. 2 ) LIM = FLOAT(IP) + FLOAT(CWS)*RN
+c      IF ( N .EQ. 2 ) LIM = FLOAT(IP) + FLOAT(CWS)*RN
+      IF ( N .EQ. 2 ) LIM = real(IP, real64) + real(CWS, real64)*RN
       ITRUNC = (W(2) - CWS + W(1) - 1)/W(1)
       LIM12 = IP + (CWS + ITRUNC*W(1))*P(2)/W(2) - ITRUNC*P(1)
       IF ( LIM12 .GT. LIM ) LIM = LIM12
@@ -1320,22 +1370,23 @@ C RELATIONS.
 C ON OUTPUT, JPX IS THE FIRST UNDOMINATED ITEM, X(JPX) THE SECOND, AND
 C SO ON. IF Y IS THE LAST ONE, THEN X(Y) = 0.
 C
-      INTEGER PO(JDIM),WO(JDIM),X(JDIM)
-      INTEGER FEQ,PRFEQ,PRJ,PRK
+      use iso_fortran_env
+      INTEGER(int64) PO(JDIM),WO(JDIM),X(JDIM)
+      INTEGER(int64) FEQ,PRFEQ,PRJ,PRK
 C INITIALIZATION.
       JPX = 1
       DO 10 J=1,N
         X(J) = J + 1
    10 CONTINUE
       X(N) = 0
-      CRAT = FLOAT(PO(1))/FLOAT(WO(1)) + 1.
+      CRAT = real(PO(1), real64)/real(WO(1), real64) + 1.
       PRFEQ = 0
       PRJ = 0
 C MAIN ITERATION.
       J = JPX
    20   IWOJ = WO(J)
         IPOJ = PO(J)
-        RJ = FLOAT(IPOJ)/FLOAT(IWOJ)
+        RJ = real(IPOJ, real64)/real(IWOJ, real64)
         IF ( RJ .EQ. CRAT ) GO TO 30
         CRAT = RJ
         PRFEQ = PRJ
@@ -1382,8 +1433,9 @@ C V(I) (OUTPUT) = POINTER TO THE I-TH ELEMENT OF THE SORTED ARRAY.
 C
 C ON RETURN, ARRAY A IS UNCHANGED.
 C
-      INTEGER V(N),IU(20),IL(20)
-      REAL    A(JDA)
+      use iso_fortran_env
+      INTEGER(int64) V(N),IU(20),IL(20)
+      REAL(real64)   A(JDA)
       II = 1
       JJ = N
       IF ( N .LE. 1 ) RETURN
@@ -1457,3 +1509,4 @@ C
       V(K+1) = IV
       GO TO 100
       END
+      end program

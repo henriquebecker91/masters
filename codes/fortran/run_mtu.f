@@ -116,13 +116,13 @@ c      end do
         end do
         ! Unhappily, because the casting below, this means the program
         ! don't work with a number of items bigger than an int32.
-        call sortr(n,rr,pp,real(jdim, real64))
+        call sortr(n,rr,pp,jdim)
         do j=1,n
           i = pp(j)
           po(j) = p(i)
           wo(j) = w(i)
         end do
-        call mtu1(n,po,wo,c,0.,z,xo,jdim,jub,x,rr)
+        call mtu1(n,po,wo,c,0._real64,z,xo,jdim,jub,x,rr)
         do j=1,n
           x(j) = 0
         end do
@@ -164,41 +164,6 @@ c      end do
       write (*,'(a,i0)') 'Max number of seconds before wrap: ', max_sec
       stop
       contains
-
-      pure function iabs64(x) result(res)
-c*********************************************************************72
-c
-cc iabs64 Seems like f2008 don't have an int64 version of iabs.
-c
-c  Licensing:
-c
-c    Public Domain. Unlicense.
-c
-c  Modified:
-c
-c    TODO
-c
-c  Author:
-c
-c    Henrique Becker
-c
-c  Parameters:
-c
-c    x Input, Name of the file with an sUKP instance.
-c
-      use iso_fortran_env
-      implicit none
-      integer(int64), intent(in) :: x
-      integer(int64) :: res
-
-      if (x < 0) then
-        res = -x
-      else
-        res = x
-      endif
-
-      return
-      end function iabs64
 
       subroutine read_sukp_instance(fname, n, c, w, p)
 c*********************************************************************72
@@ -248,6 +213,8 @@ c
 
       return
       end
+
+      end program
 
       subroutine timestamp ( )
 c*********************************************************************72
@@ -455,10 +422,16 @@ C ALL THE INPUT PARAMETERS ARE UNCHANGED.
 C
       use iso_fortran_env
       implicit none
-      integer(int64) :: jdim,C,Z
+
+      integer(int64) :: n,c,z,jdim,jub
+      integer :: jfo, jck
       INTEGER(int64) :: P(JDIM),X(JDIM),PO(JDIM)
       INTEGER(int64) :: WO(JDIM),PP(JDIM),W(JDIM)
       REAL(real64)    RR(JDIM),XO(JDIM)
+      integer(int64) :: i,ib,icr,icrr,icws,if,if1,il,ip,ip1,ip2,ip3,is1
+     *,is2,itrunc,iw1,iw2,iw3,ixo1,j,jj,jpk,jpx,jwk,k,kc,kf,kk
+      real(real64) :: lim12,rk
+
       Z = 0
       IF ( JCK .EQ. 1 ) CALL CHMTU2(N,P,W,C,Z,JDIM)
       IF ( Z .LT. 0 ) RETURN
@@ -602,7 +575,7 @@ C REDUCTION OF THE PROBLEM.
       Z = PO(1)*IXO1
       JUB = Z
       GO TO 240
-  230 CALL MTU1(KF,PO,WO,C,0.,Z,XO,JDIM,JUB,X,RR)
+  230 CALL MTU1(KF,PO,WO,C,0._real64,Z,XO,JDIM,JUB,X,RR)
   240 DO 250 J=1,N
         X(J) = 0
   250 CONTINUE
@@ -611,7 +584,42 @@ C REDUCTION OF THE PROBLEM.
         X(I) = XO(J)
   260 CONTINUE
       RETURN
+      
+      contains
 
+      integer(int64) function iabs64(x)
+c*********************************************************************72
+c
+cc iabs64 Seems like f2008 don't have an int64 version of iabs.
+c
+c  Licensing:
+c
+c    Public Domain. Unlicense.
+c
+c  Modified:
+c
+c    TODO
+c
+c  Author:
+c
+c    Henrique Becker
+c
+c  Parameters:
+c
+c    x Input, Name of the file with an sUKP instance.
+c
+      use iso_fortran_env
+      implicit none
+      integer(int64), intent(in) :: x
+
+      if (x < 0) then
+        iabs64 = -x
+      else
+        iabs64 = x
+      endif
+
+      return
+      end function iabs64
       END
 
       SUBROUTINE CHMTU2(N,P,W,C,Z,JDIM)
@@ -620,8 +628,10 @@ C CHECK THE INPUT DATA.
 C
       use iso_fortran_env
       implicit none
-      integer(int64) JDIM
+
+      integer(int64) JDIM,N
       INTEGER(int64) P(JDIM),W(JDIM),C,Z
+              integer(int64) J
       IF ( N .GT. 1 .AND. N .LE. JDIM - 1 ) GO TO 10
       Z = - 1
       RETURN
@@ -637,6 +647,7 @@ C
    50 Z = - 3
       RETURN
       END
+
       SUBROUTINE KSMALL(N,S,K,N6,SS)
 C SUBROUTINE TO FIND THE  K-TH  SMALLEST OF  N  ELEMENTS
 C IN  O(N)  TIME.
@@ -683,8 +694,17 @@ C M. FISCHETTI AND S. MARTELLO, ANNALS OF OPERATIONAL
 C RESEARCH 13, 1988.
 C
       use iso_fortran_env
-      DIMENSION S(N),SS(N6)
+      implicit none
+
+      integer(int64) :: n,k,n6
+      real(real64), DIMENSION (N) :: S
+      real(real64), DIMENSION (N6) :: SS
       INTEGER(int64) L(6),R(6),T(6)
+
+      integer(int64) :: nn,nn7,ns1,ns12,ns2,nxt,i,jflag,lev,nlr,ii,il
+     *,ir,it
+      real(real64) :: v
+
       L(1) = 1
       R(1) = N
       T(1) = K
@@ -693,7 +713,7 @@ C
 C STATEMENTS  1 - 10 .
 C
    10 IF ( LEV .GT. 1 )  GO TO 20
-      CALL FORWD(N,S,N6,SS,LEV,L,R,T,1,V,JFLAG)
+      CALL FORWD(N,S,N6,SS,LEV,L,R,T,1_int64,V,JFLAG)
       GO TO 30
    20 CALL FORWD(N6,SS,N6,SS,LEV,L,R,T,R(LEV)+1,V,JFLAG)
    30 IF ( JFLAG .EQ. 0 ) GO TO 20
@@ -761,10 +781,15 @@ C EXPLICITLY DETERMINE SET  A - A1 - A2 .
       R(LEV) = IL + ( NN - NS12 ) - 1
       GO TO 10
       END
+
       SUBROUTINE BLD(N6,SS,IL,IR,II,NXT,NLR)
 C SUBROUTINE TO EXPLICITLY DETERMINE SET  A - A1  OR SET
 C A - A1 - A2  WHEN LEV .GT. 1 .
-      DIMENSION SS(N6)
+      use iso_fortran_env
+      implicit none
+
+      integer(int64) :: n6,il,ir,ii,nxt,nlr,j,i,irr,next,ik,i6,ij
+      real(real64), dimension (N6) :: SS
       J = IL - 1
       NEXT = NXT
       DO 30 I=IL,II,7
@@ -785,10 +810,19 @@ C A - A1 - A2  WHEN LEV .GT. 1 .
    40 CONTINUE
       RETURN
       END
+
       SUBROUTINE BLDF(N,S,N6,SS,IL,IR,NLR)
 C SUBROUTINE TO EXPLICITLY DETERMINE SET  A1  OR SET  A - A1
 C OR SET  A - A1 - A2  WHEN  LEV .EQ. 1 .
-      DIMENSION S(N),SS(N6)
+      use iso_fortran_env
+      implicit none
+
+      integer(int64) :: n,n6,il,ir,nlr
+      real(real64), DIMENSION (N) :: S
+      real(real64), DIMENSION (N6) :: SS
+      integer(int64) :: nn7,ics,icd,ius,ips,iud,ipd
+      real(real64) :: ap
+
       NN7 = (IR - IL + 1)/7
       ICS = 1
       ICD = NN7 + 1
@@ -815,10 +849,16 @@ C OR SET  A - A1 - A2  WHEN  LEV .EQ. 1 .
       IPD = IPD - 1
       GO TO 10
       END
+
       SUBROUTINE BLDS1(N6,SS,IL,II,NXT,NLR)
 C SUBROUTINE TO EXPLICITLY DETERMINE SET  A1  WHEN
 C LEV .GT. 1 .
-      DIMENSION SS(N6)
+      use iso_fortran_env
+      implicit none
+
+      integer(int64) :: n6,il,ii,nxt,nlr
+      real(real64), DIMENSION (N6) :: SS
+      integer(int64) :: J,NEXT,IK,I,IJ,IRR
       J = IL - 1
       NEXT = NXT
       DO 30 I=IL,II,7
@@ -839,9 +879,17 @@ C LEV .GT. 1 .
    40 CONTINUE
       RETURN
       END
+
       SUBROUTINE DETNS1(NA,A,N6,SS,IL,IR,II,NXT,V,NS1,NLR)
 C SUBROUTINE TO COMPUTE THE CARDINALITY OF SET  A1 .
-      DIMENSION A(NA),SS(N6)
+      use iso_fortran_env
+      implicit none
+
+      integer(int64) :: na,n6,il,ir,ii,nxt,ns1,nlr,i,irr,next
+      real(real64) :: v
+      real(real64), dimension (NA) :: A
+      real(real64), dimension (N6) :: SS
+
       NS1 = 0
       NEXT = NXT
       DO 90 I=IL,II,7
@@ -886,9 +934,18 @@ C SUBROUTINE TO COMPUTE THE CARDINALITY OF SET  A1 .
   110 NS1 = NS1 + NLR
       RETURN
       END
+
       SUBROUTINE DETNS2(NA,A,N6,SS,IL,IR,II,NXT,V,NS2,NLR)
 C SUBROUTINE TO COMPUTE THE CARDINALITY OF SET  A2 .
-      DIMENSION A(NA),SS(N6)
+      use iso_fortran_env
+      implicit none
+
+      integer(int64) :: na,n6,il,ir,ii,nxt,ns2,nlr
+      real(real64) :: v
+      real(real64), DIMENSION (NA) :: A
+      real(real64), DIMENSION (N6) :: SS
+      integer(int64) :: next,is,i6,i,j,ner,irr
+
       NS2 = 0
       NEXT = NXT
       DO 50 I=IL,II,7
@@ -918,11 +975,20 @@ C SUBROUTINE TO COMPUTE THE CARDINALITY OF SET  A2 .
       NLR = NLR + NER
       RETURN
       END
+
       SUBROUTINE FORWD(NA,A,N6,SS,LEV,L,R,T,NXT,V,JFLAG)
 C SUBROUTINE TO PERFORM STATEMENTS  1 - 9 .
       use iso_fortran_env
+      implicit none
+
+      integer(int64) :: NA,N6,LEV,NXT,JFLAG,I,i1,i2,ii,ilc,imed,irc,it1
+     *,itt,n1,n2,next,nn7
+      real(real64) :: A,SS,V,AP,AUX,P
+
       DIMENSION A(NA),SS(N6)
       INTEGER(int64) L(6),R(6),T(6)
+
+      integer(int64) :: IL,IR,IT,NN,ITARG
       IL = L(LEV)
       IR = R(LEV)
       IT = T(LEV)
@@ -1015,10 +1081,17 @@ C STATEMENT  9 .
       T(LEV) = IT
       RETURN
       END
+
       SUBROUTINE MPSORT(NA,A,I1,I2,IT,V)
 C SUBROUTINE TO REARRANGE THE ARRAY SEGMENT  A(I1:I2) SO
 C THAT  A(IT+I1-1)  CONTAINS THE  IT-TH  SMALLEST ELEMENT.
-      DIMENSION A(NA)
+      use iso_fortran_env
+      implicit none
+
+      integer(int64) :: na,i1,i2,it
+      real(real64) :: v,ap,aux
+      real(real64), dimension (na) :: a
+      integer(int64) :: i,j,ita,irr,ij,ill
       I = I1
       J = I2
       ITA = IT + I1 - 1
@@ -1070,10 +1143,18 @@ C THAT  A(IT+I1-1)  CONTAINS THE  IT-TH  SMALLEST ELEMENT.
       A(IRR+1) = AP
       GO TO 90
       END
+
       SUBROUTINE SORT7(NA,A,I)
 C SUBROUTINE TO SORT IN INCREASING ORDER THE ELEMENTS FROM
 C A(I)  TO  A(I+6)  OF  A  BY PERFORMING AT MOST  13  TESTS.
-      DIMENSION A(NA)
+      use iso_fortran_env
+      implicit none
+
+      integer(int64) :: NA,I
+      real(real64), dimension (NA) :: A
+      integer(int64) :: I1,I2,I3,I4,I5,I6
+      real(real64) :: A1,A2,A3,A4,AUX,A5,A6
+
       I1 = I + 1
       I2 = I + 2
       I3 = I + 3
@@ -1204,9 +1285,16 @@ C  OF THE GENERAL UNIDIMENSIONAL KNAPSACK PROBLEM", IN M. ROUBENS, ED.,
 C  "ADVANCES IN OPERATIONS RESEARCH", NORTH HOLLAND, 1977.
 C
       use iso_fortran_env
-      INTEGER(int64) P(JDIM),W(JDIM),C,Z
+      implicit none
+
+      integer(int64) n,c,z,jdim,jub
+      INTEGER(int64) P(JDIM),W(JDIM)
       INTEGER(int64) XX(JDIM),CWS,CWF,DIFF,R,S,S1,S2,T,PROFIT,PS
-      REAL(real64)    X(JDIM),MIN(JDIM)
+      REAL(real64)   X(JDIM),MIN(JDIM)
+      integer(int64) i,ib,icr,icrr,icwd,icws,if,if1,il,ip,ip1,ip2,ip3
+      integer(int64) itrunc,iw1,iw2,iw3,ixo1,j,jj,jpk,jwk,k,kc,kf,kk
+      integer(int64) ii,ii1,kk1,mink,nn
+      real(real64) lim,lim12,lim2,rn
 C
 C STEP 1.
 C
@@ -1363,6 +1451,7 @@ C
       NN = NN + 1
       GO TO 200
       END
+
       SUBROUTINE REDU(N,PO,WO,JDIM,JPX,X)
 C
 C REDUCE AN UNBOUNDED KNAPSACK PROBLEM (PO,WO) THROUGH DOMINANCE
@@ -1371,8 +1460,14 @@ C ON OUTPUT, JPX IS THE FIRST UNDOMINATED ITEM, X(JPX) THE SECOND, AND
 C SO ON. IF Y IS THE LAST ONE, THEN X(Y) = 0.
 C
       use iso_fortran_env
-      INTEGER(int64) PO(JDIM),WO(JDIM),X(JDIM)
-      INTEGER(int64) FEQ,PRFEQ,PRJ,PRK
+      implicit none
+
+      integer(int64) :: N,JDIM,JPX
+      INTEGER(int64) :: PO(JDIM),WO(JDIM),X(JDIM)
+      integer(int64) :: FEQ,PRFEQ,PRJ,PRK
+      integer(int64) :: j,ipoj,iwoj,k
+      real(real64) :: crat,rj
+
 C INITIALIZATION.
       JPX = 1
       DO 10 J=1,N
@@ -1434,8 +1529,14 @@ C
 C ON RETURN, ARRAY A IS UNCHANGED.
 C
       use iso_fortran_env
+      implicit none
+
+      integer(int64) N,JDA
       INTEGER(int64) V(N),IU(20),IL(20)
       REAL(real64)   A(JDA)
+      integer(int64) II,JJ,M,I,J,K,IJ,IV,IVT,KI,L
+      REAL(real64)   T
+
       II = 1
       JJ = N
       IF ( N .LE. 1 ) RETURN
@@ -1509,4 +1610,3 @@ C
       V(K+1) = IV
       GO TO 100
       END
-      end program

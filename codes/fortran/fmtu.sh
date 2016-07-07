@@ -1,7 +1,9 @@
 #!/bin/bash
 
-new_file="$2.sukp"
-ukp2sukp.out < "$2" > "$new_file"
-run_f_mtu.out "$1" "$new_file"
-rm "$new_file"
+echo "$2"
+wd=`pwd`
+sukp_file=`mktemp -p $wd`
+ukp2sukp.out < "$2" > "$sukp_file"
+run_f_mtu.out "$1" "$sukp_file"
+rm "$sukp_file"
 

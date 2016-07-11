@@ -16,7 +16,7 @@ c    Public Domain. Unlicense.
 c
 c  Modified:
 c
-c    TODO
+c    Mon, 11 Jul 2016 01:41:23 -0300
 c
 c  Author:
 c
@@ -32,8 +32,8 @@ c
       integer(int64), allocatable :: w(:) ! Instance item weights.
       integer(int64), allocatable :: x(:) ! # of each item on solution.
 
-      integer(int64) :: z    ! Solution value.
-      integer(int64) :: mass ! Weight of the found optimal solution.
+      integer(int64) :: z     ! Solution optimal value.
+      integer(int64) :: y_opt ! Weight of the found optimal solution.
 
       integer(int64) :: jdim ! Size of MTU arrays, must be at least n+1.
       integer :: jck  ! Boolean. The instance should be checked?
@@ -76,23 +76,6 @@ c
 
       call read_sukp_instance(fname, n, c, w, p)
       jdim = n + 1
-
-      ! Code for printing the instance. CAUTION: knapsack_reorder
-      ! changes the input of the algorithm.
-c      write ( *, '(a)' ) ' '
-c      write ( *, '(a)' ) '  MTU2 solves the UKP.'
-c      write ( *, '(a)' ) ' '
-c      write ( *, '(a,i6)' ) '  Knapsack capacity is ', c
-
-c      call knapsack_reorder ( n, p, w )
-
-c      write ( *, '(a)' ) ' '
-c      write ( *, '(a)' ) '  Object  Profit    Mass'
-c      write ( *, '(a)' ) ' '
-c      do i = 1, n
-c        write ( *, '(2x,i6,2x,i6,2x,i6)' ) 
-c     &  i, p(i), w(i)
-c      end do
 
       jfo = 1 ! We want an exact solution.
       jck = 1 ! We don't want input checking (to not mess the times).
@@ -144,22 +127,21 @@ c      end do
       ttime = real(t2 - t1)/real(clock_rate)
       max_sec = clock_max/clock_rate
 
-      write (*, '(a)') ' '
-      write (*, '(a)') ' Optimal Solution Breakdown:'
-      write (*, '(a)') ' '
-      write (*, '(a)') '  Object  Quant.  Profit    Mass'
-      write (*, '(a)') ' '
-      mass = 0
+      write (*,'(a,i0)') 'opt: ', z
+      write (*,'(a,i0)') 'y_opt: ', y_opt
+
+      y_opt = 0
       do i = 1, n
         if ( x(i) .ge. 1 ) then
-          mass = mass + w(i)*x(i)
-          write (*, '(2x,i6,2x,i6,2x,i6,2x,i6)') i, x(i), p(i), w(i)
+          y_opt = y_opt + w(i)*x(i)
+          write (*, '(a,i0,a,i0,a,i0,a,i0,a,f19.9)') 'ix: ', i,
+     *' qt: ', x(i), ' w: ', w(i), ' p: ', p(i), ' e: ',
+     *real(p(i), real64)/real(w(i), real64)
         end if
       end do
-      write (*, '(a)') ' '
 
-      write (*,'(a,i0)') 'opt: ', z
-      write (*,'(a,i0)') 'y_opt: ', mass
+      write (*,'(a,i0)') 'c: ', c
+      write (*,'(a,i0)') 'n: ', n
       write (*,'(a,f19.9)') 'Seconds: ', ttime
       write (*,'(a,i0)') 'Max number of seconds before wrap: ', max_sec
       stop
@@ -176,7 +158,7 @@ c    Public Domain. Unlicense.
 c
 c  Modified:
 c
-c    TODO
+c    Mon, 11 Jul 2016 01:41:23 -0300
 c
 c  Author:
 c
@@ -213,151 +195,7 @@ c
 
       return
       end
-
       end program
-
-      subroutine timestamp ( )
-c*********************************************************************72
-c
-cc TIMESTAMP prints out the current YMDHMS date as a timestamp.
-c
-c  Licensing:
-c
-c    This code is distributed under the GNU LGPL license.
-c
-c  Modified:
-c
-c    12 January 2007
-c
-c  Author:
-c
-c    John Burkardt
-c
-c  Parameters:
-c
-c    None
-c
-      implicit none
-
-      character * ( 8 ) ampm
-      integer d
-      character * ( 8 ) date
-      integer h
-      integer m
-      integer mm
-      character * ( 9 ) month(12)
-      integer n
-      integer s
-      character * ( 10 ) time
-      integer y
-
-      save month
-
-      data month /
-     &  'January  ', 'February ', 'March    ', 'April    ',
-     &  'May      ', 'June     ', 'July     ', 'August   ',
-     &  'September', 'October  ', 'November ', 'December ' /
-
-      call date_and_time ( date, time )
-
-      read ( date, '(i4,i2,i2)' ) y, m, d
-      read ( time, '(i2,i2,i2,1x,i3)' ) h, n, s, mm
-
-      if ( h .lt. 12 ) then
-        ampm = 'AM'
-      else if ( h .eq. 12 ) then
-        if ( n .eq. 0 .and. s .eq. 0 ) then
-          ampm = 'Noon'
-        else
-          ampm = 'PM'
-        end if
-      else
-        h = h - 12
-        if ( h .lt. 12 ) then
-          ampm = 'PM'
-        else if ( h .eq. 12 ) then
-          if ( n .eq. 0 .and. s .eq. 0 ) then
-            ampm = 'Midnight'
-          else
-            ampm = 'AM'
-          end if
-        end if
-      end if
-
-      write ( *,
-     &  '(i2,1x,a,1x,i4,2x,i2,a1,i2.2,a1,i2.2,a1,i3.3,1x,a)' )
-     &  d, month(m), y, h, ':', n, ':', s, '.', mm, ampm
-
-      return
-      end
-
-      subroutine knapsack_reorder ( n, p, w )
-c*********************************************************************72
-c
-cc KNAPSACK_REORDER reorders knapsack data by "profit density".
-c
-c  Discussion:
-c
-c    This routine must be called to rearrange the data before calling
-c    routines that handle a knapsack problem.
-c
-c    The "profit density" for object I is defined as P(I)/W(I).
-c
-c  Licensing:
-c
-c    This code is distributed under the GNU LGPL license.
-c
-c  Modified:
-c
-c    06 December 2009
-c
-c  Author:
-c
-c    John Burkardt
-c
-c  Reference:
-c
-c    Donald Kreher, Douglas Simpson,
-c    Combinatorial Algorithms,
-c    CRC Press, 1998,
-c    ISBN: 0-8493-3988-X,
-c    LC: QA164.K73.
-c
-c  Parameters:
-c
-c    Input, integer N, the number of objects.
-c
-c    Input/output, integer P(N), the "profit" or value of each object.
-c
-c    Input/output, integer W(N), the "weight" or cost of each object.
-c
-      implicit none
-
-      integer n
-
-      integer i
-      integer j
-      integer p(n)
-      integer t
-      integer w(n)
-c
-c  Rearrange the objects in order of "profit density".
-c
-      do i = 1, n
-        do j = i+1, n
-          if ( p(i) * w(j) < p(j) * w(i) ) then
-            t    = p(i)
-            p(i) = p(j)
-            p(j) = t
-            t    = w(i)
-            w(i) = w(j)
-            w(j) = t
-          end if
-        end do
-      end do
-
-      return
-      end
 
       SUBROUTINE MTU2(N,P,W,C,Z,X,JDIM,JFO,JCK,JUB,PO,WO,XO,RR,PP)
 C
@@ -598,7 +436,7 @@ c    Public Domain. Unlicense.
 c
 c  Modified:
 c
-c    TODO
+c    Mon, 11 Jul 2016 01:41:23 -0300
 c
 c  Author:
 c

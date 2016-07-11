@@ -3,10 +3,10 @@
 require 'batch_experiment'
 require 'batch_experiment/sample_extractors'
 
-# Variable used to denote the environment where the experiment was execute. The
-# first word identify the computer. The second how many isolated cores were
+# Variable used to denote the environment where the experiment was executed.
+# The first word identify the computer. The second how many isolated cores were
 # used. TODO: add link for the configs of different machines.
-curr_env_id = :notebook_uc3
+curr_env_id = :desktop_uc5
 # The notebook has four cores, the desktop has six cores. As one core has
 # to be used to run the OS and utilities. Sometimes we want to use the same
 # quantity of cores on the two parallel computers, so we use from the second
@@ -18,12 +18,12 @@ when :notebook_uc3
     cwd:        '/home/henrique/AreaDeTrabalho/instances_after_mail/',
     cores:      [1,2,3], }
 when :desktop_uc3
-  {output_dir:  '/home/henrique/AreaDeTrabalho/mtu_impl_output_dir/',
-    cwd:        '/home/henrique/AreaDeTrabalho/the_4540_instances/',
+  {output_dir:  '/home/henrique/mtu_impl_output_dir/',
+    cwd:        '/home/henrique/the_4540_instances/',
     cores:      [1,2,3], }
 when :desktop_uc5
-  {output_dir:  '/home/henrique/AreaDeTrabalho/mtu_impl_output_dir/',
-    cwd:        '/home/henrique/AreaDeTrabalho/the_4540_instances/',
+  {output_dir:  '/home/henrique/mtu_impl_output_dir/',
+    cwd:        '/home/henrique/the_4540_instances/',
     cores:      [1,2,3,4,5], }
 end
 
@@ -35,11 +35,11 @@ comm_comm = {
 
 # Commands and prefixes used.
 # NOTE: The code of those commands is the same as the code from commit:
-# [master 69724d3] "Updated comments and added test to MTU2 to avoid
-# poor performance on subset-sum instances." (from
-# https://github.com/henriquebecker91/masters). Note that fmtu.sh, needs
-# "run_f_mtu.out" (codes/fortran) and "ukp2sukp.out" (codes/cpp) on an
-# executable path.
+# [master 42ecda2] "Changes on fortran MTU output format and removal of unused
+# code." (from https://github.com/henriquebecker91/masters). Note that fmtu.sh,
+# needs "run_f_mtu.out" (codes/fortran) and "ukp2sukp.out" (codes/cpp) on an
+# executable path (the version of the code of both dependencies is the same
+# mentioned above).
 comms_info = [{
   command:    'fmtu.sh 1 INST_FILE',
   prefix:     "fmtu1_#{curr_env_id}",
@@ -56,16 +56,18 @@ comms_info = [{
 
 batch_info = {
   cpus_available: curr_env_conf[:cores],
-  timeout: 999,
-  post_timeout: 1,
-  cwd: curr_env_conf[:cwd],
-  output_dir: curr_env_conf[:output_dir],
+  timeout:        999,
+  post_timeout:   1,
+  cwd:            curr_env_conf[:cwd],
+  output_dir:     curr_env_conf[:output_dir],
 }
 
 experiment_info = {
   csvfname:     "mtu_impl_#{curr_env_id}.csv",
   qt_runs:      1,
-  comms_order:  :by_file,
+  # The :by_file option is good for debugging, but will make many commands
+  # trying to read the same file at the same time.
+  comms_order:  :random,
 }
 
 # List with 10% of the instance (totalling 454). Used to have an ideia about

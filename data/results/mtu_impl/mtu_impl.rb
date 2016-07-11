@@ -39,7 +39,8 @@ comm_comm = {
 # code." (from https://github.com/henriquebecker91/masters). Note that fmtu.sh,
 # needs "run_f_mtu.out" (codes/fortran) and "ukp2sukp.out" (codes/cpp) on an
 # executable path (the version of the code of both dependencies is the same
-# mentioned above).
+# mentioned above). The code was compiled using the Makefiles, and the gcc and
+# gcc-fortran version were the 6.1.1 (2016-06-02).
 comms_info = [{
   command:    'fmtu.sh 1 INST_FILE',
   prefix:     "fmtu1_#{curr_env_id}",

@@ -7,5 +7,6 @@ cgcreate -a "$user" -t "$user" -g "memory:test/$$"
 mem_limit=$((2 * 1024**3))
 echo $mem_limit > "/sys/fs/cgroup/memory/test/$$/memory.limit_in_bytes"
 
-cgexec -g memory:test run_ukp5.out test
+cgexec -g "memory:test/$$" "$0.out" $@
+cgdelete -g "memory:test/$$"
 

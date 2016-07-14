@@ -9,6 +9,22 @@ mtu$internal_time <- sapply(mtu$internal_time, function(x) if (is.na(x)) 999 els
 # Remove empty column created by extra ';'
 mtu$X <- NULL
 
+mtu[mtu$filename == "nsds2_n50000wmin20000-0-s155213243c1921419.ukp", ]
+
+# Compute how many runs disagree on the opt for the same filename
+# (this number should be zero, as all methods are exact)
+mtuc <- mtu[complete.cases(mtu), ] # Only the lines that don't ended on timeout
+# Add logical variable that will be true if two runs over the same instance
+# (filename) disagree on opt (i.e check if the algorithms got different values). 
+mtuc2 <- mtuc %>% group_by(filename) %>% mutate(opt_match = (length(unique(opt)) > 1))
+sum(mtuc2$opt_match) # should be zero
+# Select the eight instances that were solved only by one of the algorithms
+# (the other three algorithms ended on timeout when executed over these
+# instances)
+mtuc22 <- mtuc %>% group_by(filename) %>% mutate(opt_match = (length(opt) == 1))
+mtuc33 <- mtuc22[mtuc22$opt_match,]
+mtuc33
+
 mtu1 <- filter(mtu, algorithm == "cpp-mtu1_desktop_uc5" | algorithm == "fmtu1_desktop_uc5") # only mtu1
 mtu2 <- filter(mtu, algorithm == "cpp-mtu2_desktop_uc5" | algorithm == "fmtu2_desktop_uc5") # only mtu2
 cppmtu <- filter(mtu, algorithm == "cpp-mtu1_desktop_uc5" | algorithm == "cpp-mtu2_desktop_uc5") # only c++ code

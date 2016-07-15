@@ -1,0 +1,62 @@
+Thirty six pages. 2001. Author: David S. Johnson
+PDF of good quality.
+
+Talks about 10 important points when making experiments (or an experimental paper)in the context of computation.
+
+Introduction
+	The theoriticians prefered methods of analysis are (in this order): worst-case; average-case; experimental.
+	Experimental analysis is important because: worst-case and average-case analysis can mean little to real world instances; some algorithms are very complex, what makes hard to analyse them by inspection (or predict their behaviour on real world instances).
+	Four types of papers: application paper (use as proof of a mathematical theorem/conjecture); horse race paper (algorithm X is "better" than Y); experimental analysis paper (try to understand strenghts and weaknesses of algorithmic ideas); experimental average-case paper (average-case by experimentation when probabilistic analysis is too hard);
+	Paper focus on the third type.
+	The ten principles:
+		Perform newsworthy experiments
+		Tie your paper to the literature
+		Use instance testbeds that can support general conclusions
+		Use efficient and effective experimental designs
+		Use reasonably efficient implementations
+		Ensure reproducibility
+		Ensure comparability
+		Report the full history
+		Draw well-justified conclusions and look for explanations
+		Present your data in informative ways
+	The paper focus algorithms with input and output that are finite objects, and with time/memory usage (and maybe solution quality) as metrics.
+Discussion on Principles
+	Principle 1. Perform newsworthy experiments
+		First, the problem that the algorithm solves need to have practical application; second, the algorithm studied must be practical for real-world instances.
+		"[...] problems without applications do not have real-world instances, so the experimenter is left to invent (and justify) test data in a vacuum. And referees may well question the testing code for algorithms that will never be used in practice." (p. 5)
+		Pitfall 1: Dealing with dominated algorithms. Working on a dominated algorithm is justifiable if: it's of widespread use, or much simpler than the alternatives (checking if it's worth changing to the state-of-the-art); test a well-known approach on a new problem (ex.: dominated metaheuristics over TSP); the poor performance was unexpected (showing that the state-of-the-art isn't state-of-the-art). Excuses for presenting something, but not publishing a whole paper about it: it's expected to be bad, but nobody really checked; has some theoretical contributions.
+		Convince the readers that the algorithm is dominated, and that's not your bad implementation of it that is dominated.
+		The difference between a horse race paper and an experimental analysis paper is that the former can settle for simple saying "algorithm A has the better results on benchmark B", while the latter try to explain exactly why this happened and bring general insights (for new approachs and instance classes).
+		Pitfall 2: Devoting too much effort to the wrong questions: excessive study of one or two instances, study many instances sistematically instead; running full test suits before: making your code efficient; decided exactly what data you will collect.
+		Suggestion 1: Think before you compute. Before running full experiments suits: question yourself what you want/need to know and how is the best way to answer these questions.
+		Suggestion 2: Use exploratory experimentation to find good questions. Use a small set of instances to get preliminar answers, to tune the performance of your implementation, and then using this knowledge plan the full experiments suits (what data will be collected; how will the the benchmark be organized; etc...) with more definitive answers.
+		Pitfall 3: Getting in an endless loop in your experimentation. "[...] at some point you have to draw the line and leave the remaining questions for the infamous 'future research' section of the paper. [...] A newsworthy paper that never gets published does not provide much news." (p. 8).
+		CHECKLIST OF TEN QUESTIONS TO BE ANSWERED BY EXPERIMENTS: p. 8
+		Pitfall 4: Start by using randomly generated instances to evaluate the behaviour of algorithms, but end up using algorithms to investigate the properties of randomly-generated instances. Auto-explicative. Is not a problem per se to investigate those properties, but to do so when it's not the objective; or when there's no evidence that those properties have any relevance for real-world instances.
+	Principle 2. Tie your paper to the literature
+		DO THE LITERATURE REVIEW.
+		Let the literature review suggest you which experiments/questions are interesting.
+		Obligation: show your paper place on the literature. Comparisons (from ideal to least ideal): get the original code/benchmark and re-run on your machine; develop an implementation of the old code (and check if it seems to match the reported performance of the original paper, if not, point it on the paper); compare the results of your algorithm in your machine to the results of the original algorithm on the original paper (using the machines speed differences to normalize the results).
+	Principle 3. Use testbeds that can support general conclusions
+		If necessary (ex.: needs bigger instances) use random instance generators that generate instances with the same structure that real-world instances (random != unstructured). As already pointed, good performance over random unstructured instances mean almost nothing (Pet Peeve 2). As a rule of thumb, even if the instances are real-world instances, datasets where every instance executes on less than one second are not relevant (search for a performance gap of the same proportion on bigger instances, Pet Peeve 3). For approximative algorithms, don't restrict yourself to datasets with known optima; also, consider using both random structured instances and real-world instances, and check if the random instances really simulate the real-world instances well (Pet Peeve 4).
+	Principle 4. Use efficient and effective experimental designs
+		Suggestion 3. Use variance reduction techniques. (see the paper for details).
+		Suggestion 4. Use bootstrapping to evaluate multiple-run heuristics. Use statistics to get a better predictor of the heuristic accuracy (see the paper for details).
+		Suggestion 5. Use self-documenting programs. Make your program output everything that you could want to remember about that run on the future. Ex.: name and version of the algorithm; the machine and date where it was run; the name of the instance, and any other parameters passed to the instance; every of those values should be labeled and in plain text (on the program output).
+	Principle 5. Use reasonably efficient implementation
+		Pet Peeve 5: Claiming inadequate programming time/ability as an excuse. It's very useful to use efficient programs (by many reasons detailed on the paper). You can't assume that the comparison between non-optimized algorithms will give the same results that the optimized versions would.
+		Pitfall 5: Too much code tuning. Your probably should be on the same asymptotic complexity category, and within a not very big constant factor of what you expect the real-world to use. Also profile, and optimize only things that impact on the running time more than 10%.
+	Principle 6. Ensure reproducibility
+		"Your experiments need to be extensive enough to give you confidence that your conclusions are true, and not artifacts of your experimental setup (the machines, compilers, and random number generators you use, the particular instances you test, etc.) In reporting your results you must describe the algorithms, test instances, computing environment, results, etc. in enough detail so that a reader could at least in principle perform similar experiments that would lead to the same basic conclusions." (p. 15)
+		Pet Peeve 6. Supplied code doesn't match a paper's description of it. Auto-explicative.
+		Pet Peeve 7. Irreproducible standards of comparison. Discussion focused on inexact algorithms; can be summed up as 'give your readers results that you know that can be roughly reproduced'. If your 'algorithm code'/description + other artifacts (list of parameters, instances/'instance generation procedure', etc...) is not sufficient to other scientists to reproduce your reported results within a reasonable margin of error, then think again.
+		Pet Peeve 8. Using running time as a stopping criterion. This practice make the results harder to reproduce, as the quality of a result will vary for different machines/compilers/environments. Also, the results of different algorithms when relative to each other can change considerably (the best algorithm can't improve solution change after a time threshold, but the worst can, and surpass the "best"). Use an operation counter (nodes explored, iterations, etc...), and allow your program to take this limiter as a parameter.
+		Pet Peeve 9. Using the optimal solution as stopping criterion. Not the case of algorithms that can prove the solution is optimal; but when the optimal is supplied as a parameter. In the latter, the algorithm is "clairvoyant" and its times will be unnaturally good for instances that the optimal is known, that rarely of are of interest on the real-world.
+		Pet Peeve 10. Hand-tuned algorithm parameters. Reporting the used parameters ensure reproducibity. However, if different parameters are used on different instances bacause they are found to be better, the tuning time should be included on the execution time, as it was necessary to reproduce the results (and should be result of an algorithmic process).
+		Pet Peeve 11. The one-run study. Studies where the algorithm's results can vary considerably from one run to another needs lots of instances and more than one execution (or can end arriving on entirely false conclusions).
+
+
+
+
+
+

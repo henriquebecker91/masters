@@ -50,13 +50,52 @@ Discussion on Principles
 		"Your experiments need to be extensive enough to give you confidence that your conclusions are true, and not artifacts of your experimental setup (the machines, compilers, and random number generators you use, the particular instances you test, etc.) In reporting your results you must describe the algorithms, test instances, computing environment, results, etc. in enough detail so that a reader could at least in principle perform similar experiments that would lead to the same basic conclusions." (p. 15)
 		Pet Peeve 6. Supplied code doesn't match a paper's description of it. Auto-explicative.
 		Pet Peeve 7. Irreproducible standards of comparison. Discussion focused on inexact algorithms; can be summed up as 'give your readers results that you know that can be roughly reproduced'. If your 'algorithm code'/description + other artifacts (list of parameters, instances/'instance generation procedure', etc...) is not sufficient to other scientists to reproduce your reported results within a reasonable margin of error, then think again.
-		Pet Peeve 8. Using running time as a stopping criterion. This practice make the results harder to reproduce, as the quality of a result will vary for different machines/compilers/environments. Also, the results of different algorithms when relative to each other can change considerably (the best algorithm can't improve solution change after a time threshold, but the worst can, and surpass the "best"). Use an operation counter (nodes explored, iterations, etc...), and allow your program to take this limiter as a parameter.
+		Pet Peeve 8. Using running time as a stopping criterion. This practice make the results harder to reproduce, as the quality of a result will vary for different machines/compilers/environments. Also, the results of different algorithms when relative to each other can change considerably (the best algorithm can't improve solution after some time, but the worst can, and surpass the "best"). Use an operation counter (nodes explored, iterations, etc...), and allow your program to take this limiter as a parameter.
 		Pet Peeve 9. Using the optimal solution as stopping criterion. Not the case of algorithms that can prove the solution is optimal; but when the optimal is supplied as a parameter. In the latter, the algorithm is "clairvoyant" and its times will be unnaturally good for instances that the optimal is known, that rarely of are of interest on the real-world.
-		Pet Peeve 10. Hand-tuned algorithm parameters. Reporting the used parameters ensure reproducibity. However, if different parameters are used on different instances bacause they are found to be better, the tuning time should be included on the execution time, as it was necessary to reproduce the results (and should be result of an algorithmic process).
-		Pet Peeve 11. The one-run study. Studies where the algorithm's results can vary considerably from one run to another needs lots of instances and more than one execution (or can end arriving on entirely false conclusions).
-
-
-
-
-
+		Pet Peeve 10. Hand-tuned algorithm parameters. Reporting the used parameters ensure reproducibity. However, if different parameters are used on different instances because they are found to be better, the tuning time should be included on the execution time, as it was necessary to arrive at the results (and should be result of an algorithmic process).
+		Pet Peeve 11. The one-run study. Studies where the algorithm's results can vary considerably from one run to another needs lots of instances and more than one execution per instance (or can end arriving on entirely false conclusions).
+		Pet Peeve 12. Using the best result found as an evaluation criterion. (Talks about using the best result of multiple runs of not-exact randomized algorithms.) "The objections for this are twofold. First, the best solution found is the sample from the tail of a distribution, and hence less likely to be reproducible on than the average. Second, in such tables, the running times are reported are usually for a single run of the algorithm, rather than for the entire of runs that yielded the reported 'best'." (p. 19)
+	Principle 7. Ensure comparability
+		"You should write your papers (and to the extent possible to make relevant data, code and instances publicy avaliable in a long-term manner) so that future researchers (yourself included) can accurately compare their results for new algorithms/results." (p. 20)
+		Pet Peeve 13. The uncalibrated machine. The minimal is to provide: computer model, processor speed, operating system, and language/compiler. However, the computer model can be forgotten, and the raw processor speed don't give very accurate predictions of the time used by a code on two different machines; the "right way" is described on suggestion 6.
+		Suggestion 6. Use benchmark codes to calibrate machine speeds. Check for benchmarks that make operations similar to your code (and use the same language), compile with the same compiler, run it on the machine used for the tests, report results on paper. (Summary author note: today we can use https://www.cpubenchmark.net/cpu_list.php, and is very hard to end up with information about computer models to be completely lost; also, if you can provide your algorithm code, then the tests can be remade on other machines.)
+		Pet Peeve 14. The lost testbed. Make the instances, or their generators, available. Try to not lose them. Also, try to make instance datasets that are generous samples of some well-defined distribution (follows some formulae), and describe it. This way even with the instances and generators lost, the average result of your tests will be the same for instances generated for other generator that follows the same distribution.
+		Pitfall 6. Lost code/data. (This section was more relevant before cvs/git and github/'sites of online storage'; today with some effort you can make much harder to fall in this pitfall; can be rewritten as: use a CVS with an external site for upload, and maybe some other place for very large instance datasets).
+	Principle 8. Report the full history
+		You must describe exactly how you arrived at any presented averages. Use both tables and graphs. Tables are good for precision. Graphs are good for giving the big picture.
+		Pet Peeve 15. False precision. Don't report small differences (as they were significative) if you can't be sure isn't noise.
+		Pet Peeve 16. Unremarked anomalies. Even if you can't explain why, point out anomalies to make clear to your readers that the values are real and not typographical errors.
+		Pet Peeve 17. The ex post facto stopping criterion. Never give the time used to find the best solution found without also reporting the total time (until the algorithm stopped).
+		Pet Peeve 18. Failure to report overall running times. REPORT THE OVERALL TIMES, EVEN IF IT ISN'T THE FOCUS OF YOUR WORK. (The author presents five excuses commonly used for not reporting overall times, all of them with some merit/logic, and then debunk all of them.)
+	Principle 9. Draw Well-Justified Conclusions and Look for Explanations
+		"The purpose of doing experiments with algorithms is presumably to learn something about their performance, and so a good experimental paper will have conclusions to state and support." (p. 24)
+		Pet Peeve 19. Data Without Interpretation. Auto explicative.
+		Pet Peeve 20. Conclusions without support. Auto explicative.
+		Pet Peeve 21. Myopic approaches to asymptopia. Execute benchmarks with different instance sizes (ex.: 10^3, 10^4, 10^5, ..., 10^9 'elements'). Always test at least some very very large instances. This allows to try to predict the tested algorithms assimptopia.
+		Suggestion 7. Use profiling to understand running times. Know how much of your running times come from each component/sub-routine of your code. Use this to explain the time differences between algorithms (essential for experimental algorithms).
+	Principle 10. Present your data in informative ways
+		Pet Peeve 22. Tables without pictures. Don't give the big picture.
+		Pet Peeve 23. Pictures without tables. Don't give good precision.
+		Pet Peeve 24. Pictures wielding too little insight. (Summary maker note: the size of the instances increase by factors of sqrt(10), seems like a good ideia.) Don't allow scales/outliers to make your charts less insightful. Use log scale to reveal otherwise flattened data.
+		Suggestion 8. Display normalized running times. Knowing the (expected) asymptotic complexity of the algorithms (ex.: N log N), we can divide the time taken by a run over an instance of size N by this complexity (ex.: run_time / N log N), and see how different from the expected it behaves (should be a flat line if it behaviour is perfectly described by the asymptotic complexity).
+		Pet Peeve 25. Inadequately or confusingly labeled pictures. Auto-explicative.
+		Pet Peeve 26. Pictures with too much information. When a chart becomes excessively poluted, try to split what it tries to explain on more than one chart.
+		Pet Peeve 27. Confusing pictorial metaphors. Your picture needs to be completely described by its caption and, at max, one paragraph on the text. If you need more than that, probably your readers will have difficulty understanding the chart.
+		Pet Peeve 28. The spurious trend line. Don't connect dots by lines except if you want to point a trend with this.
+		Pet Peeve 29. Poorly structured tables. Use the possibility of choosing the order of the columns and rows to make trends more visible; don't simply order by alphabetical order of algorithm/instance name.
+		Pet Peeve 30. Making your readers do the arithmetic. If you think that your readers could want to know the value of a division of two numbers on a table (often a percentage of time or solution quality), add the column to your table.
+		Pet Peeve 31. The undefined metric. A column or axis label that isn't formally defined anywhere on the paper.
+		Pet Peeve 32. Comparing apples with oranges. Columns/rows of a table where the data compared (ex.: execution times) come from different papers and/or the execution on different machines; if this happens the times should be normalized on the table (to avoid confusion), and the sources described clearly on the text.
+		Pet Peeve 33. Detailed statistics on unimportant questions. Better one run over one hundred different instances than one hundred runs over one instance.
+		Pet Peeve 34. Comparing approximation algorithms as to how often they find optima. Not a good ideia because: restrict to solutions with optima known; "when the algorithm don't find the optima, how close to it the algorithm gets?"; for large/hard instances this percentage will be close to zero for all non-exact algorithms.
+		Pet Peeve 35. Too much data. Substitute raw data by summaries; remove data about specific instance distributions if their behaviour is the same that other distributions; less relevant or very specific data should go on appendix or web archives.
+Section 2. Extensions and other points to ponder
+"Whom can you trust?
+1. Never trust a random number generator.
+2. Never trust your code to be correct.
+3. Never trust a previous author to have known all the literature.
+4. Never trust your memory to where you put that data (and how it was generated).
+5. Never trust your computer to remain unchanged.
+6. Never trust backup media or Web sites to remain readable indefinitely.
+7. Never trust a so-called expert on experimental analysis."
 

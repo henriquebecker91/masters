@@ -1,8 +1,10 @@
-env <- read.csv("env_influence.csv", sep = ";")
-
 library(statsr)
 library(dplyr)
 library(ggplot2)
+library(stringi)
+
+env <- read.csv("env_influence.csv", sep = ";")
+env$X <- NULL
 
 # Cheking the biggest standard deviations between runs by hand.
 filter(env, algorithm == "ukp5" & computer == "notebook" & mode == "serial") %>% group_by(filename) %>% summarise(internal_time_sd = sd(internal_time)) %>% arrange(desc(internal_time_sd))
@@ -48,6 +50,12 @@ ggplot(env_file_mean_times, aes(x = as.numeric(filename), y = internal_time, col
 ggplot(env_file_mean_times, aes(x = as.numeric(filename), y = internal_time, color = computer_mode)) + ggtitle("UKP5 Time Variation By Env") + geom_line()
 ggplot(env_file_mean_times, aes(x = as.numeric(filename), y = internal_time, color = computer_mode)) + ggtitle("UKP5 Time Variation By Env") + geom_line() + scale_y_log10()
 
+opts <- stri_opts_regex(dotall = T, case_insensitive = T, error_on_unknown_escapes = T, omit_no_match = F)
+inst_info <- stri_match_first_regex(env_file_mean_times$filename, ".*n([0-9]++).*c([0-9]++).ukp", simplify = T, opts_regex = opts)
+env_file_mean_times$n <- as.numeric(inst_info[, 2]) # instance's number of items
+env_file_mean_times$c <- as.numeric(inst_info[, 3]) # instance's knapsack capacity
+ggplot(env_file_mean_times, aes(x = env_file_mean_times$c * env_file_mean_times$n, y = internal_time, color = computer_mode, shape = inst_class)) + ggtitle("UKP5 Time Variation By Env") + geom_point() + scale_x_log10() + scale_y_log10()
+
 # Ratio of the mean execution time on parallel by the mean execution time on serial
 # With the files (y axis) ordered in increasing order of ratio
 # This should starts at ~1, stay at 1~1.5 for the most files, and end at 2~3
@@ -58,3 +66,5 @@ parallel <- filter(env_file_mean_times, algorithm == alg_name & computer == com_
 ratio_parallel_serial <- data.frame(filename = serial$filename, inst_class = serial$inst_class, serial_time = serial$internal_time, parallel_time = parallel$internal_time) %>% mutate(ratio = parallel_time/serial_time) %>% arrange(ratio)
 ratio_parallel_serial$filename <- factor(ratio_parallel_serial$filename, levels = unique(ratio_parallel_serial$filename))
 ggplot(ratio_parallel_serial, aes(x = as.numeric(filename), y = ratio, shape = inst_class)) + ggtitle("Some Algorithm Ratio Between Parallel and Serial in the same machine") + geom_point()
+
+

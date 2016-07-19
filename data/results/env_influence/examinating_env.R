@@ -50,13 +50,31 @@ ggplot(env_file_mean_times, aes(x = as.numeric(filename), y = internal_time, col
 ggplot(env_file_mean_times, aes(x = as.numeric(filename), y = internal_time, color = computer_mode)) + ggtitle("UKP5 Time Variation By Env") + geom_line()
 ggplot(env_file_mean_times, aes(x = as.numeric(filename), y = internal_time, color = computer_mode)) + ggtitle("UKP5 Time Variation By Env") + geom_line() + scale_y_log10()
 
+# Consider the naive DP algorithm for the UKP; it has complexity o(n*c)
+# (it always executes the code inside its inner double loop about n*c times to 
+# solve an instance with knapsack size c and number of item n). If we divide the
+# time taken by this algorithm to solve an instance by the instance's c*n, we should get an 
+# almost constant value that is equal to the time used by the program to execute
+# one iteration of the double loop. Solving any reasonable number of UKP 
+# instances with different n's and c's using this algorithm, and plotting 
+# time/(n*c) as the y axis against n*c as the x axis should give a straight 
+# line, with no slope. We can use this as baseline for other algorithms. If we 
+# plot some other algorithm and it has a negative slope, we know that the 
+# instances get "easier" (need less effort per instance size) as they go. This
+# seems the case for any more sophisticated algorithm for the UKP, as the number
+# of items that can be ignored for the algorithm often increases as c*n
+# increases, reducing the computational effort.
+env_file_mean_times <- filter(env_file_mean_times, computer_mode == 'ukp5_notebook_serial')
 opts <- stri_opts_regex(dotall = T, case_insensitive = T, error_on_unknown_escapes = T, omit_no_match = F)
 inst_info <- stri_match_first_regex(env_file_mean_times$filename, ".*n([0-9]++).*c([0-9]++).ukp", simplify = T, opts_regex = opts)
+env_file_mean_times <- mutate(env_file_mean_times, naive_dp_op_qt = n * c) %>% arrange(naive_dp_op_qt)
+env_file_mean_times$filename <- factor(env_file_mean_times$filename, levels = unique(env_file_mean_times$filename))
 env_file_mean_times$n <- as.numeric(inst_info[, 2]) # instance's number of items
 env_file_mean_times$c <- as.numeric(inst_info[, 3]) # instance's knapsack capacity
-ggplot(env_file_mean_times, aes(x = env_file_mean_times$c * env_file_mean_times$n, y = internal_time, color = computer_mode, shape = inst_class)) + ggtitle("UKP5 Time Variation By Env") + geom_point() + scale_x_log10() + scale_y_log10()
-
-# Ratio of the mean execution time on parallel by the mean execution time on serial
+ggplot(env_file_mean_times, aes(x = n*c, y = internal_time/(n * c), color = computer_mode, shape = inst_class)) + geom_point()
+ggplot(env_file_mean_times, aes(x = n*c, y = internal_time/(n * c), color = computer_mode, shape = inst_class)) + geom_point() + scale_y_log10()
+ggplot(env_file_mean_times, aes(x = n*c, y = internal_time/(n * c), color = computer_mode, shape = inst_class)) + geom_point() + scale_x_log10()
+ggplot(env_file_mean_times, aes(x = n*c, y = internal_time/(n * c), color = computer_mode, shape = inst_class)) + geom_point() + scale_y_log10() + scale_x_log10()
 # With the files (y axis) ordered in increasing order of ratio
 # This should starts at ~1, stay at 1~1.5 for the most files, and end at 2~3
 alg_name = "pyasukpt"

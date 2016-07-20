@@ -15,8 +15,10 @@ namespace hbm {
   struct dom_extra_info_t : extra_info_t {
     std::string info;
 
-    dom_extra_info_t(I num_items, I num_not_sm_dominated_items) {
-      info = "Number of items: " + std::to_string(num_items) + "\n" +
+    dom_extra_info_t(const std::string &algorithm_name,
+                           I num_items, I num_not_sm_dominated_items) {
+      info = "algorithm_name: " + algorithm_name + "\n" +
+             "Number of items: " + std::to_string(num_items) + "\n" +
              "Number of not dominated items: " +
              std::to_string(num_not_sm_dominated_items) + "\n";
     }
@@ -117,8 +119,9 @@ namespace hbm {
       hbm_dominance_impl::smdom_sort(ukpi.items, undominated, already_sorted);
 
       sol.show_only_extra_info = true;
-      dom_extra_info_t<I>* ptr =
-        new dom_extra_info_t<I>(ukpi.items.size(), undominated.size());
+      dom_extra_info_t<I>* ptr = new dom_extra_info_t<I>(
+        "smdom_sort", ukpi.items.size(), undominated.size()
+      );
 
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
       sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
@@ -131,8 +134,9 @@ namespace hbm {
       hbm_dominance_impl::smdom_no_sort(begin, end, undominated);
 
       sol.show_only_extra_info = true;
-      dom_extra_info_t<I>* ptr =
-        new dom_extra_info_t<I>(end - begin, undominated.size());
+      dom_extra_info_t<I>* ptr = new dom_extra_info_t<I>(
+        "smdom_no_sort", end - begin, undominated.size()
+      );
 
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
       sol.extra_info = shared_ptr<extra_info_t>(upcast_ptr);
@@ -148,7 +152,7 @@ namespace hbm {
       }
 
       virtual const std::string& name(void) const {
-        static const std::string name = "sel_not_sm_dom (sort version)";
+        static const std::string name = "smdom_sort";
         return name;
       }
     };

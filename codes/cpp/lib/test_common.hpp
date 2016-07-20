@@ -113,11 +113,12 @@ namespace hbm {
     int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, argv_t argv) {
       if (argc < 2) {
         cout << "usage: a.out data.ukp [extra specific method params]" << endl;
-        return EXIT_FAILURE;
+        // don't fail now, to allow the method to give a better error message
+        //return EXIT_FAILURE;
       }
 
-      string spath(argv[1]);
-      cout << spath << endl;
+      const string spath(argv[1]);
+      cout << "instance_filepath: " << spath << endl;
 
       run_t<W, P, I> run;
 
@@ -218,6 +219,11 @@ namespace hbm {
   /// skipped). The instance_t passed to the ukp_solver is read from
   /// argv[1]. It's NOT expected from the ukp_solver to try reading the
   /// file itself (ukp_solver should probably ignore argv[1]).
+  ///
+  /// @note The main difference between this function and run_ukp
+  ///   is that this function will output extra info to the stdout (cout).
+  ///   The run_ukp only outputs a message if an error occur.
+  ///   This function calls run_ukp internally.
   ///
   /// @param ukp_solver A procedure that takes an instance_t, some
   ///   parameters coded as argc/argv and writes the result on a

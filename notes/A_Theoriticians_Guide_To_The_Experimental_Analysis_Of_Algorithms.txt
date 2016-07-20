@@ -90,12 +90,12 @@ Discussion on Principles
 		Pet Peeve 34. Comparing approximation algorithms as to how often they find optima. Not a good ideia because: restrict to solutions with optima known; ignores the question "when the algorithm don't find the optima, how close to it the algorithm gets?"; for large/hard instances this percentage will be close to zero for all non-exact algorithms.
 		Pet Peeve 35. Too much data. Substitute raw data by summaries; remove data about specific instance distributions if their behaviour is the same that other distributions; less relevant or very specific data should go on appendix or web archives.
 Section 2. Extensions and other points to ponder
-"Whom can you trust?
-1. Never trust a random number generator.
-2. Never trust your code to be correct.
-3. Never trust a previous author to have known all the literature.
-4. Never trust your memory to where you put that data (and how it was generated).
-5. Never trust your computer to remain unchanged.
-6. Never trust backup media or Web sites to remain readable indefinitely.
-7. Never trust a so-called expert on experimental analysis."
+	"Whom can you trust?
+	1. Never trust a random number generator.
+	2. Never trust your code to be correct.
+	3. Never trust a previous author to have known all the literature.
+	4. Never trust your memory to where you put that data (and how it was generated).
+	5. Never trust your computer to remain unchanged.
+	6. Never trust backup media or Web sites to remain readable indefinitely.
+	7. Never trust a so-called expert on experimental analysis." (p. 32)
 

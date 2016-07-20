@@ -23,6 +23,7 @@ namespace hbm {
   // -------------------- EXTRA_INFO STRUCTS --------------------
   template <typename W, typename P, typename I>
   struct greendp_extra_info_t : extra_info_t {
+    std::string algorithm_name{"greendp"};
     /// The last capacity computed before detecting periodicity and stoping.
     W last_y_value_outer_loop{0};
     #ifdef HBM_PROFILE
@@ -40,6 +41,7 @@ namespace hbm {
     virtual std::string gen_info(void) {
       std::stringstream out("");
 
+      HBM_PRINT_VAR(algorithm_name);
       HBM_PRINT_VAR(last_y_value_outer_loop);
       HBM_PRINT_VAR(c);
       HBM_PRINT_VAR(n);
@@ -86,6 +88,7 @@ namespace hbm {
 
   template <typename W, typename P, typename I>
   struct greendp1_extra_info_t : extra_info_t {
+    std::string algorithm_name{"greendp1"};
     #ifdef HBM_PROFILE
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
@@ -107,6 +110,7 @@ namespace hbm {
     std::string gen_info(void) {
       std::stringstream out("");
 
+      HBM_PRINT_VAR(algorithm_name);
       HBM_PRINT_VAR(n);
       HBM_PRINT_VAR(c);
       HBM_PRINT_VAR(t);
@@ -152,6 +156,7 @@ namespace hbm {
 
   template <typename W, typename P, typename I>
   struct greendp2_extra_info_t : extra_info_t {
+    std::string algorithm_name{"greendp2"};
     #ifdef HBM_PROFILE
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
@@ -174,6 +179,7 @@ namespace hbm {
     virtual std::string gen_info(void) {
       std::stringstream out("");
 
+      HBM_PRINT_VAR(algorithm_name);
       HBM_PRINT_VAR(c);
       HBM_PRINT_VAR(n);
       HBM_PRINT_VAR(n2);

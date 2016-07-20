@@ -84,7 +84,11 @@ namespace hbm {
   /// Same as greendp_extra_info_t, created only as a contingence if, in the
   /// future, we have different stats between greendp and mgreendp.
   template <typename W, typename P, typename I>
-  struct mgreendp_extra_info_t : greendp_extra_info_t<W, P, I> {};
+  struct mgreendp_extra_info_t : greendp_extra_info_t<W, P, I> {
+    mgreendp_extra_info_t(void) : greendp_extra_info_t<W, P, I>() {
+      greendp_extra_info_t<W, P, I>::algorithm_name = "mgreendp";
+    }
+  };
 
   template <typename W, typename P, typename I>
   struct greendp1_extra_info_t : extra_info_t {
@@ -152,7 +156,11 @@ namespace hbm {
   };
 
   template <typename W, typename P, typename I>
-  struct mgreendp1_extra_info_t : greendp1_extra_info_t<W, P, I> {};
+  struct mgreendp1_extra_info_t : greendp1_extra_info_t<W, P, I> {
+    mgreendp1_extra_info_t(void) : greendp1_extra_info_t<W, P, I>() {
+      greendp1_extra_info_t<W, P, I>::algorithm_name = "mgreendp1";
+    }
+  };
 
   template <typename W, typename P, typename I>
   struct greendp2_extra_info_t : extra_info_t {
@@ -221,7 +229,11 @@ namespace hbm {
   };
 
   template <typename W, typename P, typename I>
-  struct mgreendp2_extra_info_t : greendp2_extra_info_t<W, P, I> {};
+  struct mgreendp2_extra_info_t : greendp2_extra_info_t<W, P, I> {
+    mgreendp2_extra_info_t(void) : greendp2_extra_info_t<W, P, I>() {
+      greendp2_extra_info_t<W, P, I>::algorithm_name = "mgreendp2";
+    }
+  };
 
   namespace hbm_greendp_impl {
     using namespace std;

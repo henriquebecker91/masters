@@ -47,7 +47,7 @@ bin/run_eduk.out: mains/run_eduk.cpp lib/eduk.hpp lib/wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ mains/run_eduk.cpp $(CFLAGS) $(DEFS)
 
 bin/run_per.out: mains/run_per.cpp lib/periodicity.hpp lib/wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ mains/run_per.cpp $(CFLAGS) $(DEFS)
+	$(CC) -o $@ mains/run_per.cpp $(CFLAGS) $(LBOOST) $(DEFS)
 
 bin/run_dom.out: mains/run_dom.cpp lib/dominance.hpp lib/wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ mains/run_dom.cpp $(CFLAGS) $(DEFS)

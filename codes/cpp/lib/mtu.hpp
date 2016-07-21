@@ -19,6 +19,7 @@
 namespace hbm {
   template <typename W, typename P, typename I>
   struct mtu1_extra_info_t : extra_info_t {
+    std::string algorithm_name{"cpp-mtu1"};
     #ifdef HBM_PROFILE
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
@@ -33,6 +34,7 @@ namespace hbm {
     virtual std::string gen_info(void) {
       std::stringstream out("");
 
+      HBM_PRINT_VAR(algorithm_name);
       HBM_PRINT_VAR(c);
       HBM_PRINT_VAR(n);
 
@@ -71,7 +73,11 @@ namespace hbm {
   };
 
   template <typename W, typename P, typename I>
-  struct mtu2_extra_info_t : mtu1_extra_info_t<W, P, I> {};
+  struct mtu2_extra_info_t : mtu1_extra_info_t<W, P, I> {
+    mtu2_extra_info_t(void) : mtu1_extra_info_t<W, P, I>() {
+      mtu1_extra_info_t<W, P, I>::algorithm_name = "cpp-mtu2";
+    }
+  };
 
   namespace hbm_mtu_impl {
     using namespace std;

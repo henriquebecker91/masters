@@ -17,7 +17,8 @@ namespace hbm {
     std::string info;
 
     per_extra_info_t(W original_cap, W y_cap) {
-      info = "Original capacity: " + std::to_string(original_cap) + "\n"
+      info = std::string("algorithm_name: y_star_periodicity_bound\n")
+             + "Original capacity: " + std::to_string(original_cap) + "\n"
              + "y* capacity: " + std::to_string(y_cap) + "\n";
     }
 

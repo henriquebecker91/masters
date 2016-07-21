@@ -7,17 +7,21 @@
 
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
+#include "type_name.hpp"
 
 namespace hbm {
   /// Class responsible for pretty printing the result from the wrapped
   /// dominance procedures.
-  template <typename I>
+  template <typename W, typename P, typename I>
   struct dom_extra_info_t : extra_info_t {
     std::string info;
 
     dom_extra_info_t(const std::string &algorithm_name,
                            I num_items, I num_not_sm_dominated_items) {
       info = "algorithm_name: " + algorithm_name + "\n" +
+             "type_W: " + hbm::type_name<W>::get() + "\n"
+             "type_P: " + hbm::type_name<P>::get() + "\n"
+             "type_I: " + hbm::type_name<I>::get() + "\n"
              "Number of items: " + std::to_string(num_items) + "\n" +
              "Number of not dominated items: " +
              std::to_string(num_not_sm_dominated_items) + "\n";
@@ -119,7 +123,7 @@ namespace hbm {
       hbm_dominance_impl::smdom_sort(ukpi.items, undominated, already_sorted);
 
       sol.show_only_extra_info = true;
-      dom_extra_info_t<I>* ptr = new dom_extra_info_t<I>(
+      dom_extra_info_t<W, P, I>* ptr = new dom_extra_info_t<W, P, I>(
         "smdom_sort", ukpi.items.size(), undominated.size()
       );
 
@@ -134,7 +138,7 @@ namespace hbm {
       hbm_dominance_impl::smdom_no_sort(begin, end, undominated);
 
       sol.show_only_extra_info = true;
-      dom_extra_info_t<I>* ptr = new dom_extra_info_t<I>(
+      dom_extra_info_t<W, P, I>* ptr = new dom_extra_info_t<W, P, I>(
         "smdom_no_sort", end - begin, undominated.size()
       );
 

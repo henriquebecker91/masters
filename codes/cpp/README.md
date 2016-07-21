@@ -90,6 +90,13 @@ rule number 3 below.
 A function macro definition that is used in the inner workings
 of the library. Don't redefine it, or depend on its existence.
 
+#### HBM_GIT_HEAD_AT_COMPILATION
+A macro that should contain the git head at compilation. This macro should
+be defined by the compiler (using -DHBM_GIT_HEAD_AT_COMPILATION=...),
+if not, it will contain a string saying that someone forgot to set the macro.
+If you use the provided Makefile it will be set correctly. The exact format
+of the version string can be consulted at the Makefile too.
+
 ### Assumption Rules
 The code makes some assumptions about the profit and weight types,
 if you break those the code probably won't compile or work as

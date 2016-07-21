@@ -32,6 +32,11 @@
   #endif
 #endif
 
+#ifndef HBM_GIT_HEAD_AT_COMPILATION
+  #define HBM_GIT_HEAD_AT_COMPILATION compiler call forgot to set \
+HBM_GIT_HEAD_AT_COMPILATION
+#endif
+
 /// Namespace that encloses everything about Henrique Becker Master's.
 namespace hbm {
   /// The item on an UKP (unbounded knapsack problem).

@@ -24,6 +24,7 @@ namespace hbm {
 
     virtual std::string gen_info(void) {
       return std::string("algorithm_name: y_star_periodicity_bound\n")
+           + "git_head_at_compilation: " + HBM_GIT_HEAD_AT_COMPILATION + "\n"
            + "type_W: " + hbm::type_name<W>::get() + "\n"
            + "type_P: " + hbm::type_name<P>::get() + "\n"
            + "type_I: " + hbm::type_name<I>::get() + "\n"

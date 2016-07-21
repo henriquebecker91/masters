@@ -111,16 +111,21 @@ namespace hbm {
 
     template <typename W, typename P, typename I>
     int main_take_path(ukp_solver_t<W, P, I> ukp_solver, int argc, argv_t argv) {
+      run_t<W, P, I> run;
+
       if (argc < 2) {
-        cout << "usage: a.out data.ukp [extra specific method params]" << endl;
-        // don't fail now, to allow the method to give a better error message
-        //return EXIT_FAILURE;
+        cout << "main_take_path: called with argc < 2, the expected usage is: "
+             << "./<binary_name> path/file.ukp <other method specific params>."
+             << endl << "main_take_path: will call method anyway to give it a "
+             << "chance to show its specific usage."
+        << endl;
+        instance_t<W, P> ukpi;
+        ukp_solver(ukpi, run.result, argc, argv);
+        return EXIT_FAILURE;
       }
 
       const string spath(argv[1]);
       cout << "instance_filepath: " << spath << endl;
-
-      run_t<W, P, I> run;
 
       // Call the function without giving the program name or instance filename
       int status = hbm::hbm_test_common_impl::run_ukp(ukp_solver, argc, argv, run);

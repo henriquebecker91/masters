@@ -52,6 +52,8 @@ namespace hbm {
       std::stringstream out("");
 
       HBM_PRINT_VAR(algorithm_name);
+      out <<  "git_head_at_compilation: "
+          << HBM_GIT_HEAD_AT_COMPILATION << std::endl;
       out << "type_W: " << hbm::type_name<W>::get() << std::endl;
       out << "type_P: " << hbm::type_name<P>::get() << std::endl;
       out << "type_I: " << hbm::type_name<I>::get() << std::endl;

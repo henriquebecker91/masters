@@ -1,6 +1,10 @@
 #ifndef HBM_PERIODICITY_HPP
 #define HBM_PERIODICITY_HPP
 
+#include "ukp_common.hpp"
+#include "wrapper.hpp"
+#include "type_name.hpp"
+
 #include <type_traits>  // For is_integral, is_same
 #include <limits> // for numeric_limits
 #include <boost/multiprecision/cpp_int.hpp> // For cpp_rational (infinite
@@ -8,22 +12,23 @@
                                             // used at y_star
 #include <boost/math/common_factor_rt.hpp>  // For boost::math::lcm used
                                             // at huangtang
-#include "ukp_common.hpp"
-#include "wrapper.hpp"
 
 namespace hbm {
-  template <typename W>
+  template <typename W, typename P, typename I>
   struct per_extra_info_t : extra_info_t {
-    std::string info;
+    W original_cap;
+    W y_cap;
 
-    per_extra_info_t(W original_cap, W y_cap) {
-      info = std::string("algorithm_name: y_star_periodicity_bound\n")
-             + "Original capacity: " + std::to_string(original_cap) + "\n"
-             + "y* capacity: " + std::to_string(y_cap) + "\n";
-    }
+    per_extra_info_t(W original_cap, W y_cap) :
+                     original_cap(original_cap),  y_cap(y_cap) { }
 
     virtual std::string gen_info(void) {
-      return info;
+      return std::string("algorithm_name: y_star_periodicity_bound\n")
+           + "type_W: " + hbm::type_name<W>::get() + "\n"
+           + "type_P: " + hbm::type_name<P>::get() + "\n"
+           + "type_I: " + hbm::type_name<I>::get() + "\n"
+           + "Original capacity: " + std::to_string(original_cap) + "\n"
+           + "y* capacity: " + std::to_string(y_cap) + "\n";
     }
   };
 
@@ -154,8 +159,8 @@ namespace hbm {
       sol.show_only_extra_info = true;
       I y_star_cap = hbm_periodicity_impl::y_star(ukpi, already_sorted);
 
-      per_extra_info_t<W>* ptr =
-        new per_extra_info_t<W>(ukpi.c, y_star_cap);
+      per_extra_info_t<W, P, I>* ptr =
+        new per_extra_info_t<W, P, I>(ukpi.c, y_star_cap);
 
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(ptr);
       sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);

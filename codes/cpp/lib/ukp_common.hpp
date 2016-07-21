@@ -10,8 +10,8 @@
 // Includes for implementation.
 #include <regex>            // for regex, regex_match
 #include <algorithm>        // for sort
-#include "workarounds.hpp"  // for from_string
 #include <chrono>           // for steady_clock::
+#include "workarounds.hpp"  // for from_string
 
 #if defined(HBM_PROFILE)
   // Both macros needs a steady_clock::time_point named 'begin' on scope.

@@ -4,13 +4,31 @@
 #include "ukp_common.hpp"
 #include "periodicity.hpp"
 #include "wrapper.hpp"
+#include "type_name.hpp"
 
 namespace hbm {
+  template <typename W, typename P, typename I>
+  struct gardp_extra_info_t : extra_info_t {
+    gardp_extra_info_t(void) { }
+
+    virtual std::string gen_info(void) {
+      return std::string("algorithm_name: gardp\n")
+           + "type_W: " + hbm::type_name<W>::get() + "\n"
+           + "type_P: " + hbm::type_name<P>::get() + "\n"
+           + "type_I: " + hbm::type_name<I>::get() + "\n";
+    }
+  };
+
   namespace hbm_gardp_impl {
     using namespace std;
 
     template<typename W, typename P, typename I>
     void gardp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+      // Extra Info Pointer == eip
+      gardp_extra_info_t<W, P, I>* eip = new gardp_extra_info_t<W, P, I>();
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
+
       const W original_c = ukpi.c;
       W c = ukpi.c;
       const I n = ukpi.items.size();
@@ -108,7 +126,7 @@ namespace hbm {
 
   /// Solves an UKP instance by the dynamic programming algorithm presented at
   /// p. 221, Integer Programming, Robert S. Garfinkel, and stores the results
-  /// at sol. 
+  /// at sol.
   ///
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.

@@ -13,7 +13,7 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (it's 'all except debug/profile build' in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -27,7 +27,9 @@ LBOOST=-lboost_filesystem -lboost_system
 # releases its next version this can be removed.
 # See: https://svn.boost.org/trac/boost/ticket/12181
 LBOOST += -fpermissive
-H_DEPS=lib/ukp_common.hpp lib/test_common.hpp bin
+# To understand the utility of the pipe below ("| bin"), see
+# https://www.gnu.org/software/make/manual/make.html#Prerequisite-Types
+H_DEPS=lib/ukp_common.hpp lib/test_common.hpp | bin
 DEFS=-DHBM_XOR_SWAP
 
 # ukp5 specific
@@ -37,10 +39,10 @@ UKP5_DEFS=$(DEFS) -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS
 bin:
 	mkdir bin
 
-bin/ukp2sukp.out: mains/ukp2sukp.cpp lib/ukp_common.hpp bin
+bin/ukp2sukp.out: mains/ukp2sukp.cpp lib/ukp_common.hpp | bin
 	$(CC) -o $@ mains/ukp2sukp.cpp $(CFLAGS)
 
-bin/sukp2ukp.out: mains/sukp2ukp.cpp lib/ukp_common.hpp bin
+bin/sukp2ukp.out: mains/sukp2ukp.cpp lib/ukp_common.hpp | bin
 	$(CC) -o $@ mains/sukp2ukp.cpp $(CFLAGS)
 
 bin/run_eduk.out: mains/run_eduk.cpp lib/eduk.hpp lib/wrapper.hpp $(H_DEPS)
@@ -62,10 +64,10 @@ bin/ukp5: bin/run_ukp5.out bin/test_ukp5.out
 	touch $@
 
 bin/run_gardp.out: mains/run_gardp.cpp lib/gardp.hpp lib/wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ mains/run_gardp.cpp $(CFLAGS) $(DEFS)
+	$(CC) -o $@ mains/run_gardp.cpp $(CFLAGS) $(LBOOST) $(DEFS)
 
 bin/test_gardp.out: mains/test_gardp.cpp lib/gardp.hpp lib/wrapper.hpp $(H_DEPS)
-	$(CC) -o $@ mains/test_gardp.cpp $(CFLAGS) $(DEFS)
+	$(CC) -o $@ mains/test_gardp.cpp $(CFLAGS) $(LBOOST) $(DEFS)
 
 bin/gardp: bin/run_gardp.out bin/test_gardp.out
 	touch $@
@@ -151,5 +153,5 @@ bin/mtu2: bin/run_mtu2.out bin/test_mtu2.out
 .PHONY: clean
 
 clean:
-	rm -f bin/*
+	rm -rf ./bin
 

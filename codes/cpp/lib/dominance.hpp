@@ -14,21 +14,26 @@ namespace hbm {
   /// dominance procedures.
   template <typename W, typename P, typename I>
   struct dom_extra_info_t : extra_info_t {
-    std::string info;
+    std::string algorithm_name;
+    I num_items;
+    I num_items_not_smdom;
 
     dom_extra_info_t(const std::string &algorithm_name,
-                           I num_items, I num_not_sm_dominated_items) {
-      info = "algorithm_name: " + algorithm_name + "\n" +
-             "type_W: " + hbm::type_name<W>::get() + "\n"
-             "type_P: " + hbm::type_name<P>::get() + "\n"
-             "type_I: " + hbm::type_name<I>::get() + "\n"
-             "Number of items: " + std::to_string(num_items) + "\n" +
-             "Number of not dominated items: " +
-             std::to_string(num_not_sm_dominated_items) + "\n";
-    }
+                     I num_items,
+                     I num_items_not_smdom) :
+                     algorithm_name(algorithm_name),
+                     num_items(num_items),
+                     num_items_not_smdom(num_items_not_smdom)
+                     { }
 
     virtual std::string gen_info(void) {
-      return info;
+      return "algorithm_name: " + algorithm_name + "\n"
+           + "type_W: " + hbm::type_name<W>::get() + "\n"
+           + "type_P: " + hbm::type_name<P>::get() + "\n"
+           + "type_I: " + hbm::type_name<I>::get() + "\n"
+           + "Number of items: " + std::to_string(num_items) + "\n"
+           + "Number of not dominated items: "
+           + std::to_string(num_items_not_smdom) + "\n";
     }
   };
   

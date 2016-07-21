@@ -8,6 +8,7 @@
 
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
+#include "type_name.hpp"
 
 // The original version of the algorithm relies on the garbage collection of
 // functional languages, so nodes of lazy lists that are unreachable by the
@@ -23,6 +24,18 @@
 #endif
 
 namespace hbm {
+  template <typename W, typename P, typename I>
+  struct eduk_extra_info_t : extra_info_t {
+    eduk_extra_info_t(void) { }
+
+    virtual std::string gen_info(void) {
+      return std::string("algorithm_name: eduk\n")
+           + "type_W: " + hbm::type_name<W>::get() + "\n"
+           + "type_P: " + hbm::type_name<P>::get() + "\n"
+           + "type_I: " + hbm::type_name<I>::get() + "\n";
+    }
+  };
+
   /// Implementation details. Do not depend.
   ///
   /// This is an adaptation of the algorithm described at "Sparse knapsack
@@ -360,6 +373,11 @@ namespace hbm {
     /// &items).
     template<typename W, typename P, typename I>
     void eduk(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted = false) {
+      // Extra Info Pointer == eip
+      eduk_extra_info_t<W, P, I>* eip = new eduk_extra_info_t<W, P, I>();
+      extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
+      sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
+
       I n = ukpi.items.size();
       W c = ukpi.c;
       vector< item_t<W, P> > &items(ukpi.items);

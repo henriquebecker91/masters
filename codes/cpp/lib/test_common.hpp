@@ -1,12 +1,12 @@
 #ifndef HBM_TEST_COMMON_HPP
 #define HBM_TEST_COMMON_HPP
 
+#include "ukp_common.hpp"
+
 #include <chrono>
 #include <fstream>  // ifstream for reading UKP files
 #include <array>
 #include <iostream>
-
-#include "ukp_common.hpp"
 
 namespace hbm {
   /// @brief A type that contains a solution, and how much time was needed

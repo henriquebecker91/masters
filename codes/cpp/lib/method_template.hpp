@@ -16,6 +16,7 @@
 
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
+#include "type_name.hpp"
 
 #include <chrono>
 #include <boost/rational.hpp>
@@ -35,6 +36,7 @@ namespace hbm {
     // those profiling times you will need to put HBM_START_TIMER and
     // HBM_STOP_TIMER on your code (at METHOD CODE). Check the other codes
     // to see how it works. Also, the variables n and c need to be set.
+    std::string algorithm_name{"greendp"};
     #ifdef HBM_PROFILE
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
@@ -49,6 +51,10 @@ namespace hbm {
     virtual std::string gen_info(void) {
       std::stringstream out("");
 
+      HBM_PRINT_VAR(algorithm_name);
+      out << "type_W: " << hbm::type_name<W>::get() << std::endl;
+      out << "type_P: " << hbm::type_name<P>::get() << std::endl;
+      out << "type_I: " << hbm::type_name<I>::get() << std::endl;
       HBM_PRINT_VAR(c);
       HBM_PRINT_VAR(n);
 

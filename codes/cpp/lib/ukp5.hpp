@@ -1,6 +1,11 @@
 #ifndef HBM_UKP5_HPP
 #define HBM_UKP5_HPP
 
+#include "ukp_common.hpp"
+#include "dominance.hpp"
+#include "periodicity.hpp"
+#include "type_name.hpp"
+
 #include <sstream>  // For stringstream
 #include <fstream>  // ofstream for dump
 #include <iostream>
@@ -15,10 +20,6 @@
 //#include <boost/program_options/option.hpp>
 //#include <boost/program_options/options_description.hpp>
 //#include <boost/program_options/parsers.hpp>
-
-#include "ukp_common.hpp"
-#include "dominance.hpp"
-#include "periodicity.hpp"
 
 #ifdef HBM_INIT_G_BY_CHUNKS
   #ifndef HBM_CHECK_PERIODICITY
@@ -201,15 +202,30 @@ namespace hbm {
       ukp5_gen_stats();
 
       stringstream out("");
+      out << "algorithm_name: ukp5" << endl;
+      out << "type_W: " << hbm::type_name<W>::get() << std::endl;
+      out << "type_P: " << hbm::type_name<P>::get() << std::endl;
+      out << "type_I: " << hbm::type_name<I>::get() << std::endl;
       out << "ukp5 used conf follows:" << endl;
       conf.print(out);
       out << "end of ukp5 conf" << endl;
 
       #ifdef HBM_CHECK_PERIODICITY
+      out << "HBM_CHECK_PERIODICITY: defined" << endl;
       HBM_PRINT_VAR(last_y_value_outer_loop);
+      #else
+      out << "HBM_CHECK_PERIODICITY: undefined" << endl;
       #endif
       #ifdef HBM_INIT_G_BY_CHUNKS
+      out << "HBM_INIT_G_BY_CHUNKS: defined" << endl;
       HBM_PRINT_VAR(last_gy_initialized);
+      #else
+      out << "HBM_INIT_G_BY_CHUNKS: undefined" << endl;
+      #endif
+      #ifdef HBM_XOR_SWAP
+      out << "HBM_XOR_SWAP: defined" << endl;
+      #else
+      out << "HBM_XOR_SWAP: undefined" << endl;
       #endif
       HBM_PRINT_VAR(y_bound);
       HBM_PRINT_VAR(c);

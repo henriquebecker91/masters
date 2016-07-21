@@ -1,5 +1,6 @@
 require 'childprocess'
 require 'pathname'
+require 'socket'
 
 # The main module, the two main utility methods offered are ::batch and
 # ::experiment.
@@ -97,6 +98,11 @@ module BatchExperiment
         free_cpus.push(job[:cpu])
         File.delete(job[:lockfname])
         comms_executed << job[:command]
+        out = job[:out_file]
+        out.write("\ncommand: " + job[:command])
+        out.write("\ndate_before: " + job[:date_before].utc.to_s)
+        out.write("\ndate_after: " + Time.now.utc.to_s)
+        out.write("\nhostname: " + Socket.gethostname)
       end
       exited # bool returned to delete_if
     end
@@ -246,13 +252,16 @@ module BatchExperiment
       cproc.io.stdout = out
       cproc.io.stderr = err
 
+      date_before = Time.now
       cproc.start
 
       comms_running << {
         proc: cproc,
         cpu: cpu,
         lockfname: lockfname,
-        command: command
+        command: command,
+        date_before: date_before,
+        out_file: out,
       }
 
       # The lock file now stores the process pid for debug reasons.

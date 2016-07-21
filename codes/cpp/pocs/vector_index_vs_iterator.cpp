@@ -13,10 +13,11 @@ double inline difftime_between_now_and(const steady_clock::time_point &begin) {
 
 int main(void)
 {
-  const size_t size = 10000000;
+  const size_t size = 1000000000;
   vector<int> v(size, 0);
 
   cout << "---------- Benchmark ----------" << endl;
+  cout << "vector size: " << size << endl;
 
   steady_clock::time_point begin = steady_clock::now();
   for (int& i : v) { ++i; }
@@ -57,30 +58,33 @@ int main(void)
   cout << "at cache:           " << difftime_between_now_and(begin) << endl;
 
   /* On an ASUS R552JK-CN159H (Intel Core i7-4700HQ, 6M Cache, 3.40 GHz),
-   * with gcc version 6.1.1 20160501 (x86_64-pc-linux-gnu):
+   * with gcc version gcc version 6.1.1 20160602 (x86_64-pc-linux-gnu):
    *
    * g++ -O0 vector_index_vs_iterator.cpp && ./a.out 
    * ---------- Benchmark ----------
-   * for_each c++11:     0.0855757
-   * ptr nocache:        0.0493906
-   * ptr cache:          0.019197
-   * iterator nocache:   0.126014
-   * iterator cache:     0.082235
-   * operator[] nocache: 0.046754
-   * operator[] cache:   0.0316647
-   * at nocache:         0.130557
-   * at cache:           0.105731
+   * vector size: 1000000000
+   * for_each c++11:     8.07804
+   * ptr nocache:        4.62898
+   * ptr cache:          1.80609
+   * iterator nocache:   11.7762
+   * iterator cache:     7.46722
+   * operator[] nocache: 4.38599
+   * operator[] cache:   2.92898
+   * at nocache:         12.3106
+   * at cache:           9.94943
+   *
    * g++ -O3 vector_index_vs_iterator.cpp && ./a.out 
    * ---------- Benchmark ----------
-   * for_each c++11:     0.00472208
-   * ptr nocache:        0.00462304
-   * ptr cache:          0.00498309
-   * iterator nocache:   0.00514497
-   * iterator cache:     0.00495087
-   * operator[] nocache: 0.00447077
-   * operator[] cache:   0.00446857
-   * at nocache:         0.00472267
-   * at cache:           0.00589979
+   * vector size: 1000000000
+   * for_each c++11:     0.444418
+   * ptr nocache:        0.439062
+   * ptr cache:          0.441185
+   * iterator nocache:   0.437305
+   * iterator cache:     0.439903
+   * operator[] nocache: 0.440585
+   * operator[] cache:   0.440189
+   * at nocache:         0.440141
+   * at cache:           0.529605
    *
    * The author of this code has no ideia on how to explain those results.
    */

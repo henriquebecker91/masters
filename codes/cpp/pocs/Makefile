@@ -6,12 +6,13 @@ all: autodoc_code.out autodoc_code_fail.out get_clock_precision.out uninitialize
 
 CC=g++
 CFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -O3
-HEAD := $(shell git describe --abbrev=12 --dirty --always --tags)
+VERSION=$(shell git describe --abbrev=12 --dirty --always --tags)
+VERSION_FLAG=-DHBM_GIT_HEAD_AT_COMPILATION=\"$(VERSION)\"
 
 autodoc_code_fail.out: autodoc_code.cpp
 	$(CC) -o $@ autodoc_code.cpp $(CFLAGS)
 autodoc_code.out: autodoc_code.cpp
-	$(CC) -o $@ autodoc_code.cpp $(CFLAGS) -DHBM_GIT_HEAD_AT_COMPILATION=$(HEAD)
+	$(CC) -o $@ autodoc_code.cpp $(CFLAGS) $(VERSION_FLAG)
 get_clock_precision.out: get_clock_precision.cpp
 	$(CC) -o $@ get_clock_precision.cpp $(CFLAGS)
 uninitialized_resize.out: uninitialized_resize.cpp

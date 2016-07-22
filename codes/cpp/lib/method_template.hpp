@@ -61,6 +61,7 @@ namespace hbm {
       HBM_PRINT_VAR(n);
 
       #ifdef HBM_PROFILE
+      out << "HBM_PROFILE: defined" << std::endl;
       const double sum_time = sort_time + vector_alloc_time +
         linear_comp_time + dp_time + sol_time;
 
@@ -88,6 +89,8 @@ namespace hbm {
       out.fill(old_fill);
       out.setf(old_flags);
       out.precision(old_precision);
+      #else //HBM_PROFILE
+      out << "HBM_PROFILE: undefined" << std::endl;
       #endif //HBM_PROFILE
 
       return out.str();

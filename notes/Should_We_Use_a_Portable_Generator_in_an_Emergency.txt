@@ -1,0 +1,22 @@
+Twenty four pages. 1997. Authors: Zeger DEGRAEVE; Linus SCHRAGE
+PDF of decent quality.
+
+The paper presents an informal discussion about the use of random instance generators (the paper's point of view is that they should be avoided when possible).
+
+I HAVEN'T READ IT COMPLETELY YET.
+
+While reading this, I found the following discussions to be relevant: http://www.eternallyconfuzzled.com/arts/jsw_art_rand.aspx and http://stackoverflow.com/questions/922358/consistent-pseudo-random-numbers-across-platforms. Seems like using the mersenne twister on c++11x is a portable choice, but more research is needed. 
+
+"We can think of three reasons for not using a random problem generator: [...] b) solving lots of randomly generated problems gives a false sense of having thoroughly tested an algorithm [...]" (p. 5) and "To illustrate (b), consider the unbounded or general integer knapsack problem." (p. 6) and "A plausible, and in fact common, way of generating random instances of this problem is to let [...]" (p. 7) and "Thus, even though we might ostensibly solve, say, 20 different big randomly generated problems, we are in fact only solving essentially one modest size underlying problem 20 times. This seems a less thorough test of an algorithm than one would like. Solving 20 different problems from 20 different industrial sources would be more reassuring." (p. 7)
+
+"If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems." (p. 7)
+
+"It is expensive and time consuming to collect real industrial problems. A random
+problem generator may be the only alternative if you want a problem with a particular characteristic, e.g. large size, quickly." (p. 8)
+
+I could dissect all the paper on citations; the paper is succint and every phrase has importance/value. It has nineteen pages of text but uses a very big space between lines, I would recommend to read it entirely.
+
+The paper points how using mod to define an interval can swerve a random integer uniform distribution to the smaller values in the target interval. My impression is that this is of little relevance if: a) the interval of the original distribution is very large; and the interval of the transformed distribution is many orders of magnitudes smaller (ex: to transform a number between 0 and (2^32)-1 to a number between 0 and 2 will favor 0 over 1 and 2 in a way that's almost imperceptible and/or irrelevant); the quantity of distinct numbers on the original interval is perfectly divisible by the number of distinct numbers on the tranformed interval (in this case, the transformed interval will have the same probability for each number). 
+
+The authors offer a simple code that make the previously cited transformation of one interval to another without biasing for the smallest numbers on the distribution. It will biase equally spaced numbers over all the target interval (ex.: for a target range of zero to n it will biase each number where n%m == 0, for a specific n and m dependent on the intervals themselves).
+

@@ -1,0 +1,12 @@
+Twenty pages. 1993/1994. Authors: PAMELA H. VANCE, CYNTHIA BARNHART, ELLIS L. JOHNSON, AND GEORGE L. NEMHAUSER
+Pdf of decent quality.
+
+Paper presents a B&B method with column generation (i.e. branch-and-price). This method don't seem to have the UKP as the only pricing problem (the pricing problem is a more general problem, and some instances of it can be considered as instances of the UKP, while other not).
+
+"Additional columns can be generated as needed for the restricted master problem
+by solving the knapsack problem." (follows mathematical model of the knapsack problem)
+"However, suppose that using the conventional branching rule of branching on a fractional variable, we branch on y_1 < 0. In the column generation phase it is possible (and quite likely) that the optimal solution to the subproblem (3) will be the pattern represented by y_1. Then it becomes necessary to generate the column with the 2º highest objective value. At depth n in the branch-and-bound tree, to generate columns we may need to find the n th best solution to a knapsack problem."
+
+
+"Because of the different subproblem structures that can be induced by the branching rule, different column generation algorithms were included in the implementation. At nodes where no edge constraints are present in the subproblem, either the greedy heuristic or the Horowitz-Sahni (HS) branch-and-bound algorithm [11] may be used to find solutions to the knapsack problem. A modification of HS is used if edge constraints are present but no item appears in more than one edge constraint. If the edge constraints overlap, that is an item appears in more than one edge constraint, then the subproblem is solved by a general IP optimizer." (p. 9)
+

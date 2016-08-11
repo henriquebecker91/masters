@@ -9,6 +9,8 @@ mtu$internal_time <- sapply(mtu$internal_time, function(x) if (is.na(x)) 999 els
 # Remove empty column created by extra ';'
 mtu$X <- NULL
 
+# Strange case, where cpp-mtu2 solves on 3 seconds, and all others take more
+# than 999s.
 mtu[mtu$filename == "nsds2_n50000wmin20000-0-s155213243c1921419.ukp", ]
 
 # Compute how many runs disagree on the opt for the same filename
@@ -46,4 +48,4 @@ ukp_time_comp_plot <- function (data) {
 # Useful information about the data 
 sapply(mtus, function(x) mean(x$internal_time))
 summary(mtu)
-ukp_time_comp_plot(mtu1) + geom_point() + scale_y_log10()
+ukp_time_comp_plot(cppmtu) + geom_point() + scale_y_log10()

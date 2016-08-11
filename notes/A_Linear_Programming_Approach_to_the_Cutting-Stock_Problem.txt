@@ -8,3 +8,5 @@ It doesn't present a complete step-by-step algorithm for the unbounded knapsack 
 
 The article also cites "The Decomposition Algorithm for Linear Programs" from Dantzig (saying that the previously presented function is very similar to the one presented by Dantzig). This paper is behind a paywall, and seems to be focused on simplex. This line of pursuit is going to be abandoned.
 
+"We will, at any rate, only consider in this report the linear programming solution of the cutting-stock problem in which the variables are not restricted to be integer, since our purpose is the description of an efficient method for dealing with the first factor, the very large number n of variables." (p. 5)
+

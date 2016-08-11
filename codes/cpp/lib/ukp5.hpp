@@ -843,6 +843,12 @@ namespace hbm {
       cout << "usage: ./a.out data.ukp [k apply_dom apply_dom_before_sort"
               "create_dumps]"
               << endl;
+      // TODO: As pointed by Degraeve and Schrage on the paper
+      // "Should we use a portable generator in an emergency?"
+      // we shouldn't take a real number as input, if we can take an integer
+      // instead. The real number will probably not be exactly represented
+      // and its representation can vary between different computers
+      // (because of precision).
       cout << "       k: A real number between 0 and 1. The items will be"
               " reordered before ukp5 is called, as std::partial_sort"
               " was called with the 'middle' argument being position k*"

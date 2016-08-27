@@ -76,30 +76,35 @@ As said before, the DARP don't have a precise definition and has many variants. 
 
 \begin{align}
 minimise &\sum_{k \in K}\sum_{i \in V}\sum_{j \in V} c^{k}_{ij} x^{k}_{ij} &\label{eq:objfun}\\
-subject~to &\sum_{k \in K}\sum_{j \in V} x^{k}_{ij} = 1 & (i \in P)\label{eq:cons_}\\
-           &\sum_{i \in V}x^{k}_{0i} = \sum_{i \in V}x^{k}_{i,2n+1} = 1 & (k \in K)\\
-           &\sum_{j \in V}x^{k}_{ij} - \sum_{j \in V}x^{k}_{n+1,j} = 0& (i \in P,~k \in K)\\
-           &\sum_{j \in V}x^{k}_{ji} - \sum_{j \in V}x^{k}_{ij} = 0& (i \in P\cup D,~k \in K)\\
-           &u^{k}_{j} \geq (u^{k}_{i} + d_i + t_{ij})x^{k}_{ij} & (i,j \in V,~k\in K)\\
-           &w^{k}_{j} \geq (w^{k}_{i} + q_j)x^{k}_{ij} & (i,j \in V,~k\in K)\\
-           &r^{k}_{i} \geq u^{k}_{n+1} -(u^{k}_{i} + d_i) & (i \in P,~k\in K)\\
-           &u^{k}_{2n+1} - u^k_0 \leq T_k & (k \in K)\\
-           &e_i \leq u^k_i \leq l_i & (i \in V,~k\in K)\\
-           &t_{i,n+1} \leq r^k_i \leq L & (i \in P,~k\in K)\\
-           &max\{0,q_i\} \leq w^k_i \leq min\{Q_k, Q_k + q_i\}&(i \in V,~k\in K)\\
-           &x^{k}_{ij} \in \{0,1\}&(i,j \in V,~k\in K)\\
+subject~to &\sum_{k \in K}\sum_{j \in V} x^{k}_{ij} = 1 & (i \in P)\label{eq:no_divide}\\
+           &\sum_{i \in V}x^{k}_{0i} = \sum_{i \in V}x^{k}_{i,2n+1} = 1 & (k \in K)\label{eq:end_and_begin}\\
+           &\sum_{j \in V}x^{k}_{ij} - \sum_{j \in V}x^{k}_{n+1,j} = 0& (i \in P,~k \in K)\label{eq:same_request_same_vehicle}\\
+           &\sum_{j \in V}x^{k}_{ji} - \sum_{j \in V}x^{k}_{ij} = 0& (i \in P\cup D,~k \in K)\label{eq:no_bus_teleport}\\
+           &u^{k}_{j} \geq (u^{k}_{i} + d_i + t_{ij})x^{k}_{ij} & (i,j \in V,~k\in K)\label{eq:travel_times}\\
+           &w^{k}_{j} \geq (w^{k}_{i} + q_j)x^{k}_{ij} & (i,j \in V,~k\in K)\label{eq:capacity}\\
+           &r^{k}_{i} \geq u^{k}_{n+i} -(u^{k}_{i} + d_i) & (i \in P,~k\in K)\label{ride_time}\\
+           &u^{k}_{2n+1} - u^k_0 \leq T_k & (k \in K)\label{eq:trip_time}\\
+           &e_i \leq u^k_i \leq l_i & (i \in V,~k\in K)\label{eq:time_windows}\\
+           &t_{i,n+i} \leq r^k_i \leq L & (i \in P,~k\in K)\label{eq:max_ride_time}\\
+           &max\{0,q_i\} \leq w^k_i \leq min\{Q_k, Q_k + q_i\}&(i \in V,~k\in K)\label{eq:capacity2}\\
+           &x^{k}_{ij} \in \{0,1\}&(i,j \in V,~k\in K)\label{eq:boolean}
 \end{align}
-%\begin{subeqnarray}
-%\label{form}
-%\slabel{form:obj}  \mathrm{Minimize}& \sum{k \in K}\sum{i \in V}\sum{j \in V} c^{k}_{ij} x^{k}_{ij}\\
-%\slabel{1b} \mathrm{S. A.} & e_{p,d} = e_{p,d-1} + P_{p,d} - \sum_{t \in T(p)} \sum_{c \in C(p)} V_c Z_{p,t}^{c,d} \quad \forall p \in P, d \in \{1, .... , D\},\\
-%\slabel{1c} & e_{t,d} = e_{t,d-1} - C_{t,d} + \sum_{p \in P(t)} \sum_{c \in C(p)} V_c Z_{p,t}^{c,d-D_{p,t}} \quad \forall t \in T, d \in \{1, .... , D\}, \\
-%\slabel{1d} & 0 \leq  e_{p,d} \leq  CAP_{p,d} \quad \forall p \in P, d \in \{1, .... , D\}, \\
-%\slabel{1e} & 0 \leq  e_{t,d} \leq  CAP_{t,d} \quad \forall t \in T, d \in \{1, .... , D\}, \\
-%\slabel{1f} & Z_{p,t}^{c,d} \in \{0,1\}, \quad \forall p \in P, t \in T(p), c \in C(p), d \in  \{1, .... , D\}.
-%\end{subeqnarray}
 
-A variável binária $Z_{p,t}^{c,d}$ define se um navio-tanque da classe $c \in C$ deverá levar petróleo cru da plataforma $p \in P$ ao terminal $t \in T$ no dia $d \in \{1,...,D\}$. A função objetivo (\ref{form:obj}) consiste em minimizar o custo total de transporte, considerando o custo diário de operação $F_c$ do navio da classe $c$ e o número de dias $D_{p,t}$ necessários para levar o petróleo da plataforma $p$ até o terminal $t$ e voltar ao seu ponto inicial (por isso da multiplicação por dois). A restrição (\ref{1b}) refere-se ao balanço de inventário de cada plataforma $p$ no dia $d$, considerando a quantidade $P_{p,d}$ produzida  na plataforma e a capacidade $V_c$ da classe de navio-tanque. De forma semelhante, a restrição (\ref{1c}) é responsável pelo balanço de inventário de cada terminal, considerando o consumo diário $C_{t,d}$ do terminal. As restrições (\ref{1d}) e (\ref{1e}) asseguram que o nível mínimo (0) e máximo ($CAP_{p,d}$ e $CAP_{t,d}$) não seja extrapolado nas plataformas e terminais, respectivamente.
+In this formulation, \(n\) is the number of requests (each request is a pair of a pickup and a delivery). If there's a pickup point \(i\); then the respective delivery point is \(i + n\) (i.e. each request is in the form \((i, i + n)\)). We have four location/point sets: \(P = \{1, ..., n\}\) (the pickup points); \(D = \{n+1, ..., 2n\}\) (the delivery points); the depot (points \(0\) and \(2n + 1\)); and \(V = {0, ..., 2n + 1} \equiv P \cup D \cup \{0, 2n + 1\}\) (the universe set, i.e. all points). The depot is represented by two points only to simplify the model; it's expected to be the same point on space; the only difference is that we enforce each vehicle trip to start from \(0\) and end in \(2n+1\). We also have a vehicle set \(K\), as this a multi-vehicle variant; and we can distinguish between the capacity of each vehicle \(k \in K\) as \(Q_k\), (this is a heterogeneous fleet variant).
+
+
+The solution variable is \(x^k_{ij} \in \{0, 1\} (k \in K,~i,j \in V)\). If the vehicle \(k\) goes from the point \(i\) to point \(j\) then \(x^k_{ij} = 1\); otherwise \(x^k_{ij} = 0\).
+
+The following variables are used to model some of the constraints: \(u^k_j\) will be the time vehicle \(k\) begins to attend point \(j\); \(w^k_j\) will be the number of people inside vehicle \(k\) when it \emph{departs} from point \(j\) (i.e. after loading); \(r^k_i\) will be the time amount the passenger of pickup request \(i\) remained inside the vehicle \(k\) (his or her total ride time; until point \(i + n\)); 
+
+The remaining data given with the problem are: \(c^k_{ij}\) the cost of going from \(i\) to \(j\) with vehicle \(k\) (a byproduct of the distance and the vehicle model); \(t_{ij}\) is the time needed by any vehicle to go from point \(i\) to point \(j\) (we assume all vehicles travel at similar speed); \(d_i\) is the time needed to service (embark and disembark) the people at point \(i\) (this parameter can vary as some patients can have mobility problems and therefore need help from the driver); \(e_i\) and \(l_i\) define a time window for each point \(i\), a vehicle has to \emph{start} servicing point \(i\) after \(e_i\) and before \(l_i\) (the vehicle don't need to finish servicing the point inside the time window); \(q_i\) will be the amount of people that will embark (\(q_i\) is positive and \(i \in P\)) or disembark (\(q_i\) is negative and \(i \in D\)) at a point \(i\) (we expect \(q_i + q_{n+i}\) to be zero). Finally, \(T_k\) is the max trip time of a given vehicle \(k\), and \(L\) is the max ride time of any passenger.
+
+The objective function \ref{eq:objfun} is the minimization of the total cost of all trips. Constraints \ref{eq:no_divide}, \ref{eq:end_and_begin}, \ref{eq:same_request_same_vehicle}, and \ref{eq:no_bus_teleport} are flux constraints, where: \ref{eq:no_divide} avoids that more than one vehicle visits the same point or that one vehicle leave a point by more than one single way; \ref{eq:end_and_begin} guarantee vehicles start and end at the depot; \ref{eq:same_request_same_vehicle} enforce that for the same request, the same vehicle will be used; \ref{eq:no_bus_teleport} secure that a bus that arrived at point \(i\) will leave point \(i\). The times to start embark/disembark at each point are kept realist by constraint \ref{eq:travel_times}. Constraint \ref{eq:capacity} guarantee a lower bound on the used capacity of each vehicle. The ride time of the passengers that embarked at \(i\) is defined by \ref{eq:ride_time} (based on their embark/disembark times). The max duration of each vehicle trip is enforced by \ref{eq:trip_time}. The time windows are respected because of constraint \ref{eq:time_windows}; as the max ride is respected because of \ref{eq:max_ride_time}. The constraint \ref{capacity2} helps constraint \ref{capacity} to guarantee that the vehicles capacity will not be exceeded. At least, but no less important, constraint \ref{eq:boolean} define that routes are indivisible (making the model an integer model).
+
+MAYBE PUT IMAGE OF THE TIMES
+
+
+It's interesting to note that this formulation gives a maximum ride time for each passenger, even in the presence of time windows. This is a little redundant as one can be used to simulate the other, and both fulfill the same function, of enforcing an upper bound for the passenger inconvenience.
 
 \subsection{Literature review}
 

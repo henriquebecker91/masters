@@ -50,29 +50,18 @@
 
 \section{Theme}
 
-This work presents a doctorate proposal on the Dial-a-Ride Problem (from now on referred as DARP); and it's "organized" as follows: an overview about the DARP (how it's defined) is given\ref{}; followed by a (not exhaustive) chronological literature review on the variants of the problem and the methods used to solve them \ref{}; \ref{}; \ref{}.
-
-O presente plano de trabalho apresenta o problema de escalonamento de navios-tanque para coleta de óleo cru em plataformas de petróleo, mostrando diferentes variações e abordagens de resolução propostas na literatura. Tais variações servirão de base, juntamente com informações e dados a serem buscados na industria para propor uma nova variação, a qual possa ser aplicável na prática e que contribua no âmbito acadêmico. A partir dela, serão propostos métodos de resolução para o problema, utilizando abordagem exata e heurística. Este plano descreve também a motivação, os objetivos de trabalho e as atividades a serem realizadas durante o curso de doutorado.
+LAST THING TO WRITE, GIVE A SUMMARY OF WHAT WILL BE SEEN
 
 \section{Introduction}
-A utilização de navios-tanque na indústria petrolífera é de fundamental importância na cadeia de produção do petróleo. Também chamados navios aliviadores, eles são responsáveis por transportar petróleo cru entre plataformas \textit{offshore} (localizadas em alto mar) e terminais terrestres, de onde irão para as refinarias geralmente através de tubulações. Decisões a serem tomadas que envolvem o seu uso podem ser consideradas em três níveis: estratégico, tático e operacional. O nível estratégico refere-se a planejamento de frota e localização de terminais, enquanto que o nível tático preocupa-se em planejar a produção e transporte do que é produzido. Por fim, o nível operacional lida com questões de coleta/carregamento e entrega/descarregamento do produto \cite{ghiani2004}.
 
-Planejar as viagens de navios-tanque corresponde a um problema de nível tático em que as decisões tomadas impactam direta e indiretamente nos custos de produção. Um exemplo de impacto direto pode consistir numa viagem em que um navio de grande capacidade (e consequentemente maior custo de operação) tenha de coletar uma pequena quantidade de petróleo, enquanto que isso poderia ser feito por um navio de menor capacidade e custo, mas que está ocupado em outra operação. Já um impacto indireto pode acontecer quando determinada plataforma tenha de parar a sua produção em virtude de estar com sua capacidade de armazenamento esgotada, tendo de aguardar por um navio aliviador para voltar à produção. Considerando esses e outros exemplos, muitos trabalhos relacionados ao tema podem ser encontrados na literatura. Isso se justifica porque o problema no aspecto real consiste de uma gama de informações e dados a serem considerados, além de diferentes táticas utilizadas entre as empresas que prestam o serviço. Isso acaba por dificultar uma definição formal totalmente fiel ao problema. Dessa forma, variações e simplificações são consideradas para lidar com diferentes características do mesmo.
+
 
 \subsection{Problem definition}
 
-O problema de escalonamento de navios-tanque é um sub-problema da cadeia de fornecimento de petróleo, podendo ser visto como uma variação do problema de roteamento de veículos \textit{VRP - Veichle Routing Problem}. O VRP foi introduzido inicialmente por \cite{Dantzig1959}, onde o objetivo é planejar a rota mais econômica para veículos de entrega até um conjunto de clientes, partindo de um depósito e retornando ao mesmo, de forma que a demanda de todos clientes seja atendida, respeitando a capacidade dos veículos. Com mais de cinquenta anos de estudo (ver \cite{Laporte2009} para uma perspectiva histórica), o VRP possui diversas variações as quais têm semelhança ao problema de escalonamento de navios-tanque. Por exemplo o PVRP (\textit{Planning Veichle Routing Problem}), em que considera-se um horizonte de planejamento tendo como dados de entrada as requisições dos clientes ao longo de diferentes períodos. Em cada período resolve-se um VRP, decidindo quais os clientes serão atendidos, e quais terão de esperar \cite{Campbell2014}. Além disso, variações do VRP estão sendo propostas com base em restrições e objetivos da vida real. Essas variações geralmente são chamadas de \textit{RVRP - Rich Veichle Routing Problem}\citep{Lahyani2015}.
+MAYBE PUT IMAGE OF THE TIMES
 
-De forma geral, o problema de escalonamento de navios-tanque consiste em planejar dentro de um horizonte de tempo limitado, a(s) viagem(ns) de navios-tanque para coletar petróleo cru de plataformas \textit{offshore} e entregá-lo em terminais, reduzindo os custos de transporte e respeitando restrições de capacidade, tanto de navios, quanto de plataformas e terminais. A Figura \ref{fig:TSP} apresenta uma ilustração de toda a cadeia de fornecimento de petróleo, destacando onde se aplica o problema de escalonamento de navios-tanque. Variações podem ser consideradas através de um ou mais tipos de produtos a serem coletados, discretização de tempos de coleta e entrega, frota heterogênea de navios, dentre outras. A seção seguinte descreve alguns trabalhos que envolvem a cadeia de fornecimento de petróleo, focando principalmente nas diferentes abordagens do problema de escalonamento de navios-tanque.
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=.8\textwidth]{tanquer_scheduling.png}
-\caption{Cadeia de fornecimento de petróleo e o problema de escalonamento de navios-tanque (adaptado de \citep{Rocha2009}).}
-\label{fig:TSP}
-\end{figure}
 
-As said before, the DARP don't have a precise definition and has many variants. What follows is a common formulation for the multi-vehicle single-depot (MORE MODIFIERS?) DARP \ref{}. This formulation is often used as base for other DARP variants; as it's simple to understand and to modify. The most common change is the addition of new constraints. Note that dropping the \(k\) index changes the formulation from the multi-vehicle to the single-vehicle DARP.
 
 \begin{align}
 minimise &\sum_{k \in K}\sum_{i \in V}\sum_{j \in V} c^{k}_{ij} x^{k}_{ij} &\label{eq:objfun}\\
@@ -82,7 +71,7 @@ subject~to &\sum_{k \in K}\sum_{j \in V} x^{k}_{ij} = 1 & (i \in P)\label{eq:no_
            &\sum_{j \in V}x^{k}_{ji} - \sum_{j \in V}x^{k}_{ij} = 0& (i \in P\cup D,~k \in K)\label{eq:no_bus_teleport}\\
            &u^{k}_{j} \geq (u^{k}_{i} + d_i + t_{ij})x^{k}_{ij} & (i,j \in V,~k\in K)\label{eq:travel_times}\\
            &w^{k}_{j} \geq (w^{k}_{i} + q_j)x^{k}_{ij} & (i,j \in V,~k\in K)\label{eq:capacity}\\
-           &r^{k}_{i} \geq u^{k}_{n+i} -(u^{k}_{i} + d_i) & (i \in P,~k\in K)\label{ride_time}\\
+           &r^{k}_{i} \geq u^{k}_{n+i} -(u^{k}_{i} + d_i) & (i \in P,~k\in K)\label{eq:ride_time}\\
            &u^{k}_{2n+1} - u^k_0 \leq T_k & (k \in K)\label{eq:trip_time}\\
            &e_i \leq u^k_i \leq l_i & (i \in V,~k\in K)\label{eq:time_windows}\\
            &t_{i,n+i} \leq r^k_i \leq L & (i \in P,~k\in K)\label{eq:max_ride_time}\\
@@ -90,92 +79,65 @@ subject~to &\sum_{k \in K}\sum_{j \in V} x^{k}_{ij} = 1 & (i \in P)\label{eq:no_
            &x^{k}_{ij} \in \{0,1\}&(i,j \in V,~k\in K)\label{eq:boolean}
 \end{align}
 
-In this formulation, \(n\) is the number of requests (each request is a pair of a pickup and a delivery). If there's a pickup point \(i\); then the respective delivery point is \(i + n\) (i.e. each request is in the form \((i, i + n)\)). We have four location/point sets: \(P = \{1, ..., n\}\) (the pickup points); \(D = \{n+1, ..., 2n\}\) (the delivery points); the depot (points \(0\) and \(2n + 1\)); and \(V = {0, ..., 2n + 1} \equiv P \cup D \cup \{0, 2n + 1\}\) (the universe set, i.e. all points). The depot is represented by two points only to simplify the model; it's expected to be the same point on space; the only difference is that we enforce each vehicle trip to start from \(0\) and end in \(2n+1\). We also have a vehicle set \(K\), as this a multi-vehicle variant; and we can distinguish between the capacity of each vehicle \(k \in K\) as \(Q_k\), (this is a heterogeneous fleet variant).
+In this formulation, \(n\) is the number of requests (each request is a pair of a pickup and a delivery). If there's a pickup point \(i\); then the respective delivery point is \(i + n\) (i.e. each request is in the form \((i, i + n)\)). We have four location/point sets: \(P = \{1, \dots, n\}\) (the pickup points); \(D = \{n+1, \dots, 2n\}\) (the delivery points); the depot (points \(0\) and \(2n + 1\)); and \(V = \{0, \dots, 2n + 1\} \equiv P \cup D \cup \{0, 2n + 1\}\) (the universe set, i.e. all points). The depot is represented by two points only to simplify the model; it's expected to be the same point on space; the only difference is that we enforce each vehicle trip to start from \(0\) and end in \(2n+1\). We also have a vehicle set \(K\), as this a multi-vehicle variant; and we can distinguish between the capacity of each vehicle \(k \in K\) as \(Q_k\), (this is a heterogeneous fleet variant).
 
+The remaining data given with the problem are: \(c^k_{ij}\) the cost of going from \(i\) to \(j\) with vehicle \(k\) (a byproduct of the distance and the vehicle model); \(t_{ij}\) is the time needed by any vehicle to go from point \(i\) to point \(j\) (we assume all vehicles travel at similar speed); \(d_i\) is the time needed to service (embark and disembark) the people at point \(i\) (this parameter can vary as some patients can have mobility problems and therefore need help from the driver); \(e_i\) and \(l_i\) define a time window for each point \(i\), a vehicle has to \emph{start} servicing point \(i\) after \(e_i\) and before \(l_i\) (but the vehicle don't need to finish attending the point inside the time window); \(q_i\) will be the amount of people that will embark (\(q_i\) is positive and \(i \in P\)) or disembark (\(q_i\) is negative and \(i \in D\)) at a point \(i\) (we expect \(q_i + q_{n+i}\) to be zero). Finally, \(T_k\) is the max trip time of a given vehicle \(k\), and \(L\) is the max ride time of any passenger.
 
-The solution variable is \(x^k_{ij} \in \{0, 1\} (k \in K,~i,j \in V)\). If the vehicle \(k\) goes from the point \(i\) to point \(j\) then \(x^k_{ij} = 1\); otherwise \(x^k_{ij} = 0\).
+The solution variable is \(x^k_{ij}\) \((k \in K,~i,j \in V)\). If the vehicle \(k\) goes from the point \(i\) to point \(j\) then \(x^k_{ij} = 1\); otherwise \(x^k_{ij} = 0\).
 
-The following variables are used to model some of the constraints: \(u^k_j\) will be the time vehicle \(k\) begins to attend point \(j\); \(w^k_j\) will be the number of people inside vehicle \(k\) when it \emph{departs} from point \(j\) (i.e. after loading); \(r^k_i\) will be the time amount the passenger of pickup request \(i\) remained inside the vehicle \(k\) (his or her total ride time; until point \(i + n\)); 
+The following variables are used to model some of the constraints: \(u^k_j\) will be the time vehicle \(k\) begins to attend point \(j\); \(w^k_j\) will be the number of people inside vehicle \(k\) when it \emph{departs} from point \(j\) (i.e. after loading); \(r^k_i\) will be the time amount the passenger of pickup request \(i\) remained inside the vehicle \(k\) (his or her total ride time; from \(i\) to \(i + n\)).
 
-The remaining data given with the problem are: \(c^k_{ij}\) the cost of going from \(i\) to \(j\) with vehicle \(k\) (a byproduct of the distance and the vehicle model); \(t_{ij}\) is the time needed by any vehicle to go from point \(i\) to point \(j\) (we assume all vehicles travel at similar speed); \(d_i\) is the time needed to service (embark and disembark) the people at point \(i\) (this parameter can vary as some patients can have mobility problems and therefore need help from the driver); \(e_i\) and \(l_i\) define a time window for each point \(i\), a vehicle has to \emph{start} servicing point \(i\) after \(e_i\) and before \(l_i\) (the vehicle don't need to finish servicing the point inside the time window); \(q_i\) will be the amount of people that will embark (\(q_i\) is positive and \(i \in P\)) or disembark (\(q_i\) is negative and \(i \in D\)) at a point \(i\) (we expect \(q_i + q_{n+i}\) to be zero). Finally, \(T_k\) is the max trip time of a given vehicle \(k\), and \(L\) is the max ride time of any passenger.
+The objective function \eqref{eq:objfun} is the minimization of the total cost of all trips. Constraints \eqref{eq:no_divide}, \eqref{eq:end_and_begin}, \eqref{eq:same_request_same_vehicle}, and \eqref{eq:no_bus_teleport} are flux constraints, where: \eqref{eq:no_divide} avoids that more than one vehicle visits the same point or that one vehicle leave a point by more than one single way; \eqref{eq:end_and_begin} guarantee vehicles start and end at the depot; \eqref{eq:same_request_same_vehicle} enforce that for the same request, the same vehicle will be used; \eqref{eq:no_bus_teleport} secure that a bus that arrived at point \(i\) will leave point \(i\) (at some moment). The times to start embark/disembark at each point are kept realistic by constraint \eqref{eq:travel_times}. Constraint \eqref{eq:capacity} guarantee a lower bound on the used capacity of each vehicle. The ride time of the passengers that embarked at \(i\) is defined by \eqref{eq:ride_time} (based on their embark/disembark times). The max duration of each vehicle trip is enforced by \eqref{eq:trip_time}. The time windows are respected because of constraint \eqref{eq:time_windows}; as the max ride is respected because of \eqref{eq:max_ride_time}. The constraint \eqref{eq:capacity2} helps constraint \eqref{eq:capacity} to guarantee that the vehicles capacity will not be exceeded. At least, but no less important, constraint \eqref{eq:boolean} defines that a vehicle can either use or not use a route (it can't partially use a route).
 
-The objective function \ref{eq:objfun} is the minimization of the total cost of all trips. Constraints \ref{eq:no_divide}, \ref{eq:end_and_begin}, \ref{eq:same_request_same_vehicle}, and \ref{eq:no_bus_teleport} are flux constraints, where: \ref{eq:no_divide} avoids that more than one vehicle visits the same point or that one vehicle leave a point by more than one single way; \ref{eq:end_and_begin} guarantee vehicles start and end at the depot; \ref{eq:same_request_same_vehicle} enforce that for the same request, the same vehicle will be used; \ref{eq:no_bus_teleport} secure that a bus that arrived at point \(i\) will leave point \(i\). The times to start embark/disembark at each point are kept realist by constraint \ref{eq:travel_times}. Constraint \ref{eq:capacity} guarantee a lower bound on the used capacity of each vehicle. The ride time of the passengers that embarked at \(i\) is defined by \ref{eq:ride_time} (based on their embark/disembark times). The max duration of each vehicle trip is enforced by \ref{eq:trip_time}. The time windows are respected because of constraint \ref{eq:time_windows}; as the max ride is respected because of \ref{eq:max_ride_time}. The constraint \ref{capacity2} helps constraint \ref{capacity} to guarantee that the vehicles capacity will not be exceeded. At least, but no less important, constraint \ref{eq:boolean} define that routes are indivisible (making the model an integer model).
-
-MAYBE PUT IMAGE OF THE TIMES
-
-
-It's interesting to note that this formulation gives a maximum ride time for each passenger, even in the presence of time windows. This is a little redundant as one can be used to simulate the other, and both fulfill the same function, of enforcing an upper bound for the passenger inconvenience.
+It's interesting to note that this formulation gives a maximum ride time for each passenger, even in the presence of time windows. This is a little redundant as time windows already enforce a max ride time specific for each passenger (and therefore much more reasonable than a fixed max time ride for all passengers).
 
 \subsection{Literature review}
 
-Em \cite{Rocha2009} é proposto um modelo de programação inteira mista que busca integrar dois sub-problemas da cadeia de fornecimento de petróleo: o escalonamento de navios-tanque e o planejamento de operações em refinarias. Para isso, foi realizado um estudo de caso na empresa Petrobras, buscando reduzir a lacuna entre os níveis estratégico e operacional. A formulação considera como elementos as plataformas de produção, a frota de navios-tanque, tipos de petróleo cru e terminais marítimos que são ligados à refinarias por tubulações. Cada um dos elementos possui parâmetros e simplificações. Além da formulação, são propostos \textit{changeover cuts}, que reduziram o GAP de integralidade da solução relaxada em comparação ao modelo original pela metade segundo os testes realizados. Contudo, mesmo com a utilização de cortes, a solução do problema a partir da formulação exata consome muito tempo computacional e na medida em que o tamanho das instâncias aumenta, o tempo cresce drasticamente. Sendo assim, os autores propõem um algoritmo baseado em heurística para encontrar uma solução factível e posteriormente aplicam a técnica de \textit{local branching}, explorando uma pequena vizinhança para melhorar a qualidade da solução. Os testes foram realizados com instâncias reais, onde a técnica utilizada foi comparada ao \textit{solver} XPRESS\footnote{XPRESS Solver Engine: \url{http://www.solver.com/xpress-solver-engine}}, onde a primeira obteve limitantes inferiores de qualidade, além de encontrar soluções factíveis em um tempo médio de três minutos, enquanto que o XPRESS não conseguiu encontrar solução factível em menos de cinco horas de processamento. 
-
-Trabalhar somente com o sub-problema de escalonamento de navios-tanque entre plataformas e terminais já é considerada uma tarefa difícil, visto que uma formulação simples e direta pode ser muito custosa de ser resolvida. A partir dessa afirmações, em \cite{Rocha2013} é proposto uma reformulação para o problema, com estruturas especiais chamadas \textit{Cascading Knapsack Inequalities} ou restrições do problema da mochila em cascata, a qual técnicas sofisticadas permitem uma resolução mais eficiente do problema. O trabalho descreve a formulação inicial e direta do problema (\textit{InitModel}), e apresenta a reformulação para o balanço de inventário com restrições do problema da mochila(\textit{InvRef}). e também uma simplificação do segundo modelo (denominada de \textit{HullRel}), onde uma ou duas classes de navios-tanque são consideradas a fim de obter-se uma formulação mais apertada. Uma simplificação que pode ser encontrada  descreve que o tempo de viagem entre plataformas e terminais pode ser diferente, mas é igual independentemente da classe navios-tanque que irá fazer a viagem.
-
-Os testes realizados por \cite{Rocha2013} comparam os resultados obtidos pelas três reformulações e foram utilizadas três conjuntos de instâncias artificiais com graus de dificuldade baseados na quantidade de classes de navios-tanque disponíveis para as plataformas. A execução utilizou o \textit{solver} comercial CPLEX\footnote{IBM ILOG CPLEX - \url{http://www-01.ibm.com/software/commerce/optimization/cplex-optimizer/}} e constatou que embora o valor da relaxação de \textit{InitModel} e \textit{InvRef} tivesse um GAP de otimalidade pequeno, a relaxação de \textit{HullRel} foi em média seis vezes melhor que as das formulações anteriores. Já nos testes com as formulações não-relaxadas, e definindo um tempo limite de execução de 720 segundos, \textit{InitModel} conseguiu encontrar soluções factíveis em apenas 41 das 75 instâncias testadas, enquanto que em \textit{InvRef} e \textit{HullRel} elas foram encontradas em todas as instâncias. Isso mostra a importância da utilização de boas formulações. Além disso, o número de soluções ótimas encontradas com um tempo limite de 20 minutos foi muito maior com as reformulações propostas do que com a formulação inicial. 
-
-O trabalho de \cite{Aizemberg201482} baseia-se na formulação proposta por \cite{Rocha2013}, e realizando algumas modificações, propõe uma formulação denominada \textit{Accumullated rounded cascading formulation}(ARC) para reduzir o esforço computacional. A partir dela, os autores utilizam a decomposição de Dantzig-Wolfe para reformular o problema e obter melhores limitantes inferiores. Com isso, o método de resolução utiliza a técnica de geração de colunas baseada em heurísticas, ou seja,  a relaxação linear do problema é obtida por geração de colunas e então uma solução factível é construída para o problema original a partir das colunas geradas. Tal abordagem encontrou boas soluções factíveis para o conjunto de instâncias mais difíceis em um pequeno tempo computacional.
-
-Há modelos que buscam lidar com a logística de petróleo cru considerando a compra e venda do mesmo para atender a demanda de refinarias. Para isso, em \cite{Hennig2012} e \cite{Hennig2015} é proposto um modelo para o denominado \textit{maritme oil tanquer routing and scheduling problem}. Nesse problema o objetivo é definir rotas de navios-tanque heterogêneos para coleta de diferentes tipos de petróleo cru em portos de abastecimento (terminais) e entregá-los em refinarias, respeitando janelas de tempo. O problema apresenta características  mais condizentes com a realidade, como a realização do fracionamento da demanda entre dois ou mais navios, e também o planejamento das operações baseado numa demanda de longo e curto prazo. Demandas de longo prazo referem-se a uma grande demanda bruta de uma refinaria para um certo período, enquanto que a demanda de curto prazo refere-se a pequenas quantidades que podem variar durante a operação das refinarias. Como método de solução, \cite{Hennig2012} propõem uma pré-geração de rotas para os navios antes de submetê-los ao \textit{solver} XPRESS, e como resultado soluções factíveis são encontradas num pequeno espaço de tempo, enquanto que soluções ótimas só conseguem ser provadas em instâncias pequenas. Já \cite{Hennig2015} apresenta uma formulação em que a demanda é discretizada. Em termos de tempo computacional e GAP de otimalidade, a abordagem é melhor que o modelo de \cite{Hennig2012}, mas a qualidade da solução tende a ser menor pois navios têm maior possibilidade de estarem carregados parcialmente por causa da discretização de demanda. O autor deixa em aberto questões a serem exploradas no modelo discretizado, como a implementação do método de geração de colunas para geração de rotas e melhoria da qualidade das soluções.
-
-Além de considerar modelos determinísticos, há trabalhos que lidam com incertezas utilizando otimização estocástica. Eles geralmente consideram o planejamento e integração de sub-problemas no nível tático da cadeia de fornecimento de petróleo. Nesse caso, preocupa-se também com a demanda de clientes finais, como petroquímicas, utilizando outros tipos de modais além de navios (caminhões, trens, e tubulações),  Nesses modelos as incertezas geralmente estão associadas ao mercado, como variação de preço do petróleo e seus derivados e demanda de clientes \cite{Escudero1999, Al-Othman2008, Ribas2011}.
-
-%---Utilização de math e heuristics para a resolução. Mas pouco de exato. A seguir serão apresentadas alguns dos métodos mais conhecidos de resolução exata.
-
-%~ \subsection{Métodos de resolução}
-%~ BB BC BP
 
 \section{Motivation}
-A partir da literatura pesquisada, pode-se encontrar diversas variações para o problema de escalonamento de navios-tanque. As mesmas consideram diferentes características relacionadas ao problema real. Adicionalmente, muitas simplificações se fazem necessárias para que se consiga obter soluções factíveis em um tempo computacional relativamente curto. Sendo assim, na medida em que as simplificações são feitas, a lacuna entre teoria e realidade aumenta, levando a casos em que, embora os resultados obtidos a partir de uma dada formulação são muito bons, a solução encontrada pode não se aplicar diretamente ao problema real. Em alguns casos, essa simplificação pode ser compensada posteriormente utilizando um simulador a partir do resultado obtido pela formulação, mas não garante a melhor solução \citep{Aizemberg2011}. De forma proporcionalmente inversa, se uma formulação atende toda a gama de restrições do problema real, possivelmente a resolução dela será extremamente custosa computacionalmente, e consequentemente inviável.
 
-Outro ponto observado é que mesmo com simplificações, o problema continua difícil de ser resolvido, visto que geralmente não são utilizados métodos exatos (que tendem a ser mais lentos), preferindo métodos heurísticos ou matheuristicas, que combina métodos exatos e heurísticos.
-
-Em programação matemática, um dado problema pode ser modelado de diversas formas. Embora a solução ótima seja igual para qualquer modelo, a eficiência para encontrar tal solução pode variar. Como exemplo já visto na seção anterior, podemos citar um caso para o próprio problema de escalonamento de navios-tanque, onde a formulação já otimizada em \cite{Rocha2013} é melhorada em \cite{Aizemberg201482}. Essas melhorias tomam por base a formulação de estruturas especiais muito bem exploradas e que tem uma resolução comprovadamente eficiente. %Para obter uma formulação eficiente, é necessário um bom conhecimento teórico te
-
-Sendo assim, encontrar um balanço entre uma formulação mais fiel possível ao problema real, e ao mesmo tempo propor um método de resolução eficiente e de qualidade para o problema é um desafio muito grande e que pode ser considerado em aberto para esse problema. Contudo, ao mesmo tempo é motivador, pelo fato de que pode-se propor algo que contribua no âmbito acadêmico se tratando de questões teóricas, e também para a indústria, aplicando o modelo proposto na prática. 
-
-%**Falar da experiência com métodos exatos durante o mestrado;
- 
-%\section{Contribuições Esperadas}
+THIS IS THE DOCTORATE PROPOSAL MOTIVATION
+WORKS PROPOSE DIFFERENT OBJECTIVE FUNCTIONS AND TEST WITH DIFFERENT INSTANCES
+FOR A SINGLE PAPER THE EFFORT TO CREATE INTANCES EASILY ADAPTABLE FOR MANY VARIANTS; TO COMPARE MORE GENERIC METHODS TO MORE SPECIFIC ONES (heterogenuous fleet vs homogeneous fleet); TO GATHER INSTANCES ALREADY USED ON LITERATURE ON A TEST BED; AND TO CREATE QUALITY OF SERVICE METRICS THAT CAN BE USED TO COMPARE SOLUTIONS WITH DIFFERENT OBJECTIVE FUNCTIONS; THIS IS IN THE SCOPE OF A DOCTORATE
+	CREATE TABLE
 
 \section{Objectives}
-O objetivo geral para o trabalho durante o doutorado consiste em propor uma variação para o problema de escalonamento de navios-tanque buscando ser o mais fiel possível à realidade, apresentando sua formulação e abordagens para a resolução de forma eficiente.
+
+The objective to be pursued in the doctorate described by this proposal is: the creation of a framework that allows the comparison of the results of any techniques used to solve the multiple variants of the DARP (for exact and heuristic resolution); avoiding the proliferation of works that use the absence of a established testbed for its variant, or a minor difference on the DARP formulation, to justify absent or lax comparison.
+
 \subsection{Specific Objectives}
 \begin{itemize}
-    \item Pesquisar por problemas semelhantes e métodos utilizados para resolução na literatura;
-    \item Estudar diferentes abordagens para a formulação de problemas de otimização combinatória;    
-    \item Interagir com pessoas especializadas na indústria que envolva o problema de escalonamento de navios-tanque;
-    \item Definir informações e restrições mais relevantes para a formulação matemática do problema;
-    \item Realizar análise de sensibilidade das restrições do problema;
-    \item Otimizar a formulação proposta;
-    \item Obter dados reais para testes;
-    \item Implementar soluções para o problema, explorando diferentes abordagens (exata e heurística);
-%    \item Analisar a eficiência da implementação em diferentes \textit{solvers};
-%    \item Realizar calibração de melhores parâmetros (soluções heurísticas);
-    \item Divulgar nova variação e resultados obtidos com as abordagens utilizadas.
+    \item Catalogue the most relevant DARP variants.
+    \item Obtain or re-implement the codes used by the prior work to solve those variants.
+    \item Propose a file format for the instance datasets, one that allows the same instance to be shared by many variants.
+    \item Generate the instances used to benchmark the DARP variants (if based on a mathmatic model) on the literature.
+    \item Obtain real world instances, already used at some time on the literature, or new.
+    \item Make available all code and instances (on the proposed format).
+    \item Gather and/or propose quality of service metrics to allow comparison between formulations with different objective functions.
+    \item Benchmark the most relevant relevant exact/approximative/heuristic methods; and publish the results using the proposed quality metrics for comparison; to give a more clear notion of the state-of-the-art.
+    \item If adequate, propose new methods for solving DARP to fill any gaps (or not much explored) techniques (as math-heuristics) and/or problem variants.
 \end{itemize}
 
-% Seção: Plano de Trabalho
 \section{Work Plan}
+
 \subsection{Methods}
-%MELHORAR
-Nesta seção é descrito como pretende-se alcançar os objetivos citados anteriormente.
+
 \begin{itemize}
-\item \textbf{Pesquisas bibliográficas}: Serão realizadas a partir da literatura disponível tanto na biblioteca do Departamento de Informática quanto nos periódicos e anais de conferências acessíveis através do Portal Capes. Também pretende-se cursar disciplinas durante o doutorado que possam contribuir no estudo para resolução do problema.
-\item \textbf{Interações e busca de informações para o problema real}: Firmar uma parceria com o setor de Soluções de Pesquisa Operacional da empresa Petrobras. Um contato prévio já foi realizado com a intermediação do atual co-orientador de mestrado, professor Eduardo Camponogara, onde a empresa mostrou-se receptível e afirmou que esse problema carece de modelos que possam ser aplicados na prática. O professor Eduardo possui diversos trabalhos ligados à área de petróleo e gás, mantendo parcerias com empresas do ramo, o que contribui significativamente para obtenção de informações e dados que serão relevantes ao trabalho.
-\item \textbf{Implementações e testes}:  Será utilizada a estrutura do laboratório de Algoritmos e Otimização como local para a implementação e testes ao longo da pesquisa. Em relação à abordagens exatas, serão utilizados \textit{solvers} de programação matemática como o CPLEX. Além disso, serão reproduzidos métodos encontrados na literatura para melhorar o entendimento da técnica utilizada e possíveis contribuições que elas possam trazer ao próprio trabalho. Vale salientar ainda, que a realização do trabalho de pesquisa durante o mestrado acadêmico é focada na aplicação de métodos exatos (\textit{Branch-and-Price}), e que pretende-se aproveitar o conhecimento adquirido para contribuir na realização desse novo trabalho.
-\item \textbf{Divulgação de resultados}: O trabalho será divulgado em periódicos e conferências considerados de relevância à área, descritos na Tabela \ref{tab:periodicosEconferencias}.
+\item \textbf{Bibliographical research}: I intend to do a thoroughly literature review. The relevant articles will be discovered by means of Google Scholar and following selected articles references. The institute library and the Capes' Portal will not be excluded from this process. I will enroll on any courses offered by the doctorate program that can help to understand the problem and its solving methods.
+\item \textbf{Real-world instances}: The research group of Dr. Buriol already has partnership with one vehicle routing company and one of her PhD students is working in scheduling problems within a hospital (hospital's DARPs are the source from the majority of the literature instances). While on the doctorate, I intend to make use of this to obtain new real world instances; and to verify if the academy can contribute back to the community on this topic (suggest the most adequate method for the hospital use; maybe write a case study paper).
+\item \textbf{Implementation and tests}: The Optimization and Algorithms group have servers that can be used to run the proposed benchmarks (that can take hours/days/weeks of CPU time). Any code that needs to be implemented, will be written in C++14 (or higher) and put on public domain. My experience with exact methods over NP-hard problems (master's topic), the algorithms and optimizations classes thta I attended on master's, and the research group expertise on heuristic methods (over NP-hard problems) will contribute to the completion of the proposed doctoral work.
+\item \textbf{Publishing}: The work will be published in conferences and journals relevant to the area, as described by in table \ref{tab:periodicosEconferencias}. If the chosen journals/conferences aren't open access; they will at least allow for for reusing the same content inside the PhD thesis, that will be open access and supersede any publications during doctorate.
 \end{itemize}
 
 \subsection{Classes}\label{disciplinas}
 
-Com o objetivo de cumprir os 18 créditos do programa, será solicitado o aproveitamento das atividades desenvolvidas no mestrado conforme a Tabela \ref{tab:AtividadesDot1}. Além disso outros créditos serão cumpridos com as atividades listadas na Tabela \ref{tab:AtividadesDot2}.
+The UFRGS's PhD program request from its students to take at least 18 credits, among other tests and activities, with the possibility of reusing the ones from master's. I plan to reuse the twelve credits from my master's (see table \ref{tab:AtividadesDot1}) and complete the requisites with the following classes/activities (see table \ref{tab:AtividadesDot2}). I can enroll in more classes if they show themselves relevant to the doctorate's theme (this will be reevaluated each semester).
 
 \begin{table}[H]
 	\centering
 	\normalsize
 	\caption{Classes taken at the master's} \medskip
-	\begin{tabular}{l|p{3.0in}|c|c|c|c}
+	\begin{tabular}{|c|l|c|c|c|}
 	\hline
         Identifier & Class Name & Semester & Credits & Grade\\
 	\hline\hline
@@ -195,134 +157,115 @@ Com o objetivo de cumprir os 18 créditos do programa, será solicitado o aproveit
 \begin{table}[H]
 	\centering
 	\caption{Classes to be taken at the doctorate} \medskip
-	\begin{tabular}{l|p{3.0in}|l|l|l}
+	\begin{tabular}{|c|l|c|c|}
 	\hline
-        Identifier & Class Name & Year & Credits\\
+        Identifier & Class Name & Semester & Credits\\
 	\hline\hline
         CMP402 & Trabalho Individual II & 2017/1 & 2 \\
 	CMP588 & Tópicos DLXXXVIII: Algoritmos avançados & 2017/1 & 4 \\
 	- & Proficiência em Língua Estrangeira (Espanhol) & 2017/1 & - \\
-        CMP410 & Atividade Didática II & 2017/2 & 2 \\        
-        CMP700 & Proposta de Tese (Doutorado) & 2019/1 & - \\              
-        CMP900 & Tese de Doutorado & 2020/2 & - \\
+        CMP410 & Teaching Practice II & 2017/2 & 2 \\        
+        CMP700 & Thesis Proposal (Doctorate) & 2019/1 & - \\              
+        CMP900 & PhD Thesis & 2020/2 & - \\
+	\hline
 	\end{tabular}
 	\label{tab:AtividadesDot2}
 \end{table}
 
 \subsection{Classes and Activities Schedule}
 
-O cronograma apresentado abaixo lista o planejamento das atividades dispostas na metodologia, já consideradas as atividades descritas em \ref{disciplinas}.
+The schedule below presents a first planning of the doctorate. This plan was made taking in account the following premises: 1) there's a PhD scholarship that begins at october of 2016, and this proposal is competing to receive it; 2) the author of this proposal will be allowed to finish his master's (using the the rest of 2016) to avoid losing the title and to allow the publication of results about his master's topic that are more recent than his last paper published. If this is not true, the semester of 2016/2 can be disregarded; the author will begin doctorate at 2017/1 and conclude it in seven semesters, using the eight semester only as a failsafe measure.
+
 \begin{enumerate}\parskip0pt \parsep0pt \itemsep2pt 
 %1
-    \item Levantamento bibliográfico de trabalhos relacionados ao problema de escalonamento de navios-tanque; %1,2, 5 e 6
+    \item All activities related to master's conclusion; % 1
 %2
-    \item Realização de reuniões com o setor de da empresa Petrobras que trabalha diretamente com o problema  de escalonamento de navios-tanque; %All
+    \item Classes to obtain last credits needed; % 2
 %3
-    \item Pesquisa bibliográfica de problemas semelhantes e suas abordagens de resolução; %1 e 2 
+    \item Study for the qualification exam; % 2, 3
 %4
-    \item Aprofundamento teórico sobre métodos de resolução exata e heurística; %2 e 3
+    \item Bibliographical research on the DARP and Pickup-and-Delivery VRPs; % 2, 3, 4
 %5
-    \item Obtenção instâncias reais para testes; %3
+    \item Study of the exact and heuristic techniques used to solve DARP; % 2, 3, 4, 5, 6
 %6
-	\item Elaboração de uma formulação para o problema de escalonamento de navios-tanque; %3 
+    \item Contact with authors of selected works to ask for code and data; % 3, 4
 %7
-    \item Divulgação resultados obtidos a partir da primeira formulação em conferência; %4
+    \item Defense of the thesis proposal; % 4
 %8
-    \item Reprodução de trabalhos semelhantes para aperfeiçoar o conhecimento e detalhes de implementação; % 4 
+    \item Implementation of own ideas to fill gaps on DARP literature (techniques used and variants explored); % 4, 5, 6, 7
 %9 
-    \item Explorar estrutura do problema a fim de otimizar a formulação proposta; %4 
+    \item Execution of benchmarks; % 4, 5, 6, 7
 %10
-    \item Implementação de métodos de resolução heurística para o problema; %4 e 5
+    \item Construction of the comparison framework; % 4, 5, 6, 7
 %11
-    \item Divulgação de resultados com as abordagens heurísticas; %5
+    \item Implementation of solving methods whose code was not provided; % 5, 6
 %12
-    \item Implementação de um método de resolução exato para o problema; %5 e 6
+    \item Implementation of instance generators whose code or data was not provided. %5, 6
 %13
-    \item Divulgação de resultados obtidos com o método exato;    %6
+    \item International cooperation by means of a sandwich doctorate; % 5, 6
 %14
-    \item Apresentar e defender a proposta de tese; %6
+    \item Results analysis. % 7
 %15
-    \item Período de cooperação internacional com outro grupo de pesquisa através de doutorado sanduíche; %  6 e 7
+    \item Thesis writing and defense; % 8
 %16
-    \item Redação da tese;  %7
-%17
-    \item Entrega do volume final e defesa da tese. %8
 \end{enumerate}
 \newcommand{\X}{\textbullet}
 \begin{table}[H]
 	\centering
-	\caption{Cronograma de execução das atividades} \medskip
-    \scalebox{0.87}{
-	\begin{tabular}{c||c|c|c|c|c|c|c|c|c}
+	\caption{Schedule of the doctorate activities}\medskip
+	\scalebox{0.87}{
+	\begin{tabular}{|c||c|c|c|c|c|c|c|c|c|}
 		\hline
-		Atividade &2015/2 & 2016/1 & 2016/2 & 2017/1 & 2017/2 & 2018/1 & 2018/2 & 2019/1 & 2019/2 \\
+		&2016/2 & 2017/1 & 2017/2 & 2018/1 & 2018/2 & 2019/1 & 2019/2 & 2020/1 \\
 		\hline \hline
-		1         &	 	& \X     & \X     &         & ~      & \X      & \X      & ~      & ~     \\
-		\hline
-		2         & \X	& \X     & \X     &\X      &\X      & \X      &\X    & \X    &\X     \\
-		\hline
-		3         &		& \X      & \X     &         & ~      & ~      & ~      & ~      & ~     \\
-		\hline
-		4         &		& ~      & \X     & \X      &        & ~      & ~      & ~      & ~     \\
-		\hline
-		5         &		& ~      &         & \X      &        & ~      & ~      & ~      & ~     \\
-		\hline
-		6         &		&        &          & \X      &       & ~      & ~      & ~      & ~     \\
-		\hline
-		7         &		&  ~     &        &           & \X     & ~      & ~      & ~      & ~     \\
-		\hline
-		8         &		& ~      &        &          & \X     & ~      & ~      & ~      & ~     \\
-		\hline
-		9         &		& ~      &  ~     &         & \X     &        & ~      & ~      & ~     \\
-		\hline
-		10        &		& ~      &        & ~       & \X     & \X       & ~      & ~      & ~     \\
-		\hline
-		11        &		& ~      & ~      &         &         & \X     &        &      & ~     \\
-		\hline
-		12        &		& ~      & ~      & ~       &  ~     &\X     & \X    & ~      &  ~    \\
-		\hline
-		13        &		& ~      & ~      & ~       &        &        &  \X     &        & ~     \\
-		\hline
-		14        &		& ~      & ~      & ~       &        &        & \X     &        & ~     \\
-		\hline
-		15        &		& ~      & ~      & ~       & ~      &       & \X     & \X       &       \\
-        \hline
-		16        &		& ~      & ~      & ~       & ~      &        &         & \X     & ~     \\
-		\hline
-		17        &		& ~      & ~      & ~       & ~      & ~      &        & \X     & \X      \\
-		\hline
+		1&\X&&&&&&&\\ \hline
+		2&&\X&&&&&&\\ \hline
+		3&&\X&\X&&&&&\\ \hline
+		4&&\X&\X&\X&&&&\\ \hline
+		5&&\X&\X&\X&\X&\X&&\\ \hline
+		6&&&\X&\X&&&&\\ \hline
+		7&&&&\X&&&&\\ \hline
+		8&&&&\X&\X&\X&\X&\\ \hline
+		9&&&&\X&\X&\X&\X&\\ \hline
+		10&&&&\X&\X&\X&\X&\\ \hline
+		11&&&&&\X&\X&&\\ \hline
+		12&&&&&\X&\X&&\\ \hline
+		13&&&&&\X&\X&&\\ \hline
+		14&&&&&&&\X&\\ \hline
+		15&&&&&&&&\X\\ \hline
 	\end{tabular}
     }
 \end{table}
 
 \section{Journals and conferences}
-Na Tabela \ref{tab:periodicosEconferencias} são listadas algumas conferências e periódicos na área de Ciência da Computação, e considerados de relevância para publicações do trabalho a ser realizado.
-\newpage
+
+Table \ref{tab:periodicosEconferencias} presents journals and conferences that publish works related to this doctorate proposal theme and are regarded as relevant by many criteria.
+
 \begin{table}
 	\centering
-	\caption{Periódicos e Conferências Relevantes} \medskip
+	\caption{Relevant Journals and Conferences}\medskip
 	\begin{threeparttable}[b]
-	\begin{tabular}{p{10.5cm}|c|c|c}
-		\hline
-		Periódico & Qualis \tnote{1} & H-Index\tnote{2} & F. I. \tnote{3}\\
-		\hline \hline
+	\begin{tabular}{p{0.6\textwidth}|c|c|c}
+	\hline
+	Journal & Qualis \tnote{1} & H-Index\tnote{2} & F. I. \tnote{3}\\
+	\hline \hline
         European Journal of Operational Researsch & A1 & 165 & 2.358 \\
         Computers \& Operations Research & A1 & 93 & 1.861\\
         Annals of Operations Research & A2 & 70 & 1.217 \\
-		Journal of the Operational Research Society & A2 & 69 & 953\\        
-		Journal of Heuristics & B1 & 46 & 1.145\\
+	Journal of the Operational Research Society & A2 & 69 & 953\\        
+	Journal of Heuristics & B1 & 46 & 1.145\\
         Mathematical Methods of Operations Research & B1 & 31 & 625\\
         International Transactions in Operational Research & B2 & 8 & 977\\
         Transportation Science & B3 & 71 & 3.043\\
-		\hline \hline
+	\hline \hline
         Conferências & Qualis\tnote{4} & \multicolumn{2}{c}{H-Index\tnote{5}} \\
     	\hline \hline
-		International Conference on Automated Planning and Scheduling - ICAPS & A2 & \multicolumn{2}{c}{43} \\
-		Symposium on Experimental Algorithms - SEA & B1 & \multicolumn{2}{c}{26} \\
-		Conference on Integer Programming and Combinatorial Optimization - IPCO & B1 & \multicolumn{2}{c}{26} \\
-		Metaheuristic International Conference - MIC & B3 & \multicolumn{2}{c}{13} \\		
-		International Conference on Operations Research (Abstract) - OR  & B4 & \multicolumn{2}{c}{5} \\
-		European Conference on Operational Research (Abstract) - EURO & B4 & \multicolumn{2}{c}{4} \\
+	International Conference on Automated Planning and Scheduling - ICAPS & A2 & \multicolumn{2}{c}{43} \\
+	Symposium on Experimental Algorithms - SEA & B1 & \multicolumn{2}{c}{26} \\
+	Conference on Integer Programming and Combinatorial Optimization - IPCO & B1 & \multicolumn{2}{c}{26} \\
+	Metaheuristic International Conference - MIC & B3 & \multicolumn{2}{c}{13} \\		
+	International Conference on Operations Research (Abstract) - OR  & B4 & \multicolumn{2}{c}{5} \\
+	European Conference on Operational Research (Abstract) - EURO & B4 & \multicolumn{2}{c}{4} \\
         Simpósio Brasileiro de Pesquisa Operacional - SBPO & B4 & \multicolumn{2}{c}{8} \\
         Multidisciplinary International Scheduling Conference: Theory and Applications - MISTA & B5 & \multicolumn{2}{c}{3} \\            
 	\end{tabular}
@@ -338,22 +281,33 @@ Na Tabela \ref{tab:periodicosEconferencias} são listadas algumas conferências e 
 \end{table}
 
 \section{Research Groups}
-Esta seção apresenta alguns grupos de pesquisa que trabalham com problemas de otimização na área do petróleo, incluindo também o problema de escalonamento de navios-tanque.
+
+This section presents some reasearch groups that work with optimization problems related to DARP, or more generally VRP and PDVRP.
+
 \begin{itemize}
-\item \textbf{Grupo de pesquisa em otimização de recursos e análise de decisões na indústria do petróleo e do gás natural:} Grupo ligado à Universidade Federal do Rio de Janeiro (UFRJ), tendo como área predominante a engenharia de produção. Atuando em modelagem matemática, otimização e simulação em problemas de decisão aplicados à indústria do petróleo, o grupo tem por objetivo gerar e disseminar conhecimento científico e tecnológico nessa área viabilizando resultados potencialmente econômicos. Dentre as linhas de pesquisa do grupo podem se destacar o dimensionamento de rede logística de transporte de cargas \textit{offshore} e programação de embarcações para atendimento a unidades marítimas.
-\item \textbf{Otimização Determinística e Estocástica na Cadeia do Petróleo:} Ligado à Pontifícia Universidade Católica do Rio de Janeiro (PUC-Rio), o grupo também tem como principal área de conhecimento a engenharia de produção. Dentre as linhas de pesquisa do grupo podemos citar o planejamento da cadeia de petróleo, investimento na cadeia de petróleo e planejamento integrado da logística \textit{offshore}. As duas primeiras são voltadas ao planejamento estratégico enquanto que a terceira preocupa-se em fornecer informações através de um sistema para auxiliar na tomada de decisões no que diz respeito à suprir a demanda de materiais para o funcionamento ideal de plataformas.
-\item \textbf{\textit{Center for Integrated Operations in the Petroleum Industry (IO Center):}} Filiado à Universidade de Ciência e Tecnologia Norueguesa (NTNU), o grupo mantém parceria com a PUC-Rio, possui como missão o desenvolvimento de métodos e ferramentas para integrar operações em companhias petrolíferas. Um de seus projetos denominado IO2, busca coordenar planejamento e alocação de recursos através de funções, integrando planejamento e logística.
+\item \textbf{Portuguese group name:} description.
+\item \textbf{Portuguese group name:} description.
+\item \textbf{Portuguese group name:} description.
+\item \textbf{\textit{ENGLISH NAME:}} description. 
 \end{itemize}
+
 \iffalse 
-http://dgp.cnpq.br/dgp/espelhogrupo/8253987246191593 - UFRJ
-http://dgp.cnpq.br/dgp/espelhogrupo/1671279227412678 - PUC rio
-http://www.iocenter.no/search/site/?f%5B0%5D=im_field_topic%3A80 - NOruega
+% Put links here to ease of access
 \fi
-\section{Cooperação Internacional}
-Nesta sessão serão apresentadas algumas universidades onde pretende-se realizar o doutorado sanduíche:
+
+\section{International Conference}
+
+In this section are presented some suggested universities for the sandwish doctorate.
+
 \begin{itemize}
 \item Carnegie Mellon University - Pittsburgh, PA - Estados Unidos: Classificada como a 22ª melhor universidade no ranking mundial de 2015-16 segundo a \textit{Times Higher Education of London - THE} \footnote{\url{https://www.timeshighereducation.com/}}, ela possui um grupo de Pesquisa Operacional ligado à \textit{Tepper School of Business} com estudos em programação inteira e otimização combinatória, focados em abranger tanto teoria quanto prática. Um de seus professores, Michael A. Tricker, trabalha com \textit{scheduling}, onde foi consultor do Serviço Postal dos Estados Unidos na elaboração da cadeia de fornecimento. Além disso ele é \textit{fellow} do IFORS, organização internacional com interesse em Pesquisa Operacional, sendo eleito presidente da entidade para o período de 2016 a 2019. Ainda vale destacar que o professor Eduardo Camponogara irá realizar um ano sabático nessa universidade no período 2016-2017.
-\item University of Montreal, QC - Canadá: Segundo o ranking da THE, a Universidade está classificada em 113ª, possuindo o centro de pesquisa denominado \textit{Centre interuniversitaire de recherche sur les reseaux d'entreprise, la logistique et le transport} (CIRRELT). Ele é um centro interdisciplinar de referência internacional com foco em pesquisas para criação, gerência, operação e segurança em logística e infra-estrutura de redes. Um de seus principais temas de pesquisa refere-se a gerência de redes de fornecimento em nível tático, incluindo transportes marítimos e gerência de terminais. Dentre seus membros o qual poderiam ser possíveis orientadores durante o período de doutorado sanduíche podem ser citados Gilbert Laporte e Michel Gendreau. Gilbert é professor titular do departamento de Ciências da Decisão e possui trabalhos recentes utilizando métodos exatos para resolução de problemas de coleta e entrega. Já Michel é professor do Departamento de Matemática e Engenharia Industrial, com trabalhos em problemas de escalonamento envolvendo logística. 
+\item University of Montreal, QC - Canadá:
+
+ possuindo o centro de pesquisa denominado \textit{Centre interuniversitaire de recherche sur les reseaux d'entreprise, la logistique et le transport} (CIRRELT). Ele é um centro interdisciplinar de referência internacional com foco em pesquisas para criação, gerência, operação e segurança em logística e infra-estrutura de redes. Um de seus principais temas de pesquisa refere-se a gerência de redes de fornecimento em nível tático, incluindo transportes marítimos e gerência de terminais. Dentre seus membros o qual poderiam ser possíveis orientadores durante o período de doutorado sanduíche podem ser citados Gilbert Laporte e Michel Gendreau. Gilbert é professor titular do departamento de Ciências da Decisão e possui trabalhos recentes utilizando métodos exatos para resolução de problemas de coleta e entrega. Já Michel é professor do Departamento de Matemática e Engenharia Industrial, com trabalhos em problemas de escalonamento envolvendo logística. 
+\iffalse
+https://admission.umontreal.ca/en/student-info/costs-financing-scholarships/scholarships-and-funding/
+https://admission.umontreal.ca/en/foreign-students/
+\fi
 \end{itemize}
 
 \bibliographystyle{alpha}

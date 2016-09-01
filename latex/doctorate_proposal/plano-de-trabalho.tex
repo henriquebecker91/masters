@@ -54,12 +54,10 @@ LAST THING TO WRITE, GIVE A SUMMARY OF WHAT WILL BE SEEN
 
 \section{Introduction}
 
-
+SAY DARP IS A KIND OF VRP AND PD VRP (USING 2007 SURVEY)
 
 \subsection{Problem definition}
-
-MAYBE PUT IMAGE OF THE TIMES
-
+\label{sec:problem_def}
 
 
 
@@ -93,6 +91,37 @@ It's interesting to note that this formulation gives a maximum ride time for eac
 
 \subsection{Literature review}
 
+This section presents a non-exhaustive literature review on the DARP. The selected works are a mix of the most cited on the subject, the most recent, and the ones pointed as very important references on the papers of these first two groups. We first present them in chronological order, and then we discuss ...
+
+We begin by \cite{psaraftis_dynamic_1980}, at this time the ``Dial-a-Ride'' term was already used (as the author referenced previous works that used this term on their title). However, as the author exposes:
+\begin{quotation}
+Several versions of the dial-a-ride service exist today, giving rise to several types of what we call the ``dial-a-ride problem''. The particular version of the problem we shall examine is a single-vehicle, many-to-many, immediate-request one. ``Many-to-many'' means that the origins (pickup points) as well the destinations (delivery points) of the various customers are all distinct points. ``Immediate request'' means that every customer requesting wishes to be serviced as soon as possible.
+\end{quotation}
+Therefore the DARP hadn't a precise definition. Also, many adjectives began to be used to distinguish between variants, as the three adjectives used by Psaraftis on the quote above. Psaraftis presents on \cite{psaraftis_dynamic_1980} two exact dynamic programming algorithms, for the static and dynamic versions of his DARP definition. They are an adaptation of an exact DP solution for the TSP (Traveling Salesman Problem) with an slight improvement on the worst-case assimptotic complexity, as many routes feasible on TSP are unfeasible on DARP. The worst-case complexity remained exponential, as his DARP definition, and all the other definitions covered by this literature review, are NP-Hard.
+
+Psaraftis mental model of the DARP was similar to non-exclusive taxi vans; where a van serving someone could take detours and embark/disembark people before concluding its first or oldest request. To avoid the possibility of indefinite deferment of a customer, Psaraftis defined a Max Position Shift (MPS) parameter. If the position on the chronological request list of a customer was \(i\), on the sequence of pickup and deliveries its position was restricted to \(i - MPS\) until \(i + MPS\). We can see that if MPS is zero, there's only one possible solution (the chronological request order); and if \(MPS \geq N\) indefinite deferment is possible. The Objective function of Psaraftis' model minimized a combination of cost and user dissatisfaction (measured by the time since the user request for transport until his or her delivery). Psaraftis solved exactly instances until nine requests (19 points).
+
+Three years after Psaraftis include time windows to his algorithms\cite{psaraftis_exact_1983}, consequently dropping the ``immediate request'' modifier, and becoming more similar to the rest of DARP definitions (that also used time windows). He also dropped the MPS parameter and the vehicle capacity, while saying it would be possible to easily add them back to the algorithm.
+
+Three more years later \cite{desrosiers_dynamic_1986} solved exactly real-world instances up to 40 requests with another DP algorithm. His DARP formulation included time windows and capacity, and his objective function only minimized the total distance. ``By minimizing the total distance traveled, riding time within the vehicle is not minimized in equation (8). This objective function is less general than others proposed for minimizing user inconvenience.'' (p. 7), the user inconvenience isn't managed by the model itself, but Desrosiers points that the time windows themselves can be adjusted to avoid inconveniencing the user too much.
+
+It's very relevant to note that those early works are about the \emph{single-vehicle} variant. On \cite{psaraftis_exact_1983} it's said: ``Although single-vehicle Dial-A-Ride systems don't exist in practice, single-vehicle Dial-A-Ride algorithms can be used as subroutines in large scale multvehicle Dial-A-Ride environments.''.
+
+Still at 1986, \cite{jaw_heuristic_1986} proposes a (non-meta) heuristic for both the static and dynamic multivehicle DARP with time windows. This heuristic followed ``service quality'' constraints as max ride time and ``A vehicle is not allowed to idle when it is carrying passengers, since it is felt that such idle waiting would not be tolerated by Dial-A-Ride customers.'' (p. 3). The heuristic allowed that vehicles could have different capacities (heterogeneous fleet variant), and also allowed adding vehicles \textit{on the fly} if the heuristic failed to allocated all customers using the initial fleet (on-the-fly fleet variant). Those characteristics of the heuristic reveal interest on solving the DARP in real-world circunstances. The algorithm is tested using many artificial instances of 250 requests; and one real-world instance with 2617 customers. The objective function was complex and different from any previous objective function used.
+
+The motivation given by \cite{jaw_heuristic_1986} was the transport of elderly and handicapped people. This motivation is also given by \cite{ioachim_request_1995} whose proposed (non-meta) heuristic allowed for multi-dimensional capacity (the first for which I have knowledge). A vehicle capacity was divided in: regular, wheelchair, non-folding wheelchairs; again showing interest on the application of the algorithm for real-world problems. For some reason, the author chose to describe the problem as a ``multi-vehicle pickup and delivery problem with time windows (m-PDPTW)'' while citing older works that used the DARP terminology.
+
+The heuristic can maybe be seen as an early use of math-heuristics. The idea was to group requests in mini-clusters\footnote{The term `mini' was used because previous authors used `clusters' to refer to a request grouping that filled an entire vehicle trip; the `mini-cluster' could fill only part of the vehicle trip.}, the vehicle would attend all requests on a mini-cluster before going to the next (and, therefore, would be empty when moving between one mini-cluster and another). So requests are grouped by time/space locality first; and then the problem was exactly solved as a TSP with time windows, where the mini-clusters are nodes (all the other constraints like capacity are taken in account on the grouping phase). It was tested on a real world instance of 2500+ customers.
+
+A small survey on DARP is published by Gilbert Laporte and Jean-François Cordeau in 2002\cite{cordeau_survey_2002}, it will be superseded in 2007 by a new version of it\cite{cordeau_dial_ride_2007}. The survey points that the most common motivation for DARP is the transport of ``elderly or disabled people''. The survey also points the similarity of DARP with PDVRP and VRPTW; and tries to distinguish it from them by the following reasoning:
+\begin{quotation}
+What makes the DARP different from most such routing problems is the human perspective. When transporting passengers, reducing user inconvenience must be balanced against minimizing operating costs. In addition, vehicle capacity is normally constraining in the DARP whereas it is often redundant in PDVRP applications, particularly those related to the collection and delivery of letters and small parcels.
+\end{quotation}
+This definition, while not very specific nor formal, can be used to understand the wide range of different constraints and objective functions presented by papers on DARP. The most common qualifiers applied to DARP are detailed on the survey (static vs dynamic, heterogeneous fleet vs homogeneous fleet, single-vehicle vs multi-vehicle).
+
+A tabu search algorithm is presented at 2003\cite{cordeau_tabu_2003}. It deals with a static multivehicle DARP variant with time windows, max ride time and capacity constraints. The objective function is the most common one, namely the cost minimization (many times presented as distance/time minimization). The most original characteristic of their problem definition is that the user is allowed to define a time window for her pickup or delivery, but not both at the same time. The reasoning is that letting users to have control over both time windows can easily generate unfeasible requests. The authors point the diversity of DARP definitions with comments like ``[...] the definition of the DARP varies from one author to the next [...]''. This metaheuristic is adapted for the dynamic case and parallelized in \cite{attanasio_parallel_2004}. The objective function remains being the cost minimization, but as a consequence of the transition to the dynamic variant, the main evaluation criteria become the percentage of fulfilled requests.
+
+By 2007, a new survey on DARP is published (the already mentioned \cite{cordeau_dial_ride_2007}). It updates the older version (\cite{cordeau_survey_2002}) with the three-index formulation of DARP that we presented in detail at section \ref{sec:problem_def}; and gives us the interesting definition that ``The PDPTW is a DARP without the maximum ride time constraints.''. This last definition shows the authors' interest in disregarding DARP definitions with an objective function that isn't cost minimization. The bibliographical research made within this doctorate proposal seems to show a trend for the adoption of the simple cost minimization objective function as the default for DARP definitions.
 
 \section{Motivation}
 
@@ -283,6 +312,8 @@ Table \ref{tab:periodicosEconferencias} presents journals and conferences that p
 \label{sec:resgroups}
 
 The \textit{Centre interuniversitaire de recherche sur les reseaux d'entreprise, la logistique et le transport}\footnote{Official site: https://www.cirrelt.ca/default.aspx} (CIRRELT, Interuniversitary research center on corporate networks, logistics and transport) is ``known as one of the top three places in the world working in logistics and transportation networks''\footnote{From the official presentation video available at: \url{https://youtu.be/f0lya0F1cUw?t=327}}. The focus on logistic and transport makes this research center to have many people and publications in the area of routing problems as PDVRP and DARP. Some of the researchers that are members of this group are: Gilbert Laporte; Jean-François Cordeau; Bernard Gendron; Julie Paquette. They have published 239 peer-reviewed papers in 2014 and 160 in 2015. The universities suggested for the sandwish doctorate, listed in the next section, are members of this research group.
+
+ADD JACQUES DESROSIER http://www.hec.ca/en/profs/jacques.desrosiers.html
 
 \iffalse
 This section presents some reasearch groups that work with optimization problems related to DARP, or more generally VRP and PDVRP.

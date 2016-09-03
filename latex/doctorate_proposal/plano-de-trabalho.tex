@@ -1,29 +1,29 @@
 \documentclass[english,plano-doutorado,twoside]{iiufrgs}
 
-% Definição de Pacotesespecificas
+% DefiniÃ§Ã£o de Pacotesespecificas
 \usepackage[
 	pdfauthor={Henrique Becker},
-	pdftitle={The Dial-a-Ride Problem: not one but many},
+	pdftitle={The Dial-a-Ride Problem},
 	pdfstartview=FitH
 	]{hyperref}           	% Pacote para propriedades do documento.
 \usepackage[brazilian]{babel} 	% Pacotes de linguagem.
 \usepackage[english]{babel}   	% Pacotes de linguagem.
-\usepackage[T1]{fontenc}      	% Pacote para conj. de caracteres correto.
-\usepackage[latin1]{inputenc} 	% Pacote para acentuação.
+%\usepackage[T1]{fontenc}      	% Pacote para conj. de caracteres correto.
+\usepackage[utf8]{inputenc} 	% Pacote para acentuaÃ§Ã£o.
 \usepackage{graphicx}         	% Pacote para importar figuras.
 \usepackage{color}            	% Pacote para se trabalhar com cor no texto.
 \usepackage{times}            	% Pacote para usar fonte Adobe Times.
-\usepackage{multirow}	      	% Pacote para utilização de várias linhas em uma tabela.
-\usepackage{multicol}	      	% Pacote para utilização de várias colunas em uma tabela.
-\usepackage{url}	      	% Pacote para utilização de URLs.
+\usepackage{multirow}	      	% Pacote para utilizaÃ§Ã£o de vÃ¡rias linhas em uma tabela.
+\usepackage{multicol}	      	% Pacote para utilizaÃ§Ã£o de vÃ¡rias colunas em uma tabela.
+\usepackage{url}	      	% Pacote para utilizaÃ§Ã£o de URLs.
 \usepackage{float}
 \usepackage{enumerate}
-\usepackage{amsmath,amssymb}	% Simbolos matemáticos      	
-\usepackage{subeqnarray}	% Formulações
-\usepackage{threeparttable} % Tabela com notas de rodapé
+\usepackage{amsmath,amssymb}	% Simbolos matemÃ¡ticos      	
+\usepackage{subeqnarray}	% FormulaÃ§Ãµes
+\usepackage{threeparttable} % Tabela com notas de rodapÃ©
 
-% Informações gerais.
-\title{The Dial-a-Ride Problem: not one but many}
+% InformaÃ§Ãµes gerais.
+\title{The Dial-a-Ride Problem}
 
 \author{Becker}{Henrique}
 
@@ -36,28 +36,34 @@
 % Folha de Rosto.
 \maketitle
 
-% Definir espaçamento entre parágrafos.
+% Definir espaÃ§amento entre parÃ¡grafos.
 \setlength{\parskip}{1.5ex}
 
-% Usar a numeração das seções, sem a necessidade de criação de capítulos.
+% Usar a numeraÃ§Ã£o das seÃ§Ãµes, sem a necessidade de criaÃ§Ã£o de capÃ­tulos.
 \renewcommand{\thechapter}{}
 \renewcommand{\thesection}{\arabic{section}}
 
-% Deixar uma página em branco após a capa.
+% Deixar uma pÃ¡gina em branco apÃ³s a capa.
 ~
 \newpage
 \thispagestyle{empty}
 
 \section{Theme and Introduction}
 
-The theme of this doctorate proposal is the Dial-A-Ride Problem (DARP). The DARP, as we will see, is a problem with many definitions. It usually consists on one or more vehicles, that need to transport people from different pickup points to different delivery points. It could be defined as a VRP (Vehicle Routing Problem), more specifically a PDVRP (Pickup and Delivery Vehicle Routing Problem). Yet, such definition is lacking, as PDVRPs: 1) only minimizes total travel time/cost/distance, while the DARP objective functions are often more diversified; 2) don't care for how much time the object being transported will stay inside the vehicle, while DARPs in general are about the transportation of human beings, and as such, tries to avoid taking much more time than necessary between a pickup and a delivery; 3) not always take in account the vehicle capacity, while on DARP almost every formulation model the vehicle capacity. The problem is also similar to the PDPTW (Pickup and Delivery Problem with Time Windows).
+The subject of this doctorate proposal is the Dial-A-Ride Problem (DARP). The DARP, as we will see, is a problem with many definitions. To acquaint the reader to the problem we present here a general and informal description of the problem, in the next section we will present a formal mathematical definition.
 
-The most common motivations given for the study of the DARP are: transport of elderly and disabled people (to their work and back); taxi ridesharing (non-exclusive vans that transport people on demand); transport of hospital patients. It's sometimes described as a transport model between a taxi (exclusive/practical but expensive) and a bus (non-exclusive/impractical but cheap)\cite{dial_autonomous_1995}.
+We have available a fleet of one or more vehicles used for human transport (cars, vans, buses, etc...). They are stored at one or more depots scattered by the city. We can have or not sufficient drivers for all vehicles. Our objective is to attend transportation requests from city residents. Any customer can specify a pickup point and a delivery point. They can specify the time to be picked up and delivered, or only one of them; they can request the service days in advance, or maybe them want to be picked up as soon as possible. The service you offer is non-exclusive, and each passenger can divide the ride with other passengers (but they all expect to have a seat at least). You have to balance the costs to provide this service with the quality of service you offer. A passenger will understand if you pickup and deliver other people during his or her travelling time, but not that you take more than two times the duration of a direct ride between his or her pickup and delivery points, for example. In the other hand, you are not offering a taxi service, and to keep your fees low, you have use the drivers' time in the best way possible, what can mean taking some detours and causing your customers some inconvenience.
+
+The DARPs can be categorized as VRPs (Vehicle Routing Problems), more specifically a PDVRPs (Pickup and Delivery Vehicle Routing Problems). Yet, such definition is lacking, as PDVRPs: 1) only minimizes total travel time/cost/distance, while the DARP objective functions are often more diversified; 2) don't care for how much time the object being transported will stay inside the vehicle, while DARPs in general are about the transportation of human beings, and as such, tries to avoid taking much more time than necessary between a pickup and a delivery; 3) not always takes in account the vehicle capacity, while on DARP almost every formulation model the vehicle capacity. The problem is also similar to the PDPTW (Pickup and Delivery Problem with Time Windows), yet not all variations use time windows, or when use them, can use them differently.
+
+The most common motivations given for the study of the DARP are: transport of elderly and disabled people (to their work and back); taxi ridesharing (non-exclusive vans that transport people on demand); transport of hospital patients. It's sometimes described as a transport model between a taxi (exclusive/practical but expensive) and the city's buses (non-exclusive/impractical but cheap)\cite{dial_autonomous_1995}.
 
 \subsection{Problem definition}
 \label{sec:problem_def}
 
 On the literature review we will see the wide range of different definitions given to DARP. However, the formulation given below is easy to understand, and cover a good number of variants, and therefore is practical for introducing someone to the problem. This formulation also isn't the most efficient known, for more efficient formulations see \cite{ropke_models_2007}.
+
+This formulation is for the static version of the problem. With this we mean that all requests were made on advance, and no requests will be added to the routes while the vehicles are already in motion. The most common motivation of this version is the transport of elderly and disabled people from home to work and back. The dynamic version of the problem manages the case where requests can be made on the fly, and is more commonly associated to taxi ridesharing. Hybrid versions exist as well.
 %SAY THAT THE PROBLEM DEFINITION HERE IS ONE OF MANY AND A GENERIC ONE
 %ENUMERATE THE VARIANTS THAT THIS DEFINITION COVER
 %CITAR ROKPE 2007 FOR BETTER FORMULATION
@@ -78,15 +84,15 @@ subject~to &\sum_{k \in K}\sum_{j \in V} x^{k}_{ij} = 1 & (i \in P)\label{eq:no_
            &x^{k}_{ij} \in \{0,1\}&(i,j \in V,~k\in K)\label{eq:boolean}
 \end{align}
 
-In this formulation, \(n\) is the number of requests (each request is a pair of a pickup and a delivery). If there's a pickup point \(i\); then the respective delivery point is \(i + n\) (i.e. each request is in the form \((i, i + n)\)). We have four location/point sets: \(P = \{1, \dots, n\}\) (the pickup points); \(D = \{n+1, \dots, 2n\}\) (the delivery points); the depot (points \(0\) and \(2n + 1\)); and \(V = \{0, \dots, 2n + 1\} \equiv P \cup D \cup \{0, 2n + 1\}\) (the universe set, i.e. all points). The depot is represented by two points only to simplify the model; it's expected to be the same point on space; the only difference is that we enforce each vehicle trip to start from \(0\) and end in \(2n+1\). We also have a vehicle set \(K\), as this a multi-vehicle variant; and we can distinguish between the capacity of each vehicle \(k \in K\) as \(Q_k\) (this is a heterogeneous fleet variant).
+In this formulation, \(n\) is the number of requests (each request is a pair of a pickup and a delivery). If there's a pickup point \(i\); then the respective delivery point is \(i + n\) (i.e. each request is in the form \((i, i + n)\)). We have four location/point sets: \(P = \{1, \dots, n\}\) (the pickup points); \(D = \{n+1, \dots, 2n\}\) (the delivery points); the depot (points \(0\) and \(2n + 1\)); and \(V = \{0, \dots, 2n + 1\} \equiv P \cup D \cup \{0, 2n + 1\}\) (the universe set, i.e. all points). The depot is represented by two points only to simplify the model; it's expected to be the same point on space; the only difference is that we enforce each vehicle trip to start from \(0\) and end in \(2n+1\). We also have a vehicle set \(K\), as this is a multi-vehicle variant; and we can distinguish between the capacity of each vehicle \(k \in K\) as \(Q_k\) (this is a heterogeneous fleet variant).
 
-The remaining data given with the problem are: \(c^k_{ij}\) the cost of going from \(i\) to \(j\) with vehicle \(k\) (a byproduct of the distance and the vehicle model); \(t_{ij}\) is the time needed by any vehicle to go from point \(i\) to point \(j\) (we assume all vehicles travel at similar speed); \(d_i\) is the time needed to service (embark and disembark) the people at point \(i\) (this parameter can vary as some patients can have mobility problems and therefore need help from the driver); \(e_i\) and \(l_i\) define a time window for each point \(i\), a vehicle has to \emph{start} servicing point \(i\) after \(e_i\) and before \(l_i\) (but the vehicle don't need to finish attending the point inside the time window); \(q_i\) will be the amount of people that will embark (\(q_i\) is positive and \(i \in P\)) or disembark (\(q_i\) is negative and \(i \in D\)) at a point \(i\) (we expect \(q_i + q_{n+i}\) to be zero). Finally, \(T_k\) is the max trip time of a given vehicle \(k\), and \(L\) is the max ride time of any passenger.
+The remaining data given with the problem are: \(c^k_{ij}\) the cost of going from \(i\) to \(j\) with vehicle \(k\) (a byproduct of the distance and the vehicle model); \(t_{ij}\) is the time needed by any vehicle to go from point \(i\) to point \(j\) (we assume all vehicles travel at similar speed); \(d_i\) is the time needed to service (board and get off) the people at point \(i\) (this parameter can vary as some patients can have mobility problems and therefore need help from the driver); \(e_i\) and \(l_i\) define a time window for each point \(i\), a vehicle has to \emph{start} servicing point \(i\) after \(e_i\) and before \(l_i\) (but the vehicle don't need to finish attending the point inside the time window); \(q_i\) will be the amount of people that will board (\(q_i\) is positive and \(i \in P\)) or get off (\(q_i\) is negative and \(i \in D\)) at a point \(i\) (we expect \(q_i + q_{n+i}\) to be zero). Finally, \(T_k\) is the max trip time of a given vehicle \(k\), and \(L\) is the max ride time of any passenger.
 
 The solution variable is \(x^k_{ij}\) \((k \in K,~i,j \in V)\). If the vehicle \(k\) goes from the point \(i\) to point \(j\) then \(x^k_{ij} = 1\); otherwise \(x^k_{ij} = 0\).
 
 The following variables are used to model some of the constraints: \(u^k_j\) will be the time vehicle \(k\) begins to attend point \(j\); \(w^k_j\) will be the number of people inside vehicle \(k\) when it \emph{departs} from point \(j\) (i.e. after loading); \(r^k_i\) will be the time amount the passenger of pickup request \(i\) remained inside the vehicle \(k\) (his or her total ride time; from \(i\) to \(i + n\)).
 
-The objective function \eqref{eq:objfun} is the minimization of the total cost of all trips. Constraints \eqref{eq:no_divide}, \eqref{eq:end_and_begin}, \eqref{eq:same_request_same_vehicle}, and \eqref{eq:no_bus_teleport} are flux constraints, where: \eqref{eq:no_divide} avoids that more than one vehicle visits the same point or that one vehicle leave a point by more than one single way; \eqref{eq:end_and_begin} guarantee vehicles start and end at the depot; \eqref{eq:same_request_same_vehicle} enforce that for the same request, the same vehicle will be used; \eqref{eq:no_bus_teleport} secure that a bus that arrived at point \(i\) will leave point \(i\) (at some moment). The times to start embark/disembark at each point are kept realistic by constraint \eqref{eq:travel_times}. Constraint \eqref{eq:capacity} guarantee a lower bound on the used capacity of each vehicle. The ride time of the passengers that embarked at \(i\) is defined by \eqref{eq:ride_time} (based on their embark/disembark times). The max duration of each vehicle trip is enforced by \eqref{eq:trip_time}. The time windows are respected because of constraint \eqref{eq:time_windows}; as the max ride is respected because of \eqref{eq:max_ride_time}. The constraint \eqref{eq:capacity2} helps constraint \eqref{eq:capacity} to guarantee that the vehicles capacity will not be exceeded. At least, but no less important, constraint \eqref{eq:boolean} defines that a vehicle can either use or not use a route (it can't partially use a route).
+The objective function \eqref{eq:objfun} is the minimization of the total cost of all trips. Constraints \eqref{eq:no_divide}, \eqref{eq:end_and_begin}, \eqref{eq:same_request_same_vehicle}, and \eqref{eq:no_bus_teleport} are flow constraints, where: \eqref{eq:no_divide} avoids that more than one vehicle visits the same point or that one vehicle leaves a point by more than one single way; \eqref{eq:end_and_begin} guarantee vehicles start and end at the depot; \eqref{eq:same_request_same_vehicle} enforce that for the same request, the same vehicle will be used; \eqref{eq:no_bus_teleport} assure that a vehicle that traveled up to point \(i\) will leave point \(i\) (at some moment). The times to start boarding and delivering people at each point are kept realistic by constraint \eqref{eq:travel_times}. Constraint \eqref{eq:capacity} guarantee a lower bound on the used capacity of each vehicle. The ride time of the passengers that boarded at \(i\) is defined by \eqref{eq:ride_time} (based on their boarding/delivering times). The max duration of each vehicle trip is enforced by \eqref{eq:trip_time}. The time windows are respected because of constraint \eqref{eq:time_windows}; as the max ride is respected because of \eqref{eq:max_ride_time}. The constraint \eqref{eq:capacity2} helps constraint \eqref{eq:capacity} to guarantee that the vehicles capacity will not be exceeded. At least, but no less important, constraint \eqref{eq:boolean} defines that a vehicle can either use or not use a route (it can't partially use a route).
 
 It's interesting to note that this formulation gives a maximum ride time for each passenger, even in the presence of time windows. This is a little redundant as time windows already enforce a max ride time specific for each passenger (and therefore much more reasonable than a fixed max time ride for all passengers).
 
@@ -98,23 +104,23 @@ We begin by \cite{psaraftis_dynamic_1980} (1980), at this time the ``Dial-a-Ride
 \begin{quotation}
 Several versions of the dial-a-ride service exist today, giving rise to several types of what we call the ``dial-a-ride problem''. The particular version of the problem we shall examine is a single-vehicle, many-to-many, immediate-request one. ``Many-to-many'' means that the origins (pickup points) as well the destinations (delivery points) of the various customers are all distinct points. ``Immediate request'' means that every customer requesting wishes to be serviced as soon as possible.
 \end{quotation}
-Therefore the DARP hadn't a precise definition. Also, many adjectives began to be used to distinguish between variants, as the three adjectives used by Psaraftis on the quote above. Two exact dynamic programming algorithms are presented on \cite{psaraftis_dynamic_1980}, one for the static variant and other for the dynamic variant of his DARP definition. They are an adaptation of an exact DP solution for the TSP (Traveling Salesman Problem) with an slight improvement on the worst-case assimptotic complexity, as many routes feasible on TSP are unfeasible on DARP. The worst-case complexity remained exponential, as his DARP definition, and all the other definitions covered by this literature review, are NP-Hard.
+Therefore the DARP hadn't a precise definition. Also, many adjectives began to be used to distinguish between variants, as the three adjectives used on the quote above. Two exact dynamic programming algorithms are presented on \cite{psaraftis_dynamic_1980}, one for the static variant and other for the dynamic variant of his DARP definition. They are an adaptation of an exact DP solution for the TSP (Traveling Salesman Problem) with an slight improvement on the worst-case asymptotic complexity, as many routes feasible on TSP are unfeasible on DARP. The worst-case complexity remained exponential, as his DARP definition, and all the other definitions covered by this literature review, are NP-Hard.
 
-Psaraftis mental model of the DARP was similar to non-exclusive taxi vans; where a van serving someone could take detours and embark/disembark people before concluding its first or oldest request. To avoid the possibility of indefinite deferment of a customer, Psaraftis defined a Max Position Shift (MPS) parameter. If the position on the chronological request list of a customer was \(i\), then its position  in the sequence of pickup and deliveries was restricted to the range \(i - MPS\) to \(i + MPS\). We can see that if MPS is zero, there's only one possible solution (the chronological request order); and if \(MPS \geq N\) indefinite deferment is possible. The objective function of Psaraftis' model minimized a combination of cost and user dissatisfaction (measured by the time since the user request for transport until his or her delivery). Psaraftis solved exactly instances up to nine requests (19 points).
+The modelling of the DARP presented at \cite{psaraftis_dynamic_1980} was similar to non-exclusive taxi vans; where a van serving someone could take detours and board/deliver people before concluding its first or oldest request. To avoid the possibility of indefinite deferment of a customer, a Max Position Shift (MPS) parameter is defined. If the position on the chronological request list of a customer was \(i\), then its position  in the sequence of pickup and deliveries was restricted to the range \(i - MPS\) to \(i + MPS\). We can see that if MPS is zero, there's only one possible solution (the chronological request order); and if \(MPS \geq N\) indefinite deferment is possible. The objective function minimized a combination of cost and user dissatisfaction (measured by the time since the user request for transport until his or her delivery). Instances up to nine requests (19 points) were solved exactly.
 
-Three years after, Psaraftis include time windows to his algorithms\cite{psaraftis_exact_1983}, consequently dropping the ``immediate request'' modifier, and becoming more similar to the rest of DARP definitions (that also used time windows). He also dropped the MPS parameter and the vehicle capacity, while saying it would be possible to easily add them back to the algorithm.
+Three years after, the same author included time windows to his algorithms\cite{psaraftis_exact_1983}, consequently dropping the ``immediate request'' modifier, and becoming more similar to the rest of DARP definitions (that also used time windows). He also dropped the MPS parameter and the vehicle capacity, while saying it would be possible to easily add them back to the algorithm.
 
-Three more years later \cite{desrosiers_dynamic_1986} solved exactly real-world instances up to 40 requests with another DP algorithm. His DARP formulation included time windows and capacity, and his objective function only minimized the total distance. ``By minimizing the total distance traveled, riding time within the vehicle is not minimized in equation (8). This objective function is less general than others proposed for minimizing user inconvenience.'' (p. 7), the user inconvenience isn't managed by the model itself, but Desrosiers points that the time windows themselves can be adjusted to avoid inconveniencing the user too much.
+Three more years later \cite{desrosiers_dynamic_1986} solved exactly real-world instances up to 40 requests with another DP algorithm. His DARP formulation included time windows and capacity, and his objective function only minimized the total distance. ``By minimizing the total distance traveled, riding time within the vehicle is not minimized in equation (8). This objective function is less general than others proposed for minimizing user inconvenience.'' (p. 7), the user inconvenience isn't managed by the model itself, but the author points that the time windows themselves can be adjusted to avoid inconveniencing the user too much.
 
-It's very relevant to note that those early works are about the \emph{single-vehicle} variant. On \cite{psaraftis_exact_1983} it's said: ``Although single-vehicle Dial-A-Ride systems don't exist in practice, single-vehicle Dial-A-Ride algorithms can be used as subroutines in large scale multvehicle Dial-A-Ride environments.''.
+It's very relevant to note that those early works are about the \emph{single-vehicle} variant. On \cite{psaraftis_exact_1983} it's said: ``Although single-vehicle Dial-A-Ride systems don't exist in practice, single-vehicle Dial-A-Ride algorithms can be used as subroutines in large scale multivehicle Dial-A-Ride environments.''.
 
-Still at 1986, \cite{jaw_heuristic_1986} proposes a (non-meta) heuristic for both the static and dynamic multivehicle DARP with time windows. This heuristic followed ``service quality'' constraints as max ride time and ``A vehicle is not allowed to idle when it is carrying passengers, since it is felt that such idle waiting would not be tolerated by Dial-A-Ride customers.'' (p. 3). The heuristic allowed that vehicles could have different capacities (heterogeneous fleet variant), and also allowed adding vehicles \textit{on the fly} if the heuristic failed to allocated all customers using the initial fleet (on-the-fly fleet variant). Those characteristics of the heuristic reveal interest on solving the DARP in real-world circunstances. The algorithm is tested using many artificial instances of 250 requests; and one real-world instance with 2617 customers. The objective function was complex and different from any previous objective function used.
+Still at 1986, \cite{jaw_heuristic_1986} proposes a heuristic for both the static and dynamic multivehicle DARP with time windows. This heuristic followed ``service quality'' constraints as max ride time and ``A vehicle is not allowed to idle when it is carrying passengers, since it is felt that such idle waiting would not be tolerated by Dial-A-Ride customers.'' (p. 3). The variant in question allowed vehicles to have different capacities (heterogeneous fleet variant), and also allowed adding vehicles \textit{on the fly} if the heuristic failed to allocate all customers using the initial fleet (flexible fleet variant). Those characteristics of the heuristic reveal interest on solving the DARP in real-world circumstances. The algorithm is tested using many artificial instances of 250 requests; and one real-world instance with 2617 customers. The objective function was complex and different from any previous objective function used.
 
-The motivation given by \cite{jaw_heuristic_1986} was the transport of elderly and handicapped people. This motivation is also given by \cite{ioachim_request_1995} whose proposed a (non-meta) heuristic allowed for multi-dimensional capacity (the first for which I have knowledge). A vehicle capacity was divided in: regular, wheelchair, non-folding wheelchairs; again showing interest on the application of the algorithm for real-world problems. For some reason, the author chose to describe the problem as a ``multi-vehicle pickup and delivery problem with time windows (m-PDPTW)'' while citing older works that used the DARP terminology.
+The motivation given by \cite{jaw_heuristic_1986} was the transport of elderly and handicapped people. This motivation is also given by \cite{ioachim_request_1995} whose proposed a (non-meta) heuristic allowed for multi-dimensional capacity (the first for which I have knowledge). A vehicle capacity was divided in: regular, wheelchair, non-folding wheelchairs; again showing interest on the application of the algorithm for real-world problems. For some reason, the author described the problem as a ``multi-vehicle pickup and delivery problem with time windows (m-PDPTW)'' while citing older works that used the DARP terminology.
 
 The heuristic can maybe be seen as an early use of math-heuristics. The idea was to group requests in mini-clusters\footnote{The term `mini' was used because previous authors used `clusters' to refer to a request grouping that filled an entire vehicle trip; the `mini-cluster' could fill only part of the vehicle trip.}, the vehicle would attend all requests on a mini-cluster before going to the next (and, therefore, would be empty when moving between one mini-cluster and another). So requests are grouped by time/space locality first; and then the problem was exactly solved as a TSP with time windows, where the mini-clusters are nodes (all the other constraints like capacity are taken in account on the grouping phase). It was tested on a real world instance of 2500+ customers.
 
-A small survey on DARP is published by Gilbert Laporte and Jean-François Cordeau in 2002\cite{cordeau_survey_2002}, it will be superseded in 2007 by a new version of it\cite{cordeau_dial_ride_2007}. The 2002 survey points that the most common motivation for DARP is the transport of ``elderly or disabled people''. The survey also points the similarity of DARP with PDVRP and VRPTW; and tries to distinguish it from them by the following reasoning:
+A small survey on DARP was published by Gilbert Laporte and Jean-FranÃ§ois Cordeau in 2002\cite{cordeau_survey_2002}, it will be superseded in 2007 by a new version of it\cite{cordeau_dial_ride_2007}. The 2002 survey points that the most common motivation for DARP is the transport of ``elderly or disabled people''. The survey also points the similarity of DARP with PDVRP and VRPTW; and tries to distinguish it from them by the following reasoning:
 \begin{quotation}
 What makes the DARP different from most such routing problems is the human perspective. When transporting passengers, reducing user inconvenience must be balanced against minimizing operating costs. In addition, vehicle capacity is normally constraining in the DARP whereas it is often redundant in PDVRP applications, particularly those related to the collection and delivery of letters and small parcels.
 \end{quotation}
@@ -134,36 +140,37 @@ Finally, we rapidly list some interesting and recent works on DARP (2014 to 2016
 
 %\cite{ritzinger_dynamic_2014} propose a DP algorithm, a LNS heuristic and a hybrid combining both. It's two times slower than the compared state-of-the-art, but its main selling point is not making use of a commercial solver.
 %\cite{gschwind_effective_2014} uses the concept of `dynamic time window' to model the ride time constraint, and ``For the first time (to our knowledge), both time-window and ride-time constraints are handled in the column-generation subproblem''. 
-\cite{braekers_exact_2014} focus on the uncommon multi-depot variant (the same vehicle start and finish at the same location, but there's many of such locations, and each vehicle is linked to one of them). He says ``Based on this literature review, it is concluded that a combination of heterogeneous vehicles, heterogeneous users and multiple depots has hardly been studied.''. \cite{markovic_optimizing_2015} presents a study case with impressive results: ``MRMS-based routes yield estimated total annual savings of approximately \$0.82 million.''. His heuristic has a uncommon objective function that minimizes the sum of the total route time, the cost/number of used vehicles, and the cost/number of taxis called to take care of outliers (requests that are easier to be managed using extra taxis than fitting them with the regular fleet). \cite{liu_branch_and_cut_2015} studies a ``realistic dial-a-ride problem which simultaneously considers multiple trips, heterogeneous vehicles, multiple request types, configurable vehicle capacity and manpower planning''. The problem definition used allows for drivers rest breaks; that are essential on a real-world take on the problem, yet often dismissed from the mathmatic models. \cite{pimenta_models} presents a ``model that aims at assigning requests to vehicles by minimizing the number of loading/unloading operations'' because of the circunstances of a specific study case (autonomous eletric vehicles). \cite{molenbruch_multi_directional_2016} proposes a more general DARP model to cover for constraints that don't exist in the well-known formulation presented at section \ref{sec:problem_def}; constraints such as `driver assignment' contraints, that are common on recent papers on DARP.
+\cite{braekers_exact_2014} focus on the uncommon multi-depot variant (the same vehicle start and finish at the same location, but there's many of such locations, and each vehicle is linked to one of them). He says ``Based on this literature review, it is concluded that a combination of heterogeneous vehicles, heterogeneous users and multiple depots has hardly been studied.''. \cite{markovic_optimizing_2015} presents a study case with impressive results: ``MRMS-based routes yield estimated total annual savings of approximately \$0.82 million.''. His heuristic has a uncommon objective function that minimizes the sum of the total route time, the cost/number of used vehicles, and the cost/number of taxis called to take care of outliers (requests that are easier to be managed using extra taxis than fitting them with the regular fleet). \cite{liu_branch_and_cut_2015} studies a ``realistic dial-a-ride problem which simultaneously considers multiple trips, heterogeneous vehicles, multiple request types, configurable vehicle capacity and manpower planning''. The problem definition used allows for drivers rest breaks; that are essential on a real-world take on the problem, yet often dismissed from the mathematical models. \cite{pimenta_models} presents a ``model that aims at assigning requests to vehicles by minimizing the number of loading/unloading operations'' because of the circumstances of a specific study case (autonomous electric vehicles). \cite{molenbruch_multi_directional_2016} proposes a more general DARP model to cover for constraints that don't exist in the well-known formulation presented at section \ref{sec:problem_def}; constraints such as `driver assignment' constraints, that are common on recent papers on DARP.
 
 \section{Motivation}
 
 %The DARP isn't one problem, but a wide array of similar problems. 
-The literature review given at last section supports our characterization of the DARP as a diverse family of problems. One of the reasons of this diversity is the sheer number of real world problems related to human transportation (specially the `on demand' intra-city ones). While the author think it's very positive to see many operational research works tackling real-world problems, the consequent diversity boom can have left some gaps unfulfilled. The major gap this doctorate proposal aims to fill is the absence of a comparison framework between DARP variants, and the little reuse of the ideas between similar problems.
+The literature review given at the previous section supports our characterization of the DARP as a family of problems. One of the reasons of this diversity is the sheer number of real world problems related to human transportation (specially the `on demand' intra-city ones). While the author think it's very positive to see many operational research works tackling real-world problems, the consequent diversity boom can have left some gaps unfulfilled. The major gap this doctorate proposal aims to fill is the absence of a comparison framework between DARP variants, and the little reuse of the ideas between similar problems.
 
 While can be hard to make sense of the comparison between algorithms of very different variants, this is not always the case, nor is impossible to derive interesting knowledge from those comparisons. Comparing a multi-depot to a single-depot algorithm can be unfair, but can also give insights on how having one or multiple depots affect the operational costs and the quality of the service. Some algorithms were designed with adaptability in mind and don't need to be completely rewritten to be adapted to a new variant and thus be used to provide comparison. Some papers propose algorithms for new variants that lack comparison with a commercial generic solver such as CPlex.
 
-Using an existing algorithm to solve a more restrained variant allows to establish lower bounds and study the costs created by the extra constraints. Yet, this is rarely seen. If the set of feasible solutions is the same (or very similar), but the objective functions are different; it's possible to solve the same instance with different algorithms and compare the solutions given computing its value for each one of the objective functions. Instances that can be sistematically adapted between many variants, and thus provide a common solid bedtest are also useful.
+Using an existing algorithm to solve a more restrained variant allows to establish lower bounds and study the costs created by the extra constraints. Yet, this is rarely seen. If the set of feasible solutions is the same (or very similar), but the objective functions are different; it's possible to solve the same instance with different algorithms and compare the solutions given computing its value for each one of the objective functions. Instances that can be systematically adapted between many variants, and thus provide a common solid dataset are also useful.
 
-The current publishing system don't encourage replication studies; nor extensive comparison (based on a good literature review), as such comparison poses the risk of showing an algorithm is dominated (and making the paper unpublishable). The diversity of variants can also be expained by the fact it's easier to create a new algorithm for a new problem, than get better results than an existing algorithm for an existing problem. 
+The current publishing system don't encourage replication studies; nor extensive comparison (based on a good literature review), as such comparison poses the risk of showing an algorithm is dominated (and making the paper unpublishable). The diversity of variants can also be explained by the fact it's easier to create a new algorithm for a new problem, than get better results than an existing algorithm for an existing problem. 
 
 While to fix such situation is outside of the scope of a doctorate, much can be done in three to four years of dedicated research. If a comparison framework is established, then works with lax or no comparison can be rejected and directed to it. It would be unexpected to see such framework to arise naturally from scattered researchers focusing specific variants. However, I do think the effort in this direction is worth the reward.
 
 \section{Objectives}
 
-The objective to be pursued in the doctorate described by this proposal is: the creation of a framework that allows the comparison of the results of any techniques used to solve the multiple variants of the DARP (for exact and heuristic resolution); avoiding the proliferation of works that use the absence of a established testbed, or a minor difference on the DARP formulation, to justify absent or lax comparison.
+The objective to be pursued in the doctorate described by this proposal is: the creation of a framework that allows the comparison of the results of any techniques used to solve the multiple variants of the DARP (for exact and heuristic resolution). Such framework would include instance datasets and algorithms that could be easily adapted to a wide range of variants, as metrics to evaluate the quality of the solutions obtained from different algorithms. Alternative efficient formulations for less studied variants will be studied too.
 
 \subsection{Specific Objectives}
 \begin{itemize}
     \item Catalogue the most relevant DARP variants.
     \item Obtain or re-implement the codes used by the prior work to solve those variants.
     \item Propose a file format for the instance datasets, one that allows the same instance to be shared by many variants.
-    \item Generate the instances used to benchmark the DARP variants (if based on a mathmatic model) on the literature.
+    \item Generate the instances used to benchmark the DARP variants (if based on a mathematical model) on the literature.
     \item Obtain real world instances, already used at some time on the literature, or new.
-    \item Make available all code and instances (on the proposed format).
+    \item Make available all codes and instances (on the proposed format).
     \item Gather and/or propose quality of service metrics to allow comparison between formulations with different objective functions.
     \item Benchmark the most relevant relevant exact/approximative/heuristic methods; and publish the results using the proposed quality metrics for comparison; to give a more clear notion of the state-of-the-art.
-    \item If adequate, propose new methods for solving existing DARP variants, allowing for comparison within that variant.
+    \item Propose generic algorithms that can easily be extended to many variants.
+    \item Obtain new knowledge about the difference in the quality of the results between different variants.
 \end{itemize}
 
 \section{Work Plan}
@@ -172,8 +179,8 @@ The objective to be pursued in the doctorate described by this proposal is: the 
 
 \begin{itemize}
 \item \textbf{Bibliographical research}: I intend to do a thoroughly literature review. The relevant articles will be discovered by means of Google Scholar and following selected articles references. The institute library and the Capes' Portal will not be excluded from this process. I will enroll on any courses offered by the doctorate program that can help to understand the problem and its solving methods. Articles that aren't available by the means of the partnership between the UFRGS and publishers (as Springer) will be asked directly to the authors. Authors will be contacted about their code and instances.
-\item \textbf{Real-world instances}: The research group of Dr. Buriol already has partnership with one vehicle routing company and one of her PhD students is working in scheduling problems within a hospital (hospital's DARPs are the source from the majority of the literature instances). While on the doctorate, I intend to make use of this to obtain new real world instances; and to verify if the academy can contribute back to the community on this topic (suggest the most adequate method for the hospital use; maybe write a case study paper). Also, if the sandwish doctorate is approved for the universities suggested on section \ref{sec:sandwish}, I will be placed inside the CIRRELT research group described on section \ref{sec:resgroups}. This group has partnership with many companies and the government, making easier to obtain real-world instances.
-\item \textbf{Implementation and tests}: The Optimization and Algorithms group have servers that can be used to run the proposed benchmarks (that can take hours/days/weeks of CPU time). Any code that needs to be implemented, will be written in C++14 (or higher) and put on public domain. My experience with exact methods over NP-hard problems (master's topic), the algorithms and optimizations classes that I attended on master's, and the research group expertise on heuristic methods (over NP-hard problems) will contribute to the completion of the proposed doctoral work.
+\item \textbf{Real-world instances}: The research group of Dr. Buriol already has partnership with one company related to vehicle routing and one of her PhD students is working in scheduling problems within a hospital (hospital's DARPs are the source from the majority of the literature instances). While on the doctorate, I intend to make use of this to obtain new real world instances; and to verify if the academy can contribute back to the community on this topic (suggest the most adequate method for the hospital use; maybe write a case study paper). Also, if the sandwich doctorate is approved for the universities suggested on section \ref{sec:sandwich}, I will be placed inside the CIRRELT research group described on section \ref{sec:resgroups}. This group has partnership with many companies and the government, making easier to obtain real-world instances.
+\item \textbf{Implementation and tests}: The Optimization and Algorithms group have servers that can be used to run the proposed benchmarks (that can take hours/days/weeks of CPU time). Any code that needs to be implemented, will be written in C++14 and put on public domain. My experience with exact methods over NP-hard problems (master's topic), the algorithms and optimizations classes that I attended on master's, and the research group expertise on heuristic methods (over NP-hard problems) will contribute to the completion of the proposed doctoral work.
 \item \textbf{Publishing}: The work will be published in conferences and journals relevant to the area, as described by in table \ref{tab:periodicosEconferencias}. If the chosen journals/conferences aren't open access; they will at least allow for for reusing the same content inside the PhD thesis, that will be open access and supersede any publications during doctorate.
 \end{itemize}
 
@@ -184,34 +191,34 @@ The UFRGS's PhD program request from its students to take at least 18 credits, a
 \begin{table}[H]
 	\centering
 	\normalsize
-	\caption{Classes taken at the master's} \medskip
+	\caption{Classes taken during master's} \medskip
 	\begin{tabular}{|c|l|c|c|c|}
 	\hline
         Identifier & Class Name & Semester & Credits & Grade\\
 	\hline\hline
-        CMP568 & Tópicos DLXVIII - Otimização & 2015/1 & 2 & B \\
-        CMP269 & Recuperação de Informações & 2015/1 & 4 & A \\
+        CMP568 & TÃ³picos DLXVIII - OtimizaÃ§Ã£o & 2015/1 & 2 & B \\
+        CMP269 & RecuperaÃ§Ã£o de InformaÃ§Ãµes & 2015/1 & 4 & A \\
         CMP601 & Algorithms and Theory of Computation & 2015/1 & 4 & A \\
-	- & Proficiência em Língua Estrangeira (Inglês) & 2015/1 & - & A \\
+	- & ProficiÃªncia em LÃ­ngua Estrangeira (InglÃªs) & 2015/1 & - & A \\
 	CMP410 & Teaching Practice I & 2015/2 & 1 & - \\
         CMP301 & Projeto de Pesquisa I & 2016/1 & 2 & A \\
-        CMP800 & Dissertação de mestrado & 2016/2 & - & - \\
+        CMP800 & DissertaÃ§Ã£o de mestrado & 2016/2 & - & - \\
 	\hline
 	\end{tabular}
 	\label{tab:AtividadesDot1}
 \end{table}
 
-% TODO: verificar c/ Buriol qual o nome da matéria do Ritt que se tentará cursar
+% TODO: verificar c/ Buriol qual o nome da matÃ©ria do Ritt que se tentarÃ¡ cursar
 \begin{table}[H]
 	\centering
-	\caption{Classes to be taken at the doctorate} \medskip
+	\caption{Classes to be taken during doctorate} \medskip
 	\begin{tabular}{|c|l|c|c|}
 	\hline
         Identifier & Class Name & Semester & Credits\\
 	\hline\hline
         CMP402 & Trabalho Individual II & 2017/1 & 2 \\
-	CMP588 & Tópicos DLXXXVIII: Algoritmos avançados & 2017/1 & 4 \\
-	- & Proficiência em Língua Estrangeira (Espanhol) & 2017/1 & - \\
+	CMP588 & TÃ³picos DLXXXVIII: Algoritmos avanÃ§ados & 2017/1 & 4 \\
+	- & ProficiÃªncia em LÃ­ngua Estrangeira (Espanhol) & 2017/1 & - \\
         CMP410 & Teaching Practice II & 2017/2 & 2 \\        
         CMP700 & Thesis Proposal (Doctorate) & 2019/1 & - \\              
         CMP900 & PhD Thesis & 2020/2 & - \\
@@ -222,7 +229,7 @@ The UFRGS's PhD program request from its students to take at least 18 credits, a
 
 \subsection{Classes and Activities Schedule}
 
-The schedule below presents a first planning of the doctorate. This plan was made taking in account the following premises: 1) there's a PhD scholarship that begins at october of 2016, and this proposal is competing to receive it; 2) the author of this proposal will be allowed to finish his master's (using the the rest of 2016) to avoid losing the title and to allow the publication of results about his master's topic that are more recent than his last paper published. If this is not true, the semester of 2016/2 can be disregarded; the author will begin doctorate at 2017/1 and conclude it in seven semesters, using the eight semester only as a failsafe measure.
+The schedule below presents a first planning of the doctorate. This plan was written while considering the following premises: 1) there's a PhD scholarship that begins at October of 2016, and this proposal is competing to receive it; 2) the author of this proposal will use the first semester of doctorate to finish his master's (to avoid losing the title and to allow the publication of results about his master's topic that are more recent than his last paper published). If this proposal isn't competing for that PhD scholarship, the semester of 2016/2 can be disregarded; the author will begin doctorate at 2017/1 and conclude it in seven semesters, using the eight semester only as a fail-safe measure.
 
 \begin{enumerate}\parskip0pt \parsep0pt \itemsep2pt 
 %1
@@ -299,24 +306,24 @@ Table \ref{tab:periodicosEconferencias} presents journals and conferences that p
 	\hline \hline
         European Journal of Operational Research & A1 & 181 & 2.679 \\
         Computers \& Operations Research & A1 & 104 & 1.988\\
-        Annals of Operations Research & A1 & 78 & 1.406 \\
+%        Annals of Operations Research & A1 & 78 & 1.406 \\
 	Journal of the Operational Research Society & A2 & 75 & 1.225\\        
-	Journal of Heuristics & B1 & 50 & 1.344\\
+%	Journal of Heuristics & B1 & 50 & 1.344\\
         Mathematical Methods of Operations Research & B1 & 33 & 0.526\\
         International Transactions in Operational Research & B2 & 11 & 1.255\\
         Transportation Science & B3 & 76 & 3.295\\
 	\hline \hline
-        Conferências & Qualis\tnote{1} & \multicolumn{2}{c}{H-Index\tnote{1}} \\
+        ConferÃªncias & Qualis\tnote{1} & \multicolumn{2}{c}{H-Index\tnote{1}} \\
     	\hline \hline
 	International Conference on Automated Planning and Scheduling - ICAPS & A2 & \multicolumn{2}{c}{49} \\
 	Symposium on Experimental Algorithms - SEA & B1 & \multicolumn{2}{c}{26} \\
 	Conference on Integer Programming and Combinatorial Optimization - IPCO & B1 & \multicolumn{2}{c}{26} \\
-	Metaheuristic International Conference - MIC & B3 & \multicolumn{2}{c}{13} \\		
-	International Conference on Operations Research (Abstract) - OR  & B4 & \multicolumn{2}{c}{5} \\
-	International Workshop on Model-based metaheuristics & B4 & \multicolumn{2}{c}{5} \\
-	European Conference on Operational Research (Abstract) - EURO & B4 & \multicolumn{2}{c}{4} \\
-        Simpósio Brasileiro de Pesquisa Operacional - SBPO & B4 & \multicolumn{2}{c}{9} \\
-        Multidisciplinary International Scheduling Conference: Theory and Applications - MISTA & B5 & \multicolumn{2}{c}{3} \\            
+%	Metaheuristic International Conference - MIC & B3 & \multicolumn{2}{c}{13} \\		
+%	International Conference on Operations Research (Abstract) - OR  & B4 & \multicolumn{2}{c}{5} \\
+%	International Workshop on Model-based metaheuristics & B4 & \multicolumn{2}{c}{5} \\
+%	European Conference on Operational Research (Abstract) - EURO & B4 & \multicolumn{2}{c}{4} \\
+%        SimpÃ³sio Brasileiro de Pesquisa Operacional - SBPO & B4 & \multicolumn{2}{c}{9} \\
+%        Multidisciplinary International Scheduling Conference: Theory and Applications - MISTA & B5 & \multicolumn{2}{c}{3} \\            
 	\end{tabular}
 	\label{tab:periodicosEconferencias}
 	\begin{tablenotes}
@@ -330,12 +337,12 @@ Table \ref{tab:periodicosEconferencias} presents journals and conferences that p
 \section{Research Groups}
 \label{sec:resgroups}
 
-The \textit{Centre interuniversitaire de recherche sur les reseaux d'entreprise, la logistique et le transport}\footnote{Official site: https://www.cirrelt.ca/default.aspx} (CIRRELT, Interuniversitary research center on corporate networks, logistics and transport) is ``known as one of the top three places in the world working in logistics and transportation networks''\footnote{From the official presentation video available at: \url{https://youtu.be/f0lya0F1cUw?t=327}}. The focus on logistic and transport makes this research center to have many people and publications in the area of routing problems as PDVRP and DARP. Some of the researchers that are members of this group are: Gilbert Laporte; Jean-François Cordeau; Bernard Gendron and Jacques Desrosier. They have published 239 peer-reviewed papers in 2014 and 160 in 2015. The universities suggested for the sandwish doctorate, listed in the next section, are members of this research group.
+The \textit{Centre interuniversitaire de recherche sur les reseaux d'entreprise, la logistique et le transport}\footnote{Official site: https://www.cirrelt.ca/default.aspx} (CIRRELT, Interuniversitary research center on corporate networks, logistics and transport) is ``known as one of the top three places in the world working in logistics and transportation networks''\footnote{From the official presentation video available at: \url{https://youtu.be/f0lya0F1cUw?t=327}}. The focus on logistic and transport makes this research center to have many people and publications in the area of routing problems as PDVRP and DARP. Some of the researchers that are members of this group are: Gilbert Laporte; Jean-FranÃ§ois Cordeau; Bernard Gendron and Jacques Desrosier. They have published 239 peer-reviewed papers in 2014 and 160 in 2015. The universities suggested for the sandwich doctorate, listed in the next section, are members of this research group.
 
 %ADD JACQUES DESROSIER http://www.hec.ca/en/profs/jacques.desrosiers.html
 
 \iffalse
-This section presents some reasearch groups that work with optimization problems related to DARP, or more generally VRP and PDVRP.
+This section presents some research groups that work with optimization problems related to DARP, or more generally VRP and PDVRP.
 
 \begin{itemize}
 \item \textbf{Portuguese group name:} description.
@@ -345,27 +352,27 @@ This section presents some reasearch groups that work with optimization problems
 \end{itemize}
 \fi
 
-\section{Sandwish doctorate suggestions}
-\label{sec:sandwish}
-This sections suggests two universities (and some advisors) for the planned sandwish doctorate. More options can be considered during doctorate if they show themselves relevant. The two suggested universities are located at Montréal, Québec, Canada\footnote{Montréal is a bilingual city with about 10\% of population only knowing english, and about 60\% knowing both english and french. Data from 2011 Census: \url{http://www12.statcan.gc.ca/census-recensement/2011/dp-pd/vc-rv/index.cfm?Lang=ENG&VIEW=C&TOPIC_ID=4&CFORMAT=jpg&GEOCODE=462}.}. They are HEC Montréal\footnote{English version of official site: \url{http://www.hec.ca/en/}} and the University of Montréal\footnote{English version of the official site: \url{http://www.umontreal.ca/english/index.html}}. Both universities make part of the part of the CIRRELT research group cited last section.
+\section{sandwich doctorate suggestions}
+\label{sec:sandwich}
+This sections suggests two universities (and some advisors) for the planned sandwich doctorate. More options can be considered during doctorate if they show themselves relevant. The two suggested universities are located at MontrÃ©al, QuÃ©bec, Canada\footnote{MontrÃ©al is a bilingual city with about 10\% of population only knowing english, and about 60\% knowing both english and french. Data from 2011 Census: \url{http://www12.statcan.gc.ca/census-recensement/2011/dp-pd/vc-rv/index.cfm?Lang=ENG&VIEW=C&TOPIC_ID=4&CFORMAT=jpg&GEOCODE=462}.}. They are HEC MontrÃ©al\footnote{English version of official site: \url{http://www.hec.ca/en/}} and the University of MontrÃ©al\footnote{English version of the official site: \url{http://www.umontreal.ca/english/index.html}}. Both universities make part of the part of the CIRRELT research group cited in the previous section.
 
-Gilbert Laporte\footnote{See: \url{https://www.gerad.ca/en/people/114}} and Jean-François Cordeau\footnote{See: \url{https://www.gerad.ca/en/people/jean-francois-cordeau}}, that published one of the seminal works on DARP\cite{cordeau_dial_ride_2007}, work on HEC Montréal, and are my suggestions for advisor if HEC Montréal end up being my choice.
+Gilbert Laporte\footnote{See: \url{https://www.gerad.ca/en/people/114}} and Jean-FranÃ§ois Cordeau\footnote{See: \url{https://www.gerad.ca/en/people/jean-francois-cordeau}}, that published one of the seminal works on DARP\cite{cordeau_dial_ride_2007}, work on HEC MontrÃ©al, and are my suggestions for advisor if HEC MontrÃ©al end up being my choice.
 
-The University of Montréal is in the 113º position, by the THE World University Rankings 2016\footnote{Source: \url{https://www.timeshighereducation.com/world-university-rankings/university-of-montreal?ranking-dataset=133819}} while HEC Montréal appear nowhere in the same ranking. One suggestion of advisor for the University of Montréal would be Bernard Gendron\footnote{See: \url{http://www.recherche.umontreal.ca/en/research-at-udem/our-professors/profile/chercheur/157/pid/307/}} whose already advised works similar in theme\footnote{As \url{https://papyrus.bib.umontreal.ca/xmlui/handle/1866/13467}}.
+The University of MontrÃ©al is in the 113Âº position, by the THE World University Rankings 2016\footnote{Source: \url{https://www.timeshighereducation.com/world-university-rankings/university-of-montreal?ranking-dataset=133819}} while HEC MontrÃ©al appear nowhere in the same ranking. One suggestion of advisor for the University of MontrÃ©al would be Bernard Gendron\footnote{See: \url{http://www.recherche.umontreal.ca/en/research-at-udem/our-professors/profile/chercheur/157/pid/307/}} whose already advised works similar in subject\footnote{As \url{https://papyrus.bib.umontreal.ca/xmlui/handle/1866/13467}}.
 
-In short, HEC Montréal has two of the most renowned reserachers on the area, while the University of Montréal the best structure. As both are located on the same city, share a research group and, last year, Gilbert Laporte was a teacher at the University of Montréal, the best option would be the University of Montréal with Laporte or Cordeau as coadvisor.
+In short, HEC MontrÃ©al has two of the most renowned researchers on the area, while the University of MontrÃ©al the best structure. As both are located on the same city, share a research group and, last year, Gilbert Laporte was a teacher at the University of MontrÃ©al, the best option would be the University of MontrÃ©al with Laporte or Cordeau as coadvisor.
 
 \bibliographystyle{alpha}
 %\nocite{*}
 \bibliography{bibliografia}
 \iffalse
-% Seção: Assinaturas
+% SeÃ§Ã£o: Assinaturas
 \newpage
 \thispagestyle{empty}
 \chapter*{ASSINATURAS}
 
 \begin{center}
-\large{\textbf{The Dial-a-Ride Problem: not one but many}} \\
+\large{\textbf{The Dial-a-Ride Problem}} \\
 (Doctorate Work Plan)
 \end{center}
 

@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <chrono>
-#include <boost/rational.hpp>
+#include <cassert>
 
 #ifndef HBM_PROFILE_PRECISION
   #define HBM_PROFILE_PRECISION 5
@@ -91,7 +91,6 @@ namespace hbm {
   namespace hbm_mtu_impl {
     using namespace std;
     using namespace std::chrono;
-    using namespace boost;
 
     // "Knapsack Problems" p. 93, equation 3.19 
     template<typename W, typename P>
@@ -135,8 +134,8 @@ namespace hbm {
       // down in the equation but there's one round down here (assuming that
       // W and P are integers). This is safe to do because this value is
       // subtracted by an already rounded value (integer) and then the result
-      // is rounded down (would have thrown away the smaller than on value
-      // anyway).
+      // is rounded down (would have thrown away the smaller-than-one part
+      // of the value anyway).
       P l = ((c_prime + res*bi.w)*bi2.p)/bi2.w;
       P u1_ = z_prime + (l - res*bi.p);
 
@@ -188,7 +187,7 @@ namespace hbm {
       const auto &p = p_;
 
       vector<W> x_(n+1, 0);
-      P upper_u = u3(bi, bi2, bi3, c);
+      P upper_u = hbm_mtu_impl::u3(bi, bi2, bi3, c);
 
       myvector<W> m;
       m.resize(n+1); // This resize don't initialize the m contents with zero
@@ -505,7 +504,7 @@ namespace hbm {
       // Solve for the core problem for the first time.
       inner_mtu1(core_w, core_p, next_slice_size, c, z, x);
 
-      P upper_u3 = u3(items[0], items[1], items[2], c);
+      P upper_u3 = hbm_mtu_impl::u3(items[0], items[1], items[2], c);
 
       // non_core_start: When we copy elements from non_core to core we need
       // remove them from non_core, but simply doing so would not be efficient.
@@ -533,7 +532,9 @@ namespace hbm {
           const P &pj = non_core[j].p;
           const W &wj = non_core[j].w;
           P u = pj + u1(items[0], items[1], c - wj);
-          if (u > z) u = pj + u3(items[0], items[1], items[2], c - wj);
+          if (u > z) {
+            u = pj + hbm_mtu_impl::u3(items[0], items[1], items[2], c - wj);
+          }
           // the 'if' below can't be an 'else' of the 'if' above, don't try!
           // the variable 'u' changes value on the 'if' above
           if (u <= z) {
@@ -656,6 +657,29 @@ namespace hbm {
     }
   }
   // -------------------- EXTERNAL FUNCTIONS --------------------
+
+  /// Gives an upper bound for the optimal profit value of an UKP instance,
+  /// based on the most efficient item types of the instance and the knapsack
+  /// capacity. The item type efficiency is given by the value of its profit
+  /// divided by its weight (p1/w1 >= p2/w2 >= p3/w3 >= pj/wj, j > 3 && j <= n).
+  ///
+  /// @note Only work for integer weight and profit. Depends on the natural
+  ///   rounding-down of integers division.
+  /// @param bi Most efficient item type.
+  /// @param bi2 Second most efficient item type.
+  /// @param bi3 Third most efficient item type.
+  /// @param c The knapsack capacity.
+  /// @return An upper bound for the optimal profit value of the knapsack
+  ///   instance.
+  template<typename W, typename P>
+  inline P u3(
+      const item_t<W, P> &bi,
+      const item_t<W, P> &bi2,
+      const item_t<W, P> &bi3,
+      const W &c
+    ) {
+    return hbm_mtu_impl::u3(bi, bi2, bi3, c);
+  }
 
   /// Solves an UKP instance by the MTU1 algorithm presented at the book
   /// "Knapsack Problems" (from Martello and Toth) p. 96, and stores the

@@ -11,9 +11,9 @@
 # or if the method is too slow to solve the instances on <repo_root>/data/ukp/
 # on a reasonable time (ex.: eduk); then don't create a test_*.out rule, nor a
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
-# (it's 'all except debug/profile build' in truth).
+# (all means "all except debug/profile build" in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -150,6 +150,15 @@ bin/test_mtu2.out: mains/test_mtu2.cpp lib/mtu.hpp lib/wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ mains/test_mtu2.cpp $(CFLAGS) $(DEFS)
 
 bin/mtu2: bin/run_mtu2.out bin/test_mtu2.out
+	touch $@
+
+bin/run_babayev.out: mains/run_babayev.cpp lib/babayev.hpp lib/wrapper.hpp lib/mtu.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_babayev.cpp $(CFLAGS) $(DEFS)
+
+bin/test_babayev.out: mains/test_babayev.cpp lib/babayev.hpp lib/wrapper.hpp lib/mtu.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_babayev.cpp $(CFLAGS) $(DEFS)
+
+bin/babayev: bin/run_babayev.out bin/test_babayev.out
 	touch $@
 
 .PHONY: clean

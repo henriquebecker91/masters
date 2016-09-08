@@ -1,5 +1,7 @@
 Eight pages. 1997. Authors: Djangir A. Babayev; Fred Glover; Jennifer Ryan;
 PDF of bad quality.
 
+Equation (13), p. 3, "w > c_" simply states that if we multiply the items weight to by a value 'w' that's higher than the upper bound on the profit value, we satisfie inequality C^2_{22} (that will be used by the algorithm)?
 
+The summary at the last paragraph of the first column of page 3 seems important.
 

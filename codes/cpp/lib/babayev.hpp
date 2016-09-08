@@ -1,7 +1,4 @@
 // CHECKLIST:
-// 1º) Use your editor search/replace to replace GREENDP with the method name
-//    (all in caps).
-// 2º) Use your editor search/replace to replace greendp with the method name.
 // 3º) Implement your method (replace METHOD CODE with your code).
 // 4º) Search every TODO, follow it, and delete it.
 // 5º) Make a copy and change the relevant bits on a run_*.cpp and maybe the
@@ -11,12 +8,13 @@
 // 7º) Delete this comment.
 // Notes: if you want to pass commandline flags you can remove the wrapper_t
 //  and make your own function that receives argv/argc.
-#ifndef HBM_GREENDP_HPP
-#define HBM_GREENDP_HPP
+#ifndef HBM_BABAYEV_HPP
+#define HBM_BABAYEV_HPP
 
 #include "ukp_common.hpp"
 #include "wrapper.hpp"
 #include "type_name.hpp"
+#include "mtu.hpp" // babayev make use of the u3 upper bound
 
 #include <chrono>
 #include <boost/rational.hpp>
@@ -31,12 +29,12 @@
 
 namespace hbm {
   template <typename W, typename P, typename I>
-  struct greendp_extra_info_t : extra_info_t {
+  struct babayev_extra_info_t : extra_info_t {
     // TODO: check if this struct is adequated or not. If you want to have
     // those profiling times you will need to put HBM_START_TIMER and
     // HBM_STOP_TIMER on your code (at METHOD CODE). Check the other codes
     // to see how it works. Also, the variables n and c need to be set.
-    std::string algorithm_name{"greendp"};
+    std::string algorithm_name{"babayev"};
     #ifdef HBM_PROFILE
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
@@ -97,61 +95,141 @@ namespace hbm {
     }
   };
 
-  namespace hbm_greendp_impl {
+  namespace hbm_babayev_impl {
     using namespace std;
     using namespace std::chrono;
-    using namespace boost::math;
+    using namespace boost;
+
+    // This methods isn't described exactly in the paper. By trial and error,
+    // we determined it as a lower bound version of u3. Yet, at cost of an
+    // scan over the items (O(n)) we can get a better lower bound in many
+    // cases.
+    template<typename W, typename P>
+    P greedy_lower_bound(instance_t<W, P> &ukpi, bool already_sorted) {
+      /*P z = 0;
+      W c_ = ukpi.c;
+      if (!already_sorted) sort_by_eff(ukpi.items);
+      for (auto& i : ukpi.items) {
+        auto qt = c_ / i.w;
+        z += qt*i.p;
+        c_ -= qt*i.w;
+      }
+
+      return z;*/
+      auto &v = ukpi.items;
+      W c = ukpi.c;
+      W c1 = c % v[0].w;
+      W c2 = c1 % v[1].w;
+      P z = (c/v[0].w)*v[0].p + (c1/v[1].w)*v[1].p + (c2/v[2].w)*v[2].p;
+
+      return z;
+    }
 
     // TODO: quick comment on the method
     template<typename W, typename P, typename I>
-    void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    void babayev(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
       // Extra Info Pointer == eip
-      greendp_extra_info_t<W, P, I>* eip = new greendp_extra_info_t<W, P, I>();
+      babayev_extra_info_t<W, P, I>* eip = new babayev_extra_info_t<W, P, I>();
       extra_info_t* upcast_ptr = dynamic_cast<extra_info_t*>(eip);
       sol.extra_info = std::shared_ptr<extra_info_t>(upcast_ptr);
 
       #ifdef HBM_PROFILE
       // Used to compute the time all the execution algorithm.
-      steady_clock::time_point all_greendp_begin = steady_clock::now();
+      steady_clock::time_point all_babayev_begin = steady_clock::now();
 
       // Used by HBM_START_TIMER and HBM_STOP_TIMER if HBM_PROFILE is defined.
       steady_clock::time_point begin;
       #endif
 
-      // METHOD CODE
+      // NOTE: the paper's notation is used here, so 'c' isn't used to denote
+      // the knapsack capacity (as in other algorithms of this repository) but
+      // to denote the optimal profit value (or its lower/upper bound, or a
+      // tentative value for it). The variable 'b' is used to denote the
+      // knapsack capacity.
+      const W b = ukpi.c;
+      // STEP 1: Determine upper_c -- an upper bound for c_star,
+      //   upper_c >= c_star;
+
+      // Get the three most efficient items. TODO: do this in a better way?
+      P lower_c = 0, c = 0, upper_c = 0;
+      if (!already_sorted) sort_by_eff(ukpi.items); // already sort for the greedy algorithm
+      sol.y_opt = 0;
+      sol.opt = upper_c = u3(ukpi.items[0], ukpi.items[1], ukpi.items[2], ukpi.c);
+      lower_c = greedy_lower_bound(ukpi, true);
+      // STEP 2: c := upper_c
+      c = upper_c;
+
+      // STEP 3: Compute beta and test consistency of Eq. 7;
+      // TODO: On page four, it's said that M1 is more efficient on a
+      // certain condition than M2, and vice-versa. Check the condition and
+      // implement both methods after.
+      rational<P> R(ukpi.items[0].p, ukpi.items[0].w); // defined at page 3
+
+      // Computing w and v with M1, see first paragraph of "Procedure M1" (p.3)
+      // for reference.
+
+      // Eq. 18
+      P k = 0;
+      if (R.denominator() == 1) {
+        k = R.numerator() + 1;
+      } else {
+        k = rational_cast<P>(R) + 1;
+      }
+      // Eq. 16 (multiplied by -1) and adding one for rounding purposes
+      P v1 = - (((upper_c - 1) / k) + 1);
+      // Eq. 17 (multiplied by -1) and adding one for rounding purposes
+      P v2 = - (rational_cast<P>((b*R - lower_c - 1)/(k - R)) + 1);
+      // We want the "smallest absolute value" between two negative numbers.
+      P v = max(v1, v2);
+
+      // Eq. 15
+      W w = -v*k + 1;
+      // END OF PROCEDURE M1 (w and v defined)
+      auto &out = cout;
+      HBM_PRINT_VAR(v);
+      HBM_PRINT_VAR(w);
+      HBM_PRINT_VAR(k);
+      HBM_PRINT_VAR(R);
+      
+      // STEP 4: If Eq. 7 is inconsistent, then set c := c - 1 and return to
+      //  step 3.
+      // STEP 5: If Eq. 7 is consistent, then c_star = c and the corresponding
+      //   equation of Eq. 7 is a solution to the original knapsack problem
+      //   (1)--(3). End.
 
       #ifdef HBM_PROFILE
-      eip->total_time = difftime_between_now_and(all_greendp_begin);
+      eip->total_time = difftime_between_now_and(all_babayev_begin);
       #endif
     }
 
     // -------------------- WRAPPERS --------------------
     template<typename W, typename P, typename I>
-    struct greendp_wrap : wrapper_t<W, P, I> {
+    struct babayev_wrap : wrapper_t<W, P, I> {
       virtual void operator()(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) const {
         // Calls the overloaded version with the third argument as a bool
-        hbm_greendp_impl::greendp(ukpi, sol, already_sorted);
+        hbm_babayev_impl::babayev(ukpi, sol, already_sorted);
 
         return;
       }
 
       virtual const std::string& name(void) const {
-        static const std::string name = "greendp";
+        static const std::string name = "babayev";
         return name;
       }
     };
 
     template<typename W, typename P, typename I = size_t>
-    void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
+    void babayev(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol,
                 int argc, argv_t argv) {
-      simple_wrapper(greendp_wrap<W, P, I>(), ukpi, sol, argc, argv);
+      simple_wrapper(babayev_wrap<W, P, I>(), ukpi, sol, argc, argv);
     }
   }
   // -------------------- EXTERNAL FUNCTIONS --------------------
 
-  /// Solves an UKP instance by the 
-  /// TODO: ALGORITH_NAME presented at PAPER_NAME
-  /// , and stores the results at sol.
+  /// Solves an UKP instance by the unnamed algorithm presented at
+  /// "A New Knapsack Approach by Integer Equivalent Aggregation and
+  /// Consistency Determination", and stores the results at sol. The
+  /// name 'babayev' is the surname of the paper's first author.
   ///
   /// @note TODO: it only work with integers? there's some other caveat?
   /// @param ukpi The UKP instance to be solved.
@@ -159,8 +237,8 @@ namespace hbm {
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
   ///   TODO: what kind of ordering?
   template<typename W, typename P, typename I>
-  void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
-    hbm_greendp_impl::greendp(ukpi, sol, already_sorted);
+  void babayev(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
+    hbm_babayev_impl::babayev(ukpi, sol, already_sorted);
   }
 
   /// An overloaded function, it's used as argument to test_common functions.
@@ -172,13 +250,12 @@ namespace hbm {
   /// sorted by weight (in relation to each other).
   ///
   /// @see main_take_path
-  /// @see greendp(instance_t<W, P> &, solution_t<W, P, I> &, bool)
+  /// @see babayev(instance_t<W, P> &, solution_t<W, P, I> &, bool)
   template<typename W, typename P, typename I>
-  void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
-    hbm_greendp_impl::greendp(ukpi, sol, argc, argv);
+  void babayev(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
+    hbm_babayev_impl::babayev(ukpi, sol, argc, argv);
   }
 }
 
-#endif //HBM_GREENDP_HPP
-
+#endif //HBM_BABAYEV_HPP
 

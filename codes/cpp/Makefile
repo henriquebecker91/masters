@@ -161,6 +161,9 @@ bin/test_babayev.out: mains/test_babayev.cpp lib/babayev.hpp lib/wrapper.hpp lib
 bin/babayev: bin/run_babayev.out bin/test_babayev.out
 	touch $@
 
+bin/bench_babayev_hard.out: mains/bench_babayev_hard.cpp lib/chung.hpp lib/mtu.hpp lib/ukp5.hpp $(H_DEPS)
+	$(CC) -o $@ mains/bench_babayev_hard.cpp $(CFLAGS) $(DEFS) $(LBOOST) -DHBM_PROFILE
+
 .PHONY: clean
 
 clean:

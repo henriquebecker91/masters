@@ -5,3 +5,9 @@ Equation (13), p. 3, "w > c_" simply states that if we multiply the items weight
 
 The summary at the last paragraph of the first column of page 3 seems important.
 
+Check https://github.com/henriquebecker91/masters/blob/master/codes/cpp/lib/babayev.hpp for more info on how to implement the method (implementation left unifinished).
+
+The approach 2 for solving the consistency check (that was used to obtain the times presented on the paper's tables), isn't described on the own article.
+
+IMPORTANT: The experiments described on the sections "First group of experiments -- [...]" and "The second group of experiments: [...]" seem very flawed.
+

@@ -147,6 +147,7 @@ namespace hbm {
       // tentative value for it). The variable 'b' is used to denote the
       // knapsack capacity.
       const W b = ukpi.c;
+      const I n = ukpi.items.size();
       // STEP 1: Determine upper_c -- an upper bound for c_star,
       //   upper_c >= c_star;
 
@@ -184,13 +185,82 @@ namespace hbm {
 
       // Eq. 15
       W w = -v*k + 1;
+
+      // Important: don't forget we need to check if they are coprime with gcd.
       // END OF PROCEDURE M1 (w and v defined)
       auto &out = cout;
       HBM_PRINT_VAR(v);
       HBM_PRINT_VAR(w);
       HBM_PRINT_VAR(k);
       HBM_PRINT_VAR(R);
-      
+
+      myvector<P> agg_eq;
+      agg_eq.resize(n + 1);
+      agg_eq[n] = w; // slack variable / dummy item
+      P alpha1 = w;
+      for (I i = 0; i < n; ++i) {
+        auto it = ukpi.items[i];
+        agg_eq[i] = it.p*v + it.w*w;
+        if (alpha1 > agg_eq[i]) alpha1 = agg_eq[i];
+        cout << "agg_eq[" << i << "]: " << agg_eq[i] << endl;
+      }
+      cout << "agg_eq[n]: " << w << endl;
+      cout << "agg_eq[n+1]: " << w*b << v << "*c" << endl;
+      HBM_PRINT_VAR(alpha1);
+
+      // IMPORTANT: the lower bound lower_c on their computational results
+      // is given by solving the reduced problem (1% most efficient) exactly
+      // (page 6).
+      // IMPORTANT: two approachs for solving the consistency problem are
+      // presented. On page 6, it's said that approach two was used to
+      // generate the results presented.
+
+      vector<P> r(alpha1, 0);
+
+      // The algorithm isn't fully specified on the paper "A New Knapsack
+      // Approach by Integer Equivalent Aggregation and Consistency
+      // Determination", it references the paper "Integer Programming over a
+      // Finite Additive Group" for core of the algorithm (the consistency
+      // testing). We know the algorithm is right until there because the
+      // values match the ones given at the the paper ("A New [...]"). Using
+      // GLPK and a simple mathprog model we can verify that a consistency
+      // check as described on the paper really would yield the results
+      // presented. I abandoned this implementation task because there wasn't
+      // enough time before ending master's.
+      //
+      // param beta, integer, > 0;
+      //
+      // param n, integer, > 0;
+      // /* number of items */
+      //
+      // set I := 1..n;
+      // /* set of items */
+      //
+      // param a{i in 1..n}, integer, >= 0;
+      // /* the aggregate value between weight and profit */
+      //
+      // var x{i in I}, integer, >= 0;
+      // /* x[i] = m, means m copies of item i are in the knapsack */
+      //
+      // minimize obj: sum{i in I} a[i]*x[i];
+      // /* objective is to maximize the profit, but for this we minimize the aggregate function value */
+      //
+      // s.t. the_only_constraint: sum{i in I} a[i] * x[i] = beta;
+      //
+      // solve;
+      //
+      // for {i in I} { printf 'Item nº %d: %d\n', i, x[i]; }
+      // printf "Result: %d\n", sum {i in I} a[i]*x[i];
+      //
+      // data;
+      //
+      // param beta := 229; /* will fail (unfeasible) */
+      // /* param beta := 267;*/ /* will find one solution */
+      // param n := 6;
+      // param a := 1 48, 2 43, 3 127, 4 41, 5 121, 6 115;
+      //
+      // end;
+
       // STEP 4: If Eq. 7 is inconsistent, then set c := c - 1 and return to
       //  step 3.
       // STEP 5: If Eq. 7 is consistent, then c_star = c and the corresponding
@@ -231,11 +301,12 @@ namespace hbm {
   /// Consistency Determination", and stores the results at sol. The
   /// name 'babayev' is the surname of the paper's first author.
   ///
-  /// @note TODO: it only work with integers? there's some other caveat?
+  /// @note Unfinished implementation. Currently waiting a response from
+  ///   Babayev and Jennifer Ryan/Sanchez.
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
-  ///   TODO: what kind of ordering?
+  ///   efficiency.
   template<typename W, typename P, typename I>
   void babayev(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
     hbm_babayev_impl::babayev(ukpi, sol, already_sorted);

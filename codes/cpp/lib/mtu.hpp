@@ -170,9 +170,9 @@ namespace hbm {
                           bi2(w_[2], p_[2]),
                           bi3(w_[3], p_[3]);
       // Variables needs to be initialized before we start jumping.
-      W y, i;
+      W y;
       P u;
-      I h;
+      I h, i;
 
       // 1. Initialize
       //step_1: // unused step
@@ -327,7 +327,7 @@ namespace hbm {
       }
       assert(z == sol.opt);
       #ifdef HBM_PROFILE
-      eip->total_time = difftime_between_now_and(all_mtu2_begin);
+      eip->total_time = difftime_between_now_and(all_mtu1_begin);
       #endif
     }
 

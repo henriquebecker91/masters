@@ -207,6 +207,23 @@ namespace hbm {
                 used_items(used_items),
                 show_only_extra_info(show_only_extra_info),
                 extra_info(extra_info) { }
+
+
+    void print(std::ostream &out = std::cout) const {
+      if (!show_only_extra_info) {
+        // The printing of all the fields except extra_info should
+        // be inside this condition
+        out << "opt:    " << opt << std::endl;
+        out << "y_opt:  " << y_opt << std::endl;
+        for (auto it = used_items.cbegin(); it != used_items.cend(); ++it) {
+          it->print(out);
+        }
+      }
+
+      // The extra info is always shown
+      std::string extra_info_str = extra_info->gen_info();
+      if (!extra_info_str.empty()) out << extra_info_str << std::endl;
+    }
   };
 
   /// Exception type for UKP instance read errors.

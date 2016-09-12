@@ -312,7 +312,7 @@ namespace hbm {
       for (W y = w_min; y <= last_position_used; ++y) {
         if (g[y] > opt) {
           ++(qt_non_skipped_ys);
-          qt_inner_loop_executions += d[y];
+          qt_inner_loop_executions += static_cast<W>(d[y]);
           non_skipped_d[y] = d[y];
           
           opt = g[y];
@@ -588,7 +588,7 @@ namespace hbm {
 
         for (I ix = 1; ix <= dy; ++ix) {
           item_t<W, P> it = items[ix];
-          I wi = it.w;
+          W wi = it.w;
           P pi = it.p;
           W ny = y + wi;
           P ogny = g[ny];

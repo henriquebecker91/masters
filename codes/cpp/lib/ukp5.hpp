@@ -202,7 +202,8 @@ namespace hbm {
       ukp5_gen_stats();
 
       stringstream out("");
-      out << "algorithm_name: ukp5" << endl;
+      out << "CAUTION: items are being sorted by increasing weight here, not decreasing efficiency as usual." << endl;
+      out << "algorithm_name: ukp5-sbw" << endl;
       out <<  "git_head_at_compilation: "
           << HBM_GIT_HEAD_AT_COMPILATION << std::endl;
       out << "type_W: " << hbm::type_name<W>::get() << std::endl;

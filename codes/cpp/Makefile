@@ -13,7 +13,7 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (all means "all except debug/profile build" in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5_sbw bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -56,13 +56,14 @@ bin/run_per.out: mains/run_per.cpp lib/periodicity.hpp lib/wrapper.hpp $(H_DEPS)
 bin/run_dom.out: mains/run_dom.cpp lib/dominance.hpp lib/wrapper.hpp $(H_DEPS)
 	$(CC) -o $@ mains/run_dom.cpp $(CFLAGS) $(DEFS)
 
-bin/run_ukp5.out: mains/run_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
+# changed the binary name to avoid confusion
+bin/run_ukp5_sbw.out: mains/run_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
 	$(CC) -o $@ mains/run_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
 
-bin/test_ukp5.out: mains/test_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
+bin/test_ukp5_sbw.out: mains/test_ukp5.cpp $(UKP5_DEPS) $(H_DEPS)
 	$(CC) -o $@ mains/test_ukp5.cpp $(CFLAGS) $(LBOOST) $(UKP5_DEFS)
 
-bin/ukp5: bin/run_ukp5.out bin/test_ukp5.out
+bin/ukp5_sbw: bin/run_ukp5_sbw.out bin/test_ukp5_sbw.out
 	touch $@
 
 bin/run_gardp.out: mains/run_gardp.cpp lib/gardp.hpp lib/wrapper.hpp $(H_DEPS)

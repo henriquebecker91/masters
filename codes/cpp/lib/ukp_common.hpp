@@ -83,17 +83,16 @@ namespace hbm {
 
     /// The standard ordering for items.
     ///
-    /// The condition x \< y is true iff the item x is more efficient
-    /// than y (x.p/x.w \> y.p/y.w) or, if the efficiencies are equal,
-    /// the condition x.w \< y.w is true.
+    /// CHANGED TO CREATE A UKP5 THAT ORDER THE ITEMS BY INCREASING WEIGHT.
+    /// THIS IS A DIRTY HACK ISOLATED IN ONE COMMIT OF TOPIC BRANCH. BECAUSE
+    /// THIS CHANGE ALL METHODS WILL SORT ITEMS BY WEIGHT AND NOT EFFICIENCY,
+    /// DO NOT USE THIS VERSION.
     ///
     /// @param o The item at the right of the < operator.
     ///
     /// @return True if the criterion described above is met, False otherwise.
     inline bool operator<(const item_t &o) const {
-      P a = p * static_cast<P>(o.w),
-        b = o.p * static_cast<P>(w);
-      return a > b || (a == b && w < o.w);
+      return w < o.w;
     }
   };
 

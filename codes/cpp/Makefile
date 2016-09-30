@@ -36,7 +36,7 @@ DEFS=-DHBM_XOR_SWAP
 
 # ukp5 specific
 UKP5_DEPS=lib/ukp5.hpp lib/periodicity.hpp lib/dominance.hpp
-UKP5_DEFS=$(DEFS) -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS
+UKP5_DEFS=$(DEFS) #-DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS # don't make much sense if the items are ordered by weight
 
 bin:
 	mkdir bin

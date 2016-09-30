@@ -83,7 +83,11 @@ namespace hbm {
     /// Fill the difference between the bound and the capacity with
     /// copies of the best item. Note that setting this option to
     /// true will yet give an exact optimal solution.
-    bool use_y_star_per{true};
+    /// ANOTHER DIRTY HACK. DON'T MAKE SENSE TO USE Y_STAR ON THE
+    /// 128_16_std_breqd INSTANCES. ALSO, IF WE USE IT, WE WOULD NEED TO
+    /// CHANGE THE CODE, AS IT DEPENDS ON THE INSTANCES BEING ORDERED BY
+    /// EFFICIENCY (WHEN ORDERED).
+    bool use_y_star_per{false};
 
     /// Write human-readable object representation to a stream.
     ///

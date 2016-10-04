@@ -13,7 +13,7 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (all means "all except debug/profile build" in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev bin/cutstock
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -163,6 +163,52 @@ bin/babayev: bin/run_babayev.out bin/test_babayev.out
 
 bin/bench_babayev_hard.out: mains/bench_babayev_hard.cpp lib/chung.hpp lib/mtu.hpp lib/ukp5.hpp $(H_DEPS)
 	$(CC) -o $@ mains/bench_babayev_hard.cpp $(CFLAGS) $(DEFS) $(LBOOST) -DHBM_PROFILE
+
+# Cutting-stock with multiple different knapsack solvers
+
+# Options used by Leonardo Moura for compiling with CPlex
+CPLEX_EFLAGS  = -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD
+
+# Folders where CPlex is stored
+SYSTEM        = x86-64_sles10_4.1
+LIBFORMAT     = static_pic
+CPLEXDIR      = /opt/ibm/ILOG/CPLEX_Studio125/cplex
+CONCERTDIR    = /opt/ibm/ILOG/CPLEX_Studio125/concert
+
+# linking cplex
+CPLEXLIBDIR   = $(CPLEXDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
+CONCERTLIBDIR = $(CONCERTDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
+CPLEX_LFLAGS  = -L$(CPLEXLIBDIR) -lilocplex -lcplex -L$(CONCERTLIBDIR) -lconcert -lm -pthread
+# includes for cplex
+CPLEXINCDIR   = $(CPLEXDIR)/include
+CONCERTINCDIR = $(CONCERTDIR)/include
+CPLEX_IFLAGS  = -I$(CPLEXINCDIR) -I$(CONCERTINCDIR) 
+
+CPLEX_EFLAGS += $(CPLEX_LFLAGS) $(CPLEX_IFLAGS)
+
+# KNAPSACK_SOLVER macro possible values
+CPLEX=1
+UKP5_FP=2
+UKP5_FP_NS=3
+UKP5_INT=4
+UKP5_INT_NS=5
+MTU1=6
+MTU2=7
+MGREENDP=8
+MGREENDP1=9
+
+# ukp5 specific
+# REDEFINE UKP5_DEFS TO REMOVE HBM_XOR_SWAP (not used in fp builds)
+UKP5_FP_FLAGS = -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS $(LBOOST)
+
+bin/ukp5_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS) | bin
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS) 
+
+bin/cplex_cutstock.out: mains/cutstock.cpp | bin
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(CPLEX) $(CPLEX_EFLAGS) 
+
+bin/cutstock: bin/ukp5_cutstock.out bin/cplex_cutstock.out
+	touch $@
 
 .PHONY: clean
 

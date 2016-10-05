@@ -31,7 +31,7 @@ LBOOST=-lboost_filesystem -lboost_system
 LBOOST += -fpermissive
 # To understand the utility of the pipe below ("| bin"), see
 # https://www.gnu.org/software/make/manual/make.html#Prerequisite-Types
-H_DEPS=lib/ukp_common.hpp lib/test_common.hpp | bin
+H_DEPS=lib/ukp_common.hpp lib/test_common.hpp lib/type_name.hpp lib/workarounds.hpp | bin
 DEFS=-DHBM_XOR_SWAP
 
 # ukp5 specific
@@ -197,17 +197,38 @@ MTU2=7
 MGREENDP=8
 MGREENDP1=9
 
+COMMON_DEPS = lib/ukp_common.hpp lib/test_common.hpp lib/type_name.hpp lib/workarounds.hpp | bin
+
 # ukp5 specific
 # REDEFINE UKP5_DEFS TO REMOVE HBM_XOR_SWAP (not used in fp builds)
-UKP5_FP_FLAGS = -DHBM_CHECK_PERIODICITY -DHBM_INIT_G_BY_CHUNKS $(LBOOST)
+# HBM_CHECK_PERIODICITY and HBM_INIT_G_BY_CHUNKS are also not very useful
+# in this case and can be disabled
+UKP5_DEPS = lib/ukp5.hpp lib/periodicity.hpp lib/dominance.hpp $(COMMON_DEPS)
+UKP5_FP_FLAGS  = $(LBOOST)
+UKP5_INT_FLAGS = -DHBM_XOR_SWAP $(LBOOST)
 
-bin/ukp5_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS) | bin
-	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS) 
+MTU_DEPS  = lib/mtu.hpp lib/wrapper.hpp $(COMMON_DEPS) 
+MTU_FLAGS = -DHBM_XOR_SWAP
 
-bin/cplex_cutstock.out: mains/cutstock.cpp | bin
+bin/cplex_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
 	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(CPLEX) $(CPLEX_EFLAGS) 
 
-bin/cutstock: bin/ukp5_cutstock.out bin/cplex_cutstock.out
+bin/ukp5_fp_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS) 
+
+bin/ukp5_fp_ns_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP_NS) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS) 
+
+bin/ukp5_int_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_INT) $(UKP5_INT_FLAGS) $(CPLEX_EFLAGS) 
+
+bin/ukp5_int_ns_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_INT_NS) $(UKP5_INT_FLAGS) $(CPLEX_EFLAGS) 
+
+bin/mtu1_cutstock.out: mains/cutstock.cpp $(MTU_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(MTU1) $(MTU_FLAGS) $(CPLEX_EFLAGS) 
+
+bin/cutstock: bin/cplex_cutstock.out bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out
 	touch $@
 
 .PHONY: clean

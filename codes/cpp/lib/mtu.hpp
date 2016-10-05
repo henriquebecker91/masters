@@ -143,20 +143,7 @@ namespace hbm {
       return max(u1_, u0); // 3.26
     }
 
-    // The mtu1 code without any wrappers. Used internally by mtu1 and
-    // mtu2. Takes the weights and profits list, the number of items,
-    // the capacity, the variable where to store the optimal value
-    // and the vector where to store the optimal solution found.
-    // Both z and x are cleaned before use, x has to have the correct size
-    // ('n' or greater) but can be unintialized.
-    // Note that this method has index notation beggining on 1 (both
-    // w_ and p_ are expected to begin at 1 and go until n).
-    // It's expected that the size of w and p exceeds n by at least one
-    // position (i.e. w and p have at least size n+1). This is because
-    // inner_mtu1 writes a dummy item at the n+1 position (the data
-    // originally on that position is lot, be warned).
-    // This code assumes that w_ and p_ are sorted by non-increasing
-    // efficiency.
+    // See comment over hbm::inner_mtu1.
     template<typename W, typename P, typename I>
     void inner_mtu1(
       myvector<W> &w_,
@@ -739,6 +726,25 @@ namespace hbm {
   template<typename W, typename P, typename I>
   void mtu2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, int argc, argv_t argv) {
     hbm_mtu_impl::mtu2(ukpi, sol, argc, argv);
+  }
+
+  /// The mtu1 code without any wrappers. Used internally by mtu1 and
+  /// mtu2. Takes the weights and profits list, the number of items,
+  /// the capacity, the variable where to store the optimal value
+  /// and the vector where to store the optimal solution found.
+  /// Both z and x are cleaned before use, x has to have the correct size
+  /// ('n' or greater) but can be unintialized.
+  /// Note that this method has index notation beggining on 1 (both
+  /// w_ and p_ are expected to begin at 1 and go until n).
+  /// It's expected that the size of w and p exceeds n by at least one
+  /// position (i.e. w and p have at least size n+2). This is because
+  /// inner_mtu1 writes a dummy item at the n+1 position (the data
+  /// originally on that position is lost, be warned).
+  /// This code assumes that w_ and p_ are sorted by non-increasing
+  /// efficiency. Exposed for efficiency reasons.
+  template<typename W, typename P, typename I>
+  void inner_mtu1(myvector<W> &w_, myvector<P> &p_, const I &n, const W &c, P &z, myvector<W> &x) {
+    hbm::hbm_mtu_impl::inner_mtu1(w_, p_, n, c, z, x);
   }
 }
 

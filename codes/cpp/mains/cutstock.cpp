@@ -6,9 +6,9 @@
 #define UKP5_INT    4
 #define UKP5_INT_NS 5
 #define MTU1        6
-//#define MTU2        7 // there's no good reason to apply MTU2 to the problem
-#define MGREENDP    8
-#define MGREENDP1   9
+//#define MTU2        7 // there's no good reason to apply MTU2 to the problem, it was made for very large randomly distributed instances, the instances here aren't large, and after each iteration the knapsacks become closer to a strongly correlated distribution
+#define MGREENDP    8 // can fail if two items have the same efficiency, what is not uncommon in the cutting stock instances (specially items with the double of the weight of the other and the exact double of the profit value)
+#define MGREENDP1   9 // needs smaller coefficients or is killed by bad alloc (trying to alloc memory linear to an upper bound on the optimal solution profit). UPDATE: even with smaller coefficients (2^20) it's terribly slow
 // MGREENDP2 isn't exact, so isn't here
 
 #define WEIGHT uint_fast32_t
@@ -31,18 +31,21 @@
 #include <numeric>
 #endif
 
-#if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS || \
+#if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
     KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS
 #include "ukp5.hpp"
 #elif KNAPSACK_SOLVER == MTU1
 #include "mtu.hpp"
+#elif KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
+#include "greendp.hpp"
 #endif
 
 #if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS || \
     KNAPSACK_SOLVER == CPLEX
   #define PROFIT FP_P
 #elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-      KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP1
+      KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+      KNAPSACK_SOLVER == MGREENDP1
   #define PROFIT INT_P
 #endif
 
@@ -75,6 +78,10 @@ int main(int argc, char **argv)
   name = "ukp5_int_ns";
   #elif KNAPSACK_SOLVER == MTU1
   name = "mtu1";
+  #elif KNAPSACK_SOLVER == MGREENDP
+  name = "mgreendp";
+  #elif KNAPSACK_SOLVER == MGREENDP1
+  name = "mgreendp1";
   #else
     #error VALUE FOR MACRO KNAPSACK_SOLVER WAS NOT EXPECTED
   #endif
@@ -141,8 +148,8 @@ int main(int argc, char **argv)
   patSolver.setParam(IloCplex::Threads,     1);
   #elif KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
         KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-        KNAPSACK_SOLVER == MTU1
-
+        KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+        KNAPSACK_SOLVER == MGREENDP1
   hbm::instance_t<WEIGHT, PROFIT> ukpi;
   ukpi.c = static_cast<WEIGHT>(rollWidth);
   ukpi.items.resize(nWdth);
@@ -170,7 +177,8 @@ int main(int argc, char **argv)
   conf.use_y_star_per = false;
   #endif
 
-  #if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_INT
+  #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT || \
+      KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
   std::vector<IX_TYPE> idx(nWdth, 0);
   hbm::instance_t<WEIGHT, PROFIT> sorted_ukpi;
   sorted_ukpi.c = static_cast<WEIGHT>(rollWidth);
@@ -183,14 +191,33 @@ int main(int argc, char **argv)
   steady_clock::time_point before, after;
   double curr_knapsack_time = 0, all_knapsacks_time = 0;
   double curr_master_prob_time = 0, all_master_prob_time = 0;
+  double curr_cast_time = 0;
   IloNumArray newPatt(env, nWdth);
 
   double sigma = ldexp(1, -40); // == 1*pow(2, -40) ~= pow(10, 12)
   #if KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-      KNAPSACK_SOLVER == MTU1
+      KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP
   double multiplier = ldexp(1, 40);
   PROFIT one = static_cast<PROFIT>((1.0 + sigma) * multiplier);
   cout << "int_threshold: " << one << endl;
+  #elif KNAPSACK_SOLVER == MGREENDP1
+  // MGREENDP1 needs a smaller coefficient as it allocates memory
+  // linear to the optimal solution profit
+  double multiplier = ldexp(1, 20);
+  PROFIT one = static_cast<PROFIT>(multiplier);
+  cout << "int_threshold: " << one << endl;
+  #endif
+
+  // Initialize the weights, the ukpi change only profits between knapsacks,
+  // any method that sort the items do the sorting in an auxiliar array.
+  // Therefore, we don't need to reset the weights every time.
+  #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
+      KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
+      KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+      KNAPSACK_SOLVER == MGREENDP1
+  for (IloInt i = 0; i < nWdth; i++) {
+    ukpi.items[i].w = static_cast<WEIGHT>(size[i]);
+  }
   #endif
 
   while (!last_iter) {
@@ -203,19 +230,24 @@ int main(int argc, char **argv)
 
     /// FIND AND ADD A NEW PATTERN ///
     
+    // Casting the values can be costy. Cheking how much time is used.
+    // UPDATE: seems like casting isn't costy, but we add the time
+    // to be fair.
+    before = steady_clock::now();
     // Initialize knapsack instance
     for (IloInt i = 0; i < nWdth; i++) {
       #if KNAPSACK_SOLVER == CPLEX
       price[i] = cutSolver.getDual(Fill[i]);
       #elif KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS
-      ukpi.items[i].w = static_cast<WEIGHT>(size[i]);
       ukpi.items[i].p = cutSolver.getDual(Fill[i]);
       #elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-            KNAPSACK_SOLVER == MTU1
-      ukpi.items[i].w = static_cast<WEIGHT>(size[i]);
+            KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+            KNAPSACK_SOLVER == MGREENDP1
       ukpi.items[i].p = static_cast<PROFIT>(multiplier * cutSolver.getDual(Fill[i]));
       #endif
     }
+    after = steady_clock::now();
+    curr_cast_time = duration_cast<duration<double>>(after - before).count();
 
     #if KNAPSACK_SOLVER == CPLEX
     ReducedCost.setLinearCoefs(Use, price);
@@ -226,7 +258,10 @@ int main(int argc, char **argv)
     #if KNAPSACK_SOLVER == CPLEX
     patSolver.solve();
     patSolver.getValues(newPatt, Use);
-    #elif KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_INT
+    // All methods that receive a instance_t and order the items by
+    // non-increasing efficiency.
+    #elif KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT || \
+          KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
     // initialize vector with 0, 1, 2, ... n
     std::iota(idx.begin(), idx.end(), 0);
     // sort idx in a way that: if idx[i] == j, then the ukpi.items[j] is the
@@ -239,8 +274,14 @@ int main(int argc, char **argv)
       sorted_ukpi.items[i] = ukpi.items[idx[i]];
     }
 
-    // Solve the knapsack problem.
-    hbm::ukp5(sorted_ukpi, sol, conf);
+      // Solve the knapsack problem.
+      #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT
+      hbm::ukp5(sorted_ukpi, sol, conf);
+      #elif KNAPSACK_SOLVER == MGREENDP
+      hbm::mgreendp(sorted_ukpi, sol, true);
+      #elif KNAPSACK_SOLVER == MGREENDP1
+      hbm::mgreendp1(sorted_ukpi, sol, true);
+      #endif
 
     // Save the solution on the CPlex data structure format.
     for (IloInt i = 0; i < nWdth; i++) newPatt[i] = 0;
@@ -281,6 +322,7 @@ int main(int argc, char **argv)
     after = steady_clock::now();
 
     curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
+    curr_knapsack_time += curr_cast_time;
     all_knapsacks_time += curr_knapsack_time;
 
     cout << "num_iter: " << ++num_iter << endl;
@@ -293,7 +335,8 @@ int main(int argc, char **argv)
 
     cout << "hex_opt: " << hexfloat << sol.opt << endl;
     cout << "dec_opt: " << defaultfloat << sol.opt << endl;
-    #elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS
+    #elif KNAPSACK_SOLVER == UKP5_INT  || KNAPSACK_SOLVER == UKP5_INT_NS || \
+          KNAPSACK_SOLVER == MGREENDP  || KNAPSACK_SOLVER == MGREENDP1
     if (sol.opt <= one) last_iter = true;
     cout << "int_opt: " << sol.opt << endl;
     #elif KNAPSACK_SOLVER == MTU1
@@ -303,6 +346,8 @@ int main(int argc, char **argv)
 
     cout << "hex_knapsack_time: " << hexfloat << curr_knapsack_time << endl;
     cout << "dec_knapsack_time: " << defaultfloat << curr_knapsack_time << endl;
+    //cout << "hex_cast_time: " << hexfloat << curr_cast_time << endl;
+    //cout << "dec_cast_time: " << defaultfloat << curr_cast_time << endl;
 
     for (IloInt i = 0; i < nWdth; ++i) {
       if (newPatt[i] > 0) {
@@ -331,8 +376,10 @@ int main(int argc, char **argv)
     }
     #endif*/
 
-    #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS || \
-        KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS
+    #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
+        KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
+        KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+        KNAPSACK_SOLVER == MGREENDP1
     cout << sol.extra_info->gen_info() << endl;
     #endif
 

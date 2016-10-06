@@ -22,7 +22,7 @@ CC=g++
 SFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -Og #
 HEAD=$(shell git describe --abbrev=12 --dirty --always --tags)
 CFLAGS=$(SFLAGS) -DHBM_GIT_HEAD_AT_COMPILATION=\"$(HEAD)\"
-LBOOST=-lboost_filesystem -lboost_system 
+LBOOST=-lboost_filesystem -lboost_system
 # In 11/05/2016, with gcc 6.1.1 and boost 1.60.0-4, the multiprecision library
 # gave compiler errors (seems like new gcc checks noticed a bug on boost).
 # The only way to compile with boost is using -fpermissive, when boost
@@ -182,7 +182,7 @@ CPLEX_LFLAGS  = -L$(CPLEXLIBDIR) -lilocplex -lcplex -L$(CONCERTLIBDIR) -lconcert
 # includes for cplex
 CPLEXINCDIR   = $(CPLEXDIR)/include
 CONCERTINCDIR = $(CONCERTDIR)/include
-CPLEX_IFLAGS  = -I$(CPLEXINCDIR) -I$(CONCERTINCDIR) 
+CPLEX_IFLAGS  = -I$(CPLEXINCDIR) -I$(CONCERTINCDIR)
 
 CPLEX_EFLAGS += $(CPLEX_LFLAGS) $(CPLEX_IFLAGS)
 
@@ -197,7 +197,7 @@ MTU2=7
 MGREENDP=8
 MGREENDP1=9
 
-COMMON_DEPS = lib/ukp_common.hpp lib/test_common.hpp lib/type_name.hpp lib/workarounds.hpp | bin
+COMMON_DEPS = lib/ukp_common.hpp lib/type_name.hpp lib/workarounds.hpp | bin
 
 # ukp5 specific
 # REDEFINE UKP5_DEFS TO REMOVE HBM_XOR_SWAP (not used in fp builds)
@@ -207,28 +207,37 @@ UKP5_DEPS = lib/ukp5.hpp lib/periodicity.hpp lib/dominance.hpp $(COMMON_DEPS)
 UKP5_FP_FLAGS  = $(LBOOST)
 UKP5_INT_FLAGS = -DHBM_XOR_SWAP $(LBOOST)
 
-MTU_DEPS  = lib/mtu.hpp lib/wrapper.hpp $(COMMON_DEPS) 
+MTU_DEPS  = lib/mtu.hpp lib/wrapper.hpp $(COMMON_DEPS)
 MTU_FLAGS = -DHBM_XOR_SWAP
 
+GREENDP_DEPS  = lib/greendp.hpp lib/wrapper.hpp $(COMMON_DEPS)
+GREENDP_FLAGS = -DHBM_XOR_SWAP
+
 bin/cplex_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
-	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(CPLEX) $(CPLEX_EFLAGS) 
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(CPLEX) $(CPLEX_EFLAGS)
 
 bin/ukp5_fp_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
-	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS) 
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS)
 
 bin/ukp5_fp_ns_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
-	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP_NS) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS) 
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_FP_NS) $(UKP5_FP_FLAGS) $(CPLEX_EFLAGS)
 
 bin/ukp5_int_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
-	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_INT) $(UKP5_INT_FLAGS) $(CPLEX_EFLAGS) 
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_INT) $(UKP5_INT_FLAGS) $(CPLEX_EFLAGS)
 
 bin/ukp5_int_ns_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
-	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_INT_NS) $(UKP5_INT_FLAGS) $(CPLEX_EFLAGS) 
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(UKP5_INT_NS) $(UKP5_INT_FLAGS) $(CPLEX_EFLAGS)
 
 bin/mtu1_cutstock.out: mains/cutstock.cpp $(MTU_DEPS)
-	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(MTU1) $(MTU_FLAGS) $(CPLEX_EFLAGS) 
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(MTU1) $(MTU_FLAGS) $(CPLEX_EFLAGS)
 
-bin/cutstock: bin/cplex_cutstock.out bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out
+bin/mgreendp_cutstock.out: mains/cutstock.cpp $(GREENDP_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(MGREENDP) $(GREENDP_FLAGS) $(CPLEX_EFLAGS)
+
+bin/mgreendp1_cutstock.out: mains/cutstock.cpp $(GREENDP_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(MGREENDP1) $(GREENDP_FLAGS) $(CPLEX_EFLAGS)
+
+bin/cutstock: bin/cplex_cutstock.out bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out bin/mgreendp_cutstock.out bin/mgreendp1_cutstock.out
 	touch $@
 
 .PHONY: clean

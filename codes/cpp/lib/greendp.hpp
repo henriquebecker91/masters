@@ -815,9 +815,8 @@ namespace hbm {
       // BEFORE STEP 1 (notation already introduced by article)
       HBM_START_TIMER();
       auto &items = ukpi.items;
-      // In this paper the items are sorted by non-decreasing efficiency
-      // and the ties are solved by ordering by non-increasing weight
-      // (or profit).
+      // In this paper the items are sorted by non-increasing efficiency
+      // and the ties are solved by ordering by non-decreasing weight.
       if (!already_sorted) sort_by_eff(items);
       HBM_STOP_TIMER(eip->sort_time);
 
@@ -998,9 +997,8 @@ namespace hbm {
       // BEFORE STEP 1 (notation already introduced by article)
       HBM_START_TIMER();
       auto &items = ukpi.items;
-      // In this paper the items are sorted by non-decreasing efficiency
-      // and the ties are solved by ordering by non-increasing weight
-      // (or profit).
+      // In this paper the items are sorted by non-increasing efficiency
+      // and the ties are solved by ordering by non-decreasing weight.
       if (!already_sorted) sort_by_eff(items);
       HBM_STOP_TIMER(eip->sort_time);
 
@@ -1300,7 +1298,7 @@ namespace hbm {
       // Put the optimal solution on our format.
       for (I k = 1; k <= n; ++k) {
         if (x[k] > 0) {
-          sol.used_items.emplace_back(items[k-1], x[k], k);
+          sol.used_items.emplace_back(items[k-1], x[k], k-1);
           sol.y_opt += x[k]*items[k-1].w;
         }
       }
@@ -1337,8 +1335,8 @@ namespace hbm {
       // BEFORE STEP 1 (notation already introduced by article)
       HBM_START_TIMER();
       auto &items = ukpi.items;
-      // In this paper the items are sorted by non-decreasing efficiency
-      // and the ties are solved by ordering by non-increasing weight
+      // In this paper the items are sorted by non-increasing efficiency
+      // and the ties are solved by ordering by non-decreasing weight
       // (or profit).
       if (!already_sorted) sort_by_eff(items);
       HBM_STOP_TIMER(eip->sort_time);
@@ -1621,8 +1619,8 @@ namespace hbm {
       // BEFORE STEP 1 (notation already introduced by article)
       HBM_START_TIMER();
       auto &items = ukpi.items;
-      // In this paper the items are sorted by non-decreasing efficiency
-      // and the ties are solved by ordering by non-increasing weight
+      // In this paper the items are sorted by non-increasing efficiency
+      // and the ties are solved by ordering by non-decreasing weight
       // (or profit).
       if (!already_sorted) sort_by_eff(items);
       HBM_STOP_TIMER(eip->sort_time);
@@ -2133,7 +2131,8 @@ namespace hbm {
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
-  ///   non-decreasing efficiency.
+  ///   non-decreasing efficiency (this is correct; it is non-decreasing
+  ///   efficiency, not non-increasing as the majority of the other methods).
   template<typename W, typename P, typename I>
   void greendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
     hbm_greendp_impl::greendp(ukpi, sol, already_sorted);
@@ -2145,7 +2144,7 @@ namespace hbm {
   /// given the ukpi.items will NOT be sorted by non-decreasing efficiency. If
   /// it's ommited the ukpi.items will be sorted by non-decreasing efficiency.
   /// If more than one item have the same efficiency, then those items will be
-  /// sorted by weight (in relation to each other).
+  /// sorted by descending weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see greendp(instance_t<W, P> &, solution_t<W, P, I> &, bool)
@@ -2158,6 +2157,8 @@ namespace hbm {
   /// Algorithm for the Knapsack Problem", an attemp to adapt the algorithm
   /// to structured programming.
   ///
+  /// @note IMPORTANT: in this version the items will be sorted by
+  ///   non-increasing efficiency (differently from the non-modern version).
   /// @see greendp
   template<typename W, typename P, typename I>
   void mgreendp(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
@@ -2167,10 +2168,10 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items will NOT be sorted by non-decreasing efficiency. If
-  /// it's ommited the ukpi.items will be sorted by non-decreasing efficiency.
+  /// given the ukpi.items will NOT be sorted by non-increasing efficiency. If
+  /// it's ommited the ukpi.items will be sorted by non-increasing efficiency.
   /// If more than one item have the same efficiency, then those items will be
-  /// sorted by weight (in relation to each other).
+  /// sorted by ascending weight (in relation to each other).
   ///
   /// @see main_take_path
   /// @see mgreendp(instance_t<W, P> &, solution_t<W, P, I> &, bool)
@@ -2188,7 +2189,7 @@ namespace hbm {
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
-  ///   non-decreasing efficiency. An if there is more than one most efficient
+  ///   non-increasing efficiency. An if there is more than one most efficient
   ///   item, the one with the smallest profit (or weight) should be the first.
   template<typename W, typename P, typename I>
   void greendp1(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {
@@ -2244,7 +2245,7 @@ namespace hbm {
   /// @param ukpi The UKP instance to be solved.
   /// @param sol The object where the results will be written.
   /// @param already_sorted If the ukpi.items vector needs to be sorted by
-  ///   non-decreasing efficiency. An if there is more than one most efficient
+  ///   non-increasing efficiency. An if there is more than one most efficient
   ///   item, the one with the smallest profit (or weight) should be the first.
   template<typename W, typename P, typename I>
   void greendp2(instance_t<W, P> &ukpi, solution_t<W, P, I> &sol, bool already_sorted) {

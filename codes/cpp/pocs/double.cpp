@@ -1,11 +1,17 @@
 #include <iostream>
 #include <cmath>
+#include <cstdio>
 
 #ifndef PRINT
   #define PRINT(var) cout << #var ": " << var << endl
 #endif
 
 using namespace std;
+
+inline void from_string(const string& s, double& d)
+{
+  sscanf(s.c_str(), "%lA", &d);
+}
 
 // Checking the double representation
 int main (void) {
@@ -27,5 +33,14 @@ int main (void) {
   // value when converted to integer, and as rarely the objective function
   // reachs 2, this seem to be a very safe margin.
   PRINT(1.0 + ldexp(1.0, -40));
+  double a, b, c;
+  from_string("0X1.5555555555555P-3", a);
+  from_string("0X1P-1", b);
+  from_string("0X1P+0", c);
+  PRINT(a);
+  PRINT(b);
+  PRINT(c);
+  PRINT(a + b + c);
+  PRINT(c + b + a);
 }
 

@@ -189,9 +189,10 @@ int main(int argc, char **argv)
   size_t num_iter = 0;
   bool last_iter  = false;
   steady_clock::time_point before, after;
+  double curr_cast_time = 0, all_cast_time = 0;
+  double curr_sort_time = 0, all_sort_time = 0;
   double curr_knapsack_time = 0, all_knapsacks_time = 0;
   double curr_master_prob_time = 0, all_master_prob_time = 0;
-  double curr_cast_time = 0;
   IloNumArray newPatt(env, nWdth);
 
   double sigma = ldexp(1, -40); // == 1*pow(2, -40) ~= pow(10, 12)
@@ -254,15 +255,18 @@ int main(int argc, char **argv)
     #endif
 
     // WE COUNT THE TIME USED TO SOLVE THE KNAPSACK AND RECOVER THE SOLUTION
-    before = steady_clock::now();
     #if KNAPSACK_SOLVER == CPLEX
+    before = steady_clock::now();
     patSolver.solve();
     patSolver.getValues(newPatt, Use);
+    after = steady_clock::now();
+    curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
     // All methods that receive a instance_t and order the items by
     // non-increasing efficiency.
     #elif KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT || \
           KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
     // initialize vector with 0, 1, 2, ... n
+    before = steady_clock::now();
     std::iota(idx.begin(), idx.end(), 0);
     // sort idx in a way that: if idx[i] == j, then the ukpi.items[j] is the
     // i-esim most efficient item.
@@ -273,15 +277,18 @@ int main(int argc, char **argv)
     for (IloInt i = 0; i < nWdth; i++) {
       sorted_ukpi.items[i] = ukpi.items[idx[i]];
     }
+    after = steady_clock::now();
+    curr_sort_time = duration_cast<duration<double>>(after - before).count();
 
-      // Solve the knapsack problem.
-      #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT
-      hbm::ukp5(sorted_ukpi, sol, conf);
-      #elif KNAPSACK_SOLVER == MGREENDP
-      hbm::mgreendp(sorted_ukpi, sol, true);
-      #elif KNAPSACK_SOLVER == MGREENDP1
-      hbm::mgreendp1(sorted_ukpi, sol, true);
-      #endif
+    before = steady_clock::now();
+    // Solve the knapsack problem.
+    #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT
+    hbm::ukp5(sorted_ukpi, sol, conf);
+    #elif KNAPSACK_SOLVER == MGREENDP
+    hbm::mgreendp(sorted_ukpi, sol, true);
+    #elif KNAPSACK_SOLVER == MGREENDP1
+    hbm::mgreendp1(sorted_ukpi, sol, true);
+    #endif
 
     // Save the solution on the CPlex data structure format.
     for (IloInt i = 0; i < nWdth; i++) newPatt[i] = 0;
@@ -290,14 +297,20 @@ int main(int argc, char **argv)
     }
     // Clear ukp5 solution data structure.
     sol.used_items.clear();
+    after = steady_clock::now();
+    curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
     #elif KNAPSACK_SOLVER == UKP5_FP_NS || KNAPSACK_SOLVER == UKP5_INT_NS
+    before = steady_clock::now();
     hbm::ukp5(ukpi, sol, conf);
     for (IloInt i = 0; i < nWdth; i++) newPatt[i] = 0;
     for (auto &it : sol.used_items) {
       newPatt[it.ix] = static_cast<FP_P>(it.qt);
     }
     sol.used_items.clear();
+    after = steady_clock::now();
+    curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
     #elif KNAPSACK_SOLVER == MTU1
+    before = steady_clock::now();
     // initialize vector with 0, 1, 2, ... n
     std::iota(idx.begin(), idx.end(), 0);
     // sort idx in a way that: if idx[i] == j, then the ukpi.items[j] is the
@@ -311,19 +324,23 @@ int main(int argc, char **argv)
       w[i+1] = it.w;
       p[i+1] = it.p;
     }
+    after = steady_clock::now();
+    curr_sort_time = duration_cast<duration<double>>(after - before).count();
 
+    before = steady_clock::now();
     // x and z don't need to be cleaned after use
     hbm::inner_mtu1(w, p, n, c, z, x);
 
     for (IloInt i = 1; i <= nWdth; i++) {
       newPatt[idx[i-1]] = static_cast<FP_P>(x[i]);
     }
-    #endif
     after = steady_clock::now();
-
     curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
+    #endif
+
     curr_knapsack_time += curr_cast_time;
     all_knapsacks_time += curr_knapsack_time;
+    all_sort_time      += curr_sort_time;
 
     cout << "num_iter: " << ++num_iter << endl;
     #if KNAPSACK_SOLVER == CPLEX
@@ -389,6 +406,8 @@ int main(int argc, char **argv)
       cout << endl;
       cout << "hex_sum_knapsack_time: " << hexfloat << all_knapsacks_time << endl;
       cout << "dec_sum_knapsack_time: " << defaultfloat << all_knapsacks_time << endl;
+      cout << "hex_sum_sort_time: " << hexfloat << all_sort_time << endl;
+      cout << "dec_sum_sort_time: " << defaultfloat << all_sort_time << endl;
       cout << endl;
       cout << "total_iter: " << num_iter << endl;
       report1(cutSolver, Cut, Fill);

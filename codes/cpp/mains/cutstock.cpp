@@ -397,9 +397,17 @@ int main(int argc, char **argv)
 
     #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
         KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-        KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
-        KNAPSACK_SOLVER == MGREENDP1
-    cout << sol.extra_info->gen_info() << endl;
+        KNAPSACK_SOLVER == MGREENDP ||  KNAPSACK_SOLVER == MGREENDP1
+    if (last_iter) {
+      cout << "last iteration knapsack solver log follows" << endl;
+      cout << sol.extra_info->gen_info() << endl;
+    } else if (num_iter == 1) {
+      cout << "first iteration knapsack solver log follows" << endl;
+      cout << sol.extra_info->gen_info() << endl;
+    } else if (num_iter % 100 == 0) {
+      cout << std::to_string(num_iter) + "th iteration knapsack solver log follows" << endl;
+      cout << sol.extra_info->gen_info() << endl;
+    }
     #endif
 
     if (last_iter) {

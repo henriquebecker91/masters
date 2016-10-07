@@ -240,6 +240,9 @@ bin/mgreendp1_cutstock.out: mains/cutstock.cpp $(GREENDP_DEPS)
 bin/cutstock: bin/cplex_cutstock.out bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out bin/mgreendp_cutstock.out bin/mgreendp1_cutstock.out
 	touch $@
 
+bin/fast_cutstock: bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out
+	touch $@
+
 .PHONY: clean
 
 clean:

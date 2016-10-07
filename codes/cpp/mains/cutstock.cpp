@@ -189,7 +189,7 @@ int main(int argc, char **argv)
   size_t num_iter = 0;
   bool last_iter  = false;
   steady_clock::time_point before, after;
-  double curr_cast_time = 0, all_cast_time = 0;
+  double curr_cast_time = 0;
   double curr_sort_time = 0, all_sort_time = 0;
   double curr_knapsack_time = 0, all_knapsacks_time = 0;
   double curr_master_prob_time = 0, all_master_prob_time = 0;
@@ -365,6 +365,8 @@ int main(int argc, char **argv)
     cout << "dec_knapsack_time: " << defaultfloat << curr_knapsack_time << endl;
     //cout << "hex_cast_time: " << hexfloat << curr_cast_time << endl;
     //cout << "dec_cast_time: " << defaultfloat << curr_cast_time << endl;
+    cout << "hex_sort_time: " << hexfloat << curr_sort_time << endl;
+    cout << "dec_sort_time: " << defaultfloat << curr_sort_time << endl;
 
     for (IloInt i = 0; i < nWdth; ++i) {
       if (newPatt[i] > 0) {

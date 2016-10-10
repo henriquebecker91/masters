@@ -25,10 +25,12 @@
 #include <iostream>
 #include <chrono>
 #include <cstdint>
-
-#if KNAPSACK_SOLVER != CPLEX
 #include <vector>
-#include <numeric>
+
+#if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_INT || \
+    KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+    KNAPSACK_SOLVER == MGREENDP1
+#include <numeric> // for iota, used in the indirect sorting
 #endif
 
 #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
@@ -105,7 +107,7 @@ int main(int argc, char **argv)
     cout << "usage: " << argv[0] << " <filename in csp format>" << endl;
     return EXIT_FAILURE;
   }
-  cout << "instance_filepath: " << std::string(argv[0]) << endl;
+  cout << "instance_filepath: " << std::string(argv[1]) << endl;
 
   /// MASTER PROBLEM
   IloModel cutOpt(env);
@@ -247,14 +249,18 @@ int main(int argc, char **argv)
     before = steady_clock::now();
     // Initialize knapsack instance
     for (IloInt i = 0; i < nWdth; i++) {
+      FP_P p = cutSolver.getDual(Fill[i]);
+      // Negative profit items never contribute to the solution, and aren't
+      // expected by some solving methods. So we change them to zero.
+      if (p < 0) p = 0;
       #if KNAPSACK_SOLVER == CPLEX
-      price[i] = cutSolver.getDual(Fill[i]);
+      price[i] = p;
       #elif KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS
-      ukpi.items[i].p = cutSolver.getDual(Fill[i]);
+      ukpi.items[i].p = p;
       #elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
             KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
             KNAPSACK_SOLVER == MGREENDP1
-      ukpi.items[i].p = static_cast<PROFIT>(multiplier * cutSolver.getDual(Fill[i]));
+      ukpi.items[i].p = static_cast<PROFIT>(multiplier * p);
       #endif
     }
     after = steady_clock::now();
@@ -413,9 +419,11 @@ int main(int argc, char **argv)
     #else // Any knapsack solver that isn't CPLEX use the ukpi variable.
     if (true) {//(num_iter % 10 == 0) {
       std::ofstream f(string(argv[1]) + "." + name + "." + std::to_string(num_iter) + ".csv");
-      f << "w;p" << hexfloat << endl;
+      f << "w;p;fpph;fppd" << hexfloat << endl;
+      int i = 0;
       for (auto &it : ukpi.items) {
-        f << it.w << ";" << it.p << endl;
+        f << it.w << ";" << it.p << ";" << hexfloat << cutSolver.getDual(Fill[i]) << ";" << defaultfloat << cutSolver.getDual(Fill[i]) << endl;
+        ++i;
       }
       f.close();
     }

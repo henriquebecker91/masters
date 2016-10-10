@@ -301,7 +301,7 @@ namespace hbm {
 
       // Variable z will be overwritten by inner_mtu1 too.
       P z;
-      inner_mtu1(w, p, n, c, z, x);
+      hbm_mtu_impl::inner_mtu1(w, p, n, c, z, x);
 
       sol.opt = 0;
       sol.y_opt = 0;
@@ -489,7 +489,7 @@ namespace hbm {
       x.resize(n + 1);
 
       // Solve for the core problem for the first time.
-      inner_mtu1(core_w, core_p, next_slice_size, c, z, x);
+      hbm_mtu_impl::inner_mtu1(core_w, core_p, next_slice_size, c, z, x);
 
       P upper_u3 = hbm_mtu_impl::u3(items[0], items[1], items[2], c);
 
@@ -572,7 +572,7 @@ namespace hbm {
         // start the process again.
         // We do not need to clean the x solution array or the z variable,
         // inner_mtu1 already does this for us.
-        inner_mtu1(core_w, core_p, k-1, c, z, x);
+        hbm_mtu_impl::inner_mtu1(core_w, core_p, k-1, c, z, x);
       } 
 
       // Here we put the solution on the sol (solution_t) structure.

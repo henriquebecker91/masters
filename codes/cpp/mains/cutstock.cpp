@@ -197,6 +197,23 @@ int main(int argc, char **argv)
   double curr_knapsack_time = 0, all_knapsacks_time = 0;
   double curr_master_prob_time = 0, all_master_prob_time = 0;
   IloNumArray newPatt(env, nWdth);
+  // Many UKP solving algorithms don't work with items that have zero
+  // or negative profit values. This is because an item with profit zero
+  // or negative can be discarded before starting the algorithm without
+  // any loss to the optimal solution value (i.e. they are irrelevant).
+  // So the code already assumes that this cleaning was done, and
+  // optimize for positive profit items.
+  // We can do this preprocessing, but we need to save the index of the
+  // positive items before the removal of the non-positive ones. The CPlex
+  // model for the master problem receives new columns by the means of the
+  // indexes of the items that comprise the knapsack solution. So the indexes
+  // have to match the ones given in the CPlex instance, that had non-positive
+  // items inside it. We use the vector below to remember the positive items
+  // old indexes. If the index of a positive profit item after removing the
+  // non-positive items (and keeping the same order of the CPLEX instance)
+  // is i, then positive_items_ix[i] == j, where j is the index of the same
+  // item in the original listing.
+  std::vector<IX_TYPE> positive_items_ix(nWdth, 0);
 
   //double sigma = ldexp(1, -40); // == 1*pow(2, -40) ~= pow(10, 12)
   #if KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
@@ -215,14 +232,17 @@ int main(int argc, char **argv)
   // Initialize the weights, the ukpi change only profits between knapsacks,
   // any method that sort the items do the sorting in an auxiliar array.
   // Therefore, we don't need to reset the weights every time.
-  #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
+  // UPDATE: the statement above isn't true anymore, as we need to remove the
+  // zero/negative profit items (see the comment above the variable
+  // positive_items_ix above). We will update the weights inside the loop.
+  /*#if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
       KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
       KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
       KNAPSACK_SOLVER == MGREENDP1
   for (IloInt i = 0; i < nWdth; i++) {
     ukpi.items[i].w = static_cast<WEIGHT>(size[i]);
   }
-  #endif
+  #endif*/
 
   // The loop can end up cycling if a knapsack solution that would have value
   // one (1) or less (if the computation was made using infinite precision),
@@ -248,21 +268,33 @@ int main(int argc, char **argv)
     // to be fair.
     before = steady_clock::now();
     // Initialize knapsack instance
+    #if KNAPSACK_SOLVER != CPLEX
+    IX_TYPE new_index = 0;
+    ukpi.items.resize(nWdth);
+    #endif
     for (IloInt i = 0; i < nWdth; i++) {
       FP_P p = cutSolver.getDual(Fill[i]);
-      // Negative profit items never contribute to the solution, and aren't
-      // expected by some solving methods. So we change them to zero.
-      if (p < 0) p = 0;
       #if KNAPSACK_SOLVER == CPLEX
       price[i] = p;
-      #elif KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS
-      ukpi.items[i].p = p;
-      #elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-            KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
-            KNAPSACK_SOLVER == MGREENDP1
-      ukpi.items[i].p = static_cast<PROFIT>(multiplier * p);
+      #else
+      if (p > 0) {
+        positive_items_ix[new_index] = i;
+        #if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS
+        ukpi.items[new_index].p = p;
+        #elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
+              KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+              KNAPSACK_SOLVER == MGREENDP1
+        ukpi.items[new_index].p = static_cast<PROFIT>(multiplier * p);
+        #endif
+        ukpi.items[new_index].w = static_cast<WEIGHT>(size[i]);
+        ++new_index;
+      }
       #endif
     }
+    #if KNAPSACK_SOLVER != CPLEX
+    ukpi.items.resize(new_index);
+    #endif
+
     after = steady_clock::now();
     curr_cast_time = duration_cast<duration<double>>(after - before).count();
 
@@ -283,6 +315,7 @@ int main(int argc, char **argv)
           KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
     // initialize vector with 0, 1, 2, ... n
     before = steady_clock::now();
+    idx.resize(ukpi.items.size());
     std::iota(idx.begin(), idx.end(), 0);
     // sort idx in a way that: if idx[i] == j, then the ukpi.items[j] is the
     // i-esim most efficient item.
@@ -290,7 +323,8 @@ int main(int argc, char **argv)
       [&ukpi](size_t a, size_t b) { return ukpi.items[a] < ukpi.items[b]; });
 
     // Sort the items using the idx, to avoid sorting again.
-    for (IloInt i = 0; i < nWdth; i++) {
+    sorted_ukpi.items.resize(ukpi.items.size());
+    for (IloInt i = 0; i < ukpi.items.size(); i++) {
       sorted_ukpi.items[i] = ukpi.items[idx[i]];
     }
     after = steady_clock::now();
@@ -309,7 +343,8 @@ int main(int argc, char **argv)
     // Save the solution on the CPlex data structure format.
     for (IloInt i = 0; i < nWdth; i++) newPatt[i] = 0;
     for (auto &it : sol.used_items) {
-      newPatt[idx[it.ix]] = static_cast<FP_P>(it.qt);
+      IX_TYPE original_index  = positive_items_ix[idx[it.ix]];
+      newPatt[original_index] = static_cast<FP_P>(it.qt);
     }
     // Clear ukp5 solution data structure.
     sol.used_items.clear();
@@ -320,7 +355,8 @@ int main(int argc, char **argv)
     hbm::ukp5(ukpi, sol, conf);
     for (IloInt i = 0; i < nWdth; i++) newPatt[i] = 0;
     for (auto &it : sol.used_items) {
-      newPatt[it.ix] = static_cast<FP_P>(it.qt);
+      IX_TYPE original_index = positive_items_ix[it.ix];
+      newPatt[original_index] = static_cast<FP_P>(it.qt);
     }
     sol.used_items.clear();
     after = steady_clock::now();
@@ -328,6 +364,7 @@ int main(int argc, char **argv)
     #elif KNAPSACK_SOLVER == MTU1
     before = steady_clock::now();
     // initialize vector with 0, 1, 2, ... n
+    idx.resize(ukpi.items.size());
     std::iota(idx.begin(), idx.end(), 0);
     // sort idx in a way that: if idx[i] == j, then the ukpi.items[j] is the
     // i-esim most efficient item.
@@ -335,7 +372,7 @@ int main(int argc, char **argv)
       [&ukpi](size_t a, size_t b) { return ukpi.items[a] < ukpi.items[b]; });
 
     // Sort the items using the idx, to avoid sorting again.
-    for (IloInt i = 0; i < nWdth; i++) {
+    for (IloInt i = 0; i < ukpi.items.size(); i++) {
       const auto &it = ukpi.items[idx[i]];
       w[i+1] = it.w;
       p[i+1] = it.p;
@@ -345,10 +382,14 @@ int main(int argc, char **argv)
 
     before = steady_clock::now();
     // x and z don't need to be cleaned after use
-    hbm::inner_mtu1(w, p, n, c, z, x);
+    hbm::inner_mtu1(w, p, ukpi.items.size(), c, z, x);
 
-    for (IloInt i = 1; i <= nWdth; i++) {
-      newPatt[idx[i-1]] = static_cast<FP_P>(x[i]);
+    for (IloInt i = 0; i < nWdth; i++) newPatt[i] = 0;
+    for (IloInt i = 1; i <= ukpi.items.size(); i++) {
+      if (x[i] > 0) {
+        IX_TYPE original_index = positive_items_ix[idx[i-1]];
+        newPatt[original_index] = static_cast<FP_P>(x[i]);
+      }
     }
     after = steady_clock::now();
     curr_knapsack_time = duration_cast<duration<double>>(after - before).count();

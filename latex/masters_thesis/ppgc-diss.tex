@@ -43,15 +43,12 @@
 %
 % Informações gerais
 %
-\title{Um Exemplo de Monografia do Instituto de Informática da UFRGS}
+\title{The Unbounded Knapsack Problem: a critical review}
 
-\author{Flaumann}{Fritz Gutenberg}
-% alguns documentos podem ter varios autores:
-%\author{Flaumann}{Frida Gutenberg}
-%\author{Flaumann}{Klaus Gutenberg}
+\author{Becker}{Henrique}
 
 % orientador e co-orientador são opcionais (não diga isso pra eles :))
-\advisor[Prof.~Dr.]{Lamport}{Leslie}
+\advisor[Prof.~Dr.]{Buriol}{Luciana}
 %\coadvisor[Prof.~Dr.]{Knuth}{Donald Ervin}
 
 % a data deve ser a da defesa; se nao especificada, são gerados
@@ -101,10 +98,10 @@
 % palavras-chave
 % iniciar todas com letras minúsculas, exceto no caso de abreviaturas
 %
-\keyword{formatação eletrônica de documentos}
-\keyword{\LaTeX}
-\keyword{ABNT}
-\keyword{UFRGS}
+\keyword{unbounded knapsack problem}
+\keyword{dynamic programming}
+\keyword{optimization}
+\keyword{cutting stock problem}
 
 %
 % inicio do documento
@@ -131,40 +128,29 @@ it is because I stood on the shoulders of giants.''\\}
 \chapter*{Agradecimentos}
 
 
-% resumo na língua do documento
 \begin{abstract}
-Este documento é um exemplo de como formatar documentos para o
-Instituto de Informática da UFRGS usando as classes \LaTeX\
-disponibilizadas pelo UTUG\@. Ao mesmo tempo, pode servir de consulta
-para comandos mais genéricos. \emph{O texto do resumo não deve
-conter mais do que 500 palavras.}
+The abstract can't be more than 500 words long.
 \end{abstract}
 
-% resumo na outra língua
-% como parametros devem ser passados o titulo e as palavras-chave
-% na outra língua, separadas por vírgulas
-%\begin{englishabstract}{Using \LaTeX\ to Prepare Documents at II/UFRGS}{Electronic document preparation, \LaTeX, ABNT, UFRGS}
-%This document is an example on how to prepare documents at II/UFRGS
-%using the \LaTeX\ classes provided by the UTUG\@. At the same time, it
-%may serve as a guide for general-purpose commands. \emph{The text in
-%the abstract should not contain more than 500~words.}
-%\end{englishabstract}
+% Ironically, this is the brazilian portuguese abstract if the dissertation
+% is written in english.
+\begin{englishabstract}{O problema da mochila com repetições: uma revisão crítica}{problema da mochila com repetições, programação dinâmica, otimização, cutting stock problem}
+O resumo não deve conter mais que 500 palavras.
+\end{englishabstract}
 
 % lista de abreviaturas e siglas
 % o parametro deve ser a abreviatura mais longa
-\begin{listofabbrv}{SPMD}
-        \item[SMP] Symmetric Multi-Processor
-        \item[NUMA] Non-Uniform Memory Access
-        \item[SIMD] Single Instruction Multiple Data
-        \item[SPMD] Single Program Multiple Data
-        \item[ABNT] Associação Brasileira de Normas Técnicas
+\begin{listofabbrv}{XXXXXXX}
+        \item[UKP] Unbounded Knapsack Problem
+        \item[B\&B] Branch and Bound
+        \item[DP] Dynamic Programming
 \end{listofabbrv}
 
 % idem para a lista de símbolos
-%\begin{listofsymbols}{$\alpha\beta\pi\omega$}
-%       \item[$\sum{\frac{a}{b}}$] Somatório do produtório
-%       \item[$\alpha\beta\pi\omega$] Fator de inconstância do resultado
-%\end{listofsymbols}
+\begin{listofsymbols}{$\alpha\beta\pi\omega$}
+       \item[$\sum{\frac{a}{b}}$] Somatório do produtório
+       \item[$\alpha\beta\pi\omega$] Fator de inconstância do resultado
+\end{listofsymbols}
 
 % lista de figuras
 \listoffigures
@@ -176,6 +162,8 @@ conter mais do que 500 palavras.}
 \tableofcontents
 
 % aqui comeca o texto propriamente dito
+
+\include{instance_classes}
 
 % introducao
 \chapter{Introdução}

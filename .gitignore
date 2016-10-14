@@ -27,6 +27,7 @@ data/results/tmp/
 *.bbl
 *.log
 *.blg
+*.lot
 latex/**/*.pdf
 # latex (slides)
 *.vrb

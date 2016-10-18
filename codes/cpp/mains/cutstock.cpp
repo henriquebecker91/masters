@@ -307,6 +307,16 @@ int main(int argc, char **argv)
     before = steady_clock::now();
     patSolver.solve();
     patSolver.getValues(newPatt, Use);
+    // The "+ 0.5" below was added because of a CPLEX bug that happens very
+    // often: sometimes CPLEX returns a value slight below x when it should
+    // return x (where x is an integer and CPLEX is solving for integers). In
+    // those cases, we need to add a small value before rounding (0.5 is
+    // arbitrary, the value could be any value smaller than one and greater
+    // than the small difference between the return and the next integer, the
+    // excedent will be discarded by the rounding).
+    for (IloInt i = 0; i < nWdth; ++i) {
+      newPatt[i] = std::floor(newPatt[i] + 0.5);
+    }
     after = steady_clock::now();
     curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
     // All methods that receive a instance_t and order the items by
@@ -413,15 +423,7 @@ int main(int argc, char **argv)
       if (repeated_patt) last_iter = true;
     }
     for (IloInt i = 0; i < nWdth; ++i) {
-      // The "+ 0.1" below was added because of a CPLEX bug
-      // that happens very rarely: sometimes CPLEX returns
-      // a value slight below x when it should return x
-      // (where x is an integer and CPLEX is solving for
-      // integers). In those cases, we need to add a small
-      // value before rounding (0.1 is arbitrary, the value
-      // could be any value below 1, the excedent will
-      // be discarded by the rounding).
-      oldPatt[i] = static_cast<IloInt>(newPatt[i] + 0.1);
+      oldPatt[i] = static_cast<IloInt>(newPatt[i]);
     }
 
     #if KNAPSACK_SOLVER == CPLEX
@@ -451,7 +453,8 @@ int main(int argc, char **argv)
 
     for (IloInt i = 0; i < nWdth; ++i) {
       if (newPatt[i] > 0) {
-        cout << "ix: " << i << " qt: " << static_cast<size_t>(newPatt[i]) << " w: " << static_cast<size_t>(size[i]) << " hex_p: " << hexfloat << cutSolver.getDual(Fill[i]) << " dec_p: " << defaultfloat << cutSolver.getDual(Fill[i]) << endl;
+        // for the reason for the 0.5 search for the other comment with 0.5
+        cout << "ix: " << i << " qt: " << static_cast<size_t>(newPatt[i] + 0.5) << " w: " << static_cast<size_t>(size[i]) << " hex_p: " << hexfloat << cutSolver.getDual(Fill[i]) << " dec_p: " << defaultfloat << cutSolver.getDual(Fill[i]) << endl;
       }
     }
     cout << endl;

@@ -413,7 +413,15 @@ int main(int argc, char **argv)
       if (repeated_patt) last_iter = true;
     }
     for (IloInt i = 0; i < nWdth; ++i) {
-      oldPatt[i] = static_cast<IloInt>(newPatt[i]);
+      // The "+ 0.1" below was added because of a CPLEX bug
+      // that happens very rarely: sometimes CPLEX returns
+      // a value slight below x when it should return x
+      // (where x is an integer and CPLEX is solving for
+      // integers). In those cases, we need to add a small
+      // value before rounding (0.1 is arbitrary, the value
+      // could be any value below 1, the excedent will
+      // be discarded by the rounding).
+      oldPatt[i] = static_cast<IloInt>(newPatt[i] + 0.1);
     }
 
     #if KNAPSACK_SOLVER == CPLEX

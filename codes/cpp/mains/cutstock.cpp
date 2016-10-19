@@ -469,13 +469,14 @@ int main(int argc, char **argv)
       f.close();
     }
     #else // Any knapsack solver that isn't CPLEX use the ukpi variable.
-    if (true) {//(num_iter % 10 == 0) {
+    if (num_iter < 10) {//(num_iter % 10 == 0) {
       std::ofstream f(string(argv[1]) + "." + name + "." + std::to_string(num_iter) + ".csv");
       f << "w;p;fpph;fppd" << hexfloat << endl;
-      int i = 0;
-      for (auto &it : ukpi.items) {
-        f << it.w << ";" << it.p << ";" << hexfloat << cutSolver.getDual(Fill[i]) << ";" << defaultfloat << cutSolver.getDual(Fill[i]) << endl;
-        ++i;
+      // NOTE: Only shows the positive profit items
+      for (IloInt i = 0; i < ukpi.items.size(); ++i) {
+        IX_TYPE original_index = positive_items_ix[i];
+        auto it = ukpi.items[i];
+        f << it.w << ";" << it.p << ";" << hexfloat << cutSolver.getDual(Fill[original_index]) << ";" << defaultfloat << cutSolver.getDual(Fill[original_index]) << endl;
       }
       f.close();
     }

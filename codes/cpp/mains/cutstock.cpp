@@ -307,6 +307,16 @@ int main(int argc, char **argv)
     before = steady_clock::now();
     patSolver.solve();
     patSolver.getValues(newPatt, Use);
+    // The "+ 0.5" below was added because of a CPLEX bug that happens very
+    // often: sometimes CPLEX returns a value slight below x when it should
+    // return x (where x is an integer and CPLEX is solving for integers). In
+    // those cases, we need to add a small value before rounding (0.5 is
+    // arbitrary, the value could be any value smaller than one and greater
+    // than the small difference between the return and the next integer, the
+    // excedent will be discarded by the rounding).
+    for (IloInt i = 0; i < nWdth; ++i) {
+      newPatt[i] = std::floor(newPatt[i] + 0.5);
+    }
     after = steady_clock::now();
     curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
     // All methods that receive a instance_t and order the items by
@@ -443,7 +453,8 @@ int main(int argc, char **argv)
 
     for (IloInt i = 0; i < nWdth; ++i) {
       if (newPatt[i] > 0) {
-        cout << "ix: " << i << " qt: " << static_cast<size_t>(newPatt[i]) << " w: " << static_cast<size_t>(size[i]) << " hex_p: " << hexfloat << cutSolver.getDual(Fill[i]) << " dec_p: " << defaultfloat << cutSolver.getDual(Fill[i]) << endl;
+        // for the reason for the 0.5 search for the other comment with 0.5
+        cout << "ix: " << i << " qt: " << static_cast<size_t>(newPatt[i] + 0.5) << " w: " << static_cast<size_t>(size[i]) << " hex_p: " << hexfloat << cutSolver.getDual(Fill[i]) << " dec_p: " << defaultfloat << cutSolver.getDual(Fill[i]) << endl;
       }
     }
     cout << endl;
@@ -458,13 +469,14 @@ int main(int argc, char **argv)
       f.close();
     }
     #else // Any knapsack solver that isn't CPLEX use the ukpi variable.
-    if (true) {//(num_iter % 10 == 0) {
+    if (num_iter < 10) {//(num_iter % 10 == 0) {
       std::ofstream f(string(argv[1]) + "." + name + "." + std::to_string(num_iter) + ".csv");
       f << "w;p;fpph;fppd" << hexfloat << endl;
-      int i = 0;
-      for (auto &it : ukpi.items) {
-        f << it.w << ";" << it.p << ";" << hexfloat << cutSolver.getDual(Fill[i]) << ";" << defaultfloat << cutSolver.getDual(Fill[i]) << endl;
-        ++i;
+      // NOTE: Only shows the positive profit items
+      for (IloInt i = 0; i < ukpi.items.size(); ++i) {
+        IX_TYPE original_index = positive_items_ix[i];
+        auto it = ukpi.items[i];
+        f << it.w << ";" << it.p << ";" << hexfloat << cutSolver.getDual(Fill[original_index]) << ";" << defaultfloat << cutSolver.getDual(Fill[original_index]) << endl;
       }
       f.close();
     }

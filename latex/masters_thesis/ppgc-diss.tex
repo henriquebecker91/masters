@@ -34,6 +34,7 @@
 \usepackage{mathtools}          % for \DeclarePairedDelimiter
 \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 \usepackage{graphicx}           % pacote para importar figuras
+\usepackage{Sweave}
 
 
 \usepackage{times}              % pacote para usar fonte Adobe Times
@@ -166,7 +167,9 @@ O resumo não deve conter mais que 500 palavras.
 
 % aqui comeca o texto propriamente dito
 
-\include{instance_classes}
+% to make latex see the pdfs created by Sweave
+\graphicspath{{chapters/}}
+\include{chapters/instance_classes}
 
 % introducao
 \chapter{Introdução}

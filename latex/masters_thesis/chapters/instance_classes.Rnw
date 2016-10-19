@@ -1,5 +1,11 @@
 \chapter{The instance classes}
 
+<<setup,echo=false>>=
+library(ggplot2)
+library(statsr)
+library(dplyr)
+@
+
 %final
 If the author of this work could suggest one single thing to be improved in the future works about UKP, it would be the selection of the instances.
 
@@ -35,16 +41,65 @@ We have already pointed (TODO: refer to timeline) that the choices of item distr
 
 In this work, the expression `uncorrelated instances' will be used to refer to a family of UKP instances where the weight and the profit of an item have no correlation. The most common way for generating those uncorrelated instances is generating a value between \(w_{min}\) and \(w_{max}\) for the weight, and a value between \(p_{min}\) and \(p_{max}\) for the profit, for each of the \(n\) items of the instance using a (pseudo-)random number generator with an uniform distribution. %Uncorrelated instances can be generated using a (pseudo-)random number generator to generate \(n\) numbers between \(w_{min}\) and \(w_{max}\), and another \(n\) numbers between \(p_{min}\) and \(p_{max}\). Sorting both arrays will give (TODO: refer to realistic instances), that is another instance type. Uncorrelated instances 
 
-PUTS IMAGE
 \begin{figure}
-    \caption{An uncorrelated instance generated with \(n = 100\), \(w_{min} = 1\), \(w_{min} = 1000\), \(p_{min} = 1\), and \(p_{max} = 1000\).}
-    \begin{center}
-    \includegraphics[scale=1]{uncorrelated.eps}
-    \end{center}
-    \legend{Source: the author.}
-    \label{fig:uncorrelated_example}
+\caption{An uncorrelated instance generated with \(n = 100\), \(w_{min} = 1\), \(w_{min} = 1000\), \(p_{min} = 1\), and \(p_{max} = 1000\).}
+\begin{center}
+<<uncorrelated,fig=true,echo=false>>=
+library(ggplot2)
+
+n <- 100
+wmax <- 1000
+pmax <- 1000
+s <- 42
+set.seed(s)
+w <- sample(1:wmax, n, replace=TRUE)
+p <- sample(1:pmax, n, replace=TRUE)
+t = data.frame(w = w, p = p)
+qplot(w, p, data = t,
+  xlab = 'weight',
+  ylab = 'profit',
+  main = 'An uncorrelated instance')     
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:uncorrelated_example}
 \end{figure}
 
+\begin{figure}
+\caption{TESTING}
+\begin{center}
+<<knapsack_time,fig=true,echo=false>>=
+csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
+csv$X <- NULL
+
+# Note that the points at y = 600 were introduced to allow
+# for the visualization of the runs that resulted in timeout.
+# Also, note that after the visible mtu1 point closest to the top right
+# all other points are below cplex points (representing the mtu1 timeouts).
+# For the hardest problems, there's a small but clear pattern that shows
+# advantage of the methods that sort the array by efficiency over the ones
+# who doesn't.
+csv_no_na <- csv
+csv_no_na[is.na(csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
+#csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
+csv_no_na_order <- csv_no_na %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_knapsack_time)) %>% arrange(mean_methods_time)
+csv_no_na_order$filename <- factor(csv_no_na_order$filename, levels = unique(csv_no_na_order$filename))
+ggplot(csv_no_na_order,
+       aes(x = as.numeric(filename),
+           y = csv_no_na_order$hex_sum_knapsack_time,
+           color = algorithm)) +
+  ggtitle("Knapsack Solver Total Time (logarithmic)") +
+  xlab('Instance index when ordered by mean time') +
+  ylab('Knapsack\'s solver total time (Seconds)') +
+  geom_point() +
+  #geom_line()# +
+  scale_y_log10() +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:testing}
+\end{figure}
 Expose why they are uninteresting: we do not know if they model any real world instance; it's a simple matter of running a good polynomial simple/multiple dominance algorithm first, or using MTU2 that was developed for this purpose. Increasing values of \(n\) increase the time taken by MTU2 or dominance removal in a polynomial fashion. The NP-hard part of the problem, that is finding an optimal solution between non-dominated items don't grow with \(n\). %(sorting or the \(O(n^2)\) dominance algorithms).
 
 \section{Bottom Right Ellipse Quadrant Instances}

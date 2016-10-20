@@ -5,8 +5,10 @@ library(ggplot2)
 library(statsr)
 library(dplyr)
 
-csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
-csv$X <- NULL
+csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
+csp_csv$X <- NULL
+breq_csv <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
+breq_csv $X <- NULL
 
 compare_num_iter <- function(csv, first_method, second_method) {
   first_t <- csv %>% select(filename, algorithm, total_iter) %>%
@@ -67,8 +69,6 @@ In this work, the expression `uncorrelated instances' will be used to refer to a
 \caption{An uncorrelated instance generated with \(n = 100\), \(w_{min} = 1\), \(w_{min} = 1000\), \(p_{min} = 1\), and \(p_{max} = 1000\).}
 \begin{center}
 <<uncorrelated,fig=true,echo=false>>=
-library(ggplot2)
-
 n <- 100
 wmax <- 1000
 pmax <- 1000
@@ -88,6 +88,36 @@ qplot(w, p, data = t,
 \end{figure}
 
 \begin{figure}
+\caption{Benchmark with the 128-16 Standard BREQ instances}
+\begin{center}
+<<breq,fig=true,echo=false>>=
+    breq_csv <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
+    breq_csv$X <- NULL
+    csv_no_na <- breq_csv
+    csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
+    csv_no_na$n <- sapply(csv_no_na$filename,
+      (function (f) {
+        as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
+      })
+    )
+    
+    ggplot(csv_no_na,
+           aes(x = n,#* (1 + (as.numeric(algorithm) - 1)/10),
+               y = internal_time,
+               color = algorithm)) + 
+      geom_point() +
+      scale_y_log10() +
+      scale_x_continuous(trans = "log2", breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17, 2^18, 2^19, 2^20)) +
+      ylab('Time to solve (seconds)') +
+      xlab('Instance size (n value)') +
+      theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:uncorrelated_example}
+\end{figure}
+
+\begin{figure}
 \caption{CSP Knapsack Solver Total Time (logarithmic)}
 \begin{center}
 <<knapsack_time,fig=true,echo=false>>=
@@ -98,8 +128,8 @@ qplot(w, p, data = t,
 # For the hardest problems, there's a small but clear pattern that shows
 # advantage of the methods that sort the array by efficiency over the ones
 # who doesn't.
-csv_no_na <- csv
-csv_no_na[is.na(csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
+csv_no_na <- csp_csv
+csv_no_na[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
 #csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
 csv_no_na_order <- csv_no_na %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_knapsack_time)) %>% arrange(mean_methods_time)
 csv_no_na_order$filename <- factor(csv_no_na_order$filename, levels = unique(csv_no_na_order$filename))
@@ -122,9 +152,9 @@ ggplot(csv_no_na_order,
 \caption{CSP Master Model Solver Total Time (logarithmic)}
 \begin{center}
 <<master_time,fig=true,echo=false>>=
-master_time <- csv
-master_time[is.na(csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
-master_time[is.na(csv$hex_sum_master_prob_time), ]$hex_sum_master_prob_time <- 600
+master_time <- csp_csv
+master_time[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
+master_time[is.na(csp_csv$hex_sum_master_prob_time), ]$hex_sum_master_prob_time <- 600
 #csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
 master_time <- master_time %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_master_prob_time)) %>% arrange(mean_methods_time)
 master_time$filename <- factor(master_time$filename, levels = unique(master_time$filename))
@@ -147,7 +177,7 @@ ggplot(master_time,
 \caption{Percentage of time taken by solving knapsack subproblems}
 \begin{center}
 <<cutstock_master_knap_corr,fig=true,echo=false>>=
-corr_time <- csv[complete.cases(csv),]
+corr_time <- csp_csv[complete.cases(csp_csv),]
 corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
 corr_time <- arrange(corr_time, relative_time)
 corr_time$filename <- factor(corr_time$filename, levels = unique(corr_time$filename))
@@ -169,7 +199,7 @@ ggplot(corr_time,
 \caption{UKP5 Integer (sorted by efficiency and not sorted)}
 \begin{center}
 <<int_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
+compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
   geom_point()
 @
 \end{center}
@@ -181,7 +211,7 @@ compare_num_iter(csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
 \caption{UKP5 Floating Point (sorted by efficiency and not sorted)}
 \begin{center}
 <<fp_vs_fp_ns,fig=true,echo=false>>=
-compare_num_iter(csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
+compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
   geom_point()
 @
 \end{center}
@@ -193,7 +223,7 @@ compare_num_iter(csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
 \caption{UKP5 no sort (Floating Point vs Integer)}
 \begin{center}
 <<fp_ns_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
+compare_num_iter(csp_csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
   geom_point()
 @
 \end{center}
@@ -205,7 +235,7 @@ compare_num_iter(csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
 \caption{UKP5 sorted by efficiency (Floating Point vs Integer)}
 \begin{center}
 <<fp_vs_int,fig=true,echo=false>>=
-compare_num_iter(csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock') +
+compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock') +
   geom_point()
 @
 \end{center}

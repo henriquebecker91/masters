@@ -4,6 +4,28 @@
 library(ggplot2)
 library(statsr)
 library(dplyr)
+
+csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
+csv$X <- NULL
+
+compare_num_iter <- function(csv, first_method, second_method) {
+  first_t <- csv %>% select(filename, algorithm, total_iter) %>%
+    filter(algorithm == first_method) %>% arrange(filename)
+  second_t <- csv %>% select(filename, algorithm, total_iter) %>%
+    filter(algorithm == second_method) %>% arrange(filename)
+  first_t$diff <- first_t$total_iter - second_t$total_iter
+  first_t$norm_diff <- first_t$diff / second_t$total_iter
+  first_t <- first_t %>% arrange(norm_diff)
+  first_t$filename <- factor(first_t$filename,
+                             levels = unique(first_t$filename))
+  ggplot(first_t,
+         aes(x = as.numeric(filename),
+             y = norm_diff*100)) +
+    ylab(paste('Deviation of the number of iterations of',
+               first_method, "\nrelative to", second_method,
+               '(in %)')) +
+    xlab("Instance index when ordered by the value at axis y")
+}
 @
 
 %final
@@ -66,12 +88,9 @@ qplot(w, p, data = t,
 \end{figure}
 
 \begin{figure}
-\caption{TESTING}
+\caption{CSP Knapsack Solver Total Time (logarithmic)}
 \begin{center}
 <<knapsack_time,fig=true,echo=false>>=
-csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
-csv$X <- NULL
-
 # Note that the points at y = 600 were introduced to allow
 # for the visualization of the runs that resulted in timeout.
 # Also, note that after the visible mtu1 point closest to the top right
@@ -88,18 +107,112 @@ ggplot(csv_no_na_order,
        aes(x = as.numeric(filename),
            y = csv_no_na_order$hex_sum_knapsack_time,
            color = algorithm)) +
-  ggtitle("Knapsack Solver Total Time (logarithmic)") +
-  xlab('Instance index when ordered by mean time') +
-  ylab('Knapsack\'s solver total time (Seconds)') +
+  xlab('Instance index when ordered by the\nmean time methods spent solving knapsack subproblems') +
+  ylab('Knapsack\'s solver total time (seconds, logarithmic scale)') +
   geom_point() +
-  #geom_line()# +
   scale_y_log10() +
   theme(legend.position = 'bottom')
 @
 \end{center}
 \legend{Source: the author.}
-\label{fig:testing}
+\label{fig:csp_knapsack_time}
 \end{figure}
+
+\begin{figure}
+\caption{CSP Master Model Solver Total Time (logarithmic)}
+\begin{center}
+<<master_time,fig=true,echo=false>>=
+master_time <- csv
+master_time[is.na(csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
+master_time[is.na(csv$hex_sum_master_prob_time), ]$hex_sum_master_prob_time <- 600
+#csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
+master_time <- master_time %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_master_prob_time)) %>% arrange(mean_methods_time)
+master_time$filename <- factor(master_time$filename, levels = unique(master_time$filename))
+ggplot(master_time,
+       aes(x = as.numeric(filename),
+           y = master_time$hex_sum_master_prob_time,
+           color = algorithm)) +
+  xlab('Instance index when ordered by the\nmean time methods spent solving the master model') +
+  ylab('Master model solver total time (seconds, logarithmic scale)') +
+  geom_point() +
+  scale_y_log10() +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:csp_master_time}
+\end{figure}
+
+\begin{figure}
+\caption{Percentage of time taken by solving knapsack subproblems}
+\begin{center}
+<<cutstock_master_knap_corr,fig=true,echo=false>>=
+corr_time <- csv[complete.cases(csv),]
+corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
+corr_time <- arrange(corr_time, relative_time)
+corr_time$filename <- factor(corr_time$filename, levels = unique(corr_time$filename))
+ggplot(corr_time,
+       aes(x = as.numeric(filename),
+           y = relative_time * 100,
+           color = algorithm)) +
+  xlab('Instance index when ordered by the y axis value') +
+  ylab('How much of the total time was\nspent solving knapsack subproblems (in %)') +
+  geom_point() +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:percentage_knap_subproblem}
+\end{figure}
+
+\begin{figure}
+\caption{UKP5 Integer (sorted by efficiency and not sorted)}
+\begin{center}
+<<int_vs_int_ns,fig=true,echo=false>>=
+compare_num_iter(csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:int_vs_int_ns}
+\end{figure}
+
+\begin{figure}
+\caption{UKP5 Floating Point (sorted by efficiency and not sorted)}
+\begin{center}
+<<fp_vs_fp_ns,fig=true,echo=false>>=
+compare_num_iter(csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:fp_vs_fp_ns}
+\end{figure}
+
+\begin{figure}
+\caption{UKP5 no sort (Floating Point vs Integer)}
+\begin{center}
+<<fp_ns_vs_int_ns,fig=true,echo=false>>=
+compare_num_iter(csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:fp_ns_vs_int_ns}
+\end{figure}
+
+\begin{figure}
+\caption{UKP5 sorted by efficiency (Floating Point vs Integer)}
+\begin{center}
+<<fp_vs_int,fig=true,echo=false>>=
+compare_num_iter(csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:fp_vs_int}
+\end{figure}
+
 Expose why they are uninteresting: we do not know if they model any real world instance; it's a simple matter of running a good polynomial simple/multiple dominance algorithm first, or using MTU2 that was developed for this purpose. Increasing values of \(n\) increase the time taken by MTU2 or dominance removal in a polynomial fashion. The NP-hard part of the problem, that is finding an optimal solution between non-dominated items don't grow with \(n\). %(sorting or the \(O(n^2)\) dominance algorithms).
 
 \section{Bottom Right Ellipse Quadrant Instances}

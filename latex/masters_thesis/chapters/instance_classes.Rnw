@@ -4,6 +4,7 @@
 library(ggplot2)
 library(statsr)
 library(dplyr)
+library(xtable)
 
 csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
 csp_csv$X <- NULL
@@ -81,36 +82,6 @@ qplot(w, p, data = t,
   xlab = 'weight',
   ylab = 'profit',
   main = 'An uncorrelated instance')     
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:uncorrelated_example}
-\end{figure}
-
-\begin{figure}
-\caption{Benchmark with the 128-16 Standard BREQ instances}
-\begin{center}
-<<breq,fig=true,echo=false>>=
-    breq_csv <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
-    breq_csv$X <- NULL
-    csv_no_na <- breq_csv
-    csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
-    csv_no_na$n <- sapply(csv_no_na$filename,
-      (function (f) {
-        as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
-      })
-    )
-    
-    ggplot(csv_no_na,
-           aes(x = n,#* (1 + (as.numeric(algorithm) - 1)/10),
-               y = internal_time,
-               color = algorithm)) + 
-      geom_point() +
-      scale_y_log10() +
-      scale_x_continuous(trans = "log2", breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17, 2^18, 2^19, 2^20)) +
-      ylab('Time to solve (seconds)') +
-      xlab('Instance size (n value)') +
-      theme(legend.position = 'bottom')
 @
 \end{center}
 \legend{Source: the author.}
@@ -249,23 +220,90 @@ Expose why they are uninteresting: we do not know if they model any real world i
 
 The Bottom Right Ellipse Quadrant Instances (`BREQ instances', for short) is a new UKP instance item distribution proposed by the author in this work. This instance distribution was created to illustrate that different item distributions favor different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
 
-Distributions that are easy to solve by the DP approach and hard to solve by the B\&B approach are common in the literature. This distribution has the opposite characteristic, it is hard to solve by DP and easy to solve by B\&B. It's important to point that this is an artificially generated distribution that don't model any real world instances (that the author have knowledge). The author discourages the use and study of such artificial instances, and created this distribution only as a tool to demonstrate that isn't hard to create a distribution that benefits a solving approach over another. It's the author's opinion that research should focus on real-world instances and/or artificially generated instances that clearly model real world instances.
+Distributions that are easy to solve by the DP approach and hard to solve by the B\&B approach are common in the literature. This distribution has the opposite characteristic, it is hard to solve by DP and easy to solve by B\&B. It's important to point that this is an artificially generated distribution that don't model any real world instances (that the author have knowledge). The author discourages the use and study of such artificial instances (including this one), and created this distribution only as a tool to demonstrate that isn't hard to create a distribution that benefits a solving approach over another. It's the author's opinion that research should focus on real-world instances and/or artificially generated instances that clearly model real world instances.
 
 The name given to this distribution is derived from the fact that, when plotted on a graph, the items show the form of a quarter of ellipse (specifically, the bottom right quadrant). All items in such distribution respect the following equation: \(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - (w_i^2 \times \frac{p_{max}}{w_{max}}^2)}}\)\footnote{In this context, \(w_{max}\) and \(p_{max}\) define the quadrant top right corner, i.e. the possible maximum value for an item's weight and profit, an item with those exact values doesn't need to exist in a BREQ instance. The rounding down in the formulae can be dropped if the profit is a real number and not an integer.}.
 
-A natural consequence of this distribution shape is that the item profit grows quadratically with the item weight. This leads to the inexistance of simple, multiple and collective dominance\footnote{In truth, if the profit is integer, the smallest items can display some of those three dominances because the profit precision loss by rounding, but this is of little relevance and can be safely ignored for most purposes. If profit is an infinite precision real, the statement has no exceptions.}. In other words, for any multiset of items \(s\) and any single item \(i\) (with respective weigths \(w_s\) and \(w_t\), and respective profits \(p_t\) and \(p_i\)), if \(w_s \leq w_i\) then \(p_s < p_i\).
+A natural consequence of this distribution shape is that the item profit grows quadratically with the item weight. This leads to the inexistance of simple, multiple and collective dominance\footnote{In truth, if the profit is integer, the smallest items can display some of those three dominances because the profit precision loss by rounding, but this is of little relevance and can be safely ignored for most purposes. If profit is an infinite precision real, the statement has no exceptions.}. In other words, for any multiset of two or more items \(s\) and any single item \(i\) (with respective weigths \(w_s\) and \(w_t\), and respective profits \(p_t\) and \(p_i\)), if \(w_s \leq w_i\) then \(p_s < p_i\).
 
-On the other hand, threshold dominance is very common in this instance type. With exception of the best item, any item of any instance (of any distribution, not only BREQ instance) will always be threshold dominated at some capacity. However, in many instances the knapsack capacity is smaller than those threshold values and therefore the threshold dominance isn't applied or relevant. On BREQ instances, as a consequence of the quadratic profit growth, an optimal solution will never include the item \(i\) two or more times if there's an item \(j\) such as that \(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\); so each item have a good probability of being threshold dominated before the second use. 
+On the other hand, threshold dominance is very common in this instance type. With exception of the best item, any item of any instance (of any distribution, not only BREQ instance) will always be threshold dominated at some capacity. However, in many instances the knapsack capacity is smaller than those threshold values and therefore the threshold dominance isn't applied or relevant. On BREQ instances, as a consequence of the quadratic profit growth, an optimal solution will never include the item \(i\) two or more times if there's an item \(j\) such as that \(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\). Consequently, each item have a good probability of being threshold dominated before the second use. 
 
-The solutions of BREQ instances will often contain the maximum number of copies of the largest item (that is also the most profitable, and the most efficient) allowed by the instance capacity. Any gap left will probably be filled by the heaviest item that fits the gap, with this process repeated until no item fits the gap left (or there's no gap). A greedy heuristic procedure that followed those steps would probably yield an optimal solution. However, this is not always the case\footnote{A counter-example follows: consider an instance with \(n = 4\), \(c = 512\), \(w_1 = 384\), \(p_1 = 2774\), \(w_2 = 383\), \(p_2 = 2756\), \(w_3 = 129\), \(p_3 = 265\), \(w_4 = 32\) and \(p_4 = 17\); the optimal solution don't use the best item (\(w_1, p_1\)); the best solution when using the best item has a profit value of \(2842 = 2774 + 4\times17\) (weight \(512 = 384 + 4\times32\)) while the best solution when using the second most efficient item has the optimal profit value of \(3021 = 2756 + 265\) (weight \(512 = 383 + 129\)). In this case, between two solutions with the same weight, the one with the best item isn't the best one. The weight and profit values of this example follow the a BREQ distribution with \(w_{max} = 512\) and \(p_{max} = 8192\).}.
+The solutions of BREQ instances will often contain the maximum number of copies of the largest item (that is also the most profitable, and the most efficient) allowed by the instance capacity. Any gap left will probably be filled by the heaviest item that fits the gap, with this process repeated until no item fits the gap left (or there's no gap). The classical greedy heuristic procedure that follows those steps would probably yield an optimal solution. However, this is not always the case\footnote{A counter-example follows: consider an instance with \(n = 4\), \(c = 512\), \(w_1 = 384\), \(p_1 = 2774\), \(w_2 = 383\), \(p_2 = 2756\), \(w_3 = 129\), \(p_3 = 265\), \(w_4 = 32\) and \(p_4 = 17\); the optimal solution don't use the best item (\(w_1, p_1\)); the best solution when using the best item has a profit value of \(2842 = 2774 + 4\times17\) (weight \(512 = 384 + 4\times32\)) while the best solution when using the second most efficient item has the optimal profit value of \(3021 = 2756 + 265\) (weight \(512 = 383 + 129\)). In this case, between two solutions with the same weight, the one with the best item isn't the best one. The weight and profit values of this example follow the a BREQ distribution with \(w_{max} = 512\) and \(p_{max} = 8192\).}.
 
-The reasons that make BREQ instances favor B\&B over DP can be undestood examinating the two approachs behaviour. The B\&B approach will begin creating a solution using some sort of greedy heuristic similar to the one described at last paragraph. This solution will be very good, if not optimal, and provide a good lower bound. With this lower bound, the search space will be greatly reduced, making the algorithm end almost instantly. In the other side, the DP approach is based in solving subproblems. Subproblems will be solved for increasing capacity values yielding optimal solutions to be reused (combined with other items). However, as seen before, small solutions and/or solutions comprised of small items will generally be less efficient than solutions comprised of the big items, and therefore such subproblem solutions are likely to be discarded without affecting the final result.
+The reasons that make BREQ instances favor B\&B over DP can be undestood examinating the two approachs behaviour. The B\&B approach will begin creating a solution using some sort of greedy heuristic similar to the one described at last paragraph. This solution will be very good, if not optimal, and provide a good lower bound. With this lower bound, the search space will be greatly reduced, making the algorithm end almost instantly. In the other side, the DP approach is based in solving subproblems. Subproblems will be solved for increasing capacity values yielding optimal solutions to be reused (combined with other items). However, as seen before, small solutions and/or solutions comprised of small items will generally be less efficient than solutions comprised of the big items, and therefore subproblem solutions are likely to be discarded without affecting the final result.
 
 Our objective is not to explore this distribution and its behaviour with different parameters, only to show that it favors the B\&B approach over the DP. We proposes a subset of the BREQ instances which the only parameters are \(n\) and the seed for the PRNG, with the other instance parameters being computed over the value of \(n\). We call this instance distribution the BREQ 128-16 Standard, it's a BREQ distribution where \(c = 128 \times n\), \(p_{min} = w_{min} = 1\), \(w_{max} = c\) and \(p_{max} = 16 \times w_{max}\). The PRNG seed is used to create \(n\) unique random weight values between \(w_{min}\) and \(w_{max}\) (the random number distribution is uniform); the profit values for each weight are computed using the first formulae presented at this section (and the \(w_{max}\) and \(p_{max}\) values for that \(n\)). 
 
-The reasoning for the choices made when creating the BREQ 128-16 Standard follows. There was no reason to restrict the \(w_{min}\) to \(w_{max}\) interval to be smaller than \(c\) (there are \(c\) distinct valid weight values). The constant 128 used to compute the capacity \(c\) for a \(n\) value was chosen as the first power of two higher than a hundred. Consequently less than 1\% of all possible items will appear at an instance, making instances generated with different seeds significantly different. The \(p_{min}\) to \(p_{max}\) value interval was chosen to be sixteen times bigger than the \(w_{min}\) to \(w_{max}\) interval to alleviate the effects of rounding the profit value (it would not need to be done if the profit was a real number with reasonable precision). The efficiency of the items ina a BREQ distribution will vary between zero and \(\frac{p_{max}}{w_{max}}\), so if \(p_{max} = w_{min}\) the efficiency would vary between zero and one, giving more relevance to the rounding. At least, for the biggest \(n\) value that we were interested in testing (\(2^20\)), the highest possible value of an item profit is \(2^{31} = 2^{20}\times128\times16\) what keeps the values smaller than 32 bits.
+The reasoning for the choices made when creating the BREQ 128-16 Standard follows. There was no reason to restrict the \(w_{min}\) to \(w_{max}\) interval to be smaller than \(c\) (there are \(c\) distinct valid weight values). The constant 128 used to compute the capacity \(c\) for a \(n\) value was chosen as the first power of two higher than a hundred. Consequently less than 1\% of all possible items will appear at an instance, making instances generated with different seeds significantly different. The \(p_{min}\) to \(p_{max}\) value interval was chosen to be sixteen times bigger than the \(w_{min}\) to \(w_{max}\) interval to alleviate the effects of rounding the profit value to an integer value (it would not need to be done if the profit was a floating point number with reasonable precision). The efficiency of the items in a BREQ distribution will vary between zero and \(\frac{p_{max}}{w_{max}}\), so if \(p_{max} = w_{min}\) the efficiency would vary between zero and one, giving more relevance to the rounding. At least, for the biggest \(n\) value that we were interested in testing (\(2^20\)), the highest possible value of an item profit is \(2^{31} = 2^{20}\times128\times16\) what keeps the values smaller than 32 bits.
 
-The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying \(n\) and the seed. We propose a hundred instances benchmark, with all combinations of \(n = 2^{11} = 2048, 2^{12}, \dots, 2^{20} \approx 10^6\) (ten \(n\) values), and ten seed different values. We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
+The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying \(n\) and the seed. We propose a benchmark with a hundred instances, with all combinations of \(n = 2^{11} = 2048, 2^{12}, \dots, 2^{20} \approx 10^6\) (ten \(n\) values), and ten seed different values. We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
+
+\section{BREQ 128-16 Standard Benchmark Results}
+
+We have run eight algorithms over the BREQ 128-16 Standard Benchmark (proposed at section \ref{sec:breq_inst}). The results confirm our hypothesis that this distribution would be hard for DP algorithms and easy for B\&B algorithms.
+
+\begin{figure}[h]
+\caption{Benchmark with the 128-16 Standard BREQ instances.}
+\begin{center}
+<<breq,fig=true,echo=false>>=
+csv_no_na <- breq_csv
+csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
+csv_no_na$n <- sapply(csv_no_na$filename,
+(function (f) {
+  as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
+}))
+
+ggplot(csv_no_na,
+       aes(x = n,#* (1 + (as.numeric(algorithm) - 1)/10),
+           y = internal_time,
+           color = algorithm)) + 
+  geom_point() +
+  scale_y_log10() +
+  scale_x_continuous(trans = "log2",
+                     breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
+                                2^17, 2^18, 2^19, 2^20)) +
+  ylab('Time to solve (seconds)') +
+  xlab('Instance size (n value)') +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:breq_bench}
+\end{figure}
+
+Let's examinate what chart \ref{fig:breq bench} tell us. The \emph{mgreendp1} algorithm (an IEACDA algorithm) is clearly dominated, and after the first two instance sizes, all of its runs end in timeout. So we will exclude it from the rest of the analysis.
+
+The rest of the methods form two lines with different slopes, line with a steep slope and a line with a more gradual slope. The steep slope line show algorithms whose time grows very fast relative to the instance size growth. This group is mainly composed by the DP methods: ukp5, ukp5\_sbw (sorted by weight), and the eduk algorithm. The second group, that form a more gradual slope, have algorithms whose time grows much slower with the instance growth. This group is mainly composed by B\&B and hybrid methods as: mtu1, mtu2, eduk2 and mgreendp.
+
+Examinating only mtu1 and mtu2, we can see clearly that for small instances their times overlap, but with the instance size growth the core problem strategy of mtu2 (that tries to avoid sorting and examinating all the items) begins to pay off (making it the \emph{best algorithm} to solve BREQ instances). 
+
+The behavior of EDUK2 shows that the default B\&B phase (executed before defaulting to EDUK) solves the BREQ instances in all cases. If it didn't, some EDUK2 points would be together with the EDUK points for the same instance size. Between the pure DP algorithms, EDUK was the one with the worst times, being clearly dominated by our two UKP5 versions. 
+
+The ukp5 algorithm sorted the items by decreasing efficiency, and had the \(y^*\) bound and periodicity checking enabled. These two optimizations benefited none of the one hundred runs. No knapsack capacity from an instance was reduced by the use of the \(y^*\) bound; all instances had only overhead from the use of the periodicity checking. The ukp5\_sbw sorted the items by increasing weight and had these two optimizations disabled. The benchmark's instance files had the items in random order, so both algorithms used a small and similar time ordering the items\footnote{It's interesting to note that, because of the BREQ distribution and except by the profit rounding at the small items, the decreasing efficiency order is the reverse of the increasing weight order.}.
+
+The ukp5\_sbw times had a much smaller variation than the ukp5 for the same instance size, what can be only attributed to the change in ordering (as the two previously cited optimizations had only wasted time with overhead). The decreasing efficiency ordering helped ukp5 to be faster than ukp5\_sbw in some cases, and made it slower in others, what don't give us a clear winner.
+
+Finally, mgreendp showed an interesting behaviour. The mgreendp is a modern implementation in C++, made by the author, of an algorithm made by Harold Greenberg. The algorithm of Harold Greenberg (that wasn't named in the original the paper) was an adaptation of the \emph{ordered step-off} algorithm from Gilmore and Gomore. This algorithm periodically compute bounds (similar to the ones used by the B\&B approach) to check if it can stop the DP computation and fill any remaining capacity with copies of the best item. The author don't know if it could be called a hybrid algorithm, as the only characteristic taken from B\&B is the bound computation. The majority of the times, the bound computation allowed the algorithm to stop the computation at the beggining, having results very similar to EDUK2 (the hybrid B\&B-DP algorithm). However, six of the mgreendp executions had times in the steep slope line (the bound failed to stop the computation). Without the bound computation, mgreendp is basically the \emph{ordered step-off} from Gilmore and Gomore (whose is very similar to UKP5, as already pointed); consequently, those six outlier runs have times that would be expected from UKP5 for the respective instance size. One of the mgreendp runs in the last instance size, and one in the penultimate instance size, was ended by timeout (the bound failed to stop the computation and the DP algorithm was terminated by timeout).
+
+While the simple, multiple and collective dominances are rare in a BREQ distributions with integer profits; the solution dominance used by UKP5 works to some extent. The UKP5 combines optimal solutions for small capacities with single items and generate solutions that, if optimal for some capacity, will be used to generate more solutions after (recursively). In a BREQ instance, solutions made of many small items rarely are optimal and, consequently, often discarded, wasting the time used to generate them. However, as a silver lining, the UKP5's solution dominance will discard those solutions as soon as possible, and will \emph{not} use them to generate any new solutions (saving some computational effort).
+
+%<<<<label=breq_table,echo=FALSE,results=tex>>=
+%library(plyr)
+%
+%breq_csv_s <- breq_csv[complete.cases(breq_csv), ]
+%breq_csv_s$n <- sapply(breq_csv_s$filename, (function (f) {
+%  as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
+%}))
+%breq_csv_s <- ddply(breq_csv_s, c('algorithm', 'n'), summarise,
+%  ns    = length(n),
+%  avg   = mean(internal_time),
+%  min   = min(internal_time),
+%  max   = max(internal_time),
+%  sd    = sd(internal_time)
+%)
+%
+%xtable(breq_csv_s)
+%@
 
 \section{Uncorrelated Random Coeficients Instances}
 

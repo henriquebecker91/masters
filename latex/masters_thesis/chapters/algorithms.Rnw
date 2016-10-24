@@ -1,0 +1,22 @@
+\chapter{Approachs and Algorithms}
+
+This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
+
+\section{Conversion between problem types}
+
+Put that the conversion from UKP to 0-1 KP and BKP is possible, but not even considered, because it don't will exploit shortcuts only existant if the items are unbounded. Would make more sense to convert the 0-1KP/BKP to the UKP if the specific instance has sufficient items of each item tupe to fill the capacity.
+
+\section{Branch-and-Bound Algorithms}
+
+"The performance of this approach depends on the structure of the problem instances, resulting in a hard-to-predict behavior. For some instances it can degenerate to an exponential running time." (p. 24, Moura's TCC)
+
+REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfairly because of big flaws at the experiment design. THIS WILL BE SAID AT PRIOR WORK PROBABLY
+
+\subsection{MTU1 and MTU2}
+The difference between the fmtu and cpp-mtu: cpp-mtu will check if the vector is ordered by efficiency before running, and any subset-sum instance will be considered previously ordered. This impacts the difference between the two, maybe it's unfair to use cpp-mtu over subset-sum instances.
+
+The specific method of ordering the 100 more efficient, one after other, is also different.
+
+\section{Dynamic Programming}
+
+

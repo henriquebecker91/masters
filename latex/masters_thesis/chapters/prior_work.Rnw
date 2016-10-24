@@ -1,0 +1,20 @@
+\chapter{Prior Work}
+Talks about the fact that in the past no differentiation was made between the KP variants (all were refered as a/the KP)
+
+That the whole UKP literature has many problems: David Johnson - Pitfall 4 "Start by using randomly generated instances to evaluate the behaviour of algorithms, but end up using algorithms to investigate the properties of randomly-generated instances."; David Johnson "[...] problems without applications do not have real-world instances, so the experimenter is left to invent (and justify) test data in a vacuum. And referees may well question the testing of code for algorithms that will never be used in practice." (p. 5). We are researching instances that are hard for UKP, not that this has a utility on itself.
+
+This generated distortions and abandoned paradigms. The whole shift from dynamic programming methods to B\&B methods can be associated with the tests being made over ever-increasing instances; randomly generated with little or some correlation between profits and weights; and the use of naive dynamic programs; the shift of PYAsUKP to revisit dynamic programming can easily be correlated with the evolution of the artificial instances generated to be difficult to solve by B\&B while small (on capacity and number of items); the DP methods began to shine again, as the instances had small dimensions and a structure that made them hard to solve by B\&B but not so much by a good (non-naive) DP algorithm. The UKP5 is only the last part of this history.
+
+SAY WHEN CITING MTU1/MTU2 PRIOR WORK?
+
+	Check the MTU/MTU2 paper again. I do remember that there was a big design flaw on the experiments performed there. Should probably point it. The flaw was a lot of item with the same weight no? Because considering the number of items was increased and the capacity fixed. And at some time, there was much more items than capacity.
+
+Fred Glover paper "A new knapsack solution approach by integer equivalent aggregation and consistency determination" has the same flaw. The number of items goes up to 250K and the weights and profits are restricted to the range [1, \(10^3\)]. There's only \(10^3\) items in truth. He comments on how B\&B solves the problem already on the reduced problem when \(n\) is big, what is obvious by the characteristics of the instance, but it points it as is something surprising. The two first instance groups clearly will have lots of simple dominance. The last instance groups makes reference to "A Hard Knapsack Problem" but we need to check if this paper refers to the unbounded knapsack problem, or is simply about knapsack 0-1 and adapted for UKP.
+
+	Paper don't give formulation to discover the "b" values of the instances (knapsack capacities) for the first two groups. Making the work irreproducible.
+
+Give historic that shows how the type of instance tested defined the winner of the comparisons
+	LINK WITH BREW INSTANCES
+
+% maybe this goes in another section
+%	timeline: DP -> huge random instances -> B\&B is better (no empiric evidence) -> instances that are hard for B\&B (linear distribution) -> PYAsUKP is better than B\&B in instances designed to be hard to solve by it (in fact any DP non-naive DP solution would have results better than B\&B methods only, like MTU1 and MTU2). also, using MTU2 instead of MTU1 shows a lack of understanding of the methods. MTU2 was developed for very large random instances, not for relatively small and hard (distribution-wise) instances

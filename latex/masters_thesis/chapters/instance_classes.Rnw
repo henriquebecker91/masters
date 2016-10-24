@@ -1,40 +1,5 @@
 \chapter{The instance classes}
 
-<<setup,echo=false>>=
-library(ggplot2)
-library(statsr)
-library(dplyr)
-library(xtable)
-
-csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
-csp_csv$X <- NULL
-breq_csv <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
-breq_csv $X <- NULL
-fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
-fast$X <- NULL
-slow <- read.csv("../data/mtus.csv", sep = ";")
-slow$X <- NULL
-
-compare_num_iter <- function(csv, first_method, second_method) {
-  first_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == first_method) %>% arrange(filename)
-  second_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == second_method) %>% arrange(filename)
-  first_t$diff <- first_t$total_iter - second_t$total_iter
-  first_t$norm_diff <- first_t$diff / second_t$total_iter
-  first_t <- first_t %>% arrange(norm_diff)
-  first_t$filename <- factor(first_t$filename,
-                             levels = unique(first_t$filename))
-  ggplot(first_t,
-         aes(x = as.numeric(filename),
-             y = norm_diff*100)) +
-    ylab(paste('Deviation of the number of iterations of',
-               first_method, "\nrelative to", second_method,
-               '(in %)')) +
-    xlab("Instance index when ordered by the value at axis y")
-}
-@
-
 %final
 If the author of this work could suggest one single thing to be improved in the future works about UKP, it would be the selection of the instances.
 
@@ -70,10 +35,12 @@ We have already pointed (TODO: refer to timeline) that the choices of item distr
 
 In this work, the expression `uncorrelated instances' will be used to refer to a family of UKP instances where the weight and the profit of an item have no correlation. The most common way for generating those uncorrelated instances is generating a value between \(w_{min}\) and \(w_{max}\) for the weight, and a value between \(p_{min}\) and \(p_{max}\) for the profit, for each of the \(n\) items of the instance using a (pseudo-)random number generator with an uniform distribution. %Uncorrelated instances can be generated using a (pseudo-)random number generator to generate \(n\) numbers between \(w_{min}\) and \(w_{max}\), and another \(n\) numbers between \(p_{min}\) and \(p_{max}\). Sorting both arrays will give (TODO: refer to realistic instances), that is another instance type. Uncorrelated instances 
 
-\begin{figure}
+\begin{figure}[h]
 \caption{An uncorrelated instance generated with \(n = 100\), \(w_{min} = 1\), \(w_{min} = 1000\), \(p_{min} = 1\), and \(p_{max} = 1000\).}
 \begin{center}
 <<uncorrelated,fig=true,echo=false>>=
+library(ggplot2)
+
 n <- 100
 wmax <- 1000
 pmax <- 1000
@@ -90,132 +57,6 @@ qplot(w, p, data = t,
 \end{center}
 \legend{Source: the author.}
 \label{fig:uncorrelated_example}
-\end{figure}
-
-\begin{figure}
-\caption{CSP Knapsack Solver Total Time (logarithmic)}
-\begin{center}
-<<knapsack_time,fig=true,echo=false>>=
-# Note that the points at y = 600 were introduced to allow
-# for the visualization of the runs that resulted in timeout.
-# Also, note that after the visible mtu1 point closest to the top right
-# all other points are below cplex points (representing the mtu1 timeouts).
-# For the hardest problems, there's a small but clear pattern that shows
-# advantage of the methods that sort the array by efficiency over the ones
-# who doesn't.
-csv_no_na <- csp_csv
-csv_no_na[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
-#csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
-csv_no_na_order <- csv_no_na %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_knapsack_time)) %>% arrange(mean_methods_time)
-csv_no_na_order$filename <- factor(csv_no_na_order$filename, levels = unique(csv_no_na_order$filename))
-ggplot(csv_no_na_order,
-       aes(x = as.numeric(filename),
-           y = csv_no_na_order$hex_sum_knapsack_time,
-           color = algorithm)) +
-  xlab('Instance index when ordered by the\nmean time methods spent solving knapsack subproblems') +
-  ylab('Knapsack\'s solver total time (seconds, logarithmic scale)') +
-  geom_point() +
-  scale_y_log10() +
-  theme(legend.position = 'bottom')
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:csp_knapsack_time}
-\end{figure}
-
-\begin{figure}
-\caption{CSP Master Model Solver Total Time (logarithmic)}
-\begin{center}
-<<master_time,fig=true,echo=false>>=
-master_time <- csp_csv
-master_time[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
-master_time[is.na(csp_csv$hex_sum_master_prob_time), ]$hex_sum_master_prob_time <- 600
-#csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
-master_time <- master_time %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_master_prob_time)) %>% arrange(mean_methods_time)
-master_time$filename <- factor(master_time$filename, levels = unique(master_time$filename))
-ggplot(master_time,
-       aes(x = as.numeric(filename),
-           y = master_time$hex_sum_master_prob_time,
-           color = algorithm)) +
-  xlab('Instance index when ordered by the\nmean time methods spent solving the master model') +
-  ylab('Master model solver total time (seconds, logarithmic scale)') +
-  geom_point() +
-  scale_y_log10() +
-  theme(legend.position = 'bottom')
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:csp_master_time}
-\end{figure}
-
-\begin{figure}
-\caption{Percentage of time taken by solving knapsack subproblems}
-\begin{center}
-<<cutstock_master_knap_corr,fig=true,echo=false>>=
-corr_time <- csp_csv[complete.cases(csp_csv),]
-corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
-corr_time <- arrange(corr_time, relative_time)
-corr_time$filename <- factor(corr_time$filename, levels = unique(corr_time$filename))
-ggplot(corr_time,
-       aes(x = as.numeric(filename),
-           y = relative_time * 100,
-           color = algorithm)) +
-  xlab('Instance index when ordered by the y axis value') +
-  ylab('How much of the total time was\nspent solving knapsack subproblems (in %)') +
-  geom_point() +
-  theme(legend.position = 'bottom')
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:percentage_knap_subproblem}
-\end{figure}
-
-\begin{figure}
-\caption{UKP5 Integer (sorted by efficiency and not sorted)}
-\begin{center}
-<<int_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:int_vs_int_ns}
-\end{figure}
-
-\begin{figure}
-\caption{UKP5 Floating Point (sorted by efficiency and not sorted)}
-\begin{center}
-<<fp_vs_fp_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_vs_fp_ns}
-\end{figure}
-
-\begin{figure}
-\caption{UKP5 no sort (Floating Point vs Integer)}
-\begin{center}
-<<fp_ns_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_ns_vs_int_ns}
-\end{figure}
-
-\begin{figure}
-\caption{UKP5 sorted by efficiency (Floating Point vs Integer)}
-\begin{center}
-<<fp_vs_int,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_vs_int}
 \end{figure}
 
 Expose why they are uninteresting: we do not know if they model any real world instance; it's a simple matter of running a good polynomial simple/multiple dominance algorithm first, or using MTU2 that was developed for this purpose. Increasing values of \(n\) increase the time taken by MTU2 or dominance removal in a polynomial fashion. The NP-hard part of the problem, that is finding an optimal solution between non-dominated items don't grow with \(n\). %(sorting or the \(O(n^2)\) dominance algorithms).
@@ -242,163 +83,11 @@ The reasoning for the choices made when creating the BREQ 128-16 Standard follow
 
 The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying \(n\) and the seed. We propose a benchmark with a hundred instances, with all combinations of \(n = 2^{11} = 2048, 2^{12}, \dots, 2^{20} \approx 10^6\) (ten \(n\) values), and ten seed different values. We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
 
-\section{BREQ 128-16 Standard Benchmark Results}
-
-We have run eight algorithms over the BREQ 128-16 Standard Benchmark (proposed at section \ref{sec:breq_inst}). The results confirm our hypothesis that this distribution would be hard for DP algorithms and easy for B\&B algorithms.
-
-\begin{figure}[h]
-\caption{Benchmark with the 128-16 Standard BREQ instances.}
-\begin{center}
-<<breq,fig=true,echo=false>>=
-csv_no_na <- breq_csv
-csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
-csv_no_na$n <- sapply(csv_no_na$filename,
-(function (f) {
-  as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
-}))
-
-ggplot(csv_no_na,
-       aes(x = n,#* (1 + (as.numeric(algorithm) - 1)/10),
-           y = internal_time,
-           color = algorithm)) + 
-  geom_point() +
-  scale_y_log10() +
-  scale_x_continuous(trans = "log2",
-                     breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
-                                2^17, 2^18, 2^19, 2^20)) +
-  ylab('Time to solve (seconds)') +
-  xlab('Instance size (n value)') +
-  theme(legend.position = 'bottom')
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:breq_bench}
-\end{figure}
-
-Let's examinate what chart \ref{fig:breq bench} tell us. The \emph{mgreendp1} algorithm (an IEACDA algorithm) is clearly dominated, and after the first two instance sizes, all of its runs end in timeout. So we will exclude it from the rest of the analysis.
-
-The rest of the methods form two lines with different slopes, line with a steep slope and a line with a more gradual slope. The steep slope line show algorithms whose time grows very fast relative to the instance size growth. This group is mainly composed by the DP methods: ukp5, ukp5\_sbw (sorted by weight), and the eduk algorithm. The second group, that form a more gradual slope, have algorithms whose time grows much slower with the instance growth. This group is mainly composed by B\&B and hybrid methods as: mtu1, mtu2, eduk2 and mgreendp.
-
-Examinating only mtu1 and mtu2, we can see clearly that for small instances their times overlap, but with the instance size growth the core problem strategy of mtu2 (that tries to avoid sorting and examinating all the items) begins to pay off (making it the \emph{best algorithm} to solve BREQ instances). 
-
-The behavior of EDUK2 shows that the default B\&B phase (executed before defaulting to EDUK) solves the BREQ instances in all cases. If it didn't, some EDUK2 points would be together with the EDUK points for the same instance size. Between the pure DP algorithms, EDUK was the one with the worst times, being clearly dominated by our two UKP5 versions. 
-
-The ukp5 algorithm sorted the items by decreasing efficiency, and had the \(y^*\) bound and periodicity checking enabled. These two optimizations benefited none of the one hundred runs. No knapsack capacity from an instance was reduced by the use of the \(y^*\) bound; all instances had only overhead from the use of the periodicity checking. The ukp5\_sbw sorted the items by increasing weight and had these two optimizations disabled. The benchmark's instance files had the items in random order, so both algorithms used a small and similar time ordering the items\footnote{It's interesting to note that, because of the BREQ distribution and except by the profit rounding at the small items, the decreasing efficiency order is the reverse of the increasing weight order.}.
-
-The ukp5\_sbw times had a much smaller variation than the ukp5 for the same instance size, what can be only attributed to the change in ordering (as the two previously cited optimizations had only wasted time with overhead). The decreasing efficiency ordering helped ukp5 to be faster than ukp5\_sbw in some cases, and made it slower in others, what don't give us a clear winner.
-
-Finally, mgreendp showed an interesting behaviour. The mgreendp is a modern implementation in C++, made by the author, of an algorithm made by Harold Greenberg. The algorithm of Harold Greenberg (that wasn't named in the original the paper) was an adaptation of the \emph{ordered step-off} algorithm from Gilmore and Gomore. This algorithm periodically compute bounds (similar to the ones used by the B\&B approach) to check if it can stop the DP computation and fill any remaining capacity with copies of the best item. The author don't know if it could be called a hybrid algorithm, as the only characteristic taken from B\&B is the bound computation. The majority of the times, the bound computation allowed the algorithm to stop the computation at the beggining, having results very similar to EDUK2 (the hybrid B\&B-DP algorithm). However, six of the mgreendp executions had times in the steep slope line (the bound failed to stop the computation). Without the bound computation, mgreendp is basically the \emph{ordered step-off} from Gilmore and Gomore (whose is very similar to UKP5, as already pointed); consequently, those six outlier runs have times that would be expected from UKP5 for the respective instance size. One of the mgreendp runs in the last instance size, and one in the penultimate instance size, was ended by timeout (the bound failed to stop the computation and the DP algorithm was terminated by timeout).
-
-While the simple, multiple and collective dominances are rare in a BREQ distributions with integer profits; the solution dominance used by UKP5 works to some extent. The UKP5 combines optimal solutions for small capacities with single items and generate solutions that, if optimal for some capacity, will be used to generate more solutions after (recursively). In a BREQ instance, solutions made of many small items rarely are optimal and, consequently, often discarded, wasting the time used to generate them. However, as a silver lining, the UKP5's solution dominance will discard those solutions as soon as possible, and will \emph{not} use them to generate any new solutions (saving some computational effort).
-
-%<<<<label=breq_table,echo=FALSE,results=tex>>=
-%library(plyr)
-%
-%breq_csv_s <- breq_csv[complete.cases(breq_csv), ]
-%breq_csv_s$n <- sapply(breq_csv_s$filename, (function (f) {
-%  as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
-%}))
-%breq_csv_s <- ddply(breq_csv_s, c('algorithm', 'n'), summarise,
-%  ns    = length(n),
-%  avg   = mean(internal_time),
-%  min   = min(internal_time),
-%  max   = max(internal_time),
-%  sd    = sd(internal_time)
-%)
-%
-%xtable(breq_csv_s)
-%@
-
-\section{PYAsUKP 4540 Instances Benchmark}
-
-\begin{figure}[h]
-\caption{Benchmark with fast methods (no timeout)}
-\begin{center}
-<<pya_fast_fig,fig=true,echo=false>>=
-csv_no_na <- fast[complete.cases(fast), ]
-csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
-  factor(strsplit(as.character(f), "_")[[1]][1],
-         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-}))
-csv_no_na_mean <- csv_no_na %>%
-  group_by(filename) %>%
-  mutate(mean_methods_time = mean(internal_time))
-#csv_no_na$n <- sapply(csv_no_na$filename, (function (f) { as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))}))
-dt_copy <- csv_no_na_mean
-dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
-  arrange(mean_methods_time)
-csv_no_na_order$filename <- factor(csv_no_na_order$filename,
-                                   levels = unique(csv_no_na_order$filename))
-
-ggplot(csv_no_na_order,
-       aes(x = as.numeric(filename),
-           y = internal_time,
-           color = algorithm)) + 
-  geom_point() +
-  scale_y_continuous(trans = 'log10', limits = c(0.001, 1000),
-                     breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
-                     labels = c('0.001', '0.01', '0.1', '1', '10',
-                                '100', '1000')) +
-#  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
-  ylab('Time to solve (seconds, logarithmic)') +
-  xlab('Instance index when ordered by average time to solve') +
-  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:pya_fast}
-\end{figure}
-
-\begin{figure}[h]
-\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
-\begin{center}
-<<pya_slow_fig,fig=true,echo=false>>=
-csv_no_na <- slow
-csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
-csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
-  factor(strsplit(as.character(f), "_")[[1]][1],
-         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-}))
-csv_no_na_mean <- csv_no_na %>%
-  group_by(filename) %>%
-  mutate(mean_methods_time = mean(internal_time))
-dt_copy <- csv_no_na_mean
-dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
-  arrange(mean_methods_time)
-csv_no_na_order$filename <- factor(csv_no_na_order$filename,
-                                   levels = unique(csv_no_na_order$filename))
-
-ggplot(csv_no_na_order,
-       aes(x = as.numeric(filename),
-           y = internal_time,
-           color = algorithm)) + 
-  geom_point() +
-  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
-                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
-                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
-#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
-  ylab('Time to solve (seconds, logarithmic)') +
-  xlab('Instance index when ordered by average time to solve') +
-  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:pya_slow}
-\end{figure}
-
-\section{Uncorrelated Random Coeficients Instances}
-
-\section{Chung}
-% TEX COPIED FROM SEA 2016 article, CHANGE AND AMPLIFY
-
 \section{PYAsUKP instances}
 
 This section will discuss the instance sets used in~\cite{pya}.
 The distributions used by the instances weren't novel, but a 
 Those instance sets were artificially generated with the purpose of being ``hard to solve'', what means a different thing for each one of them.
-
 
 The same tool was used to generate the datasets (PYAsUKP), and the same parameters were used, otherwise noted the contrary. 
 In Subsection 5.1.1 \emph{Known ``hard'' instances} of~\cite{pya} some sets of easy instances are used to allow comparison with MTU2. 
@@ -411,6 +100,9 @@ The PYAsUKP parameters \mbox{\emph{-wmin \(w_{min}\) -cap c -n \textbf{n}}} were
 %As our knowledge of OCaml is limited, we cannot guarantee that the formula presented here is a perfect match for the code; but, based by the generated instances, we believe it to be correct to a good extent.
 We found some small discrepancies between the formulas presented in~\cite{pya} and the ones used in PYAsUKP code.
 We opted for using the ones from  PYAsUKP code, and they are presented below.
+
+\section{Chung}
+% TEX COPIED FROM SEA 2016 article, CHANGE AND AMPLIFY
 
 \subsubsection{Subset-Sum}\label{sec:subsetsum}
 Instances generated with \(p_i = w_i = rand(w_{min}, w_{max})\). 
@@ -431,6 +123,12 @@ This family of instances is generated by the following method: \textbf{n} distin
 \subsubsection{SAW}
 This family of instances is generated by the following method: generate \textbf{n} random weights between \(w_{min}\) and \(w_{max} = 1\overline{n}\) with the following property: \(\forall i \in [2, n].~w_i~mod~w_1 > 0\) (\(w_1\) is the smallest weight); sort by increasing order; then \(p_1 = w_1 + \alpha\) where \(\alpha = rand(1,5)\), and \(\forall i \in [2, n].~p_i = rand(l_i, u_i)\) where \(l_i = max(p_{i-1}, q_i)\), \(u_i = q_i + m_i\), \(q_i = p_1 \times \lfloor w_i / w_1 \rfloor \), and \(m_i = w_i~mod~w_1\). The PYAsUKP \emph{-form saw -step \(\alpha\) -wmax \(w_{max}\)} parameters were used.
 
-% maybe this goes in another section
-	timeline: DP -> huge random instances -> B\&B is better (no empiric evidence) -> instances that are hard for B\&B (linear distribution) -> PYAsUKP is better than B\&B in instances designed to be hard to solve by it (in fact any DP non-naive DP solution would have results better than B\&B methods only, like MTU1 and MTU2). also, using MTU2 instead of MTU1 shows a lack of understanding of the methods. MTU2 was developed for very large random instances, not for relatively small and hard (distribution-wise) instances
+\section{CSP Subproblem Knapsack Instances}
+
+Cite original 
+cite pyasukp "UKP real world instances are hard to find"
+Explain the real world use for solving the column generation of simplex of continuous relaxation of the bin-packing
+Point that this is useful because of the IRUP/MIRUP property
+Point that this can be no used by recent solvers, but can also be, and is a good approximation
+The second paragraph of the SEA2015 article is a filthy lie (it says belov's algorithm needs to solve UKP as a subproblem, what I only found after to not be true). Point that on the thesis.
 

@@ -1,0 +1,342 @@
+\chapter{Experiments and Analysis}
+
+\section{Setup}
+
+\subsection{MTU1 and MTU2 implementation}
+\subsection{Effect of running tests in parallel}
+
+One or two paragraphs on how running multiple parallel algorithms that use lots of memory on isolated cores can give considerable times difference.
+
+\section{Experiments and Results}
+
+<<setup,echo=false>>=
+library(ggplot2)
+library(statsr)
+library(dplyr)
+library(xtable)
+
+csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
+csp_csv$X <- NULL
+breq_csv <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
+breq_csv $X <- NULL
+fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
+fast$X <- NULL
+slow <- read.csv("../data/mtus.csv", sep = ";")
+slow$X <- NULL
+
+compare_num_iter <- function(csv, first_method, second_method) {
+  first_t <- csv %>% select(filename, algorithm, total_iter) %>%
+    filter(algorithm == first_method) %>% arrange(filename)
+  second_t <- csv %>% select(filename, algorithm, total_iter) %>%
+    filter(algorithm == second_method) %>% arrange(filename)
+  first_t$diff <- first_t$total_iter - second_t$total_iter
+  first_t$norm_diff <- first_t$diff / second_t$total_iter
+  first_t <- first_t %>% arrange(norm_diff)
+  first_t$filename <- factor(first_t$filename,
+                             levels = unique(first_t$filename))
+  ggplot(first_t,
+         aes(x = as.numeric(filename),
+             y = norm_diff*100)) +
+    ylab(paste('Deviation of the number of iterations of',
+               first_method, "\nrelative to", second_method,
+               '(in %)')) +
+    xlab("Instance index when ordered by the value at axis y")
+}
+@
+
+\subsection{BREQ 128-16 Standard Benchmark Results}
+
+We have run eight algorithms over the BREQ 128-16 Standard Benchmark (proposed at section \ref{sec:breq_inst}). The results confirm our hypothesis that this distribution would be hard for DP algorithms and easy for B\&B algorithms.
+
+\begin{figure}[h]
+\caption{Benchmark with the 128-16 Standard BREQ instances.}
+\begin{center}
+<<breq,fig=true,echo=false>>=
+csv_no_na <- breq_csv
+csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
+csv_no_na$n <- sapply(csv_no_na$filename,
+(function (f) {
+  as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
+}))
+
+ggplot(csv_no_na,
+       aes(x = n,#* (1 + (as.numeric(algorithm) - 1)/10),
+           y = internal_time,
+           color = algorithm)) + 
+  geom_point() +
+  scale_y_log10() +
+  scale_x_continuous(trans = "log2",
+                     breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
+                                2^17, 2^18, 2^19, 2^20)) +
+  ylab('Time to solve (seconds)') +
+  xlab('Instance size (n value)') +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:breq_bench}
+\end{figure}
+
+Let's examinate what chart \ref{fig:breq bench} tell us. The \emph{mgreendp1} algorithm (an IEACDA algorithm) is clearly dominated, and after the first two instance sizes, all of its runs end in timeout. So we will exclude it from the rest of the analysis.
+
+The rest of the methods form two lines with different slopes, line with a steep slope and a line with a more gradual slope. The steep slope line show algorithms whose time grows very fast relative to the instance size growth. This group is mainly composed by the DP methods: ukp5, ukp5\_sbw (sorted by weight), and the eduk algorithm. The second group, that form a more gradual slope, have algorithms whose time grows much slower with the instance growth. This group is mainly composed by B\&B and hybrid methods as: mtu1, mtu2, eduk2 and mgreendp.
+
+Examinating only mtu1 and mtu2, we can see clearly that for small instances their times overlap, but with the instance size growth the core problem strategy of mtu2 (that tries to avoid sorting and examinating all the items) begins to pay off (making it the \emph{best algorithm} to solve BREQ instances). 
+
+The behavior of EDUK2 shows that the default B\&B phase (executed before defaulting to EDUK) solves the BREQ instances in all cases. If it didn't, some EDUK2 points would be together with the EDUK points for the same instance size. Between the pure DP algorithms, EDUK was the one with the worst times, being clearly dominated by our two UKP5 versions. 
+
+The ukp5 algorithm sorted the items by decreasing efficiency, and had the \(y^*\) bound and periodicity checking enabled. These two optimizations benefited none of the one hundred runs. No knapsack capacity from an instance was reduced by the use of the \(y^*\) bound; all instances had only overhead from the use of the periodicity checking. The ukp5\_sbw sorted the items by increasing weight and had these two optimizations disabled. The benchmark's instance files had the items in random order, so both algorithms used a small and similar time ordering the items\footnote{It's interesting to note that, because of the BREQ distribution and except by the profit rounding at the small items, the decreasing efficiency order is the reverse of the increasing weight order.}.
+
+The ukp5\_sbw times had a much smaller variation than the ukp5 for the same instance size, what can be only attributed to the change in ordering (as the two previously cited optimizations had only wasted time with overhead). The decreasing efficiency ordering helped ukp5 to be faster than ukp5\_sbw in some cases, and made it slower in others, what don't give us a clear winner.
+
+Finally, mgreendp showed an interesting behaviour. The mgreendp is a modern implementation in C++, made by the author, of an algorithm made by Harold Greenberg. The algorithm of Harold Greenberg (that wasn't named in the original the paper) was an adaptation of the \emph{ordered step-off} algorithm from Gilmore and Gomore. This algorithm periodically compute bounds (similar to the ones used by the B\&B approach) to check if it can stop the DP computation and fill any remaining capacity with copies of the best item. The author don't know if it could be called a hybrid algorithm, as the only characteristic taken from B\&B is the bound computation. The majority of the times, the bound computation allowed the algorithm to stop the computation at the beggining, having results very similar to EDUK2 (the hybrid B\&B-DP algorithm). However, six of the mgreendp executions had times in the steep slope line (the bound failed to stop the computation). Without the bound computation, mgreendp is basically the \emph{ordered step-off} from Gilmore and Gomore (whose is very similar to UKP5, as already pointed); consequently, those six outlier runs have times that would be expected from UKP5 for the respective instance size. One of the mgreendp runs in the last instance size, and one in the penultimate instance size, was ended by timeout (the bound failed to stop the computation and the DP algorithm was terminated by timeout).
+
+While the simple, multiple and collective dominances are rare in a BREQ distributions with integer profits; the solution dominance used by UKP5 works to some extent. The UKP5 combines optimal solutions for small capacities with single items and generate solutions that, if optimal for some capacity, will be used to generate more solutions after (recursively). In a BREQ instance, solutions made of many small items rarely are optimal and, consequently, often discarded, wasting the time used to generate them. However, as a silver lining, the UKP5's solution dominance will discard those solutions as soon as possible, and will \emph{not} use them to generate any new solutions (saving some computational effort).
+
+%The algorithms described at \cite{TheUnboundedKnapsackProblem-T.C.HU.pdf} were not implemented and tested because of time reasons. However, we can see, by the algorithms assimptotic worst case complexity (\(O(n v_1 w_1)\) and \(O(n w_i)\)), that they 
+
+%<<<<label=breq_table,echo=FALSE,results=tex>>=
+%library(plyr)
+%
+%breq_csv_s <- breq_csv[complete.cases(breq_csv), ]
+%breq_csv_s$n <- sapply(breq_csv_s$filename, (function (f) {
+%  as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
+%}))
+%breq_csv_s <- ddply(breq_csv_s, c('algorithm', 'n'), summarise,
+%  ns    = length(n),
+%  avg   = mean(internal_time),
+%  min   = min(internal_time),
+%  max   = max(internal_time),
+%  sd    = sd(internal_time)
+%)
+%
+%xtable(breq_csv_s)
+%@
+
+\subsection{PYAsUKP 4540 Instances Benchmark}
+
+\begin{figure}[h]
+\caption{Benchmark with fast methods (no timeout)}
+\begin{center}
+<<pya_fast_fig,fig=true,echo=false>>=
+csv_no_na <- fast[complete.cases(fast), ]
+csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
+  factor(strsplit(as.character(f), "_")[[1]][1],
+         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+}))
+csv_no_na_mean <- csv_no_na %>%
+  group_by(filename) %>%
+  mutate(mean_methods_time = mean(internal_time))
+#csv_no_na$n <- sapply(csv_no_na$filename, (function (f) { as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))}))
+dt_copy <- csv_no_na_mean
+dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
+  arrange(mean_methods_time)
+csv_no_na_order$filename <- factor(csv_no_na_order$filename,
+                                   levels = unique(csv_no_na_order$filename))
+
+ggplot(csv_no_na_order,
+       aes(x = as.numeric(filename),
+           y = internal_time,
+           color = algorithm)) + 
+  geom_point() +
+  scale_y_continuous(trans = 'log10', limits = c(0.001, 1000),
+                     breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+                     labels = c('0.001', '0.01', '0.1', '1', '10',
+                                '100', '1000')) +
+#  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
+  ylab('Time to solve (seconds, logarithmic)') +
+  xlab('Instance index when ordered by average time to solve') +
+  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:pya_fast}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
+\begin{center}
+<<pya_slow_fig,fig=true,echo=false>>=
+csv_no_na <- slow
+csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
+csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
+  factor(strsplit(as.character(f), "_")[[1]][1],
+         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+}))
+csv_no_na_mean <- csv_no_na %>%
+  group_by(filename) %>%
+  mutate(mean_methods_time = mean(internal_time))
+dt_copy <- csv_no_na_mean
+dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
+  arrange(mean_methods_time)
+csv_no_na_order$filename <- factor(csv_no_na_order$filename,
+                                   levels = unique(csv_no_na_order$filename))
+
+ggplot(csv_no_na_order,
+       aes(x = as.numeric(filename),
+           y = internal_time,
+           color = algorithm)) + 
+  geom_point() +
+  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
+                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
+                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
+#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
+  ylab('Time to solve (seconds, logarithmic)') +
+  xlab('Instance index when ordered by average time to solve') +
+  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:pya_slow}
+\end{figure}
+
+\subsection{CSP Knapsack Subproblem Experiment}
+
+Two items with the same weight never exist in a cutstock knapsack problem.
+
+Difference of the number of rolls in the last hexdecimal gigit is normal and caused the by the fact floating point arithmetic don't have infinite precision.
+
+There's only one true outlier: the run of ukp5\_int\_cutstock over N4C1W1\_O.csp.txt that resulted in 257.7500 (0x1.01cp+8) rolls while the other methods resulted in 257.5833 (0x1.0195555555556p+8, for ukp5\_fp\_cutstock) rolls (a 0.1667 roll difference). Would be expected that ukp5\_int\_cutstock and ukp5\_fp\_cutstock to agree in the solution of the same instance as they are the same algoritm using the same item ordering (ukp5\_int\_cutstock and ukp5\_int\_ns\_cutstock use different orderings and can end up selecting different optimal solutions if there's more than one distinct optimal solution with the smallest weight for an optimal solution). However, the solutions given by the two methods at the third iteration differed. The solution given by the fp method isn't the optimal solution for the integer method (and vice-versa) because when the items profit were made integer (by multiplying them by \(2^{40}\) and rounding them down) a small value was lost with the rounding. Consequently, the integer profit value of the optimal solution returned by the ukp5\_fp was smaller than the integer profit value of the solution returned by ukp5\_int (as the latter was favored by the rounding procedure). The author found that those differences between knapsack solutions because of precision loss are very common (happening at least for one knapsack of almost each CSP solving). They explain the difference in the number of iterations between two exact methods that are equal except by the item profit precision (we will see that the iteration count can vary considerably because of this little detail). However, no other instance had a difference in the rolls result of this magnitude (0.1667). All other runs had a difference between the result in rolls smaller than \(2^{-20}\) (i.e. for each instance, the roll's result of any run subtracted by the mean of the roll's result for all methods was smaller than \(2^{-20}\) and greater than \(-(2^{-20})\). The author can't explain the outlier, yet he believes that it can be a rare case where the small loss of precision caused by using integers in the solver of the knapsack subproblem affects significantly the optimal value in rolls of the master problem. Such behavior should be examinated when using knapsack solvers planned for integer values to solve floating point pricing subproblems of a CSP solver.
+
+We do not checked if executing many times the same fp method over the same instance can give different iteration counts. However floating point arithmetic is deterministic, while incorrect from a infinite precision point of view. (CONFIRMED BY EXECUTING THE SAME INSTANCE 100 TIMES)
+
+Could code make use of the gigantic profit dominance of the instances?
+
+If we could discover what property the solutions given by the CPlex knapsack solver have that makes the master model needs less iterations, we could adapt the other programming methods to return optimal solution with this property?
+
+The two int ukp5 cutstock solvers have difference in the number of iterations. Ex.: BPP\_1000\_1000\_0.2\_0.8\_9.csp.txt, ukp5\_int\_cutstock has 6908 iterations and ukp5\_int\_ns\_cutstock has 6719 iterations. The only thing that change between the two is the order of the array. The two always get an optimal solution with the smallest weight. At iteration 5879, the optimal solution given by the two methods differ, for the same knapsack, both solutions are optimal (consequently have the same profit value), and both have the same weight (that is the smallest possible for an optimal solution of that knapsack). This little change creates a cascading effect that makes one method end 189 iterations before the other. This can seem little considering the number of iterations of the biggest iteration number (189 of 6719 is about 2.81\%), but this difference happened at iteration 5879 so there were only 1029 iterations left for the run with more iterations (one code ended 18\% faster simply by an arbitrary distiction between two optimal solutions of the same weight).
+
+    Add graphs created to the dissertation. Say that ending at 80\% iterations of the more iterations method don't mean the code was 25\% faster as the knapsack times aren't uniform. If the divergence occurs close to the end and is significant (if the difference occured at iteration x, and x is about 80\% of the iterations of the method with the greatest number of iterations, and the less iterations method ended doing 90\% of the more iterations method, those 10\% were composed entirely of instances significantly harder than the first ones (that were equal). This effect wasn't studied extensively because of time and scope reasons. Thing interesting to analyze would be: how often knapsacks generated by cutting stock have different optimal solutions (or specifically distinct optimal solutions with the same weight, also, the specific case where the weight is the smallest possible, seems to be very common as the change in the ordering shown so many CSP instances where at least one knapsack diverged); would be adding all optimal solutions (or even, all solutions with profit value over one) at each single knapsack a way to speed up the computation? (there would be any negative effects, as the master model bloating? the trade-off would be valid? someone has already proposed this?) Columns can end up not being used even if choosen between the optimal ones. Dominance exclude solutions with the guarantee at least one optimal solution will remain, disabling dominance would pay off? Varying the CPLEX seed and the choosen optimal solution would make differences of wich magnitude?
+
+    The graph of iterations shown by the optimal solutions given by the cplex knapsack solver seems to result in a smaller number of iterations. It's expected that the UKP5 versions will vary between 0.2 and -0.2 from the mean (about 0 to 45\% relative to each other) as we have examinated this behavior before. This don't see to be a B\&B approach effect as MTU1 don't behave the same way. The author hypothesis is that the UKP5's idiosyncrasy of returning always one of the smallest optimal solutions can be unfavoreable to its relationship with the master model. The gap between an optimal solution weight and the knapsack capacity is interpreted as a roll's waste at the master problem. When a knapsack solver returns an optimal solution as small as possible, it's adding to the the master's model a column/pattern with more waste than other possible optimal solutions.
+
+        The dual values of the CSP master model can be negative or zero (non-positive). Such non-positive values can break codes optimized with the assumption that all items have a positive profit. Because of this, on our implementation we have removed those items before solving the knapsack problem with a non-cplex solver (cplex have no problem with such nonpositive profits), and remaped the solution items to their old indexes before returning the solution to the master problem. We do not know if any of those non-positive profit items could be fit in the gap left by some optimal solution of the same instance.
+
+\begin{figure}[h]
+\caption{CSP Knapsack Solver Total Time (logarithmic)}
+\begin{center}
+<<knapsack_time,fig=true,echo=false>>=
+# Note that the points at y = 600 were introduced to allow
+# for the visualization of the runs that resulted in timeout.
+# Also, note that after the visible mtu1 point closest to the top right
+# all other points are below cplex points (representing the mtu1 timeouts).
+# For the hardest problems, there's a small but clear pattern that shows
+# advantage of the methods that sort the array by efficiency over the ones
+# who doesn't.
+csv_no_na <- csp_csv
+csv_no_na[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
+#csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
+csv_no_na_order <- csv_no_na %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_knapsack_time)) %>% arrange(mean_methods_time)
+csv_no_na_order$filename <- factor(csv_no_na_order$filename, levels = unique(csv_no_na_order$filename))
+ggplot(csv_no_na_order,
+       aes(x = as.numeric(filename),
+           y = csv_no_na_order$hex_sum_knapsack_time,
+           color = algorithm)) +
+  xlab('Instance index when ordered by the\nmean time methods spent solving knapsack subproblems') +
+  ylab('Knapsack\'s solver total time (seconds, logarithmic scale)') +
+  geom_point() +
+  scale_y_log10() +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:csp_knapsack_time}
+\end{figure}
+
+\begin{figure}[h]
+\caption{CSP Master Model Solver Total Time (logarithmic)}
+\begin{center}
+<<master_time,fig=true,echo=false>>=
+master_time <- csp_csv
+master_time[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
+master_time[is.na(csp_csv$hex_sum_master_prob_time), ]$hex_sum_master_prob_time <- 600
+#csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
+master_time <- master_time %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_master_prob_time)) %>% arrange(mean_methods_time)
+master_time$filename <- factor(master_time$filename, levels = unique(master_time$filename))
+ggplot(master_time,
+       aes(x = as.numeric(filename),
+           y = master_time$hex_sum_master_prob_time,
+           color = algorithm)) +
+  xlab('Instance index when ordered by the\nmean time methods spent solving the master model') +
+  ylab('Master model solver total time (seconds, logarithmic scale)') +
+  geom_point() +
+  scale_y_log10() +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:csp_master_time}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Percentage of time taken by solving knapsack subproblems}
+\begin{center}
+<<cutstock_master_knap_corr,fig=true,echo=false>>=
+corr_time <- csp_csv[complete.cases(csp_csv),]
+corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
+corr_time <- arrange(corr_time, relative_time)
+corr_time$filename <- factor(corr_time$filename, levels = unique(corr_time$filename))
+ggplot(corr_time,
+       aes(x = as.numeric(filename),
+           y = relative_time * 100,
+           color = algorithm)) +
+  xlab('Instance index when ordered by the y axis value') +
+  ylab('How much of the total time was\nspent solving knapsack subproblems (in %)') +
+  geom_point() +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:percentage_knap_subproblem}
+\end{figure}
+
+\begin{figure}[h]
+\caption{UKP5 Integer (sorted by efficiency and not sorted)}
+\begin{center}
+<<int_vs_int_ns,fig=true,echo=false>>=
+compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:int_vs_int_ns}
+\end{figure}
+
+\begin{figure}[h]
+\caption{UKP5 Floating Point (sorted by efficiency and not sorted)}
+\begin{center}
+<<fp_vs_fp_ns,fig=true,echo=false>>=
+compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:fp_vs_fp_ns}
+\end{figure}
+
+\begin{figure}[h]
+\caption{UKP5 no sort (Floating Point vs Integer)}
+\begin{center}
+<<fp_ns_vs_int_ns,fig=true,echo=false>>=
+compare_num_iter(csp_csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:fp_ns_vs_int_ns}
+\end{figure}
+
+\begin{figure}[h]
+\caption{UKP5 sorted by efficiency (Floating Point vs Integer)}
+\begin{center}
+<<fp_vs_int,fig=true,echo=false>>=
+compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock') +
+  geom_point()
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:fp_vs_int}
+\end{figure}
+

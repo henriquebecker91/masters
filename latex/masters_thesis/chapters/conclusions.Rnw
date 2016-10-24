@@ -1,0 +1,17 @@
+\chapter{Conclusions and Future Work}
+
+\section{Conclusions}
+
+basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway). The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
+Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
+
+\section{Future Works}
+
+There's lots of methods for UKP solving, any interessed should do a good review before thinking in creating a new solution
+while a survey implementing all algorithms could be interesting, it only would be valid if tackled real-world instances
+	for the main real-world problem cited at the UKP literature (CSP pricing), it isn't used so much anymore, and there's questions that precede the problem of the fastest UKP solving algorithm: as if adding multiple solutions simulstaneosly is a good idea, or if we should only try to get the first solutions better than 1 (and use a exact method only after failing in this prospect), etc...
+
+Many algorithms weren't re-implemented; so much comparison is lacking. Specially Fred Glover's algorithm.
+
+
+

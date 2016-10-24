@@ -10,6 +10,10 @@ csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
 csp_csv$X <- NULL
 breq_csv <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
 breq_csv $X <- NULL
+fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
+fast$X <- NULL
+slow <- read.csv("../data/mtus.csv", sep = ";")
+slow$X <- NULL
 
 compare_num_iter <- function(csv, first_method, second_method) {
   first_t <- csv %>% select(filename, algorithm, total_iter) %>%
@@ -304,6 +308,85 @@ While the simple, multiple and collective dominances are rare in a BREQ distribu
 %
 %xtable(breq_csv_s)
 %@
+
+\section{PYAsUKP 4540 Instances Benchmark}
+
+\begin{figure}[h]
+\caption{Benchmark with fast methods (no timeout)}
+\begin{center}
+<<pya_fast_fig,fig=true,echo=false>>=
+csv_no_na <- fast[complete.cases(fast), ]
+csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
+  factor(strsplit(as.character(f), "_")[[1]][1],
+         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+}))
+csv_no_na_mean <- csv_no_na %>%
+  group_by(filename) %>%
+  mutate(mean_methods_time = mean(internal_time))
+#csv_no_na$n <- sapply(csv_no_na$filename, (function (f) { as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))}))
+dt_copy <- csv_no_na_mean
+dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
+  arrange(mean_methods_time)
+csv_no_na_order$filename <- factor(csv_no_na_order$filename,
+                                   levels = unique(csv_no_na_order$filename))
+
+ggplot(csv_no_na_order,
+       aes(x = as.numeric(filename),
+           y = internal_time,
+           color = algorithm)) + 
+  geom_point() +
+  scale_y_continuous(trans = 'log10', limits = c(0.001, 1000),
+                     breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+                     labels = c('0.001', '0.01', '0.1', '1', '10',
+                                '100', '1000')) +
+#  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
+  ylab('Time to solve (seconds, logarithmic)') +
+  xlab('Instance index when ordered by average time to solve') +
+  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:pya_fast}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
+\begin{center}
+<<pya_slow_fig,fig=true,echo=false>>=
+csv_no_na <- slow
+csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
+csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
+  factor(strsplit(as.character(f), "_")[[1]][1],
+         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+}))
+csv_no_na_mean <- csv_no_na %>%
+  group_by(filename) %>%
+  mutate(mean_methods_time = mean(internal_time))
+dt_copy <- csv_no_na_mean
+dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
+  arrange(mean_methods_time)
+csv_no_na_order$filename <- factor(csv_no_na_order$filename,
+                                   levels = unique(csv_no_na_order$filename))
+
+ggplot(csv_no_na_order,
+       aes(x = as.numeric(filename),
+           y = internal_time,
+           color = algorithm)) + 
+  geom_point() +
+  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
+                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
+                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
+#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
+  ylab('Time to solve (seconds, logarithmic)') +
+  xlab('Instance index when ordered by average time to solve') +
+  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:pya_slow}
+\end{figure}
 
 \section{Uncorrelated Random Coeficients Instances}
 

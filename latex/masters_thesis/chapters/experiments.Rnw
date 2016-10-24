@@ -1,19 +1,11 @@
 \chapter{Experiments and Analysis}
 
-\section{Setup}
-
-\subsection{MTU1 and MTU2 implementation}
-\subsection{Effect of running tests in parallel}
-
-One or two paragraphs on how running multiple parallel algorithms that use lots of memory on isolated cores can give considerable times difference.
-
-\section{Experiments and Results}
-
 <<setup,echo=false>>=
 library(ggplot2)
 library(statsr)
 library(dplyr)
 library(xtable)
+library(gridExtra)
 
 csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
 csp_csv$X <- NULL
@@ -23,6 +15,8 @@ fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
 fast$X <- NULL
 slow <- read.csv("../data/mtus.csv", sep = ";")
 slow$X <- NULL
+mtu <- read.csv("../data/mtu_impl_desktop_uc5.csv", sep = ";")
+mtu$X <- NULL
 
 compare_num_iter <- function(csv, first_method, second_method) {
   first_t <- csv %>% select(filename, algorithm, total_iter) %>%
@@ -42,7 +36,67 @@ compare_num_iter <- function(csv, first_method, second_method) {
                '(in %)')) +
     xlab("Instance index when ordered by the value at axis y")
 }
+
+ukp_time_comp_plot <- function (data, legend) {
+  data <- select(data, algorithm, filename, internal_time)
+  data$algorithm <- sapply(data$algorithm, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
+  data$language <- data$algorithm
+  data$language <- sapply(data$language, (function (f) { factor(gsub("cpp-mtu[12]", "C++", f)) }))
+  data$language <- sapply(data$language, (function (f) { factor(gsub("fmtu[12]", "Fortran", f)) }))
+  data$language <- sapply(data$language, (function (f) { factor(f, levels = c('C++', 'Fortran')) }))
+  data$algorithm <- sapply(data$algorithm, (function (f) { factor(gsub(".*1", "MTU1", f)) }))
+  data$algorithm <- sapply(data$algorithm, (function (f) { factor(gsub(".*2", "MTU2", f)) }))
+  data$algorithm <- sapply(data$algorithm,(function (f) { factor(f, levels = c('MTU1', 'MTU2')) }))
+  data <- data %>% group_by(filename) %>% mutate(fname_mean_time = mean(internal_time)) %>% arrange(fname_mean_time)
+  data$filename <- factor(data$filename, levels = unique(data$filename))
+  View(data)
+  p <- ggplot(data, aes(x = as.numeric(filename), y = internal_time, color = language)) 
+  p <- p + geom_point() + scale_y_continuous(
+    trans = 'log10', limits = c(0.001, 1000),
+    breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+    labels = c('0.001', '0.01', '0.1', '1', '10', '100', '1000')
+  ) 
+  p <- p + xlab("Instances ordered by the mean time value")
+  p <- p + ylab("Time (seconds, log10 scale)")
+  p <- p + theme(legend.position = legend)
+}
 @
+
+\section{Setup}
+
+The experiments described at Section \ref{sec:exp_and_res} were run using a computer with the following characteristics: the CPU was an Intel\textregistered Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz; there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where the last two are shared between cores).
+The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
+Three of the four cores were isolated using the \emph{isolcpus} kernel flag. 
+The \emph{taskset} utility was used to execute runs in one of the isolated cores.
+% SEE ABOUT SWAP AND THE MEMORY USE SPECIALLY FOR MGREENDP1
+% CHECK THE COMPILER VERSION/FLAGS for each experiment?: The UKP5 code was compiled with gcc (g++) version 5.3.0 (the \emph{-O3 -std=c++11} flags were enabled).
+
+\subsection{MTU1 and MTU2 implementation}
+
+\begin{figure}[h]
+\caption{Benchmark with the 128-16 Standard BREQ instances.}
+\begin{center}
+<<mtu_comp,fig=true,echo=false>>=
+mtu$internal_time <- sapply(mtu$internal_time, function(x) if (is.na(x)) 999 else x)
+
+mtu1 <- filter(mtu, algorithm == "cpp-mtu1_desktop_uc5" | algorithm == "fmtu1_desktop_uc5") # only mtu1
+mtu2 <- filter(mtu, algorithm == "cpp-mtu2_desktop_uc5" | algorithm == "fmtu2_desktop_uc5") # only mtu2
+
+p1 <- ukp_time_comp_plot(mtu1, 'none') + ggtitle("MTU1 (Fortran vs C++)")
+p2 <- ukp_time_comp_plot(mtu2, 'bottom') + ggtitle("MTU2 (Fortran vs C++)")
+grid.arrange(p1, p2)
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:breq_bench}
+\end{figure}
+
+\subsection{Effect of running tests in parallel}
+
+One or two paragraphs on how running multiple parallel algorithms that use lots of memory on isolated cores can give considerable times difference.
+
+\section{Experiments and Results}
+\label{sec:exp_and_res}
 
 \subsection{BREQ 128-16 Standard Benchmark Results}
 

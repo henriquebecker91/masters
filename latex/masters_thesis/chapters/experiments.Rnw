@@ -41,12 +41,12 @@ ukp_time_comp_plot <- function (data, legend) {
   data <- select(data, algorithm, filename, internal_time)
   data$algorithm <- sapply(data$algorithm, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
   data$language <- data$algorithm
-  data$language <- sapply(data$language, (function (f) { factor(gsub("cpp-mtu[12]", "C++", f)) }))
-  data$language <- sapply(data$language, (function (f) { factor(gsub("fmtu[12]", "Fortran", f)) }))
-  data$language <- sapply(data$language, (function (f) { factor(f, levels = c('C++', 'Fortran')) }))
-  data$algorithm <- sapply(data$algorithm, (function (f) { factor(gsub(".*1", "MTU1", f)) }))
-  data$algorithm <- sapply(data$algorithm, (function (f) { factor(gsub(".*2", "MTU2", f)) }))
-  data$algorithm <- sapply(data$algorithm,(function (f) { factor(f, levels = c('MTU1', 'MTU2')) }))
+  data$language <- sapply(data$language, (function (f) { gsub("cpp-mtu[12]", "C++", f) }))
+  data$language <- sapply(data$language, (function (f) { gsub("fmtu[12]", "Fortran", f) }))
+  data$language <- factor(data$language, levels = c('C++', 'Fortran'))
+  data$algorithm <- sapply(data$algorithm, (function (f) { gsub(".*1", "MTU1", f) }))
+  data$algorithm <- sapply(data$algorithm, (function (f) { gsub(".*2", "MTU2", f) }))
+  data$algorithm <- factor(data$algorithm, levels = c('MTU1', 'MTU2'))
   data <- data %>% group_by(filename) %>% mutate(fname_mean_time = mean(internal_time)) %>% arrange(fname_mean_time)
   data$filename <- factor(data$filename, levels = unique(data$filename))
   View(data)
@@ -71,10 +71,18 @@ The \emph{taskset} utility was used to execute runs in one of the isolated cores
 % SEE ABOUT SWAP AND THE MEMORY USE SPECIALLY FOR MGREENDP1
 % CHECK THE COMPILER VERSION/FLAGS for each experiment?: The UKP5 code was compiled with gcc (g++) version 5.3.0 (the \emph{-O3 -std=c++11} flags were enabled).
 
+The main experiments of this work are describe at Section \ref{sec:exp_and_res} and follow the setup previously described. Two other smaller experiments were relevant to those and are described in the next two subsections. The first shows that our implementation of MTU1 and MTU2 (written in C++) are in par with the original ones (written in Fortran); we will use our implementation in the remaining of the experiments. The second shows that there can be considerable time difference when the runs of an experiment are executed in parallel (even one per core, and with the core isolated from other processes) instead one at time. 
+
 \subsection{MTU1 and MTU2 implementation}
 
+The setup of this specific experiment was the following: the specific commit was \verb+[master 42ecda2] "Changes on fortran MTU output format and removal of unused code."+\footnote{Hyperlink for tree at specific commit: \url{https://github.com/henriquebecker91/masters/tree/42ecda29905c0ab56c03b7254b52bb06e67ab8d7}}. The code was compiled using the available Makefiles, and the gcc and gcc-fortran version were the 6.1.1 (2016-06-02), the \emph{-O3} flag was used on both C++ and Fortran versions. The Fortran version read the same instances from a simplified format (that preserved the instance's item order). The binary \verb+ukp2sukp.out+ (codes/cpp) was used to convert one format to the other (same commit mentioned above). As the algorithms don't make a heavy memory use (and has good locality of reference), five isolated cores of the computer were used in parallel for running the experiment. The computer setup was: XXX.
+
+The Fortran codes were an adaptation of the original MTU codes. The only difference from the originals was that any 32 bits integers or float variables/parameters were replaced by their 64 bits counterparts. 
+
+The two implementations of the MTU1 algorithm have no significative differences (besides the programming language). The only significative difference between the MTU2 implementations was the algorithm used to sort partially the items array. The original algorithm\cite{XXX} didn't specify the exact algorithm for this partial sorting. The original implementation used a complex algorithm developed by the same authors of MTU2 in another paper\cite{XXX} to find the nth most efficient item in a unordered array (and then sort). Our implementation use the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+. Our implementation also checks if the whole vector is ordered before starting to execute the partial sorts, and it sorts by non-increasing efficiency and if tied by non-decreasing weight.
+
 \begin{figure}[h]
-\caption{Benchmark with the 128-16 Standard BREQ instances.}
+\caption{Comparison between MTU implementations}
 \begin{center}
 <<mtu_comp,fig=true,echo=false>>=
 mtu$internal_time <- sapply(mtu$internal_time, function(x) if (is.na(x)) 999 else x)
@@ -82,7 +90,7 @@ mtu$internal_time <- sapply(mtu$internal_time, function(x) if (is.na(x)) 999 els
 mtu1 <- filter(mtu, algorithm == "cpp-mtu1_desktop_uc5" | algorithm == "fmtu1_desktop_uc5") # only mtu1
 mtu2 <- filter(mtu, algorithm == "cpp-mtu2_desktop_uc5" | algorithm == "fmtu2_desktop_uc5") # only mtu2
 
-p1 <- ukp_time_comp_plot(mtu1, 'none') + ggtitle("MTU1 (Fortran vs C++)")
+p1 <- ukp_time_comp_plot(mtu1, 'bottom') + ggtitle("MTU1 (Fortran vs C++)")
 p2 <- ukp_time_comp_plot(mtu2, 'bottom') + ggtitle("MTU2 (Fortran vs C++)")
 grid.arrange(p1, p2)
 @
@@ -90,6 +98,8 @@ grid.arrange(p1, p2)
 \legend{Source: the author.}
 \label{fig:breq_bench}
 \end{figure}
+
+The test was made with the reduced PYAsUKP benchmark (see Section \ref{XXX}). We can see that the MTU1 implementations had a very small variation, with the C++ version being a little slower. The MTU2 implementation had a much bigger variation. We do believe that this variation is caused by the ordering checking and sorting algorithm difference. Specially, there's a trend between the values 180 and 230 of the x axis. This trend is composed by the subset-sum instances. The subset-sum instances are always ordered by efficiency as their efficiency is the same for all items (the weight and profit are equal). The instance when generated by PYAsUKP is also ordered by non-decreasing item weight, what makes it completely ordered for our C++ implementation. The Fortran implementation don't seem to work well with this characteristic of the subset-sum instances. We have chosen to use the C++ implementation in our experiments. The reason are: the C++ implementation can read the same format used by PYAsUKP (and the other algorithms); with the exception of PYAsUKP (that uses OCaml) all other methods use C++ and the same structures; choosing the Fortran implementation would harm considerably the MTU2 times for something that seems to be a minor implementation detail.
 
 \subsection{Effect of running tests in parallel}
 

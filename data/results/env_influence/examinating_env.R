@@ -77,12 +77,32 @@ ggplot(env_file_mean_times, aes(x = n*c, y = internal_time/(n * c), color = comp
 ggplot(env_file_mean_times, aes(x = n*c, y = internal_time/(n * c), color = computer_mode, shape = inst_class)) + geom_point() + scale_y_log10() + scale_x_log10()
 # With the files (y axis) ordered in increasing order of ratio
 # This should starts at ~1, stay at 1~1.5 for the most files, and end at 2~3
-alg_name = "pyasukpt"
-com_name = "notebook"
-serial <- filter(env_file_mean_times, algorithm == alg_name & computer == com_name & mode == "serial") %>% arrange(filename) %>% select(filename,internal_time,inst_class)
-parallel <- filter(env_file_mean_times, algorithm == alg_name & computer == com_name & mode == "parallel") %>% arrange(filename) %>% select(filename,internal_time)
-ratio_parallel_serial <- data.frame(filename = serial$filename, inst_class = serial$inst_class, serial_time = serial$internal_time, parallel_time = parallel$internal_time) %>% mutate(ratio = parallel_time/serial_time) %>% arrange(ratio)
-ratio_parallel_serial$filename <- factor(ratio_parallel_serial$filename, levels = unique(ratio_parallel_serial$filename))
-ggplot(ratio_parallel_serial, aes(x = as.numeric(filename), y = ratio, shape = inst_class)) + ggtitle("Some Algorithm Ratio Between Parallel and Serial in the same machine") + geom_point()
+create_facet <- function(env_file_mean_times, alg_name, com_name) {
+  serial <- filter(env_file_mean_times, mode == "serial" &
+                   algorithm == alg_name &
+                   computer == com_name) %>% arrange(filename)
+  parallel <- filter(env_file_mean_times, mode == "parallel" &
+                     algorithm == alg_name &
+                     computer == com_name) %>% arrange(filename)
+  ratio_parallel_serial <- data.frame(filename = serial$filename,
+                                      algorithm = serial$algorithm,
+                                      computer = serial$computer,
+                                      serial_time = serial$internal_time,
+                                      parallel_time = parallel$internal_time) %>%
+    mutate(ratio = parallel_time/serial_time) %>% arrange(ratio)
+  ratio_parallel_serial$order <- 1:454
+  ratio_parallel_serial
+}
+
+t1 <- create_facet(env_file_mean_times, "ukp5", "notebook")
+t2 <- create_facet(env_file_mean_times, "ukp5", "desktop")
+t3 <- create_facet(env_file_mean_times, "pyasukpt", "notebook")
+t4 <- create_facet(env_file_mean_times, "pyasukpt", "desktop")
+t <- rbind(t1, t2, t3, t4)
+ggplot(t, aes(x = order, y = ratio, color = paste(algorithm, computer, sep = '_'))) +
+  xlab('Instance index when sorted by the y axis value') +
+  ylab('mean parallel time / mean serial time\n(same instance, same environment)') +
+  geom_point() + theme(legend.position = 'bottom') + theme(legend.title = element_blank())
+
 
 

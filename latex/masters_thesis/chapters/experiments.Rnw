@@ -193,8 +193,29 @@ ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) + #scale_x_log10(
 @
 \end{center}
 \legend{Source: the author.}
-\label{fig:sd_env_infl}
+\label{fig:mean_time_env_infl}
 \end{figure}
+
+The lack of logarithmic scale at the x axis of Figure \ref{fig:mean_time_env_infl} flatten the UKP5 data points, but gives us a clear view of how UKP5 can be benefited in an experiment that makes multiple runs in parallel and compares PYAsUKP and UKP5. The execution of runs in parallel seems to affect UKP5 far more than PYAsUKP, as it has much more points distant from \(y \approx 1\) (where serial and parallel runs have similar mean times) than PYAsUKP, and only UKP5 has a significative share of points over \(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time).
+
+However, all UKP5 runs use little time (clearly less than 25 seconds) where many of the PYAsUKP runs have times between 25 and 300 (or 200) seconds. Even more, the PYAsUKP runs that take more time are also the more affected by the parallel execution; the author hypothesize that they take more time because the instance is harder, and use more memory for the same reason, this way they end up using more than the L1 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable). The result is that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time, making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
+
+Let's examinate closely the values for the notebook setting, as this was the one used at the \cite{XXX} paper. We will refer to UKP5 (or PYAsUKP) Parallel (or Serial) Total time (or TT, for short) as the sum of the internal times of all the runs of that algorithm in that computer and mode. The 
+
+<<env_infl_nums,echo=true>>=
+ukp5_par <- filter(env_data, mode == 'parallel' & algorithm == 'ukp5' & computer == 'notebook')
+pya_par <- filter(env_data, mode == 'parallel' & algorithm == 'pyasukpt' & computer == 'notebook')
+ukp5_ser <- filter(env_data, mode == 'serial' & algorithm == 'ukp5' & computer == 'notebook')
+pya_ser <- filter(env_data, mode == 'serial' & algorithm == 'pyasukpt' & computer == 'notebook')
+
+sum(ukp5_par$internal_time) / sum(ukp5_ser$internal_time)
+sum(ukp5_par$internal_time) - sum(ukp5_ser$internal_time)
+sum(pya_par$internal_time) / sum(pya_ser$internal_time)
+sum(pya_par$internal_time) - sum(pya_ser$internal_time)
+sum(pya_ser$internal_time) / sum(ukp5_ser$internal_time)
+sum(pya_par$internal_time) / sum(ukp5_par$internal_time)
+@
+
 
 The author hypothesize that the cache growth means little to runs that even with the cache growth will not access the same region 
 

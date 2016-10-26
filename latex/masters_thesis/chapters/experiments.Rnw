@@ -111,11 +111,11 @@ There's a trend between the values 180 and 230 of the x axis. This trend is comp
 
 After the publication of \cite{XXX}, the author perceived that the times were affected by executing multiple runs in parallel, \emph{even if each run was being executed in a exclusive/isolated core}. We credit this effect to the L2 and L3 memory cache levels being shared between cores. Some experiments were run to discern the magnitude of this effect.
 
-For the rest of this section, we will differ between runs that executed in parallel and runs that executed one-at-time (serially). It's important to note that we are talking about the wall-clock time of the algorithm execution (without the instance reading, or output printing) between: 1º) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and each one of the remaining cores isolated and executing one run too (i.e. parallel runs); 2º) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and each one of the remaining cores isolated but free (i.e. serial runs).
+For the rest of this section, we will differ between runs that executed in parallel and runs that executed one-at-time (serially). It's important to note that we are talking about the wall-clock time of the algorithm execution (without the instance reading, or output printing) between: 1\textsuperscript{st}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and two of the remaining cores isolated and executing one run too (i.e. parallel runs); 2\textsuperscript{nd}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and two of the remaining cores isolated but free (i.e. serial runs).
 
-The experiments have shown that the standard deviation and the mean time of multiple runs of the same algorithm in the same computer vary considerably if they are executed in parallel or serially; how much they vary depends of the specific algorithm and computer. The experiments used the reduced PYAsUKP benchmark and ten runs for each combination of the same algorithm, in the same computer, over the same instance, and in the same mode (parallell or serial).
+The experiments have shown that the standard deviation and the mean time of multiple runs of the same algorithm in the same computer vary considerably if they are executed in parallel or serially; how much they vary depends of the specific algorithm and computer. The experiments used the reduced PYAsUKP benchmark and ten runs for each combination of the same algorithm, in the same computer, over the same instance, and in the same mode (parallell or serial). For the same computer, all runs of one algorithm were executed before starting the first run of the other algorithms, what is specially important for the parallel runs, as this means they only have competed for memory with other runs of the same algorithm. The order of the runs between the ones with the same computer, algorithm and mode was random.
 
-The author do not intend to do an in-depth analysis, but only to show that the difference exists and can be significative. The experiments described at Section \ref{XXX} were executed serially exactly to avoid that noise.
+The author do not intend to do an in-depth analysis, but only to show that the difference exists and can be significative. The experiments described at Section \ref{XXX} were executed serially to avoid this noise. Also, this analysis answers a question of a referee made when the paper \cite{XXX} was under review, and show how the experiment setting (that corresponds to parallel runs over the \verb+notebook+ computer) benefited UKP5 over PYAsUKP. The author believes that the point made by \cite{XXX} still stands, as the effect over the numbers would not render a completely different analysis.
 
 \begin{figure}[h]
 \caption{Parallel and Serial Runs Standard Deviation}
@@ -148,29 +148,34 @@ ggplot(data = com_sd,
 \label{fig:sd_env_infl}
 \end{figure}
 
+The first we can see at Figure~\ref{fig:sd_env_infl} is that the standard deviation of the parallels runs is significantly greater than the ones from the serial runs (note that the axis aren't fixed scale). The runs in parallel mode were executed in random order and each of the ten runs with the same setting, will have probably competed for cache with different runs; this explains the SD difference between parallel and serial.
+
+The SD of UKP5 is much smaller than the one of PYAsUKP (independent of mode or computer), what is probably caused by the locality of reference of the UKP5 algorithm in contrast with PYAsUKP. The desktop setting shows considerably less SD over the serial runs (in contrast to the notebook setting); what can be explained by the fact the L1 cache (that isn't shared between cores) is bigger in the desktop than the notebook computer. The desktop setting also shows considerably less SD for the parallel runs, however the instances with the biggest SD seems to be less affected by this effect than the others.
+
+Finally, we can see that the instance type is tied to the algorithm used and the standard deviation of their times. The author believes that the distribution of the items size (that changes how farther will be the memory positions accessed by UKP5 sequentially) and profit (that ) have a big impact on the standard deviation, as they will effect the cache misses.
+
 \begin{figure}[h]
 \caption{}
 \begin{center}
 <<times_env_infl,fig=true,echo=false>>=
-env_file_mean_times <- env_data %>%
-                       select(algorithm, computer, mode, filename, internal_time) %>%
-                       group_by(algorithm, computer, mode, filename) %>%
-                       summarise(internal_time = mean(internal_time))
+env_file_mean_times <- env_data %>% 
+  select(algorithm, computer, mode, filename, internal_time) %>% 
+  group_by(algorithm, computer, mode, filename) %>% 
+  summarise(mean_time = mean(internal_time))
 
 create_facet <- function(env_file_mean_times, alg_name, com_name) {
   serial <- filter(env_file_mean_times, mode == "serial" &
-                   algorithm == alg_name &
-                   computer == com_name) %>% arrange(filename)
-  parallel <- filter(env_file_mean_times, mode == "parallel" &
                      algorithm == alg_name &
                      computer == com_name) %>% arrange(filename)
+  parallel <- filter(env_file_mean_times, mode == "parallel" &
+                       algorithm == alg_name &
+                       computer == com_name) %>% arrange(filename)
   ratio_parallel_serial <- data.frame(filename = serial$filename,
                                       algorithm = serial$algorithm,
                                       computer = serial$computer,
-                                      serial_time = serial$internal_time,
-                                      parallel_time = parallel$internal_time) %>%
-    mutate(ratio = parallel_time/serial_time) %>% arrange(ratio)
-  ratio_parallel_serial$order <- 1:454
+                                      serial_time = serial$mean_time,
+                                      parallel_time = parallel$mean_time) %>% 
+    mutate(ratio = parallel_time/serial_time)
   ratio_parallel_serial
 }
 
@@ -179,9 +184,10 @@ t2 <- create_facet(env_file_mean_times, "ukp5", "desktop")
 t3 <- create_facet(env_file_mean_times, "pyasukpt", "notebook")
 t4 <- create_facet(env_file_mean_times, "pyasukpt", "desktop")
 t <- rbind(t1, t2, t3, t4)
+t$inst_class <- sapply(t$filename, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
 t$env = paste(t$algorithm, t$computer, sep = '_')
-ggplot(t, aes(x = order, y = ratio)) +
-  xlab('Instance index when sorted by the y axis value\n(different for each chart)') +
+ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) + #scale_x_log10() +
+  xlab('Mean time of the serial runs (seconds)') +
   ylab('mean parallel time / mean serial time\n(same instance, same environment)') +
   geom_point() + theme(legend.position = 'bottom') + theme(legend.title = element_blank()) + facet_wrap(~ env)
 @
@@ -189,6 +195,8 @@ ggplot(t, aes(x = order, y = ratio)) +
 \legend{Source: the author.}
 \label{fig:sd_env_infl}
 \end{figure}
+
+The author hypothesize that the cache growth means little to runs that even with the cache growth will not access the same region 
 
 To have a higher level of trust on our result, all the experiments that follow 
 

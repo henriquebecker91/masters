@@ -111,9 +111,14 @@ There's a trend between the values 180 and 230 of the x axis. This trend is comp
 
 After the publication of \cite{XXX}, the author perceived that the times were affected by executing multiple runs in parallel, \emph{even if each run was being executed in a exclusive/isolated core}. We credit this effect to the L2 and L3 memory cache levels being shared between cores. Some experiments were run to discern the magnitude of this effect.
 
+For the rest of this section, we will differ between runs that executed in parallel and runs that executed one-at-time (serially). It's important to note that we are talking about the wall-clock time of the algorithm execution (without the instance reading, or output printing) between: 1º) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and each one of the remaining cores isolated and executing one run too (i.e. parallel runs); 2º) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and each one of the remaining cores isolated but free (i.e. serial runs).
+
+The experiments have shown that the standard deviation and the mean time of multiple runs of the same algorithm in the same computer vary considerably if they are executed in parallel or serially; how much they vary depends of the specific algorithm and computer. The experiments used the reduced PYAsUKP benchmark and ten runs for each combination of the same algorithm, in the same computer, over the same instance, and in the same mode (parallell or serial).
+
+The author do not intend to do an in-depth analysis, but only to show that the difference exists and can be significative. The experiments described at Section \ref{XXX} were executed serially exactly to avoid that noise.
 
 \begin{figure}[h]
-\caption{}
+\caption{Parallel and Serial Runs Standard Deviation}
 \begin{center}
 <<sd_env_infl,fig=true,echo=false>>=
 serial_big_sd <- filter(env_data, mode == "serial") %>%

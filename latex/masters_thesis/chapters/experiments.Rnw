@@ -113,46 +113,48 @@ After the publication of \cite{XXX}, the author perceived that the times were af
 
 For the rest of this section, we will differ between runs that executed in parallel and runs that executed one-at-time (serially). It's important to note that we are talking about the wall-clock time of the algorithm execution (without the instance reading, or output printing) between: 1\textsuperscript{st}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and two of the remaining cores isolated and executing one run too (i.e. parallel runs); 2\textsuperscript{nd}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and two of the remaining cores isolated but free (i.e. serial runs).
 
-The experiments have shown that the standard deviation and the mean time of multiple runs of the same algorithm in the same computer vary considerably if they are executed in parallel or serially; how much they vary depends of the specific algorithm and computer. The experiments used the reduced PYAsUKP benchmark and ten runs for each combination of the same algorithm, in the same computer, over the same instance, and in the same mode (parallell or serial). For the same computer, all runs of one algorithm were executed before starting the first run of the other algorithms, what is specially important for the parallel runs, as this means they only have competed for memory with other runs of the same algorithm. The order of the runs between the ones with the same computer, algorithm and mode was random.
+The experiments have shown that the mean time of multiple runs of the same algorithm in the same computer vary considerably if they are executed in parallel or serially; how much they vary depends of the specific algorithm and computer. The experiments used the reduced PYAsUKP benchmark and ten runs for each combination of the same algorithm, in the same computer, over the same instance, and in the same mode (parallell or serial). For the same computer, all runs of one algorithm were executed before starting the first run of the other algorithms, what is specially important for the parallel runs, as this means they only have competed for cache with other runs of the same algorithm. The order of the runs between the ones with the same computer, algorithm and mode was random.
 
-The author do not intend to do an in-depth analysis, but only to show that the difference exists and can be significative. The experiments described at Section \ref{XXX} were executed serially to avoid this noise. Also, this analysis answers a question of a referee made when the paper \cite{XXX} was under review, and show how the experiment setting (that corresponds to parallel runs over the \verb+notebook+ computer) benefited UKP5 over PYAsUKP. The author believes that the point made by \cite{XXX} still stands, as the effect over the numbers would not render a completely different analysis.
+The author do not intend to do an in-depth analysis, but only to show that the difference exists and can be significative. The experiments described at Section \ref{XXX} were executed serially to avoid this noise. Also, this analysis answers a question of a referee made when the paper \cite{XXX} was under review, and show how the experiment setting (that corresponds to parallel runs over the \verb+notebook+ computer) don't benefited UKP5 over PYAsUKP. The author believes that the point made by \cite{XXX} still stands, as the effect over the numbers would not render a much different analysis.
 
-\begin{figure}[h]
-\caption{Parallel and Serial Runs Standard Deviation}
-\begin{center}
-<<sd_env_infl,fig=true,echo=false>>=
-serial_big_sd <- filter(env_data, mode == "serial") %>%
-                 group_by(computer, algorithm, filename) %>%
-                 summarise(internal_time_sd = sd(internal_time)) %>%
-                 arrange(computer, algorithm, filename)
-parallel_big_sd <- filter(env_data, mode == "parallel") %>%
-                   group_by(computer, algorithm, filename) %>%
-                   summarise(internal_time_sd = sd(internal_time)) %>%
-                   arrange(computer, algorithm, filename)
+% WE WERE COMPARING SD OF DIFFERENT MEANS DIRECTLY, THIS WAS VERY VERY STUPID
+% REMOVING THE WHOLE SECTION
+%\begin{figure}[h]
+%\caption{Parallel and Serial Runs Standard Deviation}
+%\begin{center}
+%<<sd_env_infl,fig=true,echo=false>>=
+%serial_big_sd <- filter(env_data, mode == "serial") %>%
+%                 group_by(computer, algorithm, filename) %>%
+%                 summarise(internal_time_sd = sd(internal_time)) %>%
+%                 arrange(computer, algorithm, filename)
+%parallel_big_sd <- filter(env_data, mode == "parallel") %>%
+%                   group_by(computer, algorithm, filename) %>%
+%                   summarise(internal_time_sd = sd(internal_time)) %>%
+%                   arrange(computer, algorithm, filename)
+%
+%com_sd <- data.frame(filename = serial_big_sd$filename,
+%                     serial_sd = serial_big_sd$internal_time_sd,
+%                     parallel_sd = parallel_big_sd$internal_time_sd,
+%                     algorithm = serial_big_sd$algorithm,
+%                     computer = serial_big_sd$computer)
+%
+%com_sd$inst_class <- sapply(com_sd$filename, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
+%com_sd$env = paste(com_sd$algorithm, com_sd$computer, sep = '_')
+%
+%ggplot(data = com_sd,
+%       aes(x = serial_sd, y = parallel_sd, color = inst_class)) +
+%       geom_point() + facet_wrap(~ env, scales = 'free')
+%@
+%\end{center}
+%\legend{Source: the author.}
+%\label{fig:sd_env_infl}
+%\end{figure}
 
-com_sd <- data.frame(filename = serial_big_sd$filename,
-                     serial_sd = serial_big_sd$internal_time_sd,
-                     parallel_sd = parallel_big_sd$internal_time_sd,
-                     algorithm = serial_big_sd$algorithm,
-                     computer = serial_big_sd$computer)
+%The first we can see at Figure~\ref{fig:sd_env_infl} is that the standard deviation of the parallels runs is significantly greater than the ones from the serial runs (note that the axis aren't fixed scale). The runs in parallel mode were executed in random order and each of the ten runs with the same setting, will have probably competed for cache with different runs; this explains the SD difference between parallel and serial.
 
-com_sd$inst_class <- sapply(com_sd$filename, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
-com_sd$env = paste(com_sd$algorithm, com_sd$computer, sep = '_')
+%The SD of UKP5 is much smaller than the one of PYAsUKP (independent of mode or computer), but this is only a effect from the UKP5 times being smaller (SD vary with scale). The desktop setting shows considerably less SD over the serial runs (in contrast to the notebook setting); what can be explained by the fact the L1 cache (that isn't shared between cores) is bigger in the desktop than the notebook computer (bigger L2 and L3 caches also help). The desktop setting also shows considerably less SD for the parallel runs, however the instances with the biggest SD seems to be less affected by this effect than the others.
 
-ggplot(data = com_sd,
-       aes(x = serial_sd, y = parallel_sd, color = inst_class)) +
-       geom_point() + facet_wrap(~ env, scales = 'free')
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:sd_env_infl}
-\end{figure}
-
-The first we can see at Figure~\ref{fig:sd_env_infl} is that the standard deviation of the parallels runs is significantly greater than the ones from the serial runs (note that the axis aren't fixed scale). The runs in parallel mode were executed in random order and each of the ten runs with the same setting, will have probably competed for cache with different runs; this explains the SD difference between parallel and serial.
-
-The SD of UKP5 is much smaller than the one of PYAsUKP (independent of mode or computer), what is probably caused by the locality of reference of the UKP5 algorithm in contrast with PYAsUKP. The desktop setting shows considerably less SD over the serial runs (in contrast to the notebook setting); what can be explained by the fact the L1 cache (that isn't shared between cores) is bigger in the desktop than the notebook computer. The desktop setting also shows considerably less SD for the parallel runs, however the instances with the biggest SD seems to be less affected by this effect than the others.
-
-Finally, we can see that the instance type is tied to the algorithm used and the standard deviation of their times. The author believes that the distribution of the items size (that changes how farther will be the memory positions accessed by UKP5 sequentially) and profit (that ) have a big impact on the standard deviation, as they will effect the cache misses.
+%Finally, we can see that the instance type is tied to the algorithm used and the standard deviation of their times. The author believes that the distribution of the items size (that changes how farther will be the memory positions accessed by UKP5 sequentially) and profit (that ) have a big impact on the standard deviation, as they will effect the cache misses.
 
 \begin{figure}[h]
 \caption{}
@@ -186,23 +188,32 @@ t4 <- create_facet(env_file_mean_times, "pyasukpt", "desktop")
 t <- rbind(t1, t2, t3, t4)
 t$inst_class <- sapply(t$filename, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
 t$env = paste(t$algorithm, t$computer, sep = '_')
-ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) + #scale_x_log10() +
+ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) +
   xlab('Mean time of the serial runs (seconds)') +
   ylab('mean parallel time / mean serial time\n(same instance, same environment)') +
-  geom_point() + theme(legend.position = 'bottom') + theme(legend.title = element_blank()) + facet_wrap(~ env)
+  geom_point() + theme(legend.position = 'bottom') + theme(legend.title = element_blank()) + facet_wrap(~ env) +
+  scale_x_continuous(trans = 'log10', breaks = c(0.1, 10, 100))
 @
 \end{center}
 \legend{Source: the author.}
 \label{fig:mean_time_env_infl}
 \end{figure}
 
-The lack of logarithmic scale at the x axis of Figure \ref{fig:mean_time_env_infl} flatten the UKP5 data points, but gives us a clear view of how UKP5 can be benefited in an experiment that makes multiple runs in parallel and compares PYAsUKP and UKP5. The execution of runs in parallel seems to affect UKP5 far more than PYAsUKP, as it has much more points distant from \(y \approx 1\) (where serial and parallel runs have similar mean times) than PYAsUKP, and only UKP5 has a significative share of points over \(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time).
+% The lack of logarithmic scale at the x axis of Figure \ref{fig:mean_time_env_infl} flatten the UKP5 data points, but gives us a clear view of how UKP5 can be benefited in an experiment that makes multiple runs in parallel and compares PYAsUKP and UKP5. The execution of runs in parallel seems to affect UKP5 far more than PYAsUKP, as it has much more points distant from \(y \approx 1\) (where serial and parallel runs have similar mean times) than PYAsUKP, and only UKP5 has a significative share of points over \(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time).
 
-However, all UKP5 runs use little time (clearly less than 25 seconds) where many of the PYAsUKP runs have times between 25 and 300 (or 200) seconds. Even more, the PYAsUKP runs that take more time are also the more affected by the parallel execution; the author hypothesize that they take more time because the instance is harder, and use more memory for the same reason, this way they end up using more than the L1 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable). The result is that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time, making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
+% However, all UKP5 runs use little time (clearly less than 25 seconds) where many of the PYAsUKP runs have times between 25 and 300 (or 200) seconds. Even more, the PYAsUKP runs that take more time are also the more affected by the parallel execution; the author hypothesize that they take more time because the instance is harder, and use more memory for the same reason, this way they end up using more than the L1 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable). The result is that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time, making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
 
-Let's examinate closely the values for the notebook setting, as this was the one used at the \cite{XXX} paper. We will refer to UKP5 (or PYAsUKP) Parallel (or Serial) Total time (or TT, for short) as the sum of the internal times of all the runs of that algorithm in that computer and mode. The 
+The execution of runs in parallel seems to affect UKP5 far more than PYAsUKP, as it has much more points distant from \(y \approx 1\) (where serial and parallel runs have similar mean times) than PYAsUKP, and only UKP5 has a significative share of points over \(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time). The author believes that the fact that UKP5 initializes two arrays with the size of the knapsack capacity (plus \(w_{max}\)), and access many diferent memory regions in sequence (at each position of those arrays it access in an arbitrary order the position up to \(w_{max}\) positions far from the current position), makes it to be more affected by the cache sharing.
 
-<<env_infl_nums,echo=true>>=
+However, one could point that all UKP5 runs use little time (less than 10 seconds when serially and, consequently, no more than thirty when in parallel), where many of the PYAsUKP runs have times between 10 and 100 seconds (serially), with some up to 300 seconds. Even more, the PYAsUKP runs that take more time are also the more affected by the parallel execution; the author hypothesize that they take more time because the instance is harder, and use more memory for the same reason, this way they end up using more than the L1 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable, the same effect happens to UKP5). The result is that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time (in absolute numbers), making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
+
+Let's examinate closely the values for the notebook setting, as this was the one used at the \cite{XXX} paper. We will refer to UKP5 (or PYAsUKP) Parallel (or Serial) Total time (or TT, for short) as the sum of the internal times of all the runs of that algorithm in that mode (only in the notebook setting). The UKP5 Parallel TT is 2.03 times greater than UKP5 Serial TT, while PYAsUKP Parallel TT is only 1.60 times greater than the PYAsUKP Serial TT. However, this means about 8252 extra seconds for UKP5 Parallel TT (compared to the serial time) and about 74180 extra seconds for PYAsUKP Parallel TT (compared to the serial time). We will see that this considerable absolute difference don't end up benefiting UKP5 in the analysis, as the PYAsUKP Serial TT is about 12.10 times bigger than the UKP5 Serial TT, but the PYAsUKP Parallel TT is about 15.33 times bigger than UKP5 Parallel TT. In fact, the parallel execution seems to benefit the PYAsUKP numbers against UKP5 while not by much. If we focused in the desktop setting, we would see that PYAsUKP was benefited too (while by less), the PYAsUKP Parallel TT would be 15.62 times greater than the UKP5 Parallel TT; and the PYAsUKP Serial TT would be 16.50 times greater than the UKP5 Serial TT.
+
+The author belives this superficial analysis is sufficient to convince the reader that there's a significant difference by running the experiments serially or in parallel. If some real-world application of UKP needs to solve multiple knapsacks in parallel, algorithms that use less memory (or with better locality of reference) can be prefered not only to avoid swapping, but because they will affect each others times less. As this isn't the case here, and as the CSP (real world application of UKP covered in this chapter) specifically solves multiple knapsacks serially, the remaining experiments at this chapter will consist of serially executed runs.
+
+<<env_infl_nums,echo=false,results=hide>>=
+# Used to get the values of the above paragraph. Change 'echo=false' to
+# to display the values 'echo=true'.
 ukp5_par <- filter(env_data, mode == 'parallel' & algorithm == 'ukp5' & computer == 'notebook')
 pya_par <- filter(env_data, mode == 'parallel' & algorithm == 'pyasukpt' & computer == 'notebook')
 ukp5_ser <- filter(env_data, mode == 'serial' & algorithm == 'ukp5' & computer == 'notebook')
@@ -214,12 +225,19 @@ sum(pya_par$internal_time) / sum(pya_ser$internal_time)
 sum(pya_par$internal_time) - sum(pya_ser$internal_time)
 sum(pya_ser$internal_time) / sum(ukp5_ser$internal_time)
 sum(pya_par$internal_time) / sum(ukp5_par$internal_time)
+
+ukp5_par <- filter(env_data, mode == 'parallel' & algorithm == 'ukp5' & computer == 'desktop')
+pya_par <- filter(env_data, mode == 'parallel' & algorithm == 'pyasukpt' & computer == 'desktop')
+ukp5_ser <- filter(env_data, mode == 'serial' & algorithm == 'ukp5' & computer == 'desktop')
+pya_ser <- filter(env_data, mode == 'serial' & algorithm == 'pyasukpt' & computer == 'desktop')
+
+sum(ukp5_par$internal_time) / sum(ukp5_ser$internal_time)
+sum(ukp5_par$internal_time) - sum(ukp5_ser$internal_time)
+sum(pya_par$internal_time) / sum(pya_ser$internal_time)
+sum(pya_par$internal_time) - sum(pya_ser$internal_time)
+sum(pya_ser$internal_time) / sum(ukp5_ser$internal_time)
+sum(pya_par$internal_time) / sum(ukp5_par$internal_time)
 @
-
-
-The author hypothesize that the cache growth means little to runs that even with the cache growth will not access the same region 
-
-To have a higher level of trust on our result, all the experiments that follow 
 
 \section{Experiments and Results}
 \label{sec:exp_and_res}
@@ -295,6 +313,8 @@ While the simple, multiple and collective dominances are rare in a BREQ distribu
 
 \subsection{PYAsUKP 4540 Instances Benchmark}
 
+In this section we present an updated version of the bechmark presented in the paper \cite{XXX}, which in turn was based in the benchmark presented at \cite{XXX}. The comparison at \cite{XXX} was between UKP5 and PYAsUKP, here we present the same benchmark with one extra method, and comparison between other three methods over a reduced version of that benchmark (with 10\% of the instances of each group). The reduced version was used because of time restraints, executing only over 10\% of the instances was sufficient to know that the methods weren't competitive.
+
 \begin{figure}[h]
 \caption{Benchmark with fast methods (no timeout)}
 \begin{center}
@@ -333,6 +353,16 @@ ggplot(csv_no_na_order,
 \legend{Source: the author.}
 \label{fig:pya_fast}
 \end{figure}
+
+Figure \ref{fig:pya_fast} show us that, except by sc and ss2, the times of PYAsUKP runs show often two main trends. The first trend cover the times of ukp5 and mgreendp (beggining at the left of the x axis), and the second trend with times significantly smaller than UKP5 and mgreendp (beggining at the middle/right of x axis), both merge in a single trend that points to the top right corner of the chart. The UKP5 and mgreendp present similar times that form plateus. Those plateus aggregate instances that take about the same time to solve by UKP5/mgreendp.
+
+While the author don't examinated the PYAsUKP internals, he belives that the second PYAsUKP trend is formed by instances where the B\&B preprocessing phase (maybe together with the PYAsUKP dominance tests) had considerable success. This would also explain the lack of this trend at the sc and ss2 instance classes, where such bounds and tests have less effect (ss2, specifically, is comprised of subset-sum instances, that do not have different efficiency between items and, consequently, aren't affected by bounds). When PYAsUKP B\&B phase fails to yield good results, the PYAsUKP's DP phase times are greater than the UKP5 and mgreendp times.
+
+The plateaus formed by the UKP5 and mgreendp runs show very little time variation between some groups of instances. A closer examination of the data reveals thos instance groups (plateaus) agrregate instances with the same number of items (for the same distribution) or, for some lower plateaus, instances with different number of items but all of them a magnitudes smaller than the numbers of items of the plateau(s) above. This behaviour shows that UKP5 and mgreendp1 are little affected by the specific items that make an instance, the instance size and distribution being good predictors of the time the UKP5/mgreendp will need to solve it. 
+
+PYAsUKP seems to have a much greater variation between the times for instances with similar number of items of the same distribuion. We can see a line with a slope close to 45 degrees close to the top right corner of the charts. This line is over a logarithmic y axis, so it's a huge variation compared to the UKP5 plateau below it, that is solving the same instances (that, as we have seen above, have similar number of items).
+
+The times between UKP5 and mgreendp are very similar, specially at instance classes hi, nsds2, where it has a small advantage. This should come with no surprise as they are similar algorithms. What is surprising is its behaviour at saw and sc instance classes, where the situation is reversed, and mgreendp takes considerably more time than UKP5 in many cases. The behaviour at those two classes can be explained by two main factors. The first factor is that mgreendp solves the knapsack subproblems without the best item, and regularly tests if it can abandon the DP and fill the remaining knapsack capacity with copies of the best item. The removal of the best item from the items list weakens the effect of the solution dominance applied by mgreendp (also used by UKP5). Some solutions that would be never generated by UKP5 will be generated at mgreendp because better solutions with the best item don't exist to dominate them. The second factor is the periodicity check applied by UKP5. This check has little overhead and stopped UKP5 computation before reaching the knapsack capacity the majority of the times (only 18 of 240 sc instances and 128 of the 1100 saw instances don't benefited from the periodicity check). % this data is buried in the file with all ukp5 outputs, sorry about that
 
 \begin{figure}[h]
 \caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}

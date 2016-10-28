@@ -21,23 +21,23 @@ mtu$X <- NULL
 env_data <- read.csv("../data/env_influence.csv", sep = ";")
 env_data$X <- NULL
 
-compare_num_iter <- function(csv, first_method, second_method) {
+compare_num_iter <- function(csv, first_m, second_m) {
   first_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == first_method) %>% arrange(filename)
+    filter(algorithm == first_m) %>% arrange(filename)
   second_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == second_method) %>% arrange(filename)
+    filter(algorithm == second_m) %>% arrange(filename)
   first_t$diff <- first_t$total_iter - second_t$total_iter
   first_t$norm_diff <- first_t$diff / second_t$total_iter
   first_t <- first_t %>% arrange(norm_diff)
-  first_t$filename <- factor(first_t$filename,
-                             levels = unique(first_t$filename))
-  ggplot(first_t,
-         aes(x = as.numeric(filename),
-             y = norm_diff*100)) +
-    ylab(paste('Deviation of the number of iterations of',
-               first_method, "\nrelative to", second_method,
-               '(in %)')) +
-    xlab("Instance index when ordered by the value at axis y")
+  first_t$order <- 1:length(first_t$norm_diff)
+  first_t
+#  ggplot(first_t,
+#         aes(x = as.numeric(filename),
+#             y = norm_diff*100)) +
+#    ylab(paste('Deviation of the number of iterations of',
+#               first_m, "\nrelative to", second_m,
+#               '(in %)')) +
+#    xlab("Instance index when ordered by the value at axis y")
 }
 
 ukp_time_comp_plot <- function (data, legend) {
@@ -354,53 +354,71 @@ ggplot(csv_no_na_order,
 \label{fig:pya_fast}
 \end{figure}
 
+The attent reader will perceive that the ss2 distribution don't show mgreendp data points. This happens because it fails automatically over instances were the two most efficient items have the same efficiency (what always happens at subset sum instances). We could fix this problem, but this would disable mgreendp specific periodicity check (that it's main feature) and make the algorithm even more similar to UKP5. So we opted for not running mgreendp over those instances.
+
 Figure \ref{fig:pya_fast} show us that, except by sc and ss2, the times of PYAsUKP runs show often two main trends. The first trend cover the times of ukp5 and mgreendp (beggining at the left of the x axis), and the second trend with times significantly smaller than UKP5 and mgreendp (beggining at the middle/right of x axis), both merge in a single trend that points to the top right corner of the chart. The UKP5 and mgreendp present similar times that form plateus. Those plateus aggregate instances that take about the same time to solve by UKP5/mgreendp.
 
-While the author don't examinated the PYAsUKP internals, he belives that the second PYAsUKP trend is formed by instances where the B\&B preprocessing phase (maybe together with the PYAsUKP dominance tests) had considerable success. This would also explain the lack of this trend at the sc and ss2 instance classes, where such bounds and tests have less effect (ss2, specifically, is comprised of subset-sum instances, that do not have different efficiency between items and, consequently, aren't affected by bounds). When PYAsUKP B\&B phase fails to yield good results, the PYAsUKP's DP phase times are greater than the UKP5 and mgreendp times.
+While the author don't examinated the PYAsUKP internals, he belives that the second PYAsUKP trend is formed by instances where the B\&B preprocessing phase had considerable success (stopped the computation or used bounds to remove items before excuting the DP). This would also explain the lack of this trend at the sc and ss2 instance classes, where such bounds and tests have less effect (the ss2 class is comprised of subset-sum instances, that do not have different efficiency between items and, consequently, are little affected by bounds). When PYAsUKP B\&B phase fails to yield good results, the PYAsUKP's DP phase times are greater than the UKP5 and mgreendp times.
 
-The plateaus formed by the UKP5 and mgreendp runs show very little time variation between some groups of instances. A closer examination of the data reveals thos instance groups (plateaus) agrregate instances with the same number of items (for the same distribution) or, for some lower plateaus, instances with different number of items but all of them a magnitudes smaller than the numbers of items of the plateau(s) above. This behaviour shows that UKP5 and mgreendp1 are little affected by the specific items that make an instance, the instance size and distribution being good predictors of the time the UKP5/mgreendp will need to solve it. 
+The plateaus formed by the UKP5 and mgreendp runs show very little time variation between some groups of instances. A closer examination of the data reveals that the instance groups (plateaus) aggregate instances with the same number of items (for the same distribution) or, instances with different number of items but all of them magnitude(s) smaller (or greater) than the numbers of items of the plateau(s) above (or below). This behaviour shows that UKP5 and mgreendp1 are little affected by the specific items that make an instance, the instance size and distribution being good predictors of the time the UKP5/mgreendp will need to solve it. 
 
-PYAsUKP seems to have a much greater variation between the times for instances with similar number of items of the same distribuion. We can see a line with a slope close to 45 degrees close to the top right corner of the charts. This line is over a logarithmic y axis, so it's a huge variation compared to the UKP5 plateau below it, that is solving the same instances (that, as we have seen above, have similar number of items).
+PYAsUKP seems to have a much greater variation between the times for instances with similar number of items of the same distribuion. We can see a line with a slope of about 45 degrees close to the top right corner of the charts. This line is over a logarithmic y axis, so it's a huge variation compared to the UKP5 plateau below it, that is solving the same instances (that, as we have seen above, have similar number of items).
 
-The times between UKP5 and mgreendp are very similar, specially at instance classes hi, nsds2, where it has a small advantage. This should come with no surprise as they are similar algorithms. What is surprising is its behaviour at saw and sc instance classes, where the situation is reversed, and mgreendp takes considerably more time than UKP5 in many cases. The behaviour at those two classes can be explained by two main factors. The first factor is that mgreendp solves the knapsack subproblems without the best item, and regularly tests if it can abandon the DP and fill the remaining knapsack capacity with copies of the best item. The removal of the best item from the items list weakens the effect of the solution dominance applied by mgreendp (also used by UKP5). Some solutions that would be never generated by UKP5 will be generated at mgreendp because better solutions with the best item don't exist to dominate them. The second factor is the periodicity check applied by UKP5. This check has little overhead and stopped UKP5 computation before reaching the knapsack capacity the majority of the times (only 18 of 240 sc instances and 128 of the 1100 saw instances don't benefited from the periodicity check). % this data is buried in the file with all ukp5 outputs, sorry about that
+The times between UKP5 and mgreendp are very similar, specially at instance classes hi, nsds2, where it has a small advantage. This should come with no surprise as they are similar algorithms. What is surprising is its behaviour at saw and sc instance classes, where the situation is reversed, and mgreendp takes considerably more time than UKP5 in many cases. The behaviour at those two classes can be explained by three main factors.
 
-\begin{figure}[h]
-\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
-\begin{center}
-<<pya_slow_fig,fig=true,echo=false>>=
-csv_no_na <- slow
-csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
-csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
-  factor(strsplit(as.character(f), "_")[[1]][1],
-         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-}))
-csv_no_na_mean <- csv_no_na %>%
-  group_by(filename) %>%
-  mutate(mean_methods_time = mean(internal_time))
-dt_copy <- csv_no_na_mean
-dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
-  arrange(mean_methods_time)
-csv_no_na_order$filename <- factor(csv_no_na_order$filename,
-                                   levels = unique(csv_no_na_order$filename))
+The first factor is a characteristic of the optimal solutions from the saw and sc instances. The optimal solutions of these distributions are comprised mainly of (hundreds of) copies of the best item and one copy other item. This characteristic gives a big importance to the best item in those instances, and together with the the next two factors, explain the algorithms behavior.
 
-ggplot(csv_no_na_order,
-       aes(x = as.numeric(filename),
-           y = internal_time,
-           color = algorithm)) + 
-  geom_point() +
-  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
-                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
-                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
-#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
-  ylab('Time to solve (seconds, logarithmic)') +
-  xlab('Instance index when ordered by average time to solve') +
-  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:pya_slow}
-\end{figure}
+The second factor is that mgreendp solves the knapsack subproblems without the best item. The algorithm does that to allow for a mechanism that periodically checks if it can stop the computation and fill the remaining knapsack capacity with copies of the best item. Solving the DP subproblems without the best item weakens the effect of the solution dominance applied by mgreendp (also used by UKP5). Some solutions that would be never generated by UKP5 will be generated at mgreendp, this because better solutions that used the best item don't exist to dominate those inferior solutions.
+
+The third and last factor is the periodicity check applied by UKP5. As the mgreendp mechanism discussed above, this check stops UKP5 when it finds that the remaining capacity can simply be filled by copies of the best item. As this check don't remove the best item from the item list, it has less overhead than the mgreendp test for those instances. The UKP5 periodicity check benefited 222 of the 240 sc instances and 972 of the 1100 saw instances. % this stat is buried in the file with all ukp5 outputs, sorry about that, check for last_y_value_outer_loop in ukp5 outputs
+
+Our conclusion about this experiment is that ukp5 and mgreendp generally will dominate PYAsUKP at big instances of the presented distributions, however for a specific instance PYAsUKP can show times much smaller, similar or much greater than UKP5. As PYAsUKP times seems to grow more than UKP5/mgreendp times with the instance growth, the possibily that PYAsUKP than UKP5 has better results for even bigger instances of those distributions seems improbable (while possible). About UKP5 and mgreendp, they have similar results (as expected), where UKP5 is slight worse than mgreendp in some distributions and considerable better in others, the choice between one and another has to be made based in the distribution (specially considering that mgreendp will need workarounds to work with instances where the two most efficient items can have the same efficiency). As those instances are artificially generated and don't model any real world instances, the author advises to take them with a grain of salt. 
+
+%\begin{figure}[h]
+%\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
+%\begin{center}
+%<<pya_slow_fig,fig=true,echo=false>>=
+%csv_no_na <- slow
+%csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
+%csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
+%  factor(strsplit(as.character(f), "_")[[1]][1],
+%         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+%}))
+%csv_no_na_mean <- csv_no_na %>%
+%  group_by(filename) %>%
+%  mutate(mean_methods_time = mean(internal_time))
+%dt_copy <- csv_no_na_mean
+%dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+%csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
+%  arrange(mean_methods_time)
+%csv_no_na_order$filename <- factor(csv_no_na_order$filename,
+%                                   levels = unique(csv_no_na_order$filename))
+%
+%ggplot(csv_no_na_order,
+%       aes(x = as.numeric(filename),
+%           y = internal_time,
+%           color = algorithm)) + 
+%  geom_point() +
+%  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
+%                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
+%                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
+%#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
+%  ylab('Time to solve (seconds, logarithmic)') +
+%  xlab('Instance index when ordered by average time to solve') +
+%  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+%@
+%\end{center}
+%\legend{Source: the author.}
+%\label{fig:pya_slow}
+%\end{figure}
+
+\subsection{Algorithms implemented but not used at this benchmark}
+
+The PYAsUKP benchmark was proposed at paper \cite{XXX}. In this paper, the authors compare MTU2 to EDUK and EDUK2 using an easier version of the PYAsUKP benchmark. The PYAsUKP benchmark was not used because MTU2 used 32 bits integers and had overflow problems when solving the instances (the easier version of the benchmark had smaller coefficients to allow MTU2 to run without problems).
+
+As MTU2 and MTU1 are the most well-known B\&B algorithms for solving UKP, the author found interesting to test them against the PYAsUKP benchmark. The author implemented both algorithms in C++ (using templates) and adapted the original code in Fortran to work with 64 bits. The author tried to execute MTU1 and MTU2 over the PYAsUKP benchmark, but very fast become clear that both algorithms aren't competitive against the three algorithms compared in Figure \ref{XXX}. Many runs ended by timeout (used more than 1000 seconds), and running the four versions of the algorithm over the 4540 instances would take time from more relevant experiments. The author choose to run the experiment over the reduced PYAsUKP benchmark (only one tenth of the instances). The results can be found at section \ref{XXX}.
+
+Harold Greenberg wrote a paper with two other methods for solving the UKP\cite{XXX}, this paper was published after \cite{XXX} (that proposed the algorithm implemented by mgreendp). The author found interesting to implement those algorithms too, as they used different approachs\footnote{Those approaches are described as XXX and XXX.}, and also because they were from the same author that already designed an efficient algorithm. However, the first algorithm proved itself very time and memory consuming, and the second algorithm didn't worked for all cases (could not be considered an exact method without using an auxiliar solver to solve instances where the method failed). After some tests become clear that the intent of the paper was a theoretical exploration of new approaches, and the algorithms were dicarded from experimentation over this benchmark instances. Readers interested in both methods can check implementations of them, made available at Github\footnote{XXX}.
 
 \subsection{CSP Knapsack Subproblem Experiment}
 
@@ -503,50 +521,33 @@ ggplot(corr_time,
 \end{figure}
 
 \begin{figure}[h]
-\caption{UKP5 Integer (sorted by efficiency and not sorted)}
+\caption{Relative differences between the numbers of iterations}
 \begin{center}
-<<int_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
-  geom_point()
+<<comp_num_iter,fig=true,echo=false>>=
+t1 <- compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock')
+  #geom_point() + ggtitle('UKP5 Integer\n(sorted by efficiency and not sorted')
+t1$type <- 'Integer (sort by efficiency vs no sort)'
+t2 <- compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock')
+t2$type <- 'Floating Point (sort by efficiency vs no sort)'
+  #geom_point() + ggtitle('UKP5 Floating Point\n(sorted by efficiency and not sorted)')
+t3 <- compare_num_iter(csp_csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock')
+t3$type <- 'No Sort (FP vs Integer)'
+  #geom_point() + ggtitle('UKP5 no sort\n(Floating Point vs Integer)')
+t4 <- compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock')
+t4$type <- 'Sort by efficiency (FP vs Integer)'
+  #geom_point() + ggtitle('UKP5 sorted by efficiency\n(Floating Point vs Integer)')
+#grid.arrange(t1, t2, t3, t4)
+t <- rbind(t1, t2, t3, t4)
+ggplot(t,
+       aes(x = order,
+           y = norm_diff*100)) +
+  ylab(paste('Deviation of the number of iterations of',
+             '\none method relative to other (in %)')) +
+  xlab("Instance index when ordered by the value at axis y") +
+  facet_wrap(~ type) + geom_point()
 @
 \end{center}
 \legend{Source: the author.}
-\label{fig:int_vs_int_ns}
-\end{figure}
-
-\begin{figure}[h]
-\caption{UKP5 Floating Point (sorted by efficiency and not sorted)}
-\begin{center}
-<<fp_vs_fp_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_vs_fp_ns}
-\end{figure}
-
-\begin{figure}[h]
-\caption{UKP5 no sort (Floating Point vs Integer)}
-\begin{center}
-<<fp_ns_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_ns_vs_int_ns}
-\end{figure}
-
-\begin{figure}[h]
-\caption{UKP5 sorted by efficiency (Floating Point vs Integer)}
-\begin{center}
-<<fp_vs_int,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_vs_int}
+\label{fig:comp_num_iter}
 \end{figure}
 

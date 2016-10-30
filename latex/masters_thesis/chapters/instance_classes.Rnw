@@ -1,3 +1,7 @@
+<<setup,results=hid,echo=false>>=
+library(ggplot2)
+@
+
 \chapter{The instance classes}
 
 %final
@@ -25,7 +29,7 @@ the reasons for their use is the possibility of generating many instances, of ma
 	The paper are the hard knapsack problems shows that even for 0-1 knapsack instances (that are by default harder than UKP instances), the instances used were easy to solve
 
 
-The major problem with an experimental analysis of the UKP solving methods over artificial instances is that the different solving approaches are affected by the items distributions (i.e. some methods are the best for some for some distributions and the worst for others). Consequently, the results aren't useful for someone that wants to tackle real world UKP instances, unless some artificial instance distribution ends up modelling the 
+The major problem with an experimental analysis of the UKP solving methods over artificial instances is that the different solving approaches are affected by the items distributions (i.e. some methods are the best for some for some distributions and the worst for others). Consequently, the results aren't useful for someone that wants to tackle real world UKP instances, unless some artificial instance distribution ends up modelling those instances.
 
 TODO: The use of testbeds is overrated?
 
@@ -68,6 +72,22 @@ The Bottom Right Ellipse Quadrant Instances (`BREQ instances', for short) is a n
 Distributions that are easy to solve by the DP approach and hard to solve by the B\&B approach are common in the literature. This distribution has the opposite characteristic, it is hard to solve by DP and easy to solve by B\&B. It's important to point that this is an artificially generated distribution that don't model any real world instances (that the author have knowledge). The author discourages the use and study of such artificial instances (including this one), and created this distribution only as a tool to demonstrate that isn't hard to create a distribution that benefits a solving approach over another. It's the author's opinion that research should focus on real-world instances and/or artificially generated instances that clearly model real world instances.
 
 The name given to this distribution is derived from the fact that, when plotted on a graph, the items show the form of a quarter of ellipse (specifically, the bottom right quadrant). All items in such distribution respect the following equation: \(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - (w_i^2 \times \frac{p_{max}}{w_{max}}^2)}}\)\footnote{In this context, \(w_{max}\) and \(p_{max}\) define the quadrant top right corner, i.e. the possible maximum value for an item's weight and profit, an item with those exact values doesn't need to exist in a BREQ instance. The rounding down in the formulae can be dropped if the profit is a real number and not an integer.}.
+
+\begin{figure}[h]
+\caption{A 128-16 BREQ Standard instance with \(n = 2048\)}
+\begin{center}
+<<uncorrelated,fig=true,echo=false>>=
+library(ggplot2)
+
+t <- read.csv('../data/128_16_std_breqd-n2048-s0.csv', sep = ';')
+qplot(w, p, data = t,
+  xlab = 'weight',
+  ylab = 'profit')     
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:breq_example}
+\end{figure}
 
 A natural consequence of this distribution shape is that the item profit grows quadratically with the item weight. This leads to the inexistance of simple, multiple and collective dominance\footnote{In truth, if the profit is integer, the smallest items can display some of those three dominances because the profit precision loss by rounding, but this is of little relevance and can be safely ignored for most purposes. If profit is an infinite precision real, the statement has no exceptions.}. In other words, for any multiset of two or more items \(s\) and any single item \(i\) (with respective weigths \(w_s\) and \(w_t\), and respective profits \(p_t\) and \(p_i\)), if \(w_s \leq w_i\) then \(p_s < p_i\).
 

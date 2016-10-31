@@ -43,8 +43,6 @@ In this work, the expression `uncorrelated instances' will be used to refer to a
 \caption{An uncorrelated instance generated with \(n = 100\), \(w_{min} = 1\), \(w_{min} = 1000\), \(p_{min} = 1\), and \(p_{max} = 1000\).}
 \begin{center}
 <<uncorrelated,fig=true,echo=false>>=
-library(ggplot2)
-
 n <- 100
 wmax <- 1000
 pmax <- 1000
@@ -52,11 +50,10 @@ s <- 42
 set.seed(s)
 w <- sample(1:wmax, n, replace=TRUE)
 p <- sample(1:pmax, n, replace=TRUE)
-t = data.frame(w = w, p = p)
+t <- data.frame(w = w, p = p)
 qplot(w, p, data = t,
   xlab = 'weight',
-  ylab = 'profit',
-  main = 'An uncorrelated instance')     
+  ylab = 'profit')
 @
 \end{center}
 \legend{Source: the author.}
@@ -76,7 +73,7 @@ The name given to this distribution is derived from the fact that, when plotted 
 \begin{figure}[h]
 \caption{A 128-16 BREQ Standard instance with \(n = 2048\)}
 \begin{center}
-<<uncorrelated,fig=true,echo=false>>=
+<<breq_inst,fig=true,echo=false>>=
 library(ggplot2)
 
 t <- read.csv('../data/128_16_std_breqd-n2048-s0.csv', sep = ';')

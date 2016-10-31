@@ -13,10 +13,21 @@ Put that the conversion from UKP to 0-1 KP and BKP is possible, but not even con
 REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfairly because of big flaws at the experiment design. THIS WILL BE SAID AT PRIOR WORK PROBABLY
 
 \subsection{MTU1 and MTU2}
-The difference between the fmtu and cpp-mtu: cpp-mtu will check if the vector is ordered by efficiency before running, and any subset-sum instance will be considered previously ordered. This impacts the difference between the two, maybe it's unfair to use cpp-mtu over subset-sum instances.
-
-The specific method of ordering the 100 more efficient, one after other, is also different.
 
 \section{Dynamic Programming}
+
+\subsection{The naive algorithm}
+
+\subsection{Ordered Step-Off}
+
+\subsection{UKP5}
+
+\subsection{EDUK}
+
+\subsection{EDUK2}
+
+\section{Other approaches}
+
+Consistency integration?
 
 

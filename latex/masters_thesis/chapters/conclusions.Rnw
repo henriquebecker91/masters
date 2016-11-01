@@ -2,6 +2,8 @@
 
 \section{Conclusions}
 
+the concept of periodicity is of little relevance for algorithms that apply threshold or solution dominance, in the end, the reduction of the knapsack size will only reduce the number of iterations where the code was already only adding copies of the best item instead of iterating over all items
+
 basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway). The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
 Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
 The lack of literature review and implementation of old methods for comparison is a real problem.

@@ -5,6 +5,8 @@ This is about 0-1 knapsack, but can be considered: "Dynamic programming is one o
 \section{Conversion between problem types}
 
 Put that the conversion from UKP to 0-1 KP and BKP is possible, but not even considered, because it don't will exploit shortcuts only existant if the items are unbounded. Would make more sense to convert the 0-1KP/BKP to the UKP if the specific instance has sufficient items of each item tupe to fill the capacity.
+% AlgorithmsForKnapsackProblemsPsinger -- p. 148, cita 53 (Martello and Toth) to explain why do not transform unbounded knapsack instances in bounded (we could simply say that the lack of restrictions gives more opportunity for optimization) AND 
+% Garfinkel, PYAsUKP
 
 \section{Branch-and-Bound Algorithms}
 
@@ -22,6 +24,10 @@ REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfair
 
 \subsection{UKP5}
 
+% UKP5 algorithm explanation
+%We used only a UKP5-specific periodicity bound described later and the \(y^{*}\) bound described in~\cite[p. 223]{gar72}.
+%The \(y^*\) is \(O(1)\) on an item list ordered by non-increasing efficiency,  and it is generic, being successfuly applied on instances of most classes.
+%Assuming \(i\) is the best item, and \(j\) is the second most efficient item, then \mbox{\(y^{*} = p_i / (e_i - e_j)\)}.
 \subsection{EDUK}
 
 \subsection{EDUK2}

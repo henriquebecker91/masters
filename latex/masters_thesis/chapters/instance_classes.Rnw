@@ -2,6 +2,9 @@
 library(ggplot2)
 @
 
+% THE MARTELLO COMPARISON PROBLEM
+% Martello and Toth (1977b): aka "Branch and bound algorithms for the solution of the general unidimensional knapsack problem". They assert that the method presented on the article isn't efficient, so the paper was moved to the end of the paper reading priority queue. But at the same time, is interesting to see if they did compare with something (seems like the article that introduced MTU). As don't seem to exist a PDF of it on the internet, I emailed Martello himself asking for a copy of the paper. UPDATE: In 'Algorithms for knapsack problems', p. 251, it's said by Martello: "Enumeration methods have been proposed by Gilmore and Gomory [26], Cabot [81] and Martello and Toth [51]. This last method experimentally turned out to be the fastest (see Martello and Toth [49, 51]).", where [51] is the same as "Martello and Toth (1977b)". Also, "Enumeration methods" seems to be a jargon in 1960~1990 for branch and bound methods.
+
 \chapter{The instance classes}
 
 %final
@@ -63,6 +66,18 @@ qplot(w, p, data = t,
 \end{figure}
 
 Expose why they are uninteresting: we do not know if they model any real world instance; it's a simple matter of running a good polynomial simple/multiple dominance algorithm first, or using MTU2 that was developed for this purpose. Increasing values of \(n\) increase the time taken by MTU2 or dominance removal in a polynomial fashion. The NP-hard part of the problem, that is finding an optimal solution between non-dominated items don't grow with \(n\). %(sorting or the \(O(n^2)\) dominance algorithms).
+
+\subsection{Babayev's use of inadequate uncorrelated instances}
+
+The "Second group of experiments - Problems with Uncorrelated Random Coefficients" is trivial to solve, as its pointed in the paper. Almost all instances are solved by the greedy procedure that simply fill the knapsack with copies of the first, and maybe the second too, most efficient items. This is again caused by the small coefficients used (weights and profits restricted to 1..1000). An item with weight 1 has 1/1000 odds of being generated; and has 500/1000 = 1/2 odds of having \(p\) > 5000; so for each item generated there's 1/2000 (0.05\%) odds of generating an item that multiple-dominated ALL other items. While the max efficiency of an item with weight 1 is 1000; the max efficiency of an item with weight 2 is 500; 3 is 333 and so on. An 501/1 item will be better than the 1000/2 item (the best possible item with weight two); and therefore better than any other possible item with weight greater than one.
+With n = 1000, the chance of an instance having this item is 0.39354 (39\%), with n = 5000 is already 0.91796 (91\%), with n = 10000, is already 0.99327 (99\%). For n = 250K, the odds of one instance don't having this item type are \(5.00741 * 10^-55\).
+Therefore for the majority of the instances, the solution was probably comprised of c copies of the same item with weight one.
+
+\subsection{Babayev's use of inadequate use of correlated instances}
+
+The "First group of experiments - Problems with correlated random coefficients" have many identical items. The items are generated with weights between 1 and 1000. This alone already reduce the number of non-simple-dominated item types to 1000. The profits are uniformly distributed between floor(0.9*weight) and floor(1.1*weight). So the biggest possible efficiency is 1.1. An item type with weight 10 has 1/1000 odds of being generated; and (1/1000)*(1/3) = (1/3000) odds of being \(w\) = 10 & \(p\) = 11. An item type with those values would be an small item with the best possible efficiency (p/w = 1.1). With n = 1000, the chance of an instance having this item is 0.28350 (28\%), with n = 5000 is already 0.81117 (81\%), with n = 10000, is already 0.96434 (96\%). For n = 250K, the odds of one instance don't having this item type are \(6.34979 * 10^-37\). Such item will multiple-dominate all items that are perfectly divisible by 10 and therefore can have 1.1 efficiency; all other items whose weight isn't perfectly divisible by 10 will be less efficient than it.
+The amount of different item types can be obtained by \(sum_{i \in [1..1000]}{floor(1.1*w_i - 0.9*w_i) + 1}\) what is about 100K different item types, so any excess of n over 100K will be made of repeated item types (as the types are random generated, a instance with 100K items will already have many duplicated items, and some item types missing). This makes the benchmarks with n equal to 150K, 200K and 250K not significantly harder than the ones with n = 100K, as much of the extra item will be only copies of the same item that could be removed by a O(n*log n) scan.
+Except by the n = 1000 instances, the majority of the instances will have a solution composed of the 11/10 item, and one item filling the remaining space.
 
 \section{Bottom Right Ellipse Quadrant Instances}
 

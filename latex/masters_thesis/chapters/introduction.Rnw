@@ -1,35 +1,31 @@
 \chapter{Introduction}
 
-the first thing after the abstract that they will read
+The unbounded knapsack problem (UKP) is a simpler variant of the well-known bounded knapsack problem (BKP) and the 0-1 Knapsack Problem (0-1 KP).
+The only difference between UKP and these other two knapsack problems is that UKP don't impose a bound in the available quantity of each item type.
+The UKP can also be seen as an special case of the BKP where, for each item type, there's more copies available than is possible to fit in the knapsack capacity.
 
-The unbounded knapsack problem (UKP) is a simpler variation of the well-known bounded knapsack problem (BKP).
-UKP allows the allocation of an unbounded quantity of each item type.
 The UKP is NP-Hard, and thus has no known polynomial-time algorithm for solving it. 
-However, it can be solved by a pseudo-polynomial dynamic programming algorithm.
-UKP arises in real world problems mainly as a subproblem of the Bin Packing Problem (BPP) and Cutting Stock Problem (CSP). 
-Both BPP and CSP are of great importance for the industry \cite{survey2014}, \cite{gg-1,gg-2}. 
-The currently fastest known solver for BPP/CSP\cite{belov,survey2014}
-uses a column generation technique (introduced in \cite{gg-1}) that needs to solve an UKP instance as the pricing problem at each iteration of a column generation approach. 
-The need for efficient algorithms for solving the UKP is fundamental for the overall performance of the column generation.
-
-Two techniques are often used for solving UKP: dynamic programming (DP) \cite{eduk}, \cite[p. 214]{gar72}, \cite[p. 311]{tchu} and branch and bound (B\&B) \cite{mtu2}. 
-The DP approach has a stable pseudo-polynomial time algorithm linear on the capacity and number of items. 
-The B\&B approach can be less stable. 
-It can be faster than DP on instances with some characteristics, such as when the remainder of the division between the weight of the best item by the capacity is small; or the items have a big efficiency variance. Nonetheless, B\&B has always the risk of an exponential time worst case.
-
-The state-of-the-art solver for the UKP, introduced by~\cite{pya}, is a hybrid solver that combines DP and B\&B. 
-It tries to solve the problem by B\&B, and if this fails to solve the problem quickly, it switches to DP using some data gathered by the B\&B to speed up the process. 
-The solver's name is PYAsUKP, and it is an implementation of the EDUK2 algorithm.
+However, it can be solved in pseudo-polynomial time by using the dynamic programming approach. 
 
 \section{Motivation and Scope}
 
+it's a classical problem, with only one restriction, many papers written without citing uses
+
+UKP arises in real world problems mainly as a subproblem of the Bin Packing Problem (BPP) and Cutting Stock Problem (CSP). 
+The BPP and the CSP are of great importance for the industry \cite{survey2014}, \cite{gg-1,gg-2}. 
+The currently fastest known solver for BPP/CSP\cite{belov,survey2014}
+uses a column generation technique (introduced in \cite{gg-1}) that needs to solve an UKP instance as the pricing problem at each iteration of a column generation approach. 
+The need for efficient algorithms for solving the UKP is fundamental for the overall performance of the column generation.
 our first motivation was finding the best method for solving the cutting stock subproblem
-	the works of the area focused the CSP itself, the study of the subproblem was one in its own, that no author have taken time to do
+
+the works of the area focused the CSP itself, the study of the subproblem was one in its own, that no author have taken time to do
 we found that a large amount of previous work was ignored because of lack of implementations
 we found that a simple DP algorithm beaten the state-of-art-algorithm
 we found that the algorithm was very similar to one of the first algorithms created for this problem
 the motivation shifted to making a literature review
 this work answers the first question and makes a critical analysis of the UKP literature
+
+MIRUP IRUP
 
 Exact methods, we know that approximations exist, but the study of how much is possible to approximate without making the CSP solution inexact
 
@@ -46,8 +42,9 @@ A solution is an item multiset (i.e, a set that allows multiple copies of the sa
 The sum of the items weight, or profit, of a solution \(s\) is denoted by \(w_s\), or \(p_s\); and will be refered as the weight, or profit, of the solution.
 A valid solution \(s\) has \(w_s \leq c\).
 An optimal solution \(s^*\) is a valid solution with the greatest profit among all valid solutions.
-To solve an instance of the UKP is to find an optimal solution for that instance.
-%We refer to the profit value shared among all optimal solutions for a capacity \(y\) as \(opt(y)\), if we omit the capacity then \(c\) is implied; 
+
+To solve an instance of the UKP is to find an optimal solution for that instance. Finding all optimal solutions for an instance of the UKP isn't the focus of this work. However, the existence of multiple optimal solutions and the effects of this fact are fully acknowleged.
+%We refer to the profit value shared among all optimal solutions for a capacity \(y\) as \(opt(y)\), if we omit the capacity then \(c\) is implied.
 
 The mathematical formulation of UKP is:
 
@@ -67,7 +64,7 @@ The efficiency of an item \(i\) is its profit-to-weight ratio \(\frac{p_i}{w_i}\
 We use \(w_{min}\) and \(w_{max}\) to denote the smallest item weight, and the biggest item weight, respectively. 
 We refer to the item with greatest efficiency among all items as the \emph{best item}; if more than one item share the greatest efficiency, then the item with the lowest weight among them will be considered the best item. Also, the item with the lowest weight among all items will be refered as the \emph{smallest item}.
 
-If two or more items have the same weight, we consider only the one with the best profit (the others can be discarded without loss to the optimal solution value). The analogue is valid for items with the same profit. Consequently, any two distinct items will always have different weight and profit (only their efficiency can be the same).
+If two or more items have the same weight, we ignore all but the one with the best profit (the others can be discarded without loss to the optimal solution value). The analogue is valid for items with the same profit. Consequently, any two distinct items will always have different weight and profit (only their efficiency can be the same). Items that share the same weight (or profit) can be removed by sorting (\(O(n \times log(n))\)). Ignoring such items simplify the proofs, and don't change the UKP significantly.
 
 The observant reader will perceive that an UKP instance is defined by a list of items, instead of a set of items, as usual. Some algorithms sort the items and manipulate their indexes. So having notation to refer to the item's indexes is merely a convenience. As we don't allow distinct items with the same weight and profit, the difference between a list and a set, for the problem formulation, is null.
 
@@ -96,6 +93,10 @@ The EDUK and EDUK2 algorithms integrate and make use of these four dominances. I
 A closer look to those algorithms reveal that they indirectly make use of all four dominances. What we want to say by this is that: the algorithms will eventually stop using dominated items to generate new solutions in the course of the algorithm execution. However, this is only one way to see it. The approach used by those algorithms is focused in solutions, not individual items. Would be more adequate to say that they make use of some sort of \emph{solution dominance}. Ideally, if solution \(s\) dominates solution \(t\) (where both solutions can be comprised of any items), then an optimized algorithm would not generate any solutions that are a superset of \(t\) (as the corresponded supersets of \(s\) would dominate them anyway). Such dominance would generalize any previous dominances, as the dominated items can be seen as dominated single item solutions (or multiple item solutions in the case of threshold dominance).
 
 Those old algorithms don't apply this ideal solution dominance, but a weaker version of it. This weaker version of solution dominance don't avoid generating every solution that is a superset from a dominated solution, but can be implemented without almost any overhead. As it's very algorithm specific, it will be further discussed at the algorithms section (i.e. section \ref{algorithms}).
+
+% MARTELLLO TOTH KNAPSACK PROBLEMS THEIR DOMINANCE DEFINITION:
+%p.100, definition 3.1: "Given an instance of UKP, relative to item types set N, item type k \in N is dominated if the optimal solution value does no change when k is removed from N.
+% This definition covers the collective dominance (consequently, the simple and multiple too), but do not cover the threshold dominance (where the item can be used in an optimal solution, but is bounded to some quantity of copies) nor solution dominance (that does not allud to individual items buth whole solutions)
 
 \subsection{Periodicity and periodicity bounds}
 

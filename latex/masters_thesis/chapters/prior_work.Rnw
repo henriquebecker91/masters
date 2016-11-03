@@ -14,6 +14,8 @@ That the whole UKP literature has many problems: David Johnson - Pitfall 4 "Star
 
 This generated distortions and abandoned paradigms. The whole shift from dynamic programming methods to B\&B methods can be associated with the tests being made over ever-increasing instances; randomly generated with little or some correlation between profits and weights; and the use of naive dynamic programs; the shift of PYAsUKP to revisit dynamic programming can easily be correlated with the evolution of the artificial instances generated to be difficult to solve by B\&B while small (on capacity and number of items); the DP methods began to shine again, as the instances had small dimensions and a structure that made them hard to solve by B\&B but not so much by a good (non-naive) DP algorithm. The UKP5 is only the last part of this history.
 
+The paper ``A Finite Renewal Algorithm for the Knapsack and Turnpike Models'' and http://pubsonline.informs.org/doi/abs/10.1287/opre.18.2.306 were behind a paywall and the paper ``A better ...'' said to have a better algorithm anyway. 
+
 SAY WHEN CITING MTU1/MTU2 PRIOR WORK?
 
 	Check the MTU/MTU2 paper again. I do remember that there was a big design flaw on the experiments performed there. Should probably point it. The flaw was a lot of item with the same weight no? Because considering the number of items was increased and the capacity fixed. And at some time, there was much more items than capacity.
@@ -24,5 +26,29 @@ IMPORTANT: Paper don't give formulation to discover the "b" values of the instan
 Give historic that shows how the type of instance tested defined the winner of the comparisons
 	LINK WITH BREW INSTANCES
 
+% A LITTLE OF CSP HISTORY TOO
+\section{Cutting Stock}
+
+% BLOCKQUOTE BELOW
+ This corresponds to widely-used practices and general beliefs expressed in the literature. Usually, in the context of an LP- based branch-and-bound algorithm, where the LP relaxation is solved using column generation, cutting planes are carefully selected in order to avoid the destruction of the structure of the pricing problem. This viewpoint is shared by numerous authors. Barnhart, Hane, and Vance [BHV00], for example, mention as one of the main contributions of their branch-and-price-and-cut algorithm ``a pricing problem that does not change even as cuts are added, and similarly, a separation algorithm that does not change even as columns are added.'' (BELOV, page 3)
+
+About the pricing problem with cuts. ``It is much more difficult than the linear knapsack problem for column generation arising when no cuts are added in the LP.'' (BELOV, page 26)
+
+% The paragraph below is only about 2D-2CP?
+%``The general-purpose cuts considered in this work make the pricing problem extremely complicated and much implementation effort is required. The question arises, whether any other classes of cuts, which do not complicate the pricing problem, e.g., cover inequalities in 2D-2CP, can provide a comparable contribution.'' (p. 46)
+
+% tell about the filthy lie
+
+
 % maybe this goes in another section
 %	timeline: DP -> huge random instances -> B\&B is better (no empiric evidence) -> instances that are hard for B\&B (linear distribution) -> PYAsUKP is better than B\&B in instances designed to be hard to solve by it (in fact any DP non-naive DP solution would have results better than B\&B methods only, like MTU1 and MTU2). also, using MTU2 instead of MTU1 shows a lack of understanding of the methods. MTU2 was developed for very large random instances, not for relatively small and hard (distribution-wise) instances
+
+CITE BABYEV BUT SAY THAT THEIR EXPERIMENTS WILL BE DISCUSSED FURTHER IN THE ISTANCES SECTIO
+
+
+The "Second group of experiments - Problems with Uncorrelated Random Coefficients" is trivial to solve, as its pointed in the paper. Almost all instances are solved by the greedy procedure that simply fill the knapsack with copies of the first, and maybe the second too, most efficient items. This is again caused by the small coefficients used (weights and profits restricted to 1..1000). An item with weight 1 has 1/1000 odds of being generated; and has 500/1000 = 1/2 odds of having \(p\) > 5000; so for each item generated there's 1/2000 (0.05%) odds of generating an item that multiple-dominated ALL other items. While the max efficiency of an item with weight 1 is 1000; the max efficiency of an item with weight 2 is 500; 3 is 333 and so on. An 501/1 item will be better than the 1000/2 item (the best possible item with weight two); and therefore better than any other possible item with weight greater than one.
+With n = 1000, the chance of an instance having this item is 0.39354 (39%), with n = 5000 is already 0.91796 (91%), with n = 10000, is already 0.99327 (99%). For n = 250K, the odds of one instance don't having this item type are 5.00741 * 10^-55.
+Therefore for the majority of the instances, the solution was probably comprised of c copies of the same item with weight one.
+
+% MAYBE ADD
+% The subject that I (Henrique Becker) am studying (at the year of 2015/2016) is the exact resolution of the UKP (unbounded knapsack problem) with the objective of solving the subproblems generated by the column generation approach of solving BPP/CSP (Bin Packing Problem and Cutting Stock Problem). The paper "An Improved Knapsack Solver for Column Generation" (2013, Klaus Jansen and Stefan Kraft) seemed (by the title) to be relevant to my studies. However, the paper presents a variant of the UKP, the UKPIP (the Unbounded Knapsack Problems with Inversely Proportional Profits) that's a subproblem of the Variable-Sized Bin Packing (VBP) that's a generalization of the BPP when there's the possibility of choosing between many bin sizes (on the classical BPP there's one fixed bin size for instance). The UKIPIP is a generalization of the UKP, in the sense that it allows for choosing between many knapsack sizes, and when restricted to only one knapsack size it's equivalent to the UKP. Yet, when there's many knapsack sizes to choose from, the same solution in different knapsacks will yield a diferent profit value, as the profit value of the items is scaled by the knapsack size (the smaller the knapsack size, the bigger the profit value for the same solution); and the solution is a multiset of items and the one knapsack choosen to store these items. The paper seems to focus on approximation methods to solve the UKPIP and the other two variants of it (the bounded one, BKPIP and the 0-1 one, 0-1 KPIP). So the subject of the paper (approximation algorithms for a variant of the UKP as subproblem of a variant of the BPP) is outside our area of interest (exact algorithms for the classical UKP as a subproblem of the classical BPP).

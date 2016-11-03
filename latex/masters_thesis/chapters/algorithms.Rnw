@@ -2,6 +2,14 @@
 
 This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
 
+%Two techniques are often used for solving UKP: dynamic programming (DP) \cite{eduk}, \cite[p. 214]{gar72}, \cite[p. 311]{tchu} and branch and bound (B\&B) \cite{mtu2}. 
+%The DP approach has a stable pseudo-polynomial time algorithm linear on the capacity and number of items. 
+%The B\&B approach can be less stable. 
+%It can be faster than DP on instances with some characteristics, such as when the remainder of the division between the weight of the best item by the capacity is small; or the items have a big efficiency variance. Nonetheless, B\&B has always the risk of an exponential time worst case.
+% The state-of-the-art solver for the UKP, introduced by~\cite{pya}, is a hybrid solver that combines DP and B\&B. 
+%It tries to solve the problem by B\&B, and if this fails to solve the problem quickly, it switches to DP using some data gathered by the B\&B to speed up the process. 
+%The solver's name is PYAsUKP, and it is an implementation of the EDUK2 algorithm.
+
 \section{Conversion between problem types}
 
 Put that the conversion from UKP to 0-1 KP and BKP is possible, but not even considered, because it don't will exploit shortcuts only existant if the items are unbounded. Would make more sense to convert the 0-1KP/BKP to the UKP if the specific instance has sufficient items of each item tupe to fill the capacity.
@@ -20,7 +28,13 @@ REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfair
 
 \subsection{The naive algorithm}
 
-\subsection{Ordered Step-Off}
+\subsection{Garfinkel and Nemhauser Algorithm}
+
+\subsection{The Ordered Step-Off Algorithms}
+
+% After the 1.B Ordered Step-Off, there's a `terminating' version of it that uses a different version of my periodicity check, The gg check needs a vector with the max weight between the first and the item ix when they are ordered by efficiency (ex: for w = {3, 5, 2, 8}, the array would be w' = {3, 5, 5, 8}), at position y it checks if y < y' + w'[d[y]]. The y' variable is update when y reaches a solution where d[y] > 0 && g[y] > 0 (a solution that the most efficientitem used isn't the best item). The gg way is better as solutions stored that are changed to use the best item don't count. The UKP5 version don't use the extra array, but if a position is first saved with a bad solution and after changed to a good solution that uses the best item, tha position is yet marked as used by a non-best item, while the gg version will not. 
+% And there's the 1.C that uses a w_max positions for one of the arrays. Saving memory and using the cache memory better.
+% MAYBE FAST IMPLEMENT BOTH METHODS AND ADD THEM TO THE THESIS? IF NOT TO AN REVISED VERSION THAT WILL BE PUBLISHED ONLINE, AND SHOW THE BEST VERSION OF THE GILMORE AND GOMORY ALGORITHM?
 
 \subsection{UKP5}
 
@@ -32,8 +46,17 @@ REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfair
 
 \subsection{EDUK2}
 
+\subsection{An ordered step-off improvement by Greenberg and Feldman}
+
+%Seems like the 'k' variable represents how many copies of the best item AREN'T used. The algorithm begins assuming the knapsack is completely filled with copies of the best item and k becomes bigger when we are trying possibilities with lesser quantities of the best item. The algorithm can ends before y = c because the algorithm detects that increasing k (i.e. reducing the quantity of the best item on the solution) can't help to find a better solution.
+
 \section{Other approaches}
 
 Consistency integration?
+% The first algorithm is exact, uses only integer arithmetic, and always find the solution. The ideia of the algorithm is to aggregate the capacity constraint and the objective (sum of the profits) on one equation. Instead of working over weights and profits, we work over numbers that aggregate both. The items are remade this way: the weight is multiplied by the upper bound + 1 and summed to the profit. The generated solutions are simple the sum of those item-numbers. As the sum of the profits will never become so big as the upper bound + 1 you can get the weight with 'solution-number / upper bound + 1' (the integer division) and the profit with 'solution-number % upper bound + 1' (the '%' is the modulo operator). A fully functional and commented version of the algorithm is available at https://github.com/henriquebecker91/masters/blob/e2beb54b579a84d291e0a47a6a993becd02d2c3a/codes/cpp/greendp.hpp (search for mgreendp1)
+%IT'S VERY IMPORTANT TO NOTE THAT GREENBERG FORGOT TO INCLUDE ONE LINE ON BOTH ALGORITHMS: on step 2d of the algorithm 1 the assignment "D(z) = k" should be executed together with the other assignments, and on step 2d of algorithm 2 the assignment "D(x) = k" should be executed together with the other assignments. If this isn't done, the algorithm can't backtrack the solution after finding the optimal solution value.
 
+% Hirschberg and Wong (1976) and Kannan (1980): in the end of the paper reading priority queue, as their solution is for an very special case (only two items).
+% Garfinkel and Nemhauser (1972): Implemented, UKP5 was based on it. The original is many orders of magnitude slower than UKP5.
+% Hu (1969): Only presents the most basic/naive algorithm. It's a textbook, and it's not worried over efficiency.
 

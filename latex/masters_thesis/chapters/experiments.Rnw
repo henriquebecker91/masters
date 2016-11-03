@@ -10,6 +10,9 @@ library(stringi)
 
 csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
 csp_csv$X <- NULL
+# forgot to add sort_time to knapsack time in the chart generation codes, now
+# changing it here to avoid changing many places
+csp_csv <- mutate(csp_csv, hex_sum_knapsack_time = hex_sum_knapsack_time + hex_sum_sort_time)
 breq_csv <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
 breq_csv $X <- NULL
 fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
@@ -21,23 +24,23 @@ mtu$X <- NULL
 env_data <- read.csv("../data/env_influence.csv", sep = ";")
 env_data$X <- NULL
 
-compare_num_iter <- function(csv, first_method, second_method) {
+compare_num_iter <- function(csv, first_m, second_m) {
   first_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == first_method) %>% arrange(filename)
+    filter(algorithm == first_m) %>% arrange(filename)
   second_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == second_method) %>% arrange(filename)
+    filter(algorithm == second_m) %>% arrange(filename)
   first_t$diff <- first_t$total_iter - second_t$total_iter
   first_t$norm_diff <- first_t$diff / second_t$total_iter
   first_t <- first_t %>% arrange(norm_diff)
-  first_t$filename <- factor(first_t$filename,
-                             levels = unique(first_t$filename))
-  ggplot(first_t,
-         aes(x = as.numeric(filename),
-             y = norm_diff*100)) +
-    ylab(paste('Deviation of the number of iterations of',
-               first_method, "\nrelative to", second_method,
-               '(in %)')) +
-    xlab("Instance index when ordered by the value at axis y")
+  first_t$order <- 1:length(first_t$norm_diff)
+  first_t
+#  ggplot(first_t,
+#         aes(x = as.numeric(filename),
+#             y = norm_diff*100)) +
+#    ylab(paste('Deviation of the number of iterations of',
+#               first_m, "\nrelative to", second_m,
+#               '(in %)')) +
+#    xlab("Instance index when ordered by the value at axis y")
 }
 
 ukp_time_comp_plot <- function (data, legend) {
@@ -66,7 +69,7 @@ ukp_time_comp_plot <- function (data, legend) {
 
 \section{Setup}
 
-The experiments described at Section \ref{sec:exp_and_res} were run using a computer with the following characteristics: the CPU was an Intel\textregistered Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz; there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where the last two are shared between cores).
+The experiments described at Section \ref{sec:exp_and_res} were run using a computer with the following characteristics: the CPU was an Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz; there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where the last two are shared between cores).
 The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
 Three of the four cores were isolated using the \emph{isolcpus} kernel flag. 
 The \emph{taskset} utility was used to execute runs in one of the isolated cores.
@@ -354,78 +357,88 @@ ggplot(csv_no_na_order,
 \label{fig:pya_fast}
 \end{figure}
 
+The observant reader will perceive that the ss2 distribution don't show mgreendp data points. This happens because it fails automatically over instances where the two most efficient items have the same efficiency (what always happens at subset sum instances). We could fix this problem, but this would disable mgreendp specific periodicity check (that it's main feature) and make the algorithm even more similar to UKP5. So we opted for not running mgreendp over those instances.
+
 Figure \ref{fig:pya_fast} show us that, except by sc and ss2, the times of PYAsUKP runs show often two main trends. The first trend cover the times of ukp5 and mgreendp (beggining at the left of the x axis), and the second trend with times significantly smaller than UKP5 and mgreendp (beggining at the middle/right of x axis), both merge in a single trend that points to the top right corner of the chart. The UKP5 and mgreendp present similar times that form plateus. Those plateus aggregate instances that take about the same time to solve by UKP5/mgreendp.
 
-While the author don't examinated the PYAsUKP internals, he belives that the second PYAsUKP trend is formed by instances where the B\&B preprocessing phase (maybe together with the PYAsUKP dominance tests) had considerable success. This would also explain the lack of this trend at the sc and ss2 instance classes, where such bounds and tests have less effect (ss2, specifically, is comprised of subset-sum instances, that do not have different efficiency between items and, consequently, aren't affected by bounds). When PYAsUKP B\&B phase fails to yield good results, the PYAsUKP's DP phase times are greater than the UKP5 and mgreendp times.
+While the author don't examinated the PYAsUKP internals, he belives that the second PYAsUKP trend is formed by instances where the B\&B preprocessing phase had considerable success (stopped the computation or used bounds to remove items before excuting the DP). This would also explain the lack of this trend at the sc and ss2 instance classes, where such bounds and tests have less effect (the ss2 class is comprised of subset-sum instances, that do not have different efficiency between items and, consequently, are little affected by bounds). When PYAsUKP B\&B phase fails to yield good results, the PYAsUKP's DP phase times are greater than the UKP5 and mgreendp times.
 
-The plateaus formed by the UKP5 and mgreendp runs show very little time variation between some groups of instances. A closer examination of the data reveals thos instance groups (plateaus) agrregate instances with the same number of items (for the same distribution) or, for some lower plateaus, instances with different number of items but all of them a magnitudes smaller than the numbers of items of the plateau(s) above. This behaviour shows that UKP5 and mgreendp1 are little affected by the specific items that make an instance, the instance size and distribution being good predictors of the time the UKP5/mgreendp will need to solve it. 
+The plateaus formed by the UKP5 and mgreendp runs show very little time variation between some groups of instances. A closer examination of the data reveals that the instance groups (plateaus) aggregate instances with the same number of items (for the same distribution) or, instances with different number of items but all of them magnitude(s) smaller (or greater) than the numbers of items of the plateau(s) above (or below). This behaviour shows that UKP5 and mgreendp1 are little affected by the specific items that make an instance, the instance size and distribution being good predictors of the time the UKP5/mgreendp will need to solve it. 
 
-PYAsUKP seems to have a much greater variation between the times for instances with similar number of items of the same distribuion. We can see a line with a slope close to 45 degrees close to the top right corner of the charts. This line is over a logarithmic y axis, so it's a huge variation compared to the UKP5 plateau below it, that is solving the same instances (that, as we have seen above, have similar number of items).
+PYAsUKP seems to have a much greater variation between the times for instances with similar number of items of the same distribuion. We can see a line with a slope of about 45 degrees close to the top right corner of the charts. This line is over a logarithmic y axis, so it's a huge variation compared to the UKP5 plateau below it, that is solving the same instances (that, as we have seen above, have similar number of items).
 
-The times between UKP5 and mgreendp are very similar, specially at instance classes hi, nsds2, where it has a small advantage. This should come with no surprise as they are similar algorithms. What is surprising is its behaviour at saw and sc instance classes, where the situation is reversed, and mgreendp takes considerably more time than UKP5 in many cases. The behaviour at those two classes can be explained by two main factors. The first factor is that mgreendp solves the knapsack subproblems without the best item, and regularly tests if it can abandon the DP and fill the remaining knapsack capacity with copies of the best item. The removal of the best item from the items list weakens the effect of the solution dominance applied by mgreendp (also used by UKP5). Some solutions that would be never generated by UKP5 will be generated at mgreendp because better solutions with the best item don't exist to dominate them. The second factor is the periodicity check applied by UKP5. This check has little overhead and stopped UKP5 computation before reaching the knapsack capacity the majority of the times (only 18 of 240 sc instances and 128 of the 1100 saw instances don't benefited from the periodicity check). % this data is buried in the file with all ukp5 outputs, sorry about that
+The times between UKP5 and mgreendp are very similar, specially at instance classes hi, nsds2, where it has a small advantage. This should come with no surprise as they are similar algorithms. What is surprising is its behaviour at saw and sc instance classes, where the situation is reversed, and mgreendp takes considerably more time than UKP5 in many cases. The behaviour at those two classes can be explained by three main factors.
 
-\begin{figure}[h]
-\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
-\begin{center}
-<<pya_slow_fig,fig=true,echo=false>>=
-csv_no_na <- slow
-csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
-csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
-  factor(strsplit(as.character(f), "_")[[1]][1],
-         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-}))
-csv_no_na_mean <- csv_no_na %>%
-  group_by(filename) %>%
-  mutate(mean_methods_time = mean(internal_time))
-dt_copy <- csv_no_na_mean
-dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
-  arrange(mean_methods_time)
-csv_no_na_order$filename <- factor(csv_no_na_order$filename,
-                                   levels = unique(csv_no_na_order$filename))
+The first factor is a characteristic of the optimal solutions from the saw and sc instances. The optimal solutions of these distributions are comprised mainly of (hundreds of) copies of the best item and one copy other item. This characteristic gives a big importance to the best item in those instances, and together with the the next two factors, explain the algorithms behavior.
 
-ggplot(csv_no_na_order,
-       aes(x = as.numeric(filename),
-           y = internal_time,
-           color = algorithm)) + 
-  geom_point() +
-  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
-                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
-                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
-#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
-  ylab('Time to solve (seconds, logarithmic)') +
-  xlab('Instance index when ordered by average time to solve') +
-  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:pya_slow}
-\end{figure}
+The second factor is that mgreendp solves the knapsack subproblems without the best item. The algorithm does that to allow for a mechanism that periodically checks if it can stop the computation and fill the remaining knapsack capacity with copies of the best item. Solving the DP subproblems without the best item weakens the effect of the solution dominance applied by mgreendp (also used by UKP5). Some solutions that would be never generated by UKP5 will be generated at mgreendp, this because better solutions that used the best item don't exist to dominate those inferior solutions.
 
-\subsection{CSP Knapsack Subproblem Experiment}
+The third and last factor is the periodicity check applied by UKP5. As the mgreendp mechanism discussed above, this check stops UKP5 when it finds that the remaining capacity can simply be filled by copies of the best item. As this check don't remove the best item from the item list, it has less overhead than the mgreendp test for those instances. The UKP5 periodicity check benefited 222 of the 240 sc instances and 972 of the 1100 saw instances. % this stat is buried in the file with all ukp5 outputs, sorry about that, check for last_y_value_outer_loop in ukp5 outputs
+
+Our conclusion about this experiment is that ukp5 and mgreendp generally will dominate PYAsUKP at big instances of the presented distributions, however for a specific instance PYAsUKP can show times much smaller, similar or much greater than UKP5. As PYAsUKP times seems to grow more than UKP5/mgreendp times with the instance growth, the possibily that PYAsUKP has better results than UKP5 for even bigger instances of those distributions seems improbable (while possible). About UKP5 and mgreendp, they have similar results (as expected), where UKP5 is slight worse than mgreendp in some distributions and considerable better in others, the choice between one and another has to be made based in the distribution (specially considering that mgreendp will need workarounds to work with instances where the two most efficient items can have the same efficiency). The author would like to reminder that those distributions are artificially generated, and don't model any real-world instances (that the author has knowledge), and consequently any conclusions have limited validity.
+
+%\begin{figure}[h]
+%\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
+%\begin{center}
+%<<pya_slow_fig,fig=true,echo=false>>=
+%csv_no_na <- slow
+%csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
+%csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
+%  factor(strsplit(as.character(f), "_")[[1]][1],
+%         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+%}))
+%csv_no_na_mean <- csv_no_na %>%
+%  group_by(filename) %>%
+%  mutate(mean_methods_time = mean(internal_time))
+%dt_copy <- csv_no_na_mean
+%dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
+%csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
+%  arrange(mean_methods_time)
+%csv_no_na_order$filename <- factor(csv_no_na_order$filename,
+%                                   levels = unique(csv_no_na_order$filename))
+%
+%ggplot(csv_no_na_order,
+%       aes(x = as.numeric(filename),
+%           y = internal_time,
+%           color = algorithm)) + 
+%  geom_point() +
+%  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
+%                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
+%                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
+%#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
+%  ylab('Time to solve (seconds, logarithmic)') +
+%  xlab('Instance index when ordered by average time to solve') +
+%  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+%@
+%\end{center}
+%\legend{Source: the author.}
+%\label{fig:pya_slow}
+%\end{figure}
+
+\subsection{Algorithms implemented but not used at this benchmark}
+
+The PYAsUKP benchmark was proposed at paper \cite{XXX}. In this paper, the authors compare MTU2 to EDUK and EDUK2 using an easier version of the PYAsUKP benchmark. The PYAsUKP benchmark was not used because MTU2 used 32 bits integers and had overflow problems when solving the instances (the easier version of the benchmark had smaller coefficients to allow MTU2 to run without problems).
+
+As MTU2 and MTU1 are the most well-known B\&B algorithms for solving UKP, the author found interesting to test them against the PYAsUKP benchmark. The author implemented both algorithms in C++ (using templates) and adapted the original code in Fortran to work with 64 bits. The author tried to execute MTU1 and MTU2 over the PYAsUKP benchmark, but very fast become clear that both algorithms aren't competitive against the three algorithms compared in Figure \ref{XXX}. Many runs ended by timeout (used more than 1000 seconds), and running the four versions of the algorithm over the 4540 instances would take time from more relevant experiments. The author choose to run the experiment over the reduced PYAsUKP benchmark (only one tenth of the instances). The results can be found at section \ref{XXX}.
+
+Harold Greenberg wrote a paper with two other methods for solving the UKP\cite{XXX}, this paper was published after \cite{XXX} (that proposed the algorithm implemented by mgreendp). The author found interesting to implement those algorithms too, as they used different approachs\footnote{Those approaches are described as XXX and XXX.}, and also because they were from the same author that already designed an efficient algorithm. However, the first algorithm proved itself very time and memory consuming, and the second algorithm didn't worked for all cases (could not be considered an exact method without using a backup solver to solve instances where the method failed). After some tests become clear that the intent of the paper was a theoretical exploration of new approaches, not proposing efficient algorithms, and the algorithms were dicarded from experimentation over this benchmark instances. Readers interested in those methods can check implementations of them, made available at Github\footnote{XXX}.
+
+\section{CSP Knapsack Subproblem Experiment}
+
+the experiment described at this section is more complex than the others. the other experiments involved UKP instances of specific distributions saved in files, and executables that read the instances, solved them and returned the solving time. in this experiment, the instances are CSP instances, and the continuous relaxation of the those instances is solved by using the pr
 
 Two items with the same weight never exist in a cutstock knapsack problem.
+The dual values of the CSP master model can be negative or zero (non-positive). Such non-positive values can break code optimized with the assumption that all items have a positive profit. Because of this, on our implementation we have removed those items before solving the knapsack problem with a non-cplex solver (cplex have no problem with such nonpositive profits), and remaped the solution items to their old indexes before returning the solution to the master problem. 
 
-Difference of the number of rolls in the last hexdecimal gigit is normal and caused the by the fact floating point arithmetic don't have infinite precision.
-
-There's only one true outlier: the run of ukp5\_int\_cutstock over N4C1W1\_O.csp.txt that resulted in 257.7500 (0x1.01cp+8) rolls while the other methods resulted in 257.5833 (0x1.0195555555556p+8, for ukp5\_fp\_cutstock) rolls (a 0.1667 roll difference). Would be expected that ukp5\_int\_cutstock and ukp5\_fp\_cutstock to agree in the solution of the same instance as they are the same algoritm using the same item ordering (ukp5\_int\_cutstock and ukp5\_int\_ns\_cutstock use different orderings and can end up selecting different optimal solutions if there's more than one distinct optimal solution with the smallest weight for an optimal solution). However, the solutions given by the two methods at the third iteration differed. The solution given by the fp method isn't the optimal solution for the integer method (and vice-versa) because when the items profit were made integer (by multiplying them by \(2^{40}\) and rounding them down) a small value was lost with the rounding. Consequently, the integer profit value of the optimal solution returned by the ukp5\_fp was smaller than the integer profit value of the solution returned by ukp5\_int (as the latter was favored by the rounding procedure). The author found that those differences between knapsack solutions because of precision loss are very common (happening at least for one knapsack of almost each CSP solving). They explain the difference in the number of iterations between two exact methods that are equal except by the item profit precision (we will see that the iteration count can vary considerably because of this little detail). However, no other instance had a difference in the rolls result of this magnitude (0.1667). All other runs had a difference between the result in rolls smaller than \(2^{-20}\) (i.e. for each instance, the roll's result of any run subtracted by the mean of the roll's result for all methods was smaller than \(2^{-20}\) and greater than \(-(2^{-20})\). The author can't explain the outlier, yet he believes that it can be a rare case where the small loss of precision caused by using integers in the solver of the knapsack subproblem affects significantly the optimal value in rolls of the master problem. Such behavior should be examinated when using knapsack solvers planned for integer values to solve floating point pricing subproblems of a CSP solver.
-
-We do not checked if executing many times the same fp method over the same instance can give different iteration counts. However floating point arithmetic is deterministic, while incorrect from a infinite precision point of view. (CONFIRMED BY EXECUTING THE SAME INSTANCE 100 TIMES)
-
-Could code make use of the gigantic profit dominance of the instances?
-
-If we could discover what property the solutions given by the CPlex knapsack solver have that makes the master model needs less iterations, we could adapt the other programming methods to return optimal solution with this property?
-
-The two int ukp5 cutstock solvers have difference in the number of iterations. Ex.: BPP\_1000\_1000\_0.2\_0.8\_9.csp.txt, ukp5\_int\_cutstock has 6908 iterations and ukp5\_int\_ns\_cutstock has 6719 iterations. The only thing that change between the two is the order of the array. The two always get an optimal solution with the smallest weight. At iteration 5879, the optimal solution given by the two methods differ, for the same knapsack, both solutions are optimal (consequently have the same profit value), and both have the same weight (that is the smallest possible for an optimal solution of that knapsack). This little change creates a cascading effect that makes one method end 189 iterations before the other. This can seem little considering the number of iterations of the biggest iteration number (189 of 6719 is about 2.81\%), but this difference happened at iteration 5879 so there were only 1029 iterations left for the run with more iterations (one code ended 18\% faster simply by an arbitrary distiction between two optimal solutions of the same weight).
-
-    Add graphs created to the dissertation. Say that ending at 80\% iterations of the more iterations method don't mean the code was 25\% faster as the knapsack times aren't uniform. If the divergence occurs close to the end and is significant (if the difference occured at iteration x, and x is about 80\% of the iterations of the method with the greatest number of iterations, and the less iterations method ended doing 90\% of the more iterations method, those 10\% were composed entirely of instances significantly harder than the first ones (that were equal). This effect wasn't studied extensively because of time and scope reasons. Thing interesting to analyze would be: how often knapsacks generated by cutting stock have different optimal solutions (or specifically distinct optimal solutions with the same weight, also, the specific case where the weight is the smallest possible, seems to be very common as the change in the ordering shown so many CSP instances where at least one knapsack diverged); would be adding all optimal solutions (or even, all solutions with profit value over one) at each single knapsack a way to speed up the computation? (there would be any negative effects, as the master model bloating? the trade-off would be valid? someone has already proposed this?) Columns can end up not being used even if choosen between the optimal ones. Dominance exclude solutions with the guarantee at least one optimal solution will remain, disabling dominance would pay off? Varying the CPLEX seed and the choosen optimal solution would make differences of wich magnitude?
-
-    The graph of iterations shown by the optimal solutions given by the cplex knapsack solver seems to result in a smaller number of iterations. It's expected that the UKP5 versions will vary between 0.2 and -0.2 from the mean (about 0 to 45\% relative to each other) as we have examinated this behavior before. This don't see to be a B\&B approach effect as MTU1 don't behave the same way. The author hypothesis is that the UKP5's idiosyncrasy of returning always one of the smallest optimal solutions can be unfavoreable to its relationship with the master model. The gap between an optimal solution weight and the knapsack capacity is interpreted as a roll's waste at the master problem. When a knapsack solver returns an optimal solution as small as possible, it's adding to the the master's model a column/pattern with more waste than other possible optimal solutions.
-
-        The dual values of the CSP master model can be negative or zero (non-positive). Such non-positive values can break codes optimized with the assumption that all items have a positive profit. Because of this, on our implementation we have removed those items before solving the knapsack problem with a non-cplex solver (cplex have no problem with such nonpositive profits), and remaped the solution items to their old indexes before returning the solution to the master problem. We do not know if any of those non-positive profit items could be fit in the gap left by some optimal solution of the same instance.
+% ALREDY EXPLAINED IN ANOTHER WAY:
+%Difference of the number of rolls in the last hexdecimal gigit is normal and caused the by the fact floating point arithmetic don't have infinite precision.
+%We do not checked if executing many times the same fp method over the same instance can give different iteration counts. However floating point arithmetic is deterministic, while incorrect from a infinite precision point of view. (CONFIRMED BY EXECUTING THE SAME INSTANCE 100 TIMES)
+%The two int ukp5 cutstock solvers have difference in the number of iterations. Ex.: BPP\_1000\_1000\_0.2\_0.8\_9.csp.txt, ukp5\_int\_cutstock has 6908 iterations and ukp5\_int\_ns\_cutstock has 6719 iterations. The only thing that change between the two is the order of the array. The two always get an optimal solution with the smallest weight. At iteration 5879, the optimal solution given by the two methods differ, for the same knapsack, both solutions are optimal (consequently have the same profit value), and both have the same weight (that is the smallest possible for an optimal solution of that knapsack). This little change creates a cascading effect that makes one method end 189 iterations before the other. This can seem little considering the number of iterations of the biggest iteration number (189 of 6719 is about 2.81\%), but this difference happened at iteration 5879 so there were only 1029 iterations left for the run with more iterations (one code ended 18\% faster simply by an arbitrary distiction between two optimal solutions of the same weight).
+%Add graphs created to the dissertation. Say that ending at 80\% iterations of the more iterations method don't mean the code was 25\% faster as the knapsack times aren't uniform. If the divergence occurs close to the end and is significant (if the difference occured at iteration x, and x is about 80\% of the iterations of the method with the greatest number of iterations, and the less iterations method ended doing 90\% of the more iterations method, those 10\% were composed entirely of instances significantly harder than the first ones (that were equal). This effect wasn't studied extensively because of time and scope reasons.
+%The graph of iterations shown by the optimal solutions given by the cplex knapsack solver seems to result in a smaller number of iterations. It's expected that the UKP5 versions will vary between 0.2 and -0.2 from the mean (about 0 to 45\% relative to each other) as we have examinated this behavior before. This don't see to be a B\&B approach effect as MTU1 don't behave the same way. The author hypothesis is that the UKP5's idiosyncrasy of returning always one of the smallest optimal solutions can be unfavoreable to its relationship with the master model. The gap between an optimal solution weight and the knapsack capacity is interpreted as a roll's waste at the master problem. 
 
 \begin{figure}[h]
-\caption{CSP Knapsack Solver Total Time (logarithmic)}
+\caption{CSP Knapsack Solver Total Time}
 \begin{center}
 <<knapsack_time,fig=true,echo=false>>=
 # Note that the points at y = 600 were introduced to allow
@@ -456,7 +469,7 @@ ggplot(csv_no_na_order,
 \end{figure}
 
 \begin{figure}[h]
-\caption{CSP Master Model Solver Total Time (logarithmic)}
+\caption{CSP Master Model Solver Total Time}
 \begin{center}
 <<master_time,fig=true,echo=false>>=
 master_time <- csp_csv
@@ -502,51 +515,98 @@ ggplot(corr_time,
 \label{fig:percentage_knap_subproblem}
 \end{figure}
 
+\subsection{The differences between the number of iterations}
 \begin{figure}[h]
-\caption{UKP5 Integer (sorted by efficiency and not sorted)}
+\caption{How many iterations each method used relative to the one with the biggest count for the same instance (in \%)}
 \begin{center}
-<<int_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock') +
-  geom_point()
+<<relative_iter_count,fig=true,echo=false>>=
+csv_no_na <- csp_csv[complete.cases(csp_csv),]
+csv_no_na <- select(csv_no_na, filename, algorithm, total_iter)
+iter_t <- csv_no_na %>%
+  group_by(filename) %>%
+  mutate(max_iter_for_filename = max(total_iter)) %>%
+  arrange(max_iter_for_filename)
+iter_t$norm_iter <- iter_t$total_iter / iter_t$max_iter_for_filename
+iter_t$filename <- factor(iter_t$filename,
+                          levels = unique(iter_t$filename))
+ggplot(iter_t,
+       aes(x = as.numeric(filename),
+           y = norm_iter * 100,
+           color = algorithm)) +
+  ylab("Percentage of iterations relative to the method\nwith the biggest count for the same instance") +
+  xlab("Instance index when ordered by the\niteration count of the method with the biggest count") +
+  geom_point() +
+  theme(legend.position = 'bottom')
 @
 \end{center}
 \legend{Source: the author.}
-\label{fig:int_vs_int_ns}
+\label{fig:relative_iter_count}
 \end{figure}
 
-\begin{figure}[h]
-\caption{UKP5 Floating Point (sorted by efficiency and not sorted)}
-\begin{center}
-<<fp_vs_fp_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_vs_fp_ns}
-\end{figure}
+In Figure~\ref{fig:relative_iter_count}, it's possible to see that the methods had different numbers of iterations for the same instance. The author used a constant for the CPlex seeds of the master problem solver and the method that used CPlex as the knapsack solver (cplex\_cutstock). Each method is deterministic and will give the same iteration number if run many times over the same instance. However, the iteration number can be different for different methods over the same instance. This happens because the knapsack subproblems can have many optimal solutions, and different methods break this tie in different ways (or they return the first proven optimal solution found, that can be also different). The chosen optimal solution will affect the master problem, that will generate a slight different knapsack subproblem. This effect cascades and can change the profit values of all next knapsack subproblems, and the number of knapsack subproblems that are needed to solve (that's the same as the number of iterations).
+
+The cplex\_cutstock stands out having many of the smallest number of iterations. The author can't explain what property CPlex knapsack solutions have that create such a difference. The effect don't seems to be associated with the B\&B approach, as MTU1 don't exhibit the same effect. We can only explain the differences in iteration count between the UKP5 variants (further discussed at Section \ref{XXX}). The UKP5 variants always return an optimal solution with the smallest weight possible, this translates to generating patterns with the greatest possible waste (the gap between optimal solution weight and the knapsack capacity equals to the waste in a CSP pattern). The author's hypothesis is that such characteristic can affect negatively the number of iterations needed to find a pattern set that can't be improved (loop end condition).
+
+\subsection{The only outlier}
+
+In all the experiments presented at this work, the author verified if the optimal solution value (the value of the objective function) was the same for all methods. Given the innacurate nature of floating point arithmetic, in this experiment, the optimal solution values differed between the methods. However, except by one outlier, no method had an absolute difference from the mean optimal value greater than \(2^{-20}\). In other words, for each instance, the optimal value in rolls of any method subtracted by the mean of the optimal value in rolls for all methods was smaller than \(2^{-20}\) and greater than \(-(2^{-20})\). 
+
+The outlier was the run of ukp5\_int\_cutstock over N4C1W1\_O.csp, that resulted in 257.7500 rolls, while the other methods resulted in 257.5833 rolls for the same instance (a 0.1667 roll difference). Hoping to find the origin of the outlier, the author tracked what differed between ukp5\_int\_cutstock and ukp5\_fp\_cutstock, that are the same algorithm with the same item ordering, but using integer profits instead of the floating point ones.
+
+The solutions given by the two methods at the third iteration differed. The solution given by the fp method isn't the optimal solution for the integer method (and vice-versa) because when the items profit were made integer (by multiplying them by \(2^{40}\) and rounding them down) a small value was lost with the rounding. For the floating point method, one solution was the optimal one, for the integer method, many solutions were optimal (including the one that was optimal for the floating point method). The tie breaker of the integer method choose a different optimal solution, and started a cascade effect (one different solution from the knapsack solver is sufficient to change all subsequent knapsacks generated by the master problem solver).
+
+The author found that differences between knapsack solutions because of precision loss, followed by the cascade effect, are common. However, there was only one outlier, so the precision loss alone don't explain the outlier. The precision loss only explains the difference in the number of iterations between ukp5\_int\_cutstock and ukp5\_fp\_cutstock. The section \ref{XXX} has further discussion on how small changes to the algorithm changes the iteration count, and except by this outlier, this don't seem to affect the final result. The section was written based on the analysis made while trying to (unsuccessfuly) find the origin of the outlier.
+
+\subsection{Iteration count differences between very similar methods}
+
+In Figure \ref{fig:comp_num_iter}, we can see the relative difference of the number of iterations between any two versions of UKP5 that share one trait and differ in the other. The traits are the type used for the item profits (floating point or integer), and if the items were sorted by efficiency or not. It's interesting that such small variations of the same algorithm can yield significant differences to the numbers of iterations. 
 
 \begin{figure}[h]
-\caption{UKP5 no sort (Floating Point vs Integer)}
+\caption{Relative differences between the numbers of iterations}
 \begin{center}
-<<fp_ns_vs_int_ns,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock') +
-  geom_point()
+<<comp_num_iter,fig=true,echo=false>>=
+t1 <- compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock')
+  #geom_point() + ggtitle('UKP5 Integer\n(sorted by efficiency and not sorted')
+t1$type <- 'Integer (sort by efficiency vs no sort)'
+t2 <- compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_fp_ns_cutstock')
+t2$type <- 'Floating Point (sort by efficiency vs no sort)'
+  #geom_point() + ggtitle('UKP5 Floating Point\n(sorted by efficiency and not sorted)')
+t3 <- compare_num_iter(csp_csv, 'ukp5_fp_ns_cutstock', 'ukp5_int_ns_cutstock')
+t3$type <- 'No Sort (FP vs Integer)'
+  #geom_point() + ggtitle('UKP5 no sort\n(Floating Point vs Integer)')
+t4 <- compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock')
+t4$type <- 'Sort by efficiency (FP vs Integer)'
+  #geom_point() + ggtitle('UKP5 sorted by efficiency\n(Floating Point vs Integer)')
+#grid.arrange(t1, t2, t3, t4)
+t <- rbind(t1, t2, t3, t4)
+ggplot(t,
+       aes(x = order,
+           y = norm_diff*100)) +
+  ylab(paste('Deviation of the number of iterations of',
+             '\none method relative to other (in %)')) +
+  xlab("Instance index when ordered by the value at axis y") +
+  facet_wrap(~ type) + geom_point()
 @
 \end{center}
 \legend{Source: the author.}
-\label{fig:fp_ns_vs_int_ns}
+\label{fig:comp_num_iter}
 \end{figure}
 
-\begin{figure}[h]
-\caption{UKP5 sorted by efficiency (Floating Point vs Integer)}
-\begin{center}
-<<fp_vs_int,fig=true,echo=false>>=
-compare_num_iter(csp_csv, 'ukp5_fp_cutstock', 'ukp5_int_cutstock') +
-  geom_point()
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:fp_vs_int}
-\end{figure}
+All four charts show that some instances were solved in the same number of iterations between the two variants compared; those instances form a horizontal line at \(y = 0\). The two variants with less difference in the number of iterations are the two integer variants with different sort methods (top right chart). This was expected. If the profits are integer, the change in the items order only makes difference when a knapsack has two optimal solutions tied for the smallest optimal solution, and the difference of order makes UKP5 choose different solutions (the item order acts as a tiebreaker in this case).
+
+When the items profit is a floating point, the order the items are added influences the result (floating point addition isn't associative). The difference is usually very small (least significant hex digit of a double's mantissa), but the magnitude of the difference is irrelevant for the algorithm, that will choose the solution with the greatest profit. As the item order changes the order of the additions inside UKP5, what solution will be considered optimal (between solutions with very similar profit values) will change.
+
+When we compare variants of the same sort method, but with different profit types (two charts at bottom of the figure), the differences aren't caused by solutions tied for optimal with smallest weight, or by the lack of the associative property in the floating point addition, but by the loss of precision caused by the use of integer values. Solutions will be different because for the integer version, some items will have the same profit value, while for the floating profit version, one of those items will have a profit greater than the others (yet for a profit difference smaller than \(2^{-40}\)).
+
+We can conclude that choosing one optimal solution over another (or choosing between two solutions with values very close to the optimal) can change the number of iterations considerably, without affecting the master problem optimal solution value (in a significant manner). A researcher studying UKP algorithms for this application has to consider the implications of this fact in his or her work.%It's important to note that, while all knapsacks of the same instance have the same capacity, quantity of items and weights, the change of the items profit change the distribution, and consequently, the hardness of the knapsack.
+
+In the section \ref{XXX} (Future Works) we will see some questions raised by this conclusion. Although there was one outlier, converting profit values to integer seems to be a valid method to test classic UKP algorithms (that work only with integer profits) for solving CSP subproblems.
+
+\subsection{Algorithms not used at this benchmark}
+
+Some algorithms were available, but weren't used at this benchmark. Those are the two algorithms from \cite{XXX}, the algorithm from \cite{XXX} (mgreendp, from Section \ref{XXX}), the MTU2 algorithm and EDUK/EDUK2 (PYAsUKP).
+
+The two algorithms from \cite{XXX} weren't used for the same reasons described at Section \ref{XXX}. The author tried to use mgreendp, but it fails if the two best items have the same efficiency, what happen sometimes at knapsack subproblems. The MTU2 algorithm wasn't used because it was designed for large UKP instances, and calls MTU1 over small numbers of items, what would end up with times similar to MTU1 for many instances.
+
+This benchmark needs to call the UKP solving methods from inside the C++ code with the CPLEX master's model. The author tried to integrate EDUK and EDUK2 (that are written in OCaml) to the benchmark, using the interface between C/C++ and OCaml, but the examples provided with the PYAsUKP sources for this kind of integration weren't working. The author could have saved the knapsack instances generated when solving the CSP problem with other algorithm, and solved them using the PYAsUKP executable. This wasn't done because of the following reasons: many knapsacks are small and solved very fast, and in those cases the PYAsUKP timing report zero or innacurate values; the solutions returned by PYAsUKP would affect the next knapsacks generated, so the comparison would be unfair.
 

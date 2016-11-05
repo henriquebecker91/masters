@@ -10,6 +10,7 @@ However, it can be solved in pseudo-polynomial time by using the dynamic program
 \section{Motivation and Scope}
 
 it's a classical problem, with only one restriction, many papers written without citing uses
+% PISINGER p. 147 motivação
 
 UKP arises in real world problems mainly as a subproblem of the Bin Packing Problem (BPP) and Cutting Stock Problem (CSP). 
 The BPP and the CSP are of great importance for the industry \cite{survey2014}, \cite{gg-1,gg-2}. 

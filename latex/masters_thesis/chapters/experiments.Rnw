@@ -425,6 +425,9 @@ Harold Greenberg wrote a paper with two other methods for solving the UKP\cite{X
 
 \section{CSP Knapsack Subproblem Experiment}
 
+% CITE GG-63 page 19, where it's said that it's relevant to always maximize the column value
+% We did not divide in high demand and low demand, but this don't affect the knapsack problem itself, and we are focusing in which knapsack methods is the best for this use (p. 16)
+
 the experiment described at this section is more complex than the others. the other experiments involved UKP instances of specific distributions saved in files, and executables that read the instances, solved them and returned the solving time. in this experiment, the instances are CSP instances, and the continuous relaxation of the those instances is solved by using the pr
 
 Two items with the same weight never exist in a cutstock knapsack problem.

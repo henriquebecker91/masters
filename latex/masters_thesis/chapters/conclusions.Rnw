@@ -10,6 +10,8 @@ The lack of literature review and implementation of old methods for comparison i
 
 solution dominance make the other domincances little relevant?
 
+%That the whole UKP literature has many problems: David Johnson - Pitfall 4 "Start by using randomly generated instances to evaluate the behaviour of algorithms, but end up using algorithms to investigate the properties of randomly-generated instances."; David Johnson "[...] problems without applications do not have real-world instances, so the experimenter is left to invent (and justify) test data in a vacuum. And referees may well question the testing of code for algorithms that will never be used in practice." (p. 5). We are researching instances that are hard for UKP, not that this has a utility on itself.
+
 \section{Future Works}
 
 There's lots of methods for UKP solving, any interessed should do a good review before thinking in creating a new solution

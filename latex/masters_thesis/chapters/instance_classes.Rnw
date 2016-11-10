@@ -131,7 +131,7 @@ We opted for using the ones from PYAsUKP code, and they are presented below.
 
 \subsubsection{Strong Correlation}
 
-There's many formulaes for generating items' distribution that could be considered strong correlated items' distributions. In \cite{mtu2} and \cite{eduk}, the formula used was \(w_i = rand(w_{min}, w_{max})\) and \(p_i = w_i + \alpha)\), for a given \(w_{min}\) and \(w_{max}\) and a constant \(\alpha = 100\). However, in~\cite{pya}, the formula presented below was used, because ``\cite{chung_hard} have shown that solving this problem is difficult for B&B.''. In all strong correlated instances with \(\alpha > 0\), the smallest item is also the best item, characteristics that often makes a instance easier (the best item ends up multiple dominating many items). 
+There's many formulaes for generating items' distribution that could be considered strong correlated items' distributions. In \cite{mtu2} and \cite{eduk}, the formula used was \(w_i = rand(w_{min}, w_{max})\) and \(p_i = w_i + \alpha)\), for a given \(w_{min}\) and \(w_{max}\) and a constant \(\alpha = 100\). However, in~\cite{pya}, the formula presented below was used, because ``\cite{chung_hard} have shown that solving this problem is difficult for B\&B.''. In all strong correlated instances with \(\alpha > 0\), the smallest item is also the best item, characteristics that often makes a instance easier (the best item ends up multiple dominating many items). 
 
 Instances generated using the following formula: \(w_i = w_{min} + i - 1\) and \(p_i = w_i + \alpha\), for a given \(w_{min}\) and \(\alpha\).
 Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\), and \(w_{min}\) combination are equal.

@@ -7,13 +7,13 @@ library(ggplot2)
 
 \chapter{The instance classes}
 
-If the author of this work could suggest one single thing to be improved in the future works about UKP, it would be the choice of the instances. Few are the works that used instances from real world problems (e.g. \cite{gg-63} and \cite{gg-66}), the majority of the works about the UKP used artificially generated instances (e.g. \cite{mtu1}, \cite{mtu2}, \cite{babyev}, \cite{eduk} and \cite{pya}).
+If the author of this work could suggest one single thing to be improved in the future works about UKP, it would be the choice of the instances. Few are the works that used instances from real world problems (e.g. \cite{gg-63} and \cite{gg-66}), the majority of the works about the UKP used artificially generated instances (e.g. \cite{mtu1}, \cite{mtu2}, \cite{babayev}, \cite{eduk} and \cite{pya}).
 
 The major problem with an experimental analysis of the UKP solving methods using artificial instances is that the different solving approaches are affected by the items' distributions (i.e. some methods are the best for some for some items' distributions and the worst for others, and vice-versa). Consequently, the results aren't useful for someone that wants to tackle real world UKP instances, unless the those items' distributions ends up modelling those instances.
 
-The first artificial instances used in the literature were the instances with the uncorrelated items' distribution (described further in this chapter), whose main criticism is having a great amount of dominated items. The existence of the uncorrelated instances in the literature of the UKP was used by an essay as example of one of its points: ``We can think of three reasons for not using a random problem generator: [\dots] b) solving lots of randomly generated problems gives a false sense of having thoroughly tested an algorithm [\dots] To illustrate (b), consider the \emph{unbounded or general integer knapsack problem}. [\dots] A plausible, and in fact common, way of generating random instances of this problem is (\emph{the author of the essay describes the procedure used for the generation of instances with the uncorrelated items' distribution}) [\dots] Thus, even though we might ostensibly solve, say, 20 different big randomly generated problems, we are in fact only solving essentially one modest size underlying problem 20 times. This seems a less thorough test of an algorithm than one would like. Solving 20 different problems from 20 different industrial sources would be more reassuring.''\cite[p. 5 to 7]{portable_rng}.
+The first artificial instances used in the literature were the instances with the uncorrelated items' distribution (described further in this chapter), whose main criticism is having a great amount of dominated items. The existence of the uncorrelated instances in the literature of the UKP was used by an essay as example of one of its points: ``We can think of three reasons for not using a random problem generator: [...] b) solving lots of randomly generated problems gives a false sense of having thoroughly tested an algorithm [...] To illustrate (b), consider the \emph{unbounded or general integer knapsack problem}. [...] A plausible, and in fact common, way of generating random instances of this problem is (\emph{the author of the essay describes the procedure used for the generation of instances with the uncorrelated items' distribution}) [...] Thus, even though we might ostensibly solve, say, 20 different big randomly generated problems, we are in fact only solving essentially one modest size underlying problem 20 times. This seems a less thorough test of an algorithm than one would like. Solving 20 different problems from 20 different industrial sources would be more reassuring.''\cite[p. 5 to 7]{portable_rng}.
 
-The artificial instance datasets proposed afterwards didn't have the problem described in the last paragraph (at least not to the same extent). However, to the authors knowledge, the following criticism is valid for all artificial instance datasets created for the UKP: ``[\dots] lessons learned from experimental analysis are typically highly problem- and instance-specific. Moreover, problems without applications do not have real-world instances, so the experimenter is left to invent (and justify) test data in a vacuum. And referees may well question the testing of code for algorithms that will never be used in practice.''\cite[p.~5]{davids_guide}. While the UKP has applications, and therefore real-world instances, there exist many papers with experiments that use only artificial instances. Such experiments lead to obtaining instance-specific knowledge about instances that can never appear in the real-world, what's not very useful. If an algorithm is designed to have a better performance over such artificial instances, or simply end up being efficient only over these instances, the algorithm has no real use in practice. One justificative given for the use of such artificial instance datasets is that ``Unfortunately, very few real-life instances of UKP have been reported in the literature.''\cite[p.~6]{pya}.
+The artificial instance datasets proposed afterwards didn't have the problem described in the last paragraph (at least not to the same extent). However, to the authors knowledge, the following criticism is valid for all artificial instance datasets created for the UKP: ``[...] lessons learned from experimental analysis are typically highly problem- and instance-specific. Moreover, problems without applications do not have real-world instances, so the experimenter is left to invent (and justify) test data in a vacuum. And referees may well question the testing of code for algorithms that will never be used in practice.''\cite[p.~5]{davids_guide}. While the UKP has applications, and therefore real-world instances, there exist many papers with experiments that use only artificial instances. Such experiments lead to obtaining instance-specific knowledge about instances that can never appear in the real-world, what's not very useful. If an algorithm is designed to have a better performance over such artificial instances, or simply end up being efficient only over these instances, the algorithm has no real use in practice. One justificative given for the use of such artificial instance datasets is that ``Unfortunately, very few real-life instances of UKP have been reported in the literature.''\cite[p.~6]{pya}.
 
 The consequences of the situation is also well described by the following pitfall: ``Start by using randomly generated instances to evaluate the behaviour of algorithms, but end up using algorithms to investigate the properties of randomly-generated instances.''\cite[p.~9]{davids_guide}. The experiments over artificial instance datasets brought more knowledge about what combinations of parameters makes a instances hard or easy to solve, by one or another approach, than knowledge about useful algorithms.
 
@@ -28,6 +28,7 @@ The consequences of the situation is also well described by the following pitfal
 %The author of this work has already pointed that the choices of item distributions on the generation of artificial instances in the prior work has defined what was considered the best algorithm. The author has created a new instance distribution to further illustrate this point. 
 
 \section{Uncorrelated Items' Distribution and Instances}
+\label{sec:inst_uncorrelated}
 
 % REMEMBER PROFIT AND WEIGHT DOMINANCE
 
@@ -59,6 +60,7 @@ The author has choosen to not use uncorrelated instances in his experiments. The
 The following subsections present a detailed critical analysis about two uncorrelated instance datasets used in the literature (and the parameters used). It's impotant to note that they aren't the only instance dataset used in such papers.
 
 \subsection{Martello's use of uncorrelated instances}
+\label{sec:martello_uncorrelated}
 
 Some datasets of uncorrelated instances were used for experiments in \cite{mtu2}. The uncorrelated distribution and the set of parameters used to generate the datasets made huge instances to have only a small number of undominated items.
 
@@ -75,6 +77,7 @@ of having at least one item \(i\) with \(w_i \leq 20\) and \(p_i > \frac{p_{max}
 All instances have more than 99.5\% odds\footnote{Calculated the same way, but using \(\frac{9}{100} \times \frac{1}{2}\) as the chance of generating and item \(i\) with \(w_i \leq \frac{w_{max}}{10}\) and \(p_i > \frac{p_{max}}{2}\).} of having an item \(i\) with \(w_i \leq \frac{w_{max}}{10}\) and \(p_i > \frac{p_{max}}{2}\), that would multiple dominate all items \(j\) with \(w_j > 2 \times \frac{w_{max}}{10}\) (i.e. 80\% of the items).
 
 \subsection{Babayev's use of uncorrelated instances}
+\label{sec:babayev_uncorrelated}
 
 A dataset of uncorrelated instances was used for experiments in \cite{babayev}\footnote{Section ``Second group of experiments - Problems with Uncorrelated Random Coefficients'' of the paper.}. The set of parameters used to generate this dataset made almost all instances to be trivial. It's pointed in the paper that almost all uncorrelated instances are solved exactly by a greedy procedure use only the two most efficient items to fill the knapsack.
 
@@ -158,7 +161,7 @@ This family of instances is generated by the following method: \textbf{n} distin
 
 \subsubsection{No Collective Dominance}
 
-Any items' distribution where the efficiency of the items increase with their weight have no collective, multiple, or simple dominated instances. Threshold dominance exist in such instances, as bigger items will probably dominate solutions comprised of many copies of a smaller item. A distribution with this characteristics was proposed ``to prevent a DP based solver to benefit from the variable reduction due to the collective dominance''\cite[p. 13]{pya}, with the intent of making comparison fairer.
+Any items' distribution where the efficiency of the items increase with their weight have no collective, multiple, or simple dominated instances. Threshold dominance exist in such instances, as bigger items will probably dominate solutions comprised of many copies of a smaller item. A distribution with this characteristics was proposed ``to prevent a DP based solver to benefit from the variable reduction due to the collective dominance''\cite[p.~13]{pya}, with the intent of making comparison fairer.
 
 This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order; \(p_1 = p_{min} + rand(0, 49)\); and \(\forall i \in [2, n].~p_i = \lfloor w_i \times ((p_{i-1}/w_{i-1}) + 0.01)\rfloor + rand(1, 10)\). The given values are: \(w_{min} = p_{min} = \mathbf{n}\) and \(w_{max} = 10\overline{n}\). The PYAsUKP \emph{-form hi -pmin \(p_{min}\) -wmax \(w_{max}\)} parameters were used.
 
@@ -169,6 +172,7 @@ The SAW instances were proposed in~\cite{pya}. The SAW instances includes the st
 This family of instances is generated by the following method: generate \textbf{n} random weights between \(w_{min}\) and \(w_{max} = 1\overline{n}\) with the following property: \(\forall i \in [2, n].~w_i~mod~w_1 > 0\) (\(w_1\) is the smallest weight); sort by increasing order; then \(p_1 = w_1 + \alpha\) where \(\alpha = rand(1,5)\), and \(\forall i \in [2, n].~p_i = rand(l_i, u_i)\) where \(l_i = max(p_{i-1}, q_i)\), \(u_i = q_i + m_i\), \(q_i = p_1 \times \lfloor w_i / w_1 \rfloor \), and \(m_i = w_i~mod~w_1\). The PYAsUKP \emph{-form saw -step \(\alpha\) -wmax \(w_{max}\)} parameters were used.
 
 \section{CSP Subproblem Knapsack Instances}
+\label{sec:csp_ukp_inst}
 
 The applied use of the UKP chosen by the author to be focused in this work was: the pricing subproblem generated by solving the continuous relaxation of the set covering formulation for the classic BPP and CSP using the column generation approach. A summary about this use was already given in section \ref{XXX}, together with the explanation of its relevance. In this section, the technical details about the relationship between BPP/CSP and the UKP will be given, to allow the reader to understand how such instances of the UKP are generated and why is necessary to solve them.
 %The mathematical notation conflict with the one used with the rest of the work, however it is used only here, and self contained.
@@ -184,8 +188,8 @@ The previously mentioned `set covering' formulation for BPP and CSP is a tight f
 
 \begin{align}
   maximize & \sum_{j=1}^n x_j \label{eq:csp_objfun}\\
-subject~to & \sum_{j=1}^n a_{ij} x_j \geq b_i,~~~\forall i \in \{1,\dots,m\}  \label{eq:csp_demand}\\
-           & x_j \in \mathbb{N}_0,~~~\forall i \in \{1,\dots,m\} \label{eq:csp_x_integer}
+subject~to & \sum_{j=1}^n a_{ij} x_j \geq b_i,~~~\forall i \in \{1,...,m\}  \label{eq:csp_demand}\\
+           & x_j \in \mathbb{N}_0,~~~\forall i \in \{1,...,m\} \label{eq:csp_x_integer}
 \end{align}
 
 The author didn't choose to remove already existing columns
@@ -235,7 +239,7 @@ Our objective is not to explore this distribution and its behaviour with differe
 
 The reasoning for the choices made when creating the BREQ 128-16 Standard follows. There was no reason to restrict the \(w_{min}\) to \(w_{max}\) interval to be smaller than \(c\) (there are \(c\) distinct valid weight values). The constant 128 used to compute the capacity \(c\) for a \(n\) value was chosen as the first power of two higher than a hundred. Consequently less than 1\% of all possible items will appear at an instance, making instances generated with different seeds significantly different. The \(p_{min}\) to \(p_{max}\) value interval was chosen to be sixteen times bigger than the \(w_{min}\) to \(w_{max}\) interval to alleviate the effects of rounding the profit value to an integer value (it would not need to be done if the profit was a floating point number with reasonable precision). The efficiency of the items in a BREQ distribution will vary between zero and \(\frac{p_{max}}{w_{max}}\), so if \(p_{max} = w_{min}\) the efficiency would vary between zero and one, giving more relevance to the rounding. At least, for the biggest \(n\) value that we were interested in testing (\(2^20\)), the highest possible value of an item profit is \(2^{31} = 2^{20}\times128\times16\) what keeps the values smaller than 32 bits.
 
-The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying \(n\) and the seed. We propose a benchmark with a hundred instances, with all combinations of \(n = 2^{11} = 2048, 2^{12}, \dots, 2^{20} \approx 10^6\) (ten \(n\) values), and ten seed different values. We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
+The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying \(n\) and the seed. We propose a benchmark with a hundred instances, with all combinations of \(n = 2^{11} = 2048, 2^{12}, ..., 2^{20} \approx 10^6\) (ten \(n\) values), and ten seed different values. We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
 
 \section{Other distributions}
 
@@ -243,5 +247,5 @@ While artificial items' distributions presented in~\cite{pya} were used in the e
 
 The main reason for using the artificial distributions described in~\cite{pya} was that, almost certainly, questions about the performance of the algorithms in the most recent benchmark dataset for the UKP would arise, and these experiments answer them preemptively. Not using the dataset would cast a shadow of doubt over this work. However, there was no reason to track and implement every single artificial items' distribution already used in the literature, as the criticism presented in this work about artificial items' distributions would apply to them too.
 
-The author also finds important to show the risks of insufficient bibliographical research, and not re-evaluating the results of experiments presented in the past. In Section \ref{XXX}, we will see that simple DP algorithms of fifty years ago seems to be the best for solving the most recent benchmark dataset for UKP. 
+The author also finds important to show the risks of insufficient bibliographical research, and not re-evaluating the results of experiments presented in the past. In Section \ref{sec:pya_exp}, we will see that simple DP algorithms of fifty years ago seems to be the best for solving the most recent benchmark dataset for UKP. 
 

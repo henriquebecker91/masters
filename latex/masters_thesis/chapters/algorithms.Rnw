@@ -25,6 +25,7 @@ REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfair
 \subsection{MTU1 and MTU2}
 
 \section{Dynamic Programming}
+\label{sec:dp_algs}
 
 \subsection{The naive algorithm}
 
@@ -37,6 +38,8 @@ REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfair
 % MAYBE FAST IMPLEMENT BOTH METHODS AND ADD THEM TO THE THESIS? IF NOT TO AN REVISED VERSION THAT WILL BE PUBLISHED ONLINE, AND SHOW THE BEST VERSION OF THE GILMORE AND GOMORY ALGORITHM?
 
 \subsection{UKP5}
+\label{sec:ukp5_sol_dom_expl}
+\label{sec:ukp5_periodicity}
 
 % UKP5 algorithm explanation
 %We used only a UKP5-specific periodicity bound described later and the \(y^{*}\) bound described in~\cite[p. 223]{gar72}.

@@ -315,6 +315,7 @@ While the simple, multiple and collective dominances are rare in a BREQ distribu
 %@
 
 \subsection{PYAsUKP 4540 Instances Benchmark}
+\label{sec:pya_exp}
 
 In this section we present an updated version of the bechmark presented in the paper \cite{XXX}, which in turn was based in the benchmark presented at \cite{XXX}. The comparison at \cite{XXX} was between UKP5 and PYAsUKP, here we present the same benchmark with one extra method, and comparison between other three methods over a reduced version of that benchmark (with 10\% of the instances of each group). The reduced version was used because of time restraints, executing only over 10\% of the instances was sufficient to know that the methods weren't competitive.
 
@@ -424,6 +425,7 @@ As MTU2 and MTU1 are the most well-known B\&B algorithms for solving UKP, the au
 Harold Greenberg wrote a paper with two other methods for solving the UKP\cite{XXX}, this paper was published after \cite{XXX} (that proposed the algorithm implemented by mgreendp). The author found interesting to implement those algorithms too, as they used different approachs\footnote{Those approaches are described as XXX and XXX.}, and also because they were from the same author that already designed an efficient algorithm. However, the first algorithm proved itself very time and memory consuming, and the second algorithm didn't worked for all cases (could not be considered an exact method without using a backup solver to solve instances where the method failed). After some tests become clear that the intent of the paper was a theoretical exploration of new approaches, not proposing efficient algorithms, and the algorithms were dicarded from experimentation over this benchmark instances. Readers interested in those methods can check implementations of them, made available at Github\footnote{XXX}.
 
 \section{CSP Knapsack Subproblem Experiment}
+\label{sec:csp_experiments}
 
 % CITE GG-63 page 19, where it's said that it's relevant to always maximize the column value
 % We did not divide in high demand and low demand, but this don't affect the knapsack problem itself, and we are focusing in which knapsack methods is the best for this use (p. 16)
@@ -548,7 +550,7 @@ ggplot(iter_t,
 
 In Figure~\ref{fig:relative_iter_count}, it's possible to see that the methods had different numbers of iterations for the same instance. The author used a constant for the CPlex seeds of the master problem solver and the method that used CPlex as the knapsack solver (cplex\_cutstock). Each method is deterministic and will give the same iteration number if run many times over the same instance. However, the iteration number can be different for different methods over the same instance. This happens because the knapsack subproblems can have many optimal solutions, and different methods break this tie in different ways (or they return the first proven optimal solution found, that can be also different). The chosen optimal solution will affect the master problem, that will generate a slight different knapsack subproblem. This effect cascades and can change the profit values of all next knapsack subproblems, and the number of knapsack subproblems that are needed to solve (that's the same as the number of iterations).
 
-The cplex\_cutstock stands out having many of the smallest number of iterations. The author can't explain what property CPlex knapsack solutions have that create such a difference. The effect don't seems to be associated with the B\&B approach, as MTU1 don't exhibit the same effect. We can only explain the differences in iteration count between the UKP5 variants (further discussed at Section \ref{XXX}). The UKP5 variants always return an optimal solution with the smallest weight possible, this translates to generating patterns with the greatest possible waste (the gap between optimal solution weight and the knapsack capacity equals to the waste in a CSP pattern). The author's hypothesis is that such characteristic can affect negatively the number of iterations needed to find a pattern set that can't be improved (loop end condition).
+The cplex\_cutstock stands out having many of the smallest number of iterations. The author can't explain what property CPlex knapsack solutions have that create such a difference. The effect don't seems to be associated with the B\&B approach, as MTU1 don't exhibit the same effect. We can only explain the differences in iteration count between the UKP5 variants (further discussed at Section \ref{sec:diff_it_count}). The UKP5 variants always return an optimal solution with the smallest weight possible, this translates to generating patterns with the greatest possible waste (the gap between optimal solution weight and the knapsack capacity equals to the waste in a CSP pattern). The author's hypothesis is that such characteristic can affect negatively the number of iterations needed to find a pattern set that can't be improved (loop end condition).
 
 \subsection{The only outlier}
 
@@ -561,6 +563,7 @@ The solutions given by the two methods at the third iteration differed. The solu
 The author found that differences between knapsack solutions because of precision loss, followed by the cascade effect, are common. However, there was only one outlier, so the precision loss alone don't explain the outlier. The precision loss only explains the difference in the number of iterations between ukp5\_int\_cutstock and ukp5\_fp\_cutstock. The section \ref{XXX} has further discussion on how small changes to the algorithm changes the iteration count, and except by this outlier, this don't seem to affect the final result. The section was written based on the analysis made while trying to (unsuccessfuly) find the origin of the outlier.
 
 \subsection{Iteration count differences between very similar methods}
+\label{sec:diff_it_count}
 
 In Figure \ref{fig:comp_num_iter}, we can see the relative difference of the number of iterations between any two versions of UKP5 that share one trait and differ in the other. The traits are the type used for the item profits (floating point or integer), and if the items were sorted by efficiency or not. It's interesting that such small variations of the same algorithm can yield significant differences to the numbers of iterations. 
 

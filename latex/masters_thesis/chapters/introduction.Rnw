@@ -33,6 +33,7 @@ The author acknowledges the existence of many very good heuristics and approxima
 The IRUP and MIRUP properties cited above are found in the exact solution of the continuous relaxation of BPP and CSP. The use of an approximation or heuristic to solve the pricing problem would make the relaxation's solving not exact. A study of the effects of using an approximation algorithm to solve the pricing problem would be interesting, but is not in the scope of this work. It's interesting to rememeber that if the relaxation isn't solved exactly, a B\&B method that used the relaxation as an lower bound wouldn't be exact too.
 
 \section{Formulation and Notation}
+\label{sec:formulation}
 
 %Say solution is a multiset, will be used in the dominance section below
 %Say that we consider items with the same weight and profit the same item

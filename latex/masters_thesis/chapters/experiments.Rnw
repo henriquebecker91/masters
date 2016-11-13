@@ -100,18 +100,22 @@ Finally, the fifth and last experiment examinate UKP as the pricing subproblem d
 
 After the publication of \cite{sea2016}, the author come to perceive that algorithm's times were affected by executing multiple runs in parallel, \emph{even if each run was being executed in a exclusive/isolated core}. We credit this effect to the fact that the L2 and L3 memory cache levels are shared between cores. Some experiments were run to discern the magnitude of this effect.
 
-For the rest of this section, we will differ between runs that executed in parallel and runs that executed one-at-time (serially). It's important to note that we are talking about the wall-clock time of the algorithm execution (without the instance reading, or output printing) between: 1\textsuperscript{st}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and two of the remaining cores isolated and executing one run too (i.e. parallel runs); 2\textsuperscript{nd}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and two of the remaining cores isolated and free (i.e. serial runs).
+For the rest of this section, we will differ between runs that executed in parallel and runs that executed one-at-time (serially). It's important to note that we are talking about the wall-clock time of the algorithm execution (without the instance reading, or output printing) between: 1\textsuperscript{st}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and two of the remaining cores isolated and executing one run too (i.e. parallel runs); 2\textsuperscript{nd}) a run that executes in a isolated core (with no other process in the same core), with one of the other cores running the OS, and the remaining cores isolated and free (i.e. serial runs).
 
 \subsection{Setups}
 
 The setup of this experiment is different from the remaining experiments.
 The experiment is repeated in two distinct computers;
-this was necessary to observe the impact of different amounts of shared cache.
+this was necessary to observe the impact of different CPUs (what include different amounts of shared cache).
 Only the UKP and the PYAsUKP (EDUK2) were used;
 some algorithms will be more affected other less, but if some are strongly affected this is sufficient evidence for running all algorithms serially.
 Also, both algorithms were present in the original comparison \cite{sea2016}, and both algorithms are relatively fast (a practical concern). 
 
-The experiments used the reduced PYAsUKP benchmark (see Section \ref{XXX}) and ten runs for each combination of the same algorithm, in the same computer, over the same instance, and in the same mode (parallell or serial).
+The two computer setting will be refered as \verb+notebook+ and \verb+desktop+. The \verb+notebook+ setting is the same used in \cite{sea2016}. The \verb+notebook+ configurations included: Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7-4700HQ CPU @ 2.40GHz; there were 8GiB RAM available (\(2 \times\) DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (L1d: 32K and L1i: 32K, L2: 256K, L3: 6144K, only the L3 is shared between cores). The CPU had Intel\textsuperscript{\textregistered} HyperThreading, where 4 physical cores simulate 8 virtual cores. This technology was disabled for the tests. The \verb+desktop+ configurations included: Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7 5820k @ 3.3GHZ; there were 16GiB RAM available (\(2 \times\) Crucial Ballistix Sport DDR4 SDRAM 2400 MHz) and three levels of cache (L1i: 32K and L1d: 32K, L2: 256K, L3: 15MiB, only the L3 is shared between cores). This CPU also had Intel\textsuperscript{\textregistered} HyperThreading, where 6 physical cores simulate 12 virtual cores. This technology was also disabled for the tests in this CPU.
+
+The observant reader will perceive the the computers setting have different amounts of cores (four for \verb+notebook+ and six for \verb+desktop+). During the experiments, in both computers, one core was left to run the OS and three cores were isolated. In the parallel runs the three isolated cores were used, in the serial run only one of them. The author believes this choice made the comparison fairer.
+
+The experiments used the reduced PYAsUKP benchmark (see Section \ref{sec:pya_dat_red_pya_dat}) and ten runs for each combination of the same algorithm, in the same computer, over the same instance, and in the same mode (parallell or serial).
 For the same computer, all runs of one algorithm were executed before starting the first run of the other algorithms, what is specially important for the parallel runs, as this means they only have competed for cache with other runs of the same algorithm.
 For the same computer, algorithm, and mode, the order of the instances was randomly choosen.
 
@@ -120,7 +124,7 @@ For the same computer, algorithm, and mode, the order of the instances was rando
 The experiments have shown that the mean time of multiple runs of the same algorithm in the same computer vary considerably if they are executed in parallel or serially; how much they vary depends of the specific algorithm and computer.
 
 The author do not intend to do an in-depth analysis, but only to show that the difference exists and can be significative.
-The experiments described in all the other Section of this chapter were executed serially to avoid this noise.
+The experiments described in all the other sections of this chapter were executed serially to avoid this noise.
 The already mentioned referee of \cite{sea2016}, questioned if the faster memory access could have benefited UKP5 over PYAsUKP.
 This experiment is also an answer to that question.
 The experiment setting in \cite{sea2016} corresponds to parallel runs over the \verb+notebook+ computer.
@@ -183,20 +187,20 @@ ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) +
 % However, all UKP5 runs use little time (clearly less than 25 seconds) where many of the PYAsUKP runs have times between 25 and 300 (or 200) seconds. Even more, the PYAsUKP runs that take more time are also the more affected by the parallel execution; the author hypothesize that they take more time because the instance is harder, and use more memory for the same reason, this way they end up using more than the L1 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable). The result is that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time, making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
 
 The execution of runs in parallel seems to affect UKP5 far more than PYAsUKP, as it has much more points distant from \(y \approx 1\) (where serial and parallel runs have similar mean times) than PYAsUKP, and only UKP5 has a significative share of points over \(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time).
-The author believes that the fact that UKP5 initializes two arrays with the size of the knapsack capacity (plus \(w_{max}\)), and access many diferent memory regions in sequence (at each position of those arrays it access in an arbitrary order the position up to \(w_{max}\) positions far from the current position), makes it to be more affected by the cache sharing.
+The author believes that the reasons for UKP5 being more affected by the cache sharing are: the greater use of memory (about \(2 \times (c - w_{min} + w_{max})\)); the initialization of such arrays; and accessing many diferent memory regions in sequence (at each iteration of the outer loop, up to \(n\) array positions in a range of size up to \(w_{max}\) are accessed in an arbitrary order).
 
-However, one could point that all UKP5 runs use little time (less than 10 seconds when serially and, consequently, no more than thirty when in parallel), where many of the PYAsUKP runs have times between 10 and 100 seconds (serially), with some up to 300 seconds.
+While UKP5 seems to be more affected by running in parallel, one could point that all UKP5 runs use little time (less than 10 seconds when serially and, consequently, no more than thirty when in parallel), where many of the PYAsUKP runs have times between 10 and 100 seconds (serially), with some up to 300 seconds.
 Even more, the PYAsUKP runs that take more time are also the more affected by the parallel execution.
 The author hypothesize that they take more time because the instance is harder, and use more memory for the same reason, this way they end up using more than the L1 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable, the same effect happens to UKP5).
-The result is that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time (in absolute numbers), making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
+The result would be that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time (in absolute numbers), making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
 
 Let's examinate closely the values for the \verb+notebook+ setting, as this was the one used at the \cite{sea2016}.
 We will refer to UKP5 (or PYAsUKP) Parallel (or Serial) Total time (or TT, for short) as the sum of the internal times of all the runs of that algorithm in that mode and, for now, only in the \verb+notebook+ setting.
 The UKP5 Parallel TT is 2.03 times greater than UKP5 Serial TT, while PYAsUKP Parallel TT is only 1.60 times greater than the PYAsUKP Serial TT.
 However, this means about 8252 extra seconds for UKP5 Parallel TT (compared to the serial time) and about 74180 extra seconds for PYAsUKP Parallel TT (compared to the serial time).
-We will see that this considerable absolute difference don't end up benefiting UKP5 in the analysis, as the PYAsUKP Serial TT is about 15.33 times bigger than the UKP5 Serial TT, but the PYAsUKP Parallel TT is about 12.10 times bigger than UKP5 Parallel TT.
+We will see that this considerable absolute difference don't end up benefiting UKP5 in the analysis, as the PYAsUKP Serial TT is about 15.33 times greater than the UKP5 Serial TT, but the PYAsUKP Parallel TT is about 12.10 times bigger than UKP5 Parallel TT.
 In fact, the parallel execution seems to benefit the PYAsUKP numbers against UKP5 while not by much.
-If we focused in the desktop setting, we would see that PYAsUKP was benefited too (while by less), the PYAsUKP Parallel TT would be 15.62 times greater than the UKP5 Parallel TT; and the PYAsUKP Serial TT would be 16.50 times greater than the UKP5 Serial TT.
+If we focused in the \verb+desktop+ setting, we would see that PYAsUKP was benefited too (while by less), the PYAsUKP Parallel TT would be 15.62 times greater than the UKP5 Parallel TT; and the PYAsUKP Serial TT would be 16.50 times greater than the UKP5 Serial TT.
 
 \begin{figure}[h]
 \caption{Parallel and Serial Runs Standard Deviation}
@@ -229,9 +233,9 @@ ggplot(data = com_sd,
 \label{fig:sd_env_infl}
 \end{figure}
 
-The Figure \ref{fig:sd_env_infl} present the Standard Deviation (SD) values computed over each ten runs in the exact same conditions.
+The Figure \ref{fig:sd_env_infl} present the Standard Deviation (SD) values computed over each ten runs for the same algorithm, computer, mode and instance.
 The author will not try to draw many conclusions from this data, as SD values with different means aren't directly comparable.
-However, it's interesting to point that, in general, the runs in the serial mode, and/or the \verb+desktop+ setting, have a much smaller SD than the ones in parallel mode, and/or the notebook setting (either because of the serial/desktop times are smaller, or because the algorithms don't compete so much for cache).
+However, it's interesting to point that, in general, the runs in the serial mode, and/or the \verb+desktop+ setting, have a much smaller SD than the ones in parallel mode, and/or the \verb+notebook+ setting (either because of the serial/\verb+desktop+ times are smaller, or because the algorithms don't compete so much for cache).
 %As the variation is very small in a serial/desktop setting, and a similar setting is used for the remaining experiments, the author found no problem in executing only one run for combination of instance and algorithm in the rest of the experiments.
 
 The author belives this superficial analysis is sufficient to convince the reader that there's a significant difference by running the experiments serially or in parallel.
@@ -273,7 +277,8 @@ The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux).
 Three of the four cores were isolated using the \emph{isolcpus} kernel flag. 
 The \emph{taskset} utility was used to execute runs in one of the isolated cores.
 % SEE ABOUT SWAP AND THE MEMORY USE SPECIALLY FOR MGREENDP1
-% CHECK THE COMPILER VERSION/FLAGS for each experiment?: The UKP5 code was compiled with gcc (g++) version 5.3.0 (the \emph{-O3 -std=c++11} flags were enabled).
+% CHECK THE COMPILER VERSION/FLAGS for each experiment?:
+%All C++ code was compiled with gcc (g++) version 5.3.0 (the \emph{-O3 -std=c++11} flags were enabled).
 
 % Two other smaller experiments were relevant to those and are described in the next two subsections. The first shows that our implementation of MTU1 and MTU2 (written in C++) are in par with the original ones (written in Fortran); we will use our implementation in the remaining of the experiments. The second shows that there can be considerable time difference when the runs of an experiment are executed in parallel (even one per core, and with the core isolated from other processes) instead one at time. 
 
@@ -424,7 +429,7 @@ grid.arrange(p1, p2)
 \label{fig:breq_bench}
 \end{figure}
 
-The test was made with the reduced PYAsUKP benchmark (see Section \ref{XXX}). We can see that the MTU1 implementations had a very small variation, with the C++ version being slight faster.
+The test was made with the reduced PYAsUKP benchmark (see Section \ref{sec:pya_dat_red_pya_dat}). We can see that the MTU1 implementations had a very small variation, with the C++ version being slight faster.
 The MTU2 implementation had a much bigger variation. We do believe that this variation is caused by the order checking and the difference of sorting algorithms.
 
 There's a trend between the values 180 and 230 of the x axis.
@@ -640,7 +645,7 @@ The outlier was the run of ukp5\_int\_cutstock over N4C1W1\_O.csp, that resulted
 
 The solutions given by the two methods at the third iteration differed. The solution given by the fp method isn't the optimal solution for the integer method (and vice-versa) because when the items profit were made integer (by multiplying them by \(2^{40}\) and rounding them down) a small value was lost with the rounding. For the floating point method, one solution was the optimal one, for the integer method, many solutions were optimal (including the one that was optimal for the floating point method). The tie breaker of the integer method choose a different optimal solution, and started a cascade effect (one different solution from the knapsack solver is sufficient to change all subsequent knapsacks generated by the master problem solver).
 
-The author found that differences between knapsack solutions because of precision loss, followed by the cascade effect, are common. However, there was only one outlier, so the precision loss alone don't explain the outlier. The precision loss only explains the difference in the number of iterations between ukp5\_int\_cutstock and ukp5\_fp\_cutstock. The section \ref{XXX} has further discussion on how small changes to the algorithm changes the iteration count, and except by this outlier, this don't seem to affect the final result. The section was written based on the analysis made while trying to (unsuccessfuly) find the origin of the outlier.
+The author found that differences between knapsack solutions because of precision loss, followed by the cascade effect, are common. However, there was only one outlier, so the precision loss alone don't explain the outlier. The precision loss only explains the difference in the number of iterations between ukp5\_int\_cutstock and ukp5\_fp\_cutstock. The section \ref{sec:diff_it_count} has further discussion on how small changes to the algorithm changes the iteration count, and except by this outlier, this don't seem to affect the final result. The section was written based on the analysis made while trying to (unsuccessfuly) find the origin of the outlier.
 
 \subsection{Iteration count differences between very similar methods}
 \label{sec:diff_it_count}

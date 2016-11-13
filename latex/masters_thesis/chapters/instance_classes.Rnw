@@ -119,7 +119,7 @@ This section will discuss the instance's datasets proposed in~\cite{pya}, and re
 All those instance datasets were artificially generated with the purpose of being ``hard to solve'', this can mean a different thing for each one of them.
 Some items' distributions used in these datasets were also proposed in~\cite{pya}, others were taken from the literature.
 
-The datset is similar to the one used in~\cite{pya}, the same tool was used to generate the datasets (PYAsUKP) and the same parameters were used, otherwise noted the contrary. However, some instances make use of random seed values that weren't provided, so the exact instances used in~\cite{pya} can be different. The instances are exactly the same presented in \cite{sea2016}.
+The dataset is similar to the one used in~\cite{pya}, the same tool was used to generate the datasets (PYAsUKP) and the same parameters were used, otherwise noted the contrary. However, some instances make use of random seed values that weren't provided, so the exact instances used in~\cite{pya} can be different. The instances are exactly the same presented in \cite{sea2016}.
 
 In Subsection 5.1.1 \emph{Known ``hard'' instances} of~\cite{pya} some sets of easy instances are used to allow comparison with MTU2. 
 However, the authors reported integer overflow problems with MTU2 on harder instances. 
@@ -133,46 +133,61 @@ The notation \(rand(x, y)\) means an integer between \(x\) and \(y\) (including 
 We found some small discrepancies between the formulas presented in~\cite{pya} and the ones used in PYAsUKP code.
 We opted for using the ones from PYAsUKP code, and they are presented below.
 
-\subsubsection{Strong Correlation}
+\subsection{Subset-Sum}\label{sec:subsetsum}
+
+Subset-sum instances are instances where \(p_i = w_i = rand(w_{min}, w_{max})\).
+Subset-sum instances generated with the same parameters that in \cite{pya} can be solved in less than a centisecond by many of the algorithms presented at this work.
+The implementation of the EDUK2 algorithm have imprecise time measuring.
+Because of this, in this paper, we use a similar dataset, but with each parameter multiplied by ten.
+Therefore, were generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances. Each instance had a random capacity in the range \([5\times10^6; 10^7]\).
+%We do not discriminate each combination in~Table \ref{tab:times} for brevity.
+The PYAsUKP's \emph{-form ss -wmax \(w_{max}\)} parameters were used.
+
+The author of this work finds the the study of such instances to be nonsense. If purely subset-sum knapsacks existed in practice, then discarding all profit values and applying a subset-sum algorithm would be the best way to solve them. Also, collective dominance is very common if \(w_{min}\) is small.
+
+\subsection{Strong Correlation}
 \label{sec:sc_inst}
 
-There's many formulaes for generating items' distribution that could be considered strong correlated items' distributions. In \cite{mtu2} and \cite{eduk}, the formula used was \(w_i = rand(w_{min}, w_{max})\) and \(p_i = w_i + \alpha)\), for a given \(w_{min}\) and \(w_{max}\) and a constant \(\alpha = 100\). However, in~\cite{pya}, the formula presented below was used, because ``\cite{chung_hard} have shown that solving this problem is difficult for B\&B.''. In all strong correlated instances with \(\alpha > 0\), the smallest item is also the best item, characteristics that often makes a instance easier (the best item ends up multiple dominating many items). 
+There's many formulaes for generating items' distribution that could be considered strong correlated items' distributions. In \cite{mtu2} and \cite{eduk}, the formula used was \(w_i = rand(w_{min}, w_{max})\) and \(p_i = w_i + \alpha)\), for a given \(w_{min}\) and \(w_{max}\) and a constant \(\alpha = 100\). The already described Subset-Sum instances can also be considered strongly correlated too. However, in~\cite{pya}, the formula presented below was used, because ``\cite{chung_hard} have shown that solving this problem is difficult for B\&B.''. In all strong correlated instances with \(\alpha > 0\), the smallest item is also the best item, characteristics that often makes a instance easier (the best item ends up multiple dominating many items). 
 
 Instances generated using the following formula: \(w_i = w_{min} + i - 1\) and \(p_i = w_i + \alpha\), for a given \(w_{min}\) and \(\alpha\).
 Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\), and \(w_{min}\) combination are equal.
 The formula doesn't rely on random numbers.
 The PYAsUKP \emph{-form chung -step \(\alpha\)} parameters were used.
 
-\subsubsection{Subset-Sum}\label{sec:subsetsum}
+Twenty instances were generated with each combination of \(n = 5\times10^3\), \(\alpha \in \{5, -5\}\) and \(w_{min} \in \{10^4, 1.5\times10^4, 5\times10^4\}\). More twenty instances were generated with each combination of \(n = 10^4\), \(\alpha \in \{5, -5\}\) and \(w_{min} \in \{10^4, 5\times10^4, 11\times10^4\}\). Totalling 240 instances.
+Each instance had a random capacity in the range \([20\overline{n}; 100\overline{n}]\).
 
-Subset-sum instances are instances where \(p_i = w_i = rand(w_{min}, w_{max})\).
-Subset-sum instances generated with the same parameters that in \cite{pya} can be solved in less than a centisecond by many of the algorithms presented at this work.
-The implementation of the EDUK2 algorithm have imprecise time measuring.
-Because of this, in this paper, we use a similar dataset, but with each parameter multiplied by ten.
-Therefore, were generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.
-%We do not discriminate each combination in~Table \ref{tab:times} for brevity.
-The PYAsUKP's \emph{-form ss -wmax \(w_{max}\)} parameters were used.
-
-The author of this work finds the the study of such instances to be nonsense. If purely subset-sum knapsacks existed in practice, then discarding all profit values and applying a subset-sum algorithm would be the best way to solve them. Also, collective dominance is very common if \(w_{min}\) is small.
-
-\subsubsection{Postponed Periodicity}
+\subsection{Postponed Periodicity}
 
 Many algorithms benefit from the periodicity property explained in section \ref{XXX} by computing some lower bound on capacity \(y\). For the instances created using the formula below and ``where \(c < 2 \times w_{max}\) and \(n\) is large enough, the periodicity property does not help''\cite[p.~13]{pya}. The idea of such instances seems to be putting all algorithms in an equal footing about which capacity they are solving an instance. 
 
 This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order; \(p_1 = w_1 + rand(1, 500)\); and \(\forall i \in [2, n].~p_i = p_{i-1} + rand(1, 125)\). The \(w_{max}\) is computed as \(10\overline{n}\). The PYAsUKP \emph{-form nsds2 -step 500 -wmax \(w_{max}\)} parameters were used.
 
-\subsubsection{Without Collective Dominance}
+Two hundred instances were generated for each combination of \(n = \{2\times10^4, 5\times10^4\}\) and \(w_{min} = \{2\times10^4, 5\times10^4\}\). Totalling 800 instances. Each instance had a random capacity in the range \([w_{max}; 2\times10^6]\).
+
+\subsection{Without Collective Dominance}
 
 Any items' distribution where the efficiency of the items increase with their weight have no collective, multiple, or simple dominated instances. Threshold dominance exist in such instances, as bigger items will probably dominate solutions comprised of many copies of a smaller item. A distribution with this characteristics was proposed ``to prevent a DP based solver to benefit from the variable reduction due to the collective dominance''\cite[p.~13]{pya}, with the intent of making comparison fairer.
 
 This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order; \(p_1 = p_{min} + rand(0, 49)\); and \(\forall i \in [2, n].~p_i = \lfloor w_i \times ((p_{i-1}/w_{i-1}) + 0.01)\rfloor + rand(1, 10)\). The given values are: \(w_{min} = p_{min} = \mathbf{n}\) and \(w_{max} = 10\overline{n}\). The PYAsUKP \emph{-form hi -pmin \(p_{min}\) -wmax \(w_{max}\)} parameters were used.
 
-\subsubsection{SAW}
+Five hundred instances were generated for each combination of \(n = w_{min} \in \{5\times10^3, 10^4, 2\times10^4, 5\times10^4\}\). Totalling 2000 instances. Each instance had a random capacity in the range \([w_{max}; 1000\overline{n}]\).
+
+\subsection{SAW}
 \label{sec:saw_inst}
 
 The SAW instances were proposed in~\cite{pya}. The SAW instances includes the strong correlated instances with \(\alpha > 0\), and as such share the property described in section \ref{XXX}. The main point of the authors of~\cite{pya} for including such instances in the benchmark seems to be testing a new general upper bound proposed in the same work. The new bound it's the tightest known for the SAW instances, and is included in EDUK2.
 
 This family of instances is generated by the following method: generate \textbf{n} random weights between \(w_{min}\) and \(w_{max} = 1\overline{n}\) with the following property: \(\forall i \in [2, n].~w_i~mod~w_1 > 0\) (\(w_1\) is the smallest weight); sort by increasing order; then \(p_1 = w_1 + \alpha\) where \(\alpha = rand(1,5)\), and \(\forall i \in [2, n].~p_i = rand(l_i, u_i)\) where \(l_i = max(p_{i-1}, q_i)\), \(u_i = q_i + m_i\), \(q_i = p_1 \times \lfloor w_i / w_1 \rfloor \), and \(m_i = w_i~mod~w_1\). The PYAsUKP \emph{-form saw -step \(\alpha\) -wmax \(w_{max}\)} parameters were used.
+
+Two hundred instances were generated for each combination of \(w_{min} = 10^4\), \(n \in \{10^4, 5\times10^4, 10^5\}\). Additional five hundred instances were generated with \(w_{min} = 5\times10^3\) and \(n = 5\times10^4\). Totalling 1100 instances.
+Each instance had a random capacity in the range \([w_{max}; 10\overline{n}]\).
+
+\subsection{PYAsUKP's dataset and reduced PYAsUKP's dataset}
+\label{sec:pya_dat_red_pya_dat}
+
+The dataset described in the last five subsections, and totalling 4540 instances, will be called for the rest of this work: \emph{the PYAsUKP's dataset}. In each of the five smaller datasets, for the same combination of parameters, the number of instances generated was always perfectly divisible by ten. The dataset comprised by one tenth of the PYAsUKP's dataset, following the same distribution, and totalling 454 instances, will be called for the rest of this work: \emph{the reduced PYAsUKP's dataset}.
 
 \section{CSP Subproblem Knapsack Instances}
 \label{sec:csp_ukp_inst}

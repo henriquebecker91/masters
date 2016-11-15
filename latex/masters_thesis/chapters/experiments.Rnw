@@ -516,40 +516,39 @@ While the simple, multiple and collective dominances are rare in a BREQ distribu
 \section{CSP Knapsack Subproblem Experiment}
 \label{sec:csp_experiments}
 
-The experiment described in this section is different than the previous experiments.
-All other experiments consisted in UKP's instances of specific distributions saved in files, and executables that read those instances, solved them and returned the solving time.
+The experiment described in this section is different from the previous experiments.
+All other experiments consisted in instances of the UKP with specific distributions saved in files, and executables that read those instances, solved them and returned the solving time.
 In this experiment, the instances are not of the UKP but of the BPP and CSP.
-The times presented are the sum of the times used to solve all the pricing subproblems (or master problems) generated while solving the continuous relaxation of the instances.
+The times presented are the sum of the times used to solve all the pricing subproblems (and/or master problems) generated while solving the continuous relaxation of those instances.
 
 Adapting MTU1 for using floating point profit values (as the ones present in the pricing subproblems) proved to be difficult, as much of the bounds' computation was based in the assumption that both weight and profit values were integer.
 The solution found was to multiply the items' profit values by a multiplicative factor, round them down and treat them as integer profit values.
 The multiplicative factor chosen was \(2^{40}\).
-The inner working of floating point numbers favored the choice of potency of two.
+The inner working of floating point numbers favored the choice of a potency of two.
 This way, an integer profit value is exactly the first 40 bits of the mantissa from the respective floating point profit value.
 Also, \(2^{40} \approx 10^{12}\), so any value discarded by the rounding down is smaller than one part in one trillion.
 
 To measure the impact of the conversion described above, the author used two versions of the UKP5, one using floating point profit values, and the other using integer profit values and the same conversion described above.
-The UKP5 sorts the items by non-increasing efficiency, but it works with any ordering.
+The UKP5 by default sorts the items by non-increasing efficiency, but it works with any ordering.
 The items from a pricing subproblem are always naturally ordered by increasing weight\footnote{The term `increasing' is used because two items never share the same weight in a pricing subproblem.}.
-The author found interesting to execute the two UKP variants with sorting enabled and disabled, to check if the sorting would pay off.
+The author found interesting to execute the two UKP5 variants with sorting enabled and disabled, to verify if the sorting cost would pay off.
 Consequently, four versions of UKP5 were used in the tests, for all combinations of profit type (the original floating point, or the converted integer), and sorting (sorting by non-increasing efficieny, or not sorting, that's the same that the items ordered by increasing weight).
 
-The CPlex was already being used for solving the master problem, taking this in account, the author choose to use it to solve the pricing problem too, as a baseline.
-
+The CPlex was already being used for solving the master problem, taking this in account, the author choose to use it to solve the pricing problem too.
 For reasons explained at Section \ref{sec:csp_alg_not_used}, only UKP5, CPlex and MTU1 were used in this experiment.
 
 In \cite{gg-61}, it is suggested that instead of solving the pricing problem exactly, an heuristic for the UKP could be used, and only if the cutting pattern found by the heuristic didn't improve the solution, the exact method would be used.
 In \cite[p.~17]{gg-63}, the experiments show that there's gain in solving the pricing problems always exactly.
-That is what is done in this experiments section.
+The author choose to abide to the last suggestion and, in the experiment described at this section, the pricing subproblem is always solved exactly.
 
-The timeout used in those experiments was of 600 seconds. This choice was based in the number of CSP's instances, and that each one of them generate many pricing problems. However, after the results, the choice of timeout was clearly too conservative. The author plan to remake the experiments with a greater timeout before publishing a paper based in this thesis.
+The timeout used in those experiments was of 600 seconds. This choice was based in the number of CSP's instances, and that each one of them had the potential for generating thousands of pricing problems. However, after the results, the choice of timeout was clearly too conservative. The author plan to remake the experiments with a greater timeout before publishing a paper based in this thesis.
 
 The dual values of the CSP master model can be negative or zero (non-positive).
 Such non-positive values can break code optimized with the assumption that all items have a positive profit.
-Consequntly, in the implementations of this experiment, those items are removed before solving the pricing problem with a non-CPLEX solver (CPLEX have no problem with such nonpositive profits).
-The indexes of the items in the pricing problems' solutions are remaped to their old indexes before returning the solution to the master problem.
+Consequently, in the implementations of this experiment, those items are removed before solving the pricing problem with a non-CPLEX solver (CPLEX have no problem with such nonpositive profits).
+The indexes of the items in the solutions of the pricing problems are remaped to their old values before returning the solution to the master problem.
 The same process of remaping is already done for algoriths that change the items' order.
-The time of all remapping or conversion procedures is always added to the times taken by the algoriths to solve the pricing subproblems.
+The time taken by sorting, conversion and remaping procedures is accounted in the times taken by the UKP's algoriths to solve the pricing subproblems.
 
 % ALREDY EXPLAINED IN ANOTHER WAY:
 %Difference of the number of rolls in the last hexdecimal gigit is normal and caused the by the fact floating point arithmetic don't have infinite precision.
@@ -557,6 +556,44 @@ The time of all remapping or conversion procedures is always added to the times 
 %The two int ukp5 cutstock solvers have difference in the number of iterations. Ex.: BPP\_1000\_1000\_0.2\_0.8\_9.csp.txt, ukp5\_int\_cutstock has 6908 iterations and ukp5\_int\_ns\_cutstock has 6719 iterations. The only thing that change between the two is the order of the array. The two always get an optimal solution with the smallest weight. At iteration 5879, the optimal solution given by the two methods differ, for the same knapsack, both solutions are optimal (consequently have the same profit value), and both have the same weight (that is the smallest possible for an optimal solution of that knapsack). This little change creates a cascading effect that makes one method end 189 iterations before the other. This can seem little considering the number of iterations of the biggest iteration number (189 of 6719 is about 2.81\%), but this difference happened at iteration 5879 so there were only 1029 iterations left for the run with more iterations (one code ended 18\% faster simply by an arbitrary distiction between two optimal solutions of the same weight).
 %Add graphs created to the dissertation. Say that ending at 80\% iterations of the more iterations method don't mean the code was 25\% faster as the knapsack times aren't uniform. If the divergence occurs close to the end and is significant (if the difference occured at iteration x, and x is about 80\% of the iterations of the method with the greatest number of iterations, and the less iterations method ended doing 90\% of the more iterations method, those 10\% were composed entirely of instances significantly harder than the first ones (that were equal). This effect wasn't studied extensively because of time and scope reasons.
 %The graph of iterations shown by the optimal solutions given by the cplex knapsack solver seems to result in a smaller number of iterations. It's expected that the UKP5 versions will vary between 0.2 and -0.2 from the mean (about 0 to 45\% relative to each other) as we have examinated this behavior before. This don't see to be a B\&B approach effect as MTU1 don't behave the same way. The author hypothesis is that the UKP5's idiosyncrasy of returning always one of the smallest optimal solutions can be unfavoreable to its relationship with the master model. The gap between an optimal solution weight and the knapsack capacity is interpreted as a roll's waste at the master problem. 
+
+\begin{figure}[h]
+\caption{Total time used solving the continuous relaxation of the BPP/CSP.}
+\begin{center}
+<<total_time,fig=true,echo=false>>=
+master_time <- csp_csv
+#csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
+master_time$tt <- master_time$hex_sum_knapsack_time + master_time$hex_sum_master_prob_time
+master_time[is.na(master_time$tt), ]$tt <- 600
+
+master_time <- master_time %>% group_by(filename) %>% mutate(mean_methods_time = mean(tt)) %>% arrange(mean_methods_time)
+master_time$filename <- factor(master_time$filename, levels = unique(master_time$filename))
+ggplot(master_time,
+       aes(x = as.numeric(filename),
+           y = tt,
+           color = algorithm)) +
+  xlab('Instance index when ordered by the\nmean time methods spent solving the CSP\'s relaxation') +
+  ylab('CSP\'s relaxation total time (seconds, log10 scale)') +
+  geom_point() +
+  scale_y_continuous(
+    trans = 'log10', limits = c(0.001, 1000),
+    breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+    labels = c('0.001', '0.01', '0.1', '1', '10', '100', '1000')
+  ) +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:csp_total_time}
+\end{figure}
+
+Let's examinate Figure \ref{fig:csp_total_time}.
+To simplify visualization, in the instances where CPlex and MTU1 ended in timeout, these two methods are plotted as having used exactly 600 seconds.
+Two facts should be immediatly obvious: 1\textsuperscript{st}) using CPlex to solve the pricing subproblems isn't really competitive; 2\textsuperscript{nd}) for the majority of the CSP's instances in the benchmark, solving their continuous relaxation with a non-CPlex method is very fast (takes less than a second).
+
+The second fact isn't so surprising considering that: the benchmark included many old datasets, as it tried to be extensive; solving the continuous relaxation takes considerably less effort than solving the problem itself.
+A hard instance of the CSP, that can't be solved in many hours with state-of-the-art methods, will need to solve continuous relaxations of the model many times.
+If solving a relaxation takes more than couple of seconds each time, then solving the original CSP's instance can become impracticable.
 
 \begin{figure}[h]
 \caption{Total time used solving pricing problems (UKP) in the continuous relaxation of the BPP/CSP.}
@@ -576,18 +613,75 @@ csv_no_na_order <- csv_no_na %>% group_by(filename) %>% mutate(mean_methods_time
 csv_no_na_order$filename <- factor(csv_no_na_order$filename, levels = unique(csv_no_na_order$filename))
 ggplot(csv_no_na_order,
        aes(x = as.numeric(filename),
-           y = csv_no_na_order$hex_sum_knapsack_time,
+           y = hex_sum_knapsack_time,
            color = algorithm)) +
   xlab('Instance index when ordered by the\nmean time methods spent solving pricing subproblems') +
   ylab('Total time (seconds, log10 scale)') +
   geom_point() +
-  scale_y_log10() +
+  scale_y_continuous(
+    trans = 'log10', limits = c(0.0001, 1000),
+    breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+    labels = c('0.001', '0.01', '0.1', '1', '10', '100', '1000')
+  ) +
   theme(legend.position = 'bottom')
 @
 \end{center}
 \legend{Source: the author.}
 \label{fig:csp_knapsack_time}
 \end{figure}
+
+There's a small cluster of points between \(x > 450\) and \(x < 550\), with \(y < 0.1\).
+This cluster shows the existence of some instances that generated pricing subproblems that were much harder to solve by CPlex and MTU1 than by the DP methods.
+The same cluster can be seen in Figure \ref{fig:csp_knapsack_time}, that only shows the time taken by solving the pricing subproblems.
+
+The author don't think it's wise to draw strong conclusions using the runs that lasted less than a second.
+For runs that last less than a second, small polynomial optimizations can make considerable difference, consequently there's too much noise for a serious analysis.
+For small instances, any algorithm specifically designed for the UKP will have reasonable performance.
+
+Focusing our attention to the runs that spent more than a second solving pricing subproblems, in Figure \ref{fig:csp_knapsack_time}, some patterns emerge.
+First, becomes clear that the B\&B approach isn't viable for larger/harder instances, as its exponential worst-case times make the problem untractable.
+Second, there seems to be an advantage in not sorting the items, and this difference isn't caused by the time taken by the sorting procedure.
+In the runs that lasted more than a second, the time used to sort the items was between 3\% and 0.5\% of the time used to solve the pricing subproblems.
+Such small difference don't explain the gap displayed in the graph.
+When the items were kept ordered by increasing weight, the UKP5 was up to two times faster than when the items were sorted by non-increasing efficiency.
+Keeping the items ordered by increasing weight seems to be the best choice for such instances.
+Third, seems like executing all computation using integers is slight faster than using floating point profit values, but the difference is barely noticeable.
+
+\begin{figure}[h]
+\caption{Percentage of time taken by solving pricing subproblems (UKP) in the continuous relaxation of the BPP/CSP.}
+\begin{center}
+<<cutstock_master_knap_corr,fig=true,echo=false>>=
+corr_time <- csp_csv#[complete.cases(csp_csv),]
+corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
+corr_time$tt <- corr_time$hex_sum_knapsack_time + corr_time$hex_sum_master_prob_time
+corr_time[is.na(corr_time$tt), ]$tt <- 600
+corr_time <- corr_time %>% group_by(filename) %>% mutate(mean_methods_time = mean(tt)) %>% arrange(mean_methods_time)
+corr_time$filename <- factor(corr_time$filename, levels = unique(corr_time$filename))
+ggplot(corr_time,
+       aes(x = as.numeric(filename),
+           y = relative_time * 100,
+           color = algorithm)) +
+  xlab('Instance index when ordered by the mean time taken to solve it') +
+  ylab('How much of the total time was\nspent solving knapsack subproblems (in %)') +
+  geom_point() +
+  theme(legend.position = 'bottom')
+@
+\end{center}
+\legend{Source: the author.}
+\label{fig:percentage_knap_subproblem}
+\end{figure}
+
+The first two figures presented in this section can give the erroneous impression that solving the pricing subproblems was where the majority of the solving time was spent.
+This is true in the case of CPlex, partially true for MTU1, and not true at all for UKP5.
+The Figure \ref{fig:percentage_knap_subproblem} allows for a better visualization of what was just said.
+When CPlex is used to solve the pricing subproblems, almost all total time is spent solving the pricing subproblems.
+However, the time taken by non-CPlex methods to solve the pricing subproblem remained mostly below 25\% of the total time (or even less).
+Also, seems clear that when MTU1\_CUTSTOCK used large amounts of time, this was consequence of the MTU1 method taking too much time to solve the pricing subproblems.
+
+In the case of CUTSTOCK\_UKP5\_*, the most time-consuming instances spent no more than 40\% of the time solving the pricing subproblems (often considerably less).
+This is not to say that, in such time-consuming instances, the pricing subproblems weren't harder.
+In the Figure \ref{fig:percentage_knap_subproblem}, where \(x > 550\), we can see that there's a rise of the relative time taken to solve the pricing subproblem instances with UKP5.
+However, the reason for the growth in the total time spent to solve the most time-consuming instances was that many cutting patterns had to be added to the master problem before it could not be improved anymore; what translates to more iterations, and consequently more instances of the pricing subproblem and master problem solved.
 
 \begin{figure}[h]
 \caption{Total time used solving the master problem in the continuous relaxation of the BPP/CSP.}
@@ -601,44 +695,31 @@ master_time <- master_time %>% group_by(filename) %>% mutate(mean_methods_time =
 master_time$filename <- factor(master_time$filename, levels = unique(master_time$filename))
 ggplot(master_time,
        aes(x = as.numeric(filename),
-           y = master_time$hex_sum_master_prob_time,
+           y = hex_sum_master_prob_time,
            color = algorithm)) +
   xlab('Instance index when ordered by the\nmean time methods spent solving the master model') +
   ylab('Master model solver total time (seconds, log10 scale)') +
   geom_point() +
-  scale_y_log10() +
+  scale_y_continuous(
+    trans = 'log10', limits = c(0.001, 1000),
+    breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
+    labels = c('0.001', '0.01', '0.1', '1', '10', '100', '1000')
+  ) +
   theme(legend.position = 'bottom')
 @
 \end{center}
 \legend{Source: the author.}
-\label{fig:csp_master_time}
+\label{fig:master_time}
 \end{figure}
 
-\begin{figure}[h]
-\caption{Percentage of time taken by solving knapsack subproblems}
-\begin{center}
-<<cutstock_master_knap_corr,fig=true,echo=false>>=
-corr_time <- csp_csv[complete.cases(csp_csv),]
-corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
-corr_time <- arrange(corr_time, relative_time)
-corr_time$filename <- factor(corr_time$filename, levels = unique(corr_time$filename))
-ggplot(corr_time,
-       aes(x = as.numeric(filename),
-           y = relative_time * 100,
-           color = algorithm)) +
-  xlab('Instance index when ordered by the y axis value') +
-  ylab('How much of the total time was\nspent solving knapsack subproblems (in %)') +
-  geom_point() +
-  theme(legend.position = 'bottom')
-@
-\end{center}
-\legend{Source: the author.}
-\label{fig:percentage_knap_subproblem}
-\end{figure}
+Finally, Figure \ref{fig:master_time} shows that the time taken by solving the master model is dependent in the instance itself, and not so much in the method used to solve the pricing subproblems.
+Yet, we can see that using CPlex to solve the pricing subproblems seems to make solving the master problem slight easier.
+Such behaviour seems to be related to the differences in the number of iterations (or master/pricing problems) solved. A topic that will be explored in the next sections.
 
-\subsection{The differences between the number of iterations}
+\subsection{The differences in the number of pricing subproblems solved}
+
 \begin{figure}[h]
-\caption{How many iterations each method used relative to the one with the biggest count for the same instance (in \%)}
+\caption{How many pricing subproblems each method solved, relative to the method that solved the greatest amount for the same instance (in \%).}
 \begin{center}
 <<relative_iter_count,fig=true,echo=false>>=
 csv_no_na <- csp_csv[complete.cases(csp_csv),]
@@ -654,8 +735,8 @@ ggplot(iter_t,
        aes(x = as.numeric(filename),
            y = norm_iter * 100,
            color = algorithm)) +
-  ylab("Percentage of iterations relative to the method\nwith the biggest count for the same instance") +
-  xlab("Instance index when ordered by the\niteration count of the method with the biggest count") +
+  ylab("Percentage of pricing subproblems solved relative to the method\nwith the greatest count for the same instance") +
+  xlab("Instance index when ordered by the amount of pricing problems solved\nby the method with the greatest amount") +
   geom_point() +
   theme(legend.position = 'bottom')
 @
@@ -667,17 +748,17 @@ ggplot(iter_t,
 In Figure~\ref{fig:relative_iter_count}, it's possible to see that the methods had solved different numbers of pricing subproblems for the same instance.
 The author used a constant for the CPlex seeds of the master problem solver and the method that used CPlex as the knapsack solver (cplex\_cutstock).
 Each method is deterministic and will give the same pricing subproblems if run many times over the same instance.
-However, the pricing subproblems can be different for different methods over the same instance.
+However, for the same instance, the amount of pricing subproblems (and their profit values) is affected by the algorithm chosen to solve them.
 This happens because the pricing subproblems can have many optimal solutions, and different methods break this tie in different ways.
-The chosen optimal solution will affect the master problem, that will generate a slight different knapsack subproblem.
-This effect cascades and can change the profit values of all next knapsack subproblems, and the number of knapsack subproblems that are needed to solve (that's the same as the number of iterations).
+The choice of optimal solution will affect the master problem, that will generate a slight different pricing subproblem.
+This effect cascades and can change the profit values of all next pricing subproblems, and the number of pricing subproblems that are needed to solve (that's the same as the number of iterations, and the number of master problems needed to solve).
 
-The cplex\_cutstock stands out having many of the smallest number of iterations.
-The author can't explain what property CPlex knapsack solutions have that create such a difference.
+The CPLEX\_CUTSTOCK stands out having many of the smallest number of iterations.
+The author can't explain what property the solutions of the pricing problem returned by CPlex have that create such a difference.
 The effect don't seems to be associated with the B\&B approach, as MTU1 don't exhibit the same effect.
 We can only explain the differences in iteration count between the UKP5 variants (further discussed at Section \ref{sec:diff_it_count}).
-The UKP5 variants always return an optimal solution with the smallest weight possible, this translates to generating patterns with the greatest possible waste (the gap between optimal solution weight and the knapsack capacity equals to the waste in a CSP pattern).
-The author's hypothesis is that such characteristic can affect negatively the number of iterations needed to find a pattern set that can't be improved (loop end condition).
+The UKP5 variants always return an optimal solution with the smallest weight possible. This translates to generating patterns with the greatest possible waste (the gap between optimal solution weight and the knapsack capacity equals to the waste in a cutting pattern).
+The author's hypothesis is that this idiosyncrasy of the UKP5 can affect negatively the number of iterations needed to find a set of cutting patterns that can't be improved (loop end condition).
 
 \subsection{The only outlier}
 
@@ -686,19 +767,19 @@ Given the innacurate nature of floating point arithmetic, in this experiment, th
 However, except by one outlier, no method had an absolute difference from the mean optimal value greater than \(2^{-20}\).
 In other words, for each instance of the CSP/BPP, the optimal value in rolls of any method, subtracted by the mean of the optimal value in rolls for all methods, was smaller than \(2^{-20}\) and greater than \(-(2^{-20})\). 
 
-The outlier was the run of ukp5\_int\_cutstock over N4C1W1\_O.csp, that resulted in 257.7500 rolls, while the other methods resulted in 257.5833 rolls for the same instance (a 0.1667 roll difference).
-Hoping to find the origin of the outlier, the author tracked what differed between ukp5\_int\_cutstock and ukp5\_fp\_cutstock, that are the same algorithm with the same item ordering, but using integer profits instead of the floating point ones.
+The outlier was the run of UKP5\_INT\_CUTSTOCK over N4C1W1\_O.csp, that resulted in 257.7500 rolls, while the other methods resulted in 257.5833 rolls for the same instance (a 0.1667 roll difference).
+Hoping to find the origin of the outlier, the author tracked what differed between UKP5\_INT\_CUTSTOCK and UKP5\_FP\_CUTSTOCK, that are the same algorithm with the same item ordering, but using integer profits instead of the floating point ones.
 
 The solutions given by the two methods at the third iteration differed.
 The solution given by the floating point variant isn't the same optimal solution given by the integer method (and vice-versa).
 This happens because, when the items profit were made integer (by multiplying them by \(2^{40}\) and rounding them down), a small value was lost with the rounding.
 For the floating point method, \emph{one} solution was the optimal one.
 For the integer method, \emph{many} solutions were optimal, including the one that was optimal for the floating point variant.
-The tie breaker of the integer method choose a different optimal solution, and started a cascade effect (one different solution from the knapsack solver is sufficient to change all subsequent knapsacks generated by the master problem solver).
+The tie breaker of the integer method choose a different optimal solution, and started a cascade effect.
 
 The author found that differences between knapsack solutions because of precision loss, followed by the cascade effect, are common.
 However, there was only one outlier, so the precision loss alone don't explain the outlier.
-The precision loss only explains the difference in the number of pricing subproblems solved by ukp5\_int\_cutstock and ukp5\_fp\_cutstock.
+The precision loss only explains the difference in the number of pricing subproblems solved by UKP5\_INT\_CUTSTOCK and UKP5\_FP\_CUTSTOCK.
 The Section \ref{sec:diff_it_count} has further discussion on how small changes to the algorithm changes the iteration count, and except by this outlier, this don't seem to affect the final result.
 The Section \ref{sec:diff_it_count} was written based on the analysis made while trying to (unsuccessfuly) find the origin of the outlier.
 

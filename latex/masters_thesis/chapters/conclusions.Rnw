@@ -10,6 +10,8 @@ The lack of literature review and implementation of old methods for comparison i
 
 solution dominance make the other domincances little relevant?
 
+This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
+
 \section{Future Works}
 \label{sec:future_works}
 

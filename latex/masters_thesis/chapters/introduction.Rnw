@@ -1,4 +1,5 @@
 \chapter{Introduction}
+\label{sec:introduction}
 
 The unbounded knapsack problem (UKP) is a simpler variant of the well-known bounded knapsack problem (BKP) and the 0-1 Knapsack Problem (0-1 KP).
 The only difference between UKP and these other two knapsack problems is that UKP don't impose a bound in the available quantity of each item type.
@@ -76,6 +77,7 @@ We refer to the item with greatest efficiency among all items of an specific ins
 The observant reader will perceive that an UKP instance is defined by a list of items, instead of a set of items, as usual. Some algorithms sort the items and manipulate their indexes. So having notation to refer to the item's indexes is convenient. Also, a set would not allow for identical items (i.e. that share the same item type). Such duplicated items exist in some instance datasets of the literature, and can affect the timing of algorithms. %As we don't allow distinct items with the same weight and profit, the difference between a list and a set, for the problem formulation, is null.
 
 \section{Well-known properties of UKP}
+\label{sec:well_known_prop}
 
 In this section, we will see well-known properties of the UKP that can be exploited to speed-up computation. The main point of those properties is that they are only valid if we have available as many copies of each item type as we could need. Consequently, those properties are always valid for UKP and generally not valid for other knapsack variants. However, it's interesting to note that, if a BKP or 0-1 KP has as many or more copies of some item type than it can fit in the knapsack, then we have an unbounded quantity of that item type available and the properties described below apply to these item types. If every item type \(i\) of an instance of the BKP (or 0-1 KP) have at least \(\floor{\frac{c}{w_i}}\) copies available, then the instance can be solved as it was an instance of the UKP.
 

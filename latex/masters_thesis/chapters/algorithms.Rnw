@@ -317,13 +317,14 @@ Nonetheless, without this test, the UKP5 was about 1800 (one thousand and eight 
 \section{Branch-and-Bound Algorithms}
 
 The B\&B approach was established in the seventies as the most efficient approach for solving the UKP\footnote{To the author's knowledge this claim is first made in \cite{mtu2}, and after this other papers as \cite{babayev} began repeating it.
-The fact that only the code for MTU1 and MTU2 was readily available also didn't help the situation, as some began to claim that MTU2 was the \emph{de facto} standard algorithm for UKP (see \cite{ukp_new_results}).}, what is greatly a consequence of the datasets, items' distributions and/or generation parameters used at the period (that favored B\&B in the experiments).
+The fact that only the code for MTU1 and MTU2 was readily available also didn't help the situation, as some began to claim that MTU2 was the \emph{de facto} standard algorithm for UKP, see \cite{ukp_new_results}.}, what is greatly a consequence of the datasets, items' distributions and/or generation parameters used at the period (that favored B\&B in the experiments).
 
 The author does not intend to gives a complete introduction to the B\&B approach, but he belives a quick overview is in order.
-The B\&B approach can be seen as an improvement of the brute-force approach, the brute-force approach would consist of exhaustively examinating all solutions in the search space.
-A B\&B algorithm will keep track of the best solution found so far that, in the case of a maximization problem like UKP, this solution is called a lower bound on the optimal solution (in the sense that `the optimal solution is at least this good').
-A B\&B algorithm will divide the search space in two or more exclusive subdivisions, in the case of the UKP, an example would be `all solutions with 4 or less copies of item \(\i\)' and `all solutions with 5 or more copies of item \(i\)'.
-An optimistic guess for the best value to be found in each subdivision of the search space is computed, these are called upper bounds (this is, a value that is guaranteed to be equal to or greater than the best solution value to be found in that subdivision of the search space).
+The B\&B approach can be seen as an improvement of the brute-force approach. The brute-force approach would consist of exhaustively examinating all solutions in the search space.
+A B\&B algorithm will keep track of the best solution found so far.
+In the case of a maximization problem like UKP, this solution is called a lower bound on the optimal solution (in the sense that `the optimal solution is at least this good').
+A B\&B algorithm will divide the search space in two or more exclusive subdivisions. In the case of the UKP, an example would be `all solutions with 4 or less copies of item \(i\)' and `all solutions with 5 or more copies of item \(i\)'.
+An optimistic guess for the best value to be found in each subdivision of the search space is computed, these are called upper bounds (this is, a value that is guaranteed to be equal to or greater than the value of the best solution to be found in that subdivision of the search space).
 The subdivisions are recursively and systematically divided in smaller subdivisions.
 If the upper bound of any subdivision is smaller than or equal to the global lower bound, then the solutions of that subdivision of the search space don't need to be examinated (i.e. the best solution know at the moment is already equal to or better than any solution that can be found in that subdivision of the search space).
 If, by the use of the lower and upper bounds, the B\&B algorithm obtains proof that no solution in all the search space can be better than the best solution found so far, the B\&B algorithm stops.
@@ -346,7 +347,15 @@ The datasets used in the seventies had large \(n\) and \(c\) values, and items' 
 
 \subsection{MTU1}
 
-see paper
+The MTU1 algorithm is a B\&B algorithm for the UKP that avoids the explicity enumeration of the subdivisions' tree.
+It begins by creating a lower bound solution using a greedy heuristic procedure.
+Given that the items are ordered by non-increasing efficiency, the greedy procedure simply fills the knapsack with as much copies as possible of the first item, and then repeats the procedure for the remaining gap and the second item, until there's no gap or all items were tried
+This solution is duplicated and saved as the global lower bound, and as the current solution being enumareted.
+
+The search space is subdivided in the following fashion:
+the first level of the tree is defined by the number of copies of the first item will be used in the solution (the second level, by the second item, and so on);
+the exploration will begin using the current solution and, consequently, by the node where \(x_1 = \floor{\frac{c}{w_1}}\);
+for each level 
 
 \subsection{MTU2}
 

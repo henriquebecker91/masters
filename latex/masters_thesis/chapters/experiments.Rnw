@@ -291,7 +291,7 @@ In this section we present an updated version of the bechmark presented in \cite
 The comparison at \cite{sea2016} was between UKP5 and PYAsUKP, here the exact same dataset is used, and one extra algorithm is compared. This experiment is complemented by the one presented at next section, that compares two implementations of both MTU1 and MTU2 over a reduced version of the same dataset. The reduced version was used because of time restraints, executing only over 10\% of the instances was sufficient to know that the methods weren't competitive. The OCaml code (PYAsUKP) was compiled with the flags suggested by the authors of the code for maximum performance.
 
 \begin{figure}[h]
-\caption{Benchmark using PYAsUKP's dataset; the UKP5, MGREENDP and EDUK2 algorithms; and no timeout.}
+\caption{Benchmark using PYAsUKP's dataset; the UKP5, GREENDP and EDUK2 algorithms; and no timeout.}
 \begin{center}
 <<pya_fast_fig,fig=true,echo=false>>=
 csv_no_na <- fast[complete.cases(fast), ]

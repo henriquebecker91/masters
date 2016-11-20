@@ -12,6 +12,8 @@ solution dominance make the other domincances little relevant?
 
 This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
 
+is a experimental approach where it could be a theoretical one
+
 \section{Future Works}
 \label{sec:future_works}
 
@@ -26,3 +28,7 @@ Many algorithms weren't re-implemented; so much comparison is lacking. Specially
 
 %"If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems." (p. 7) 
 %"It is expensive and time consuming to collect real industrial problems. A random problem generator may be the only alternative if you want a problem with a particular characteristic, e.g. large size, quickly." (p. 8) 
+
+O(nc) is a very loose worst-case complexity for GG-66
+
+what if EDUK had a C++ implementation?

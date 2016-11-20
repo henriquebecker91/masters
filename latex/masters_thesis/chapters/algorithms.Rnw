@@ -308,21 +308,57 @@ Nonetheless, without this test, the UKP5 was about 1800 (one thousand and eight 
 %Assuming \(i\) is the best item, and \(j\) is the second most efficient item, then \mbox{\(y^{*} = p_i / (e_i - e_j)\)}.
 
 \subsection{EDUK}
+\label{sec:eduk}
 
-SKIP DIDI
-% see pages 5, 6 and 7 of the UnboundedKnapsackProblemDynamicProgrammingRevisited
-% get book with ritt
-% check Unbounded Knapsack Problem: New Results (a conference paper with more information about the methods)
-% pages 5, 6, and 7 of the AHybrid...
+The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) is a complex DP algorithm for the UKP, first mentioned in \cite{ukp_new_results}.
+However, only in \cite{eduk}, the algorithm's essentials are described for the first time.
+The author of this work, however, is partial to the algorithm's description to be found in \cite[p.~223]{book_ukp_2004}.
+Some basic ideas used by EDUK were already exposed by a simple and functional-oriented algorithm proposed in \cite{algo_tech_cut}\footnote{The author of this work tried to implement this simple and functional-oriented algorithm in Haskell and in C++. Both codes had a very poor performance and weren't even considered for the experiments. The author of this work admit that the reason of the poor performance could be the poor quality of his implementations. The C++ code can be accessed in \url{https://github.com/henriquebecker91/masters/blob/663324e4f071b5bca22ab5301e29273b9db88a41/codes/cpp/lib/eduk.hpp}, and the Haskell code can be accessed in \url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/hs/ukp.hs}.}.
+Before the EDUK2 was proposed, EDUK was considered by some the state-of-the-art DP algorithm for the UKP.
+An example is the comment in \cite[p.~]{book_ukp_2004}: ``[...] EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''.
+
+A version of the original code of the EDUK and EDUK2 algorithms is available here\footnote{PYAsUKP's official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}}.
+Unfortunately, this version isn't stable and has some bugs.
+Consequently, the author of this work recommends the use of the version available here\footnote{The repository of this master's thesis: \url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}.}.
+The author of this work was given access to the latter version by Vincent Poirriez who kindly answered an e-mail in January 11, 2016.
+
+The author must confess that he don't have full understanding of the EDUK algorithm inner workings.
+The original code is written in OCaml (a functional language), and the author had difficulties in his attempts to analyze it.
+Furthermore, EDUK is a more complex algorithm than any other algorithm described in this chapter (with the obvious exception of EDUK2).
+A basic overview of the EDUK algorithm essentials is given here, the author recommend the sources mentioned in the first paragraph of this section for the reader interested in a deeper analysis. 
+
+The authors of EDUK cite threshold dominance (that generalizes collective, multiple and simple dominances), a sparse representation of the iteration domain and the periodicity property to explain the efficiency of the algorithm.
+In \cite[p.~223~to~227]{book_ukp_2004}, the reasons listed are ``the detection of various notions of dominance not only as a preprocessing step but also during the dynamic programming computation'' and ``the test for collective dominance of an item type by a previously computed entry of the dynamic programming array''.
+The EDUK algorithm sorts the item list in increasing weight order, different from the majority of the algorithms for the UKP that use the non-increasing efficiency order.
+
+The sparse representation of the iteration domain is achieved by using lazy lists (a functional programming concept) instead of an array of size \(c\) (or more) to store the solutions.
+Consequently, the memory use is less dependent of \(c\) and \(w_{max}\) than other DP algorithms.
+In \cite{algo_tech_cut}, where the sparse representation idea is first presented, the solutions are represented as pairs of weight and profit value, as the solution was a pseudo-item.
+For example, a solution \(s\) comprised of the items \(i\) and \(j\) is represented by the following pair: \((w_i + w_j, p_i + p_j)\).
+Adding an item to a solution is equivalent to adding the weight and profit values of a pair to another.
+For some instances, specially the ones with big \(w_{min}\) and \(c\) values, this sparse representation allows for saving time and memory.
+In UKP5, for example, the algorithm allocates memory, initializes, and iterates many capacities \(y\) that are accessed and then skipped immediately because a solution \(s\) with \(w_s = y\) doesn't exist.
+In EDUK, such skipped capacities are never explicitly enumerated to begin with, and no memory is allocated for them, or time used iterating over them. 
+A similar effect could be obtained in UKP5 by using a \verb+std::map+ instead of an \verb+std::vector+ for the data structures \(g\) and \(d\) .
+
+Both the item list and the knapsack capacities are broken down and evaluated in slices.
+Each slice of the item list, beginning with by the ones with smallest items, is then processed.
+The items inside the current slice are combined with each other to generate solutions with weight up to the slice's \(w_{max}\).
+The solutions are used to test collective dominance between the items inside the slice and in the next slices.
+A global list of the undominated items is kept, and after an item is dominated, it's not used again.
+After evaluating all slices of the item's list, and if \(c > w_{max}\), then EDUK begins to evaluate slices of the capacity values, using the items weren't eliminated by the collective dominance tests.
+After each one of those capacity slices, the EDUK algorithm test the items for threshold dominance, potentially removing some of them from the global list of undominated items. 
+If this list ends up consisting only of the best item (that can never be threshold dominated), then the EDUK stops and fill the remaining capacity with copies of the best item.
+Otherwise, EDUK solves the UKP up until capacity \(c\).
 
 \section{Branch-and-Bound Algorithms}
 
 The B\&B approach was established in the seventies as the most efficient approach for solving the UKP\footnote{To the author's knowledge this claim is first made in \cite{mtu2}, and after this other papers as \cite{babayev} began repeating it.
 The fact that only the code for MTU1 and MTU2 was readily available also didn't help the situation, as some began to claim that MTU2 was the \emph{de facto} standard algorithm for UKP, see \cite{ukp_new_results}.}, what is greatly a consequence of the datasets, items' distributions and/or generation parameters used at the period (that favored B\&B in the experiments).
 
-The author does not intend to gives a complete introduction to the B\&B approach, but he belives a quick overview is in order.
+The author does not intend to gives a complete introduction to the B\&B approach, but he believes a quick overview is in order.
 The B\&B approach can be seen as an improvement of the brute-force approach.
-The brute-force approach would consist of exhaustively examinating all solutions in the search space.
+The brute-force approach would consist of exhaustively checking all solutions in the search space.
 A B\&B algorithm will keep track of the best solution found so far.
 In the case of a maximization problem like UKP, this solution is called a lower bound on the optimal solution (in the sense that `the optimal solution is at least this good').
 A B\&B algorithm will divide the search space in two or more exclusive subdivisions.
@@ -330,18 +366,18 @@ In the case of the UKP, an example would be `all solutions with 4 or less copies
 An optimistic guess for the best value to be found in each subdivision of the search space is computed, these are called upper bounds.
 An upper bound is a value that is guaranteed to be equal to or greater than the value of the best solution to be found in the correspondent subdivision of the search space.
 The subdivisions are recursively and systematically divided in smaller subdivisions.
-If the upper bound of any subdivision is smaller than or equal to the global lower bound, then the solutions of that subdivision of the search space don't need to be examinated (i.e. the best solution know at the moment is already equal to or better than any solution that can be found in that subdivision of the search space).
+If the upper bound of any subdivision is smaller than or equal to the global lower bound, then the solutions of that subdivision of the search space don't need to be examined (i.e. the best solution know at the moment is already equal to or better than any solution that can be found in that subdivision of the search space).
 If, by the use of the lower and upper bounds, the B\&B algorithm obtains proof that no solution in all the search space can be better than the best solution found so far, the B\&B algorithm stops.
 
 Concerning the explanation above, one thing should be clear, the quality of a B\&B algorithm is directly correlated to the quality of its bounds.
 Also, the time taken to solve an instance will vary based in how much of the search space can be safely skipped/ignored by the use of the bounds.
 The time taken by a B\&B approach over an instance of the UKP can be hard to predict, and is not very dependent to the magnitude of \(n\) and \(c\), but more dependent of the items' distribution.
-In the worst case, a B\&B algorithm can't eliminate a significative portion of the search space by the use of bounds and then, consequently, it needs to examinate all search space.
+In the worst case, a B\&B algorithm can't eliminate a significant portion of the search space by the use of bounds and then, consequently, it needs to examine all search space.
 In the case of the UKP, the solutions' search space is clearly combinatorial (all possible items combinations that fit the knapsack), so the worst-case of an B\&B approach for the UKP can be exponential.
 
 The memory use of a B\&B algorithm can follow its worst case and be exponential too, as for many times a tree is used to keep the enumeration of the subdivisions.
 However, some optimized algorithms can avoid enumerating the tree explicitly, and keep a constant memory use linear in \(n\) (even in the worst case).
-The B\&B algorithms for the UKP often aren't affect by the magnitude of \(c\), however they can be affect by how close \(c\) is from a capacity that can be entirelly filled by copies of the best item.
+The B\&B algorithms for the UKP often aren't affect by the magnitude of \(c\), however they can be affect by how close \(c\) is from a capacity that can be entirely filled by copies of the best item.
 The B\&B algorithms for the UKP will often solve the problem instantly if \(c~mod~w_b\) is small, because the greedy heuristic lower bound will probably be optimal, and will exclude the remaining search space easily.
 
 The fact that this approach is little affected by huge values of \(n\) and \(c\), and more by the distribution used, makes clear why it was considered the best approach at the seventies.
@@ -384,6 +420,7 @@ As the nodes/solutions are visited in a systematic order, for any given node/sol
 Consequently, the tree does not need to be enumerated explicity, the current node/solution is sufficient to know which solutions should be tried next.
 
 \subsection{MTU2}
+\label{sec:mtu2}
 
 The MTU2 algorithm was first proposed in \cite{mtu2}.
 The objective of MTU2 was to improve MTU1 times when it was used in very large instances (e.g. up to 250,000 items) of the items distributions from the period.
@@ -445,7 +482,26 @@ In this case, the algorithm would be the same as running UKP5 with a little over
 
 \subsection{EDUK2}
 
-SKIP DIDI
+The EDUK2 algorithm was proposed in \cite{pya}, and it is an hybridization of the EDUK (a DP algorithm) with MTU2 (a B\&B algorithm).
+The author gives here a quick overview of the hybridization, more details can be found in the paper above mentioned.
+As with EDUK, the author don't claim to fully comprehend the EDUK2 internals, and it's only summarizing what's said in the original paper.
+The author recommends the reading of Sections \ref{sec:eduk} (EDUK) and \ref{sec:mtu2} (MTU2) before of the explanation below, as it's strongly based in both algorithms.
+The comments made about EDUK's code in its own section also apply to EDUK2.
+
+The description of the changes in EDUK caused by the hybridization follows.
+The \(k = min(n, max(100, \frac{n}{100}))\) most efficient items are gathered in a tentative core problem.
+A B\&B algorithm ``similar to the one in MTU1'' tries to solve the tentative core problem.
+This B\&B algorithm has the possibility of choosing between three bound formulas, and stops after exploring \(B = 10,000\) nodes (of the implicit enumeration tree).
+If the B\&B algorithm returns a solution with value equal to an upper bound for the whole instance, then the DP algorithm is never run.
+Otherwise, the solution given by the B\&B algorithm is used as a global lower bound in the hybridized EDUK algorithm.
+The hybridized EDUK algorithm works like EDUK would, with the addition of an extra phase between slices
+The extra phase uses the lower bound to eliminate items \emph{and solutions of lesser capacities} (i.e. the critical points) from the algorithm.
+This phase is very similar to a phase of MTU2: an upper bound is computed for solutions using one copy of the respective item (a solution \(s\) can be treated as a pseudo-item (\(w_s, p_s\))), if this upper bound is equal to or smaller than the global lower bound, then the item (or solution) is abandoned by the algorithm.
+A new lower bound is computed for each solution that wasn't removed by the process described above
+The lower bound consists in filling the remaining capacity with a greedy algorithm.
+If this new lower bound is better than the global lower bound, it replaces it. 
+
+%SKIP DIDI
 %Basically eduk, but with a B\&B pre-phase that can help with bounds computation
 
 \section{Consistency approach}

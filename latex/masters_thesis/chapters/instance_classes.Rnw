@@ -7,35 +7,49 @@ library(ggplot2)
 
 \chapter{The instance classes}
 
-If the author of this work could suggest one single thing to be improved in the future works about UKP, it would be the choice of the instances. Few are the works that used instances from real world problems (e.g. \cite{gg-63} and \cite{gg-66}), the majority of the works about the UKP used artificially generated instances (e.g. \cite{mtu1}, \cite{mtu2}, \cite{babayev}, \cite{eduk} and \cite{pya}).
+If the author of this thesis could suggest one single thing to be improved in the future works about UKP, it would be the choice of the instances.
+Few are the works that used instances from real-world problems (e.g.~\cite{gg-63} and~\cite{gg-66}).
+The majority of the works about the UKP used artificially generated instances (e.g.~\cite{mtu1},~\cite{mtu2},~\cite{babayev},~\cite{eduk}, and~\cite{pya}).
 
-The major problem with an experimental analysis of the UKP solving methods using artificial instances is that the different solving approaches are affected by the items' distributions (i.e. some methods are the best for some for some items' distributions and the worst for others, and vice-versa). Consequently, the results aren't useful for someone that wants to tackle real world UKP instances, unless the those items' distributions ends up modelling those instances.
+The major problem with an experimental analysis of the UKP solving methods using artificial instances is that the different solving approaches are affected by the item distributions (i.e. some methods are the best for some for some item distributions and the worst for others, and vice-versa).
+Consequently, the results are of little value for someone that wants to tackle real-world UKP instances, unless those item distributions ends up modelling real-world instances.
 
-The first artificial instances used in the literature were the instances with the uncorrelated items' distribution (described further in this chapter), whose main criticism is having a great amount of dominated items. The existence of the uncorrelated instances in the literature of the UKP was used by an essay as example of one of its points: ``We can think of three reasons for not using a random problem generator: [...] b) solving lots of randomly generated problems gives a false sense of having thoroughly tested an algorithm [...] To illustrate (b), consider the \emph{unbounded or general integer knapsack problem}. [...] A plausible, and in fact common, way of generating random instances of this problem is (\emph{the author of the essay describes the procedure used for the generation of instances with the uncorrelated items' distribution}) [...] Thus, even though we might ostensibly solve, say, 20 different big randomly generated problems, we are in fact only solving essentially one modest size underlying problem 20 times. This seems a less thorough test of an algorithm than one would like. Solving 20 different problems from 20 different industrial sources would be more reassuring.''\cite[p. 5 to 7]{portable_rng}.
+The first artificial instances used in the literature were the instances with the uncorrelated items distribution (described further in this chapter), whose main criticism is having a great amount of dominated items.
+The existence of the uncorrelated instances in the literature of the UKP was used by an essay as an example: ``We can think of three reasons for not using a random problem generator: [...] b) solving lots of randomly generated problems gives a false sense of having thoroughly tested an algorithm [...] To illustrate (b), consider the \emph{unbounded or general integer knapsack problem}. [...] A plausible, and in fact common, way of generating random instances of this problem is (\emph{the author of the essay describes the procedure used for the generation of instances with the uncorrelated items distribution}) [...] Thus, even though we might ostensibly solve, say, 20 different big randomly generated problems, we are in fact only solving essentially one modest size underlying problem 20 times.
+This seems a less thorough test of an algorithm than one would like.
+Solving 20 different problems from 20 different industrial sources would be more reassuring.''\cite[p. 5 to 7]{portable_rng}.
 
-The artificial instance datasets proposed afterwards didn't have the problem described in the last paragraph (at least not to the same extent). However, to the authors knowledge, the following criticism is valid for all artificial instance datasets created for the UKP: ``[...] lessons learned from experimental analysis are typically highly problem- and instance-specific. Moreover, problems without applications do not have real-world instances, so the experimenter is left to invent (and justify) test data in a vacuum. And referees may well question the testing of code for algorithms that will never be used in practice.''\cite[p.~5]{davids_guide}. While the UKP has applications, and therefore real-world instances, there exist many papers with experiments that use only artificial instances. Such experiments lead to obtaining instance-specific knowledge about instances that can never appear in the real-world, what's not very useful. If an algorithm is designed to have a better performance over such artificial instances, or simply end up being efficient only over these instances, the algorithm has no real use in practice. One justificative given for the use of such artificial instance datasets is that ``Unfortunately, very few real-life instances of UKP have been reported in the literature.''\cite[p.~6]{pya}.
+The artificial instance datasets proposed later didn't have the problem described in the last paragraph (at least not to the same extent).
+However, to the authors knowledge, the following criticism is valid for all artificial instance datasets created for the UKP: ``[...] lessons learned from experimental analysis are typically highly problem- and instance-specific.
+Moreover, problems without applications do not have real-world instances, so the experimenter is left to invent (and justify) test data in a vacuum.
+And referees may as well question the testing of code for algorithms that will never be used in practice.''\cite[p.~5]{davids_guide}.
+While the UKP has applications, and therefore real-world instances, there exist many papers with experiments that use only artificial instances.
+Such experiments lead to obtaining instance-specific knowledge about instances that can never appear in the real-world, what's not very useful.
+If an algorithm is designed to have a better performance over such artificial instances, or simply end up being efficient only over these instances, the algorithm has no real use in practice.
+One justification given for the use of such artificial instance datasets is that ``Unfortunately, very few real-life instances of UKP have been reported in the literature.''\cite[p.~6]{pya}.
 
 The consequences of the situation is also well described by the following pitfall: ``Start by using randomly generated instances to evaluate the behaviour of algorithms, but end up using algorithms to investigate the properties of randomly-generated instances.''\cite[p.~9]{davids_guide}. The experiments over artificial instance datasets brought more knowledge about what combinations of parameters makes a instances hard or easy to solve, by one or another approach, than knowledge about useful algorithms.
 
 %the use of artificial instances was already strongly crticized in the past
 %the reasons for their use is the possibility of generating many instances, of many sizes (what allows for examinating the growth of the time with the growth of the instance)
-%a	This is specially interesting for UKP because it's one of the easiest NP-Hard problems, so big instances or hard instances have to be used to get high execution times, small execution times are too much affected by variance
-%	yet, artificial instances should not be used at all, if there's no guarantee that the growth/time/results will translate for real world instances (i.e. artificial instances should follow )
+%a	This is especially interesting for UKP because it's one of the easiest NP-Hard problems, so big instances or hard instances have to be used to get high execution times, small execution times are too much affected by variance
+%	yet, artificial instances should not be used at all, if there's no guarantee that the growth/time/results will translate for real-world instances (i.e. artificial instances should follow )
 %	The paper are the hard knapsack problems shows that even for 0-1 knapsack instances (that are by default harder than UKP instances), the instances used were easy to solve
 
 %TODO: The use of testbeds is overrated?
 
-%The author of this work has already pointed that the choices of item distributions on the generation of artificial instances in the prior work has defined what was considered the best algorithm. The author has created a new instance distribution to further illustrate this point. 
+%The author of this thesis has already pointed that the choices of item distributions on the generation of artificial instances in the prior work has defined what was considered the best algorithm. The author has created a new instance distribution to further illustrate this point. 
 
-\section{Uncorrelated Items' Distribution and Instances}
+\section{Uncorrelated Items Distribution and Instances}
 \label{sec:inst_uncorrelated}
 
 % REMEMBER PROFIT AND WEIGHT DOMINANCE
 
-The uncorrelated item's coefficients instances are a family of UKP instances where the weight and the profit of an item have no correlation. The most common way for generating those uncorrelated instances is generating a value between \(w_{min}\) and \(w_{max}\) for the weight, and a value between \(p_{min}\) and \(p_{max}\) for the profit, for each of the \(n\) items of the instance using a (pseudo-)random number generator with an uniform distribution.
-%Uncorrelated instances can be generated using a (pseudo-)random number generator to generate \(n\) numbers between \(w_{min}\) and \(w_{max}\), and another \(n\) numbers between \(p_{min}\) and \(p_{max}\). Sorting both arrays will give (TODO: refer to realistic instances), that is another instance type. Uncorrelated instances 
+The uncorrelated item's coefficients instances are a family of UKP instances where the weight and the profit of an item have no correlation.
+The most common way for generating those uncorrelated instances is generating a value between~\(w_{min}\) and~\(w_{max}\) for the weight, and a value between~\(p_{min}\) and~\(p_{max}\) for the profit, for each of the~\(n\) items of the instance using a (pseudo-)random number generator with an uniform distribution.
+%Uncorrelated instances can be generated using a (pseudo-)random number generator to generate~\(n\) numbers between~\(w_{min}\) and~\(w_{max}\), and another~\(n\) numbers between~\(p_{min}\) and~\(p_{max}\). Sorting both arrays will give (TODO: refer to realistic instances), that is another instance type. Uncorrelated instances 
 \begin{figure}[h]
-\caption{An uncorrelated instance generated with \(n = 100\), \(w_{min} = 1\), \(w_{min} = 1000\), \(p_{min} = 1\), and \(p_{max} = 1000\).}
+\caption{An uncorrelated instance generated with~\(n = 100\),~\(w_{min} = 1\),~\(w_{min} = 1000\),~\(p_{min} = 1\), and~\(p_{max} = 1000\).}
 \begin{center}
 <<uncorrelated,fig=true,echo=false>>=
 n <- 100
@@ -55,155 +69,218 @@ qplot(w, p, data = t,
 \label{fig:uncorrelated_example}
 \end{figure}
 
-The author has choosen to not use uncorrelated instances in his experiments. The main reasons behind this choice is that: \emph{the times used by an algorithm to solve uncorrelated instances have little to do with the algorithm's capacity of solving a NP-hard problem, and much to do with the polynomial algorithms or heuristics it uses to remove simple and multiple dominated items}. More than that, the uncorrelated distribution is artificially generated, don't model any class of instances that arise in real-world problems, and polynomial methods for removing simple and multiple dominated items, that are often the vast majority of the items in such instances, were already deeply studied\footnote{CITE THAT QUOTE OF PISINGER}. 
+The author has chosen to not use uncorrelated instances in his experiments.
+The main reasons behind this choice is that: \emph{the times used by an algorithm to solve uncorrelated instances have little to do with the algorithm's capacity of solving a NP-hard problem, and much to do with the polynomial algorithms or heuristics it uses to remove simple and multiple dominated items}.
+More than that, the uncorrelated distribution is artificially generated, it doesn't model any class of instances that arise in real-world problems, and polynomial methods for removing simple and multiple dominated items, that are often the vast majority of the items in such instances, were already deeply studied~\cite[p.~216]{book_ukp_2004}.
 
-The following subsections present a detailed critical analysis about two uncorrelated instance datasets used in the literature (and the parameters used). It's impotant to note that they aren't the only instance dataset used in such papers.
+The following subsections present a detailed critical analysis about two uncorrelated instance datasets used in the literature (and the parameters used).
+It's important to note that they aren't the only instance dataset used in such papers.
 
 \subsection{Martello's use of uncorrelated instances}
 \label{sec:martello_uncorrelated}
 
-Some datasets of uncorrelated instances were used for experiments in \cite{mtu2}. The uncorrelated distribution and the set of parameters used to generate the datasets made huge instances to have only a small number of undominated items.
+Some datasets using the uncorrelated distribution were used for experiments in~\cite{mtu2}.
+The uncorrelated distribution and the set of parameters used to generate the datasets made huge instances to have only a small number of undominated items.
 
-One dataset had instances with twenty different values of \(n\), from 50 to 250,000. The items' weights were integer values randomly generated between 10 and 1000. This parameter choice alone already reduce the number of undominated item types to 991.
-%The profit values are integer values between 1 and 1000, choosen from an uniformly random distribution too. An instance with \(n = 5000\) has about 92\% chance of having an item \(i\) with \(w = 10\) and \(p > 500\). 
+One dataset had instances with twenty different values of~\(n\), from 50 to 250,000.
+The items' weights were integer values randomly generated between 10 and 1000.
+This parameter choice alone already reduces the number of undominated item types to 991.
+%The profit values are integer values between 1 and 1000, choosen from an uniformly random distribution too. An instance with~\(n = 5000\) has about 92\% chance of having an item~\(i\) with~\(w = 10\) and~\(p > 500\). 
 The paper's authors acknowledge the existence of only 991 undominated items in the paper's first dataset and propose an additional dataset to show that ``the algorithm is not affected by the number of possible undominated item types.''.
-The datasets has instances with all combinations of parameters between quantity of items (\(10^3\), \(10^4\) and \(10^5\)); weight's range ([10, \(10^3\)], [10, \(10^4\)], [10, \(10^5\)]); and profit value's range ([1, \(10^3\)], [1, \(10^4\)], [1, \(10^5\)]).
+The datasets has instances with all combinations of parameters between quantity of items (\(10^3\),~\(10^4\) and~\(10^5\)); weight's range ([10,~\(10^3\)], [10,~\(10^4\)], [10,~\(10^5\)]); and profit value's range ([1,~\(10^3\)], [1,~\(10^4\)], [1,~\(10^5\)]).
 
-Seem clear that both the instances with weight (or profit) range equal to [10, \(10^3\)] (or [1, \(10^3\)]) have the same problem with dominance (five of each nine instances of the new dataset).
+Seem clear that both the instances with weight (or profit) range equal to [10,~\(10^3\)] (or [1,~\(10^3\)]) have the same problem with dominance (five out of nine instances of the new dataset).
 
-Instances with ranges [10, n] have more than 99.5\% odds\footnote{Calculated the following way: \(\frac{11}{991}\) are the odds of generating an instance with weight smaller than or equal to twenty (i.e. [10, 20]); \(\frac{1}{2}\) are the odds of one item having profit greater than half of the maximum profit value (e.g. [501, 1000]); \(\frac{11}{991} \times \frac{1}{2}\) are the odds of generating an item with both previous characteristics (small weight and above average profit), and \(1 - (\frac{11}{991} \times \frac{1}{2})\) are the odds of generating an item that \emph{don't} have both characteristics; \((1 - (\frac{11}{991} \times \frac{1}{2}))^{1000} \equiv 0.00382\) are the odds of generating \(1000\) items, and none of them having both characteristics. These odds are about 0.38\%, and therefore the odds of generating at least one item with both characteristics among 1000 items is about 99.61\%.}
-of having at least one item \(i\) with \(w_i \leq 20\) and \(p_i > \frac{p_{max}}{2}\). A solution \(s\) comprised only of two copies of \(i\) will have \(p_s > p_{max}\) and \(w_s \leq 40\). Consequently, all items \(j\) with \(p_j \leq p_{max}\) and \(w_j \geq 40\) will be multiple dominated by item \(i\). Those instances will have only thirty undominated items (if that much).
+Instances with ranges [10, n] have more than 99.5\% odds\footnote{Calculated the following way:~\(\frac{11}{991}\) are the odds of generating an instance with weight smaller than or equal to twenty (i.e. [10, 20]);~\(\frac{1}{2}\) are the odds of one item having profit greater than half of the maximum profit value (e.g. [501, 1000]);~\(\frac{11}{991} \times \frac{1}{2}\) are the odds of generating an item with both previous characteristics (small weight and above average profit), and~\(1 - (\frac{11}{991} \times \frac{1}{2})\) are the odds of generating an item that \emph{don't} have both characteristics;~\((1 - (\frac{11}{991} \times \frac{1}{2}))^{1000} \equiv 0.00382\) are the odds of generating~\(1000\) items, and none of them having both characteristics.
+These odds are about 0.38\%, and therefore the odds of generating at least one item with both characteristics among 1000 items is about 99.61\%.}
+of having at least one item~\(i\) with~\(w_i \leq 20\) and~\(p_i > \frac{p_{max}}{2}\).
+A solution~\(s\) comprised only of two copies of~\(i\) will have~\(p_s > p_{max}\) and~\(w_s \leq 40\).
+Consequently, all items~\(j\) with~\(p_j \leq p_{max}\) and~\(w_j \geq 40\) will be multiple dominated by item~\(i\).
+Those instances will have only thirty undominated items (possibly less).
 
-All instances have more than 99.5\% odds\footnote{Calculated the same way, but using \(\frac{9}{100} \times \frac{1}{2}\) as the chance of generating and item \(i\) with \(w_i \leq \frac{w_{max}}{10}\) and \(p_i > \frac{p_{max}}{2}\).} of having an item \(i\) with \(w_i \leq \frac{w_{max}}{10}\) and \(p_i > \frac{p_{max}}{2}\), that would multiple dominate all items \(j\) with \(w_j > 2 \times \frac{w_{max}}{10}\) (i.e. 80\% of the items).
+All instances have more than 99.5\% odds\footnote{Calculated the same way, but using~\(\frac{9}{100} \times \frac{1}{2}\) as the chance of generating and item~\(i\) with~\(w_i \leq \frac{w_{max}}{10}\) and~\(p_i > \frac{p_{max}}{2}\).} of having an item~\(i\) with~\(w_i \leq \frac{w_{max}}{10}\) and~\(p_i > \frac{p_{max}}{2}\), that would multiple dominate all items~\(j\) with~\(w_j > 2 \times \frac{w_{max}}{10}\) (i.e. 80\% of the items).
 
 \subsection{Babayev's use of uncorrelated instances}
 \label{sec:babayev_uncorrelated}
 
-A dataset of uncorrelated instances was used for experiments in \cite{babayev}\footnote{Section ``Second group of experiments - Problems with Uncorrelated Random Coefficients'' of the paper.}. The set of parameters used to generate this dataset made almost all instances to be trivial. It's pointed in the paper that almost all uncorrelated instances are solved exactly by a greedy procedure use only the two most efficient items to fill the knapsack.
+A dataset of uncorrelated instances was used for experiments in~\cite{babayev}\footnote{Section ``Second group of experiments - Problems with Uncorrelated Random Coefficients'' of the paper.}.
+The set of parameters used to generate this dataset caused almost all instances to be trivial.
+It's pointed in the paper that almost all uncorrelated instances are solved exactly by a greedy procedure that uses only the two most efficient items to fill the knapsack.
 
-Those instances are even easier than the ones from last section. The reason for this is that the items' weight interval is between [1, 1000], and not between [10, 1000] (\(w_{min}\) is even smaller). An item with weight one has \(\frac{1}{1000}\) odds of being generated; and has \(\frac{500}{1000} = \frac{1}{2}\) odds of having \(p > 500\); so for each item generated there's \(\frac{1}{2000}\) (0.05\%) odds of generating an \emph{item that multiple-dominated all other items}.
+Those instances are even easier than the ones from last section.
+The reason for this is that the items' weight interval is between [1, 1000], and not between [10, 1000] (\(w_{min}\) is even smaller).
+An item with weight \emph{one} has~\(\frac{1}{1000}\) odds of being generated; and has~\(\frac{500}{1000} = \frac{1}{2}\) odds of having~\(p > 500\); so for each item generated there's~\(\frac{1}{2000}\) (0.05\%) odds of generating an \emph{item that multiple-dominated all other items}.
 
-While the maximum efficiency of an item with weight one is one thousand; the max efficiency of an item with weight two is five hundred; three is 333 and so on. An item \(i\) with \(w_i = 1\) and \(p_i = 501\) will multiple dominate an item \(j\) with \(w_i = 2\) and \(p_i = 1000\); and \(j\) is the most efficient item with weight two possible. Consequently, the item \(i\) will dominate any other item with weight greater than one.
+While the maximum efficiency of an item with weight \emph{one} is \emph{one thousand}; the max efficiency of an item with weight \emph{two} is \emph{five hundred}; \emph{three} is 333 and so on.
+An item~\(i\) with~\(w_i = 1\) and~\(p_i = 501\) will multiple dominate an item~\(j\) with~\(w_i = 2\) and~\(p_i = 1000\); and~\(j\) is the most efficient item type with weight \emph{two} that can exist.
+Consequently, the item~\(i\) will dominate any other item with weight greater than one.
 
-With \(n = 5000\), the odds of an instance having item \(i\) are already of 91.79\%; with \(n = 10000\) they are of 99.32\%. The dataset was composed of 108 instances; 18 instances for each \(n\) value of 5,000; 10,000; 50,000; 100,000; 150,000, and 9 instances for the \(n\) values of 200,000 and 250,000. Therefore for the vast majority of the instances, the solution was probably comprised of \(c\) copies of the same item \(i\) with weight one, and \(p > 500\).
+With~\(n = 5000\), the odds of an instance having item~\(i\) are already of 91.79\%; with~\(n = 10000\) they are of 99.32\%.
+The dataset was composed of 108 instances; 18 instances for each~\(n\) value of 5,000; 10,000; 50,000; 100,000; 150,000, and 9 instances for the~\(n\) values of 200,000 and 250,000.
+Therefore for the vast majority of the instances, the solution was probably comprised of~\(c\) copies of the same item~\(i\) with weight one, and~\(p > 500\).
 
 %The values used for the knapsack capacities of the instances weren't reported in the paper. Making the exact experiment setting irreproducible.
-The author didn't found the knapsack capacity \(c\) used by the instances.
+The author didn't find the knapsack capacity~\(c\) used by the instances.
 
 %\subsection{Babayev's use of weakly correlated instances}
 
-%A dataset of uncorrelated instances was used for experiments in \cite{babayev}\footnote{Section ``First group of experiments - Problems with correlated random coefficients'' of the paper.}. The set of parameters used to generate this dataset caused the comparison between methods to not be meaningful, and the conclusions to be an atifact of the dataset idiosyncrasies.
+%A dataset of uncorrelated instances was used for experiments in~\cite{babayev}\footnote{Section ``First group of experiments - Problems with correlated random coefficients'' of the paper.}. The set of parameters used to generate this dataset caused the comparison between methods to not be meaningful, and the conclusions to be an atifact of the dataset idiosyncrasies.
  
-%The items are generated with weights between one and one thousand. This alone already reduce the number of item types to one thousand; as between the items that share the same weight, only the one item type with the greatest profit will be relevant. However, the dataset included 9 instances with \(n = 1000\) and 18 instances for each of the following \(n\) values: 5,000; 10,000; 50,000; 100,000; 150,000; 200,000 and 250,000 (totalling 135 instances). If one algorithm used a \(O(n log n)\) scan to reduce the item list to the one thousand items that are relevant, and the other algorithm didn't, this would already make more difference than the solving algorithm itself.
+%The items are generated with weights between one and one thousand. This alone already reduce the number of item types to one thousand; as between the items that share the same weight, only the one item type with the greatest profit will be relevant. However, the dataset included 9 instances with~\(n = 1000\) and 18 instances for each of the following~\(n\) values: 5,000; 10,000; 50,000; 100,000; 150,000; 200,000 and 250,000 (totalling 135 instances). If one algorithm used a~\(O(n log n)\) scan to reduce the item list to the one thousand items that are relevant, and the other algorithm didn't, this would already make more difference than the solving algorithm itself.
 
-%The profits of the items were uniformly distributed between \(\ceil{0.9 \times w}\) and \(\floor{1.1 \times w}\) (where \(w\) is the weight of the specific item). Consequently, the greatest possible efficiency is \(1.1\). An item type with weight \(10\) has \(\frac{1}{1000}\) odds of being generated; and \(\frac{1}{1000}\times\frac{1}{3} = \frac{1}{3000}\) odds of being an item with \(w = 10\) and \& \(p = 11\). An item type with those values would be an small item with the best possible efficiency \(\frac{p}{w} = 1.1\). With \(n = 1000\), the chance of an instance having this item is already 28.35\%; with \(n = 5000\) is already 81.11\%, with \(n = 10000\) is 96.43\%. Such item will multiple dominate all items that are divisible by ten, and all other items whose weight isn't perfectly divisible by ten would be less efficient than it.
+%The profits of the items were uniformly distributed between~\(\ceil{0.9 \times w}\) and~\(\floor{1.1 \times w}\) (where~\(w\) is the weight of the specific item). Consequently, the greatest possible efficiency is~\(1.1\). An item type with weight~\(10\) has~\(\frac{1}{1000}\) odds of being generated; and~\(\frac{1}{1000}\times\frac{1}{3} = \frac{1}{3000}\) odds of being an item with~\(w = 10\) and \&~\(p = 11\). An item type with those values would be an small item with the best possible efficiency~\(\frac{p}{w} = 1.1\). With~\(n = 1000\), the chance of an instance having this item is already 28.35\%; with~\(n = 5000\) is already 81.11\%, with~\(n = 10000\) is 96.43\%. Such item will multiple dominate all items that are divisible by ten, and all other items whose weight isn't perfectly divisible by ten would be less efficient than it.
 
-%The amount of different item types can be obtained by \(sum_{i \in [1..1000]}{\floor{1.1 w_i - 0.9 w_i} + 1}\) what is about \(10^6\) different item types, so any excess of \(n\) over this number will be made of repeated item types. As the types are random generated, a instance with \(10^6\) items will already have many duplicated items, and some item types missing. The datasets with \(n\) equal to 150,000, 200,000 and 250,000 are not significantly different than the ones with \(n = 10^6\) as the extra thousands of items types will be, in majority, duplicated item types. %Except by the \(n = 1000\) instances, the majority of the instances will have a solution composed of the \(w = 10\) \& \(p = 11\) item, and maybe one item filling the remaining space (if \(c\) isn't a multiple of ten).
+%The amount of different item types can be obtained by~\(sum_{i \in [1..1000]}{\floor{1.1 w_i - 0.9 w_i} + 1}\) what is about~\(10^6\) different item types, so any excess of~\(n\) over this number will be made of repeated item types. As the types are random generated, a instance with~\(10^6\) items will already have many duplicated items, and some item types missing. The datasets with~\(n\) equal to 150,000, 200,000 and 250,000 are not significantly different than the ones with~\(n = 10^6\) as the extra thousands of items types will be, in majority, duplicated item types. %Except by the~\(n = 1000\) instances, the majority of the instances will have a solution composed of the~\(w = 10\) \&~\(p = 11\) item, and maybe one item filling the remaining space (if~\(c\) isn't a multiple of ten).
 
-%The author's hypothesis is that the dataset idiosyncrasies exposed above have benefited Babayev's algorithm. Those idiosyncrasies aren't related to what makes the UKP a NP-hard problem. A polynomial algorithm filtering undominated items before calling the MTU2 or Babayev's algorithm would reduce all instances to one thousand items, and would have probably changed the results completely. Taking in consideration that the original implementation of MTU2 used about one tenth of the time of Babayev's method for the instances with \(n = 1000\), using a polynomial algorithm to filter relevant items would have probably changed the conclusions in favor of MTU2.
-%and about half for the instances with \(n = 5000\). For each group of \(n\) sizes greater than \(n = 5000\), the MTU2 was stopped by the 600 seconds timeout between 22\% and 55\% of the times. The average times of MTU2 over the instances that it solved were, in general, bigger than the ones of Babayev's algorithm. However, the MTU2 average times were less than 20\% greater than the average times of Babayev's algorithm (the only exception is the \(n = 50000\) group that where MTU2 used about the double of Babayev's average time).
-%An optimal solution for the majority of the instances with \(n > 1000\) would consinst in \(\floor{\frac{c}{w_b}}\) copies of the best item, \(w = 10\) and \(p = 11\), and an item with weight smaller than 10, and \(p = w\) (this if \(c\) wasn't perfectly divisible by 10). 
+%The author's hypothesis is that the dataset idiosyncrasies exposed above have benefited Babayev's algorithm. Those idiosyncrasies aren't related to what makes the UKP a NP-hard problem. A polynomial algorithm filtering undominated items before calling the MTU2 or Babayev's algorithm would reduce all instances to one thousand items, and would have probably changed the results completely. Taking in consideration that the original implementation of MTU2 used about one tenth of the time of Babayev's method for the instances with~\(n = 1000\), using a polynomial algorithm to filter relevant items would have probably changed the conclusions in favor of MTU2.
+%and about half for the instances with~\(n = 5000\). For each group of~\(n\) sizes greater than~\(n = 5000\), the MTU2 was stopped by the 600 seconds timeout between 22\% and 55\% of the times. The average times of MTU2 over the instances that it solved were, in general, bigger than the ones of Babayev's algorithm. However, the MTU2 average times were less than 20\% greater than the average times of Babayev's algorithm (the only exception is the~\(n = 50000\) group that where MTU2 used about the double of Babayev's average time).
+%An optimal solution for the majority of the instances with~\(n > 1000\) would consinst in~\(\floor{\frac{c}{w_b}}\) copies of the best item,~\(w = 10\) and~\(p = 11\), and an item with weight smaller than 10, and~\(p = w\) (this if~\(c\) wasn't perfectly divisible by 10). 
 %The values used for the knapsack capacities of the instances weren't reported in the paper. Making the exact experiment setting irreproducible.
-The author didn't found the knapsack capacity \(c\) used by the instances.
+%The author didn't found the knapsack capacity~\(c\) used by the instances.
 
 %\subsection{Martello and Toth's use of weakly/strongly correlated instances}
 
-%Some datasets of uncorrelated instances were used for experiments in \cite{mtu2}. The set of parameters used to generate this dataset made ....
+%Some datasets of uncorrelated instances were used for experiments in~\cite{mtu2}. The set of parameters used to generate this dataset made ....
 
-% One dataset had instances with twenty different values of \(n\), from 50 to 250,000. The weights of the weakly and strongly correlated items were integer values randomly generated between 10 and 1000. This parameter choice alone already reduce the number of undominated item types to 991.
+% One dataset had instances with twenty different values of~\(n\), from 50 to 250,000. The weights of the weakly and strongly correlated items were integer values randomly generated between 10 and 1000. This parameter choice alone already reduce the number of undominated item types to 991.
 
 \section{PYAsUKP instances}
 \label{sec:pya_inst}
 
 This section will discuss the instance's datasets proposed in~\cite{pya}, and reused in the comparison presented in~\cite{sea2016}.
-All those instance datasets were artificially generated with the purpose of being ``hard to solve'', this can mean a different thing for each one of them.
-Some items' distributions used in these datasets were also proposed in~\cite{pya}, others were taken from the literature.
+All those instance datasets were artificially generated with the purpose of being ``hard to solve''.
+The adjective `hard' can mean a different thing for each one of the datasets. 
+Some item distributions used in these datasets were also proposed in~\cite{pya}, others were taken from the literature.
 
 The dataset is similar to the one used in~\cite{pya}, the same tool was used to generate the datasets (PYAsUKP) and the same parameters were used, otherwise noted the contrary.
 However, some instances make use of random seed values that weren't provided, so the exact instances used in~\cite{pya} can be different.
-The instances are exactly the same presented in \cite{sea2016}.
+The instances are exactly the same presented in~\cite{sea2016}.
 The same code that implements EDUK and EDUK2 also implements the instance generator used here.
 Some datasets generated by this tool have the item list ordered by increasing weight, what gives a small advantage to EDUK that uses this ordering.
 
-In Subsection 5.1.1 \emph{Known ``hard'' instances} of~\cite{pya} some sets of easy instances are used to allow comparison with MTU2. 
-However, the authors reported integer overflow problems with MTU2 on harder instances. 
+In the subsection 5.1.1 \emph{Known ``hard'' instances} of~\cite{pya} some sets of easy instances are used to allow comparison with MTU2. 
+However, MTU2 had integer overflow problems with MTU2 on harder instances. 
 With exception of the subset-sum dataset, all datasets have a similar harder set (Subsection 5.2.1 \emph{New hard UKP instances}~\cite{pya}).
 Thus, we considered in the runs only the harder ones. 
-Each instance has a random capacity value within intervals shown in Table~\ref{tab:times}. 
-The PYAsUKP's parameters \mbox{\emph{-wmin \(w_{min}\) -cap c -n \textbf{n}}} were used in all instances generation. 
+The PYAsUKP's parameters \mbox{\emph{-wmin~\(w_{min}\) -cap c -n \textbf{n}}} were used in all instances generation. 
+%Each instance has a random capacity value within intervals shown in Table~\ref{tab:times}. 
 
-The notation \(rand(x, y)\) means an integer between \(x\) and \(y\) (including both \(x\) and \(y\)), generated by a PRNG with an uniform distribution. Also, when refering to the parameters for the generation of an instance, \(w_{min}\) will be used to denote the smallest weight that can be appear in an instance, but without guarantee that an item with this weight will exist in the generated instance. The meaning of \(w_{max}\) is analogue. The syntax \(x\overline{n}\) means \(x\) as a string concatenated with the value of variable \(n\) as a string (e.g. for \(n = 5000\) then \(10\overline{n} = 105000\)).
+The notation~\(rand(x, y)\) means an integer between~\(x\) and~\(y\) (including both~\(x\) and~\(y\)), generated by a PRNG with an uniform distribution.
+Also, when referring to the parameters for the generation of an instance,~\(w_{min}\) will be used to denote the smallest weight that can be appear in an instance, but without guarantee that an item with this weight will exist in the generated instance.
+The meaning of~\(w_{max}\) is analogue.
+The syntax~\(x\overline{n}\) means~\(x\) as a string concatenated with the value of~\(n\) as a string (e.g. for~\(n = 5000\) then~\(10\overline{n} = 105000\)).
 
 We found some small discrepancies between the formulas presented in~\cite{pya} and the ones used in PYAsUKP code.
 We opted for using the ones from PYAsUKP code, and they are presented below.
 
 \subsection{Subset-Sum}\label{sec:subsetsum}
 
-Subset-sum instances are instances where \(p_i = w_i = rand(w_{min}, w_{max})\).
-Subset-sum instances generated with the same parameters that in \cite{pya} can be solved in less than a centisecond by many of the algorithms presented at this work.
+Subset-sum instances are instances where~\(p_i = w_i = rand(w_{min}, w_{max})\).
+Subset-sum instances generated with the same parameters that in~\cite{pya} can be solved in less than a centisecond by many of the algorithms presented at this work.
 The implementation of the EDUK2 algorithm have imprecise time measuring.
 Because of this, in this paper, we use a similar dataset, but with each parameter multiplied by ten.
-Therefore, were generated 10 instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances. Each instance had a random capacity in the range \([5\times10^6; 10^7]\).
-%We do not discriminate each combination in~Table \ref{tab:times} for brevity.
-The PYAsUKP's \emph{-form ss -wmax \(w_{max}\)} parameters were used.
+Therefore, were generated 10 instances for each possible combination of:~\(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\);~\(w_{max} \in \{5\times10^5, 10^6\}\) and~\(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.
+Each instance had a random capacity in the range~\([5\times10^6; 10^7]\).
+%We do not discriminate each combination in~Table~\ref{tab:times} for brevity.
+The PYAsUKP's \emph{-form ss -wmax~\(w_{max}\)} parameters were used.
 
-The author of this work finds the the study of such instances to be nonsense. If purely subset-sum knapsacks existed in practice, then discarding all profit values and applying a subset-sum algorithm would be the best way to solve them. Also, collective dominance is very common if \(w_{min}\) is small.
+The rationale for the study of such instance distribution is not well understood by the author of this thesis 
+If purely subset-sum knapsacks existed in practice, then discarding all profit values and applying a subset-sum algorithm would be the best way to solve them.
+Also, collective dominance is very common if~\(w_{min}\) is small.
 
 \subsection{Strong Correlation}
 \label{sec:sc_inst}
 
-There's many formulaes for generating items' distribution that could be considered strong correlated items' distributions. In \cite{mtu2} and \cite{eduk}, the formula used was \(w_i = rand(w_{min}, w_{max})\) and \(p_i = w_i + \alpha)\), for a given \(w_{min}\) and \(w_{max}\) and a constant \(\alpha = 100\). The already described Subset-Sum instances can also be considered strongly correlated too. However, in~\cite{pya}, the formula presented below was used, because ``\cite{chung_hard} have shown that solving this problem is difficult for B\&B.''. In all strong correlated instances with \(\alpha > 0\), the smallest item is also the best item, characteristics that often makes a instance easier (the best item ends up multiple dominating many items). 
+There are many formulae for generating items distribution that could be considered strongly correlated item distributions.
+In~\cite{mtu2} and~\cite{eduk}, the formula used was~\(w_i = rand(w_{min}, w_{max})\) and~\(p_i = w_i + \alpha\), for a given~\(w_{min}\) and~\(w_{max}\) and a constant~\(\alpha = 100\).
+The already described Subset-Sum instances can also be considered strongly correlated too.
+However, in~\cite{pya}, the formula presented below was used, because ``\cite{chung_hard} have shown that solving this problem is difficult for B\&B.''.
+In all strong correlated instances with~\(\alpha > 0\), the smallest item is also the best item, characteristics that often makes a instance easier (the best item ends up multiple dominating many items). 
 
-Instances generated using the following formula: \(w_i = w_{min} + i - 1\) and \(p_i = w_i + \alpha\), for a given \(w_{min}\) and \(\alpha\).
-Note that, except by the random capacity, all instances with the same \(\alpha\), \(\mathbf{n}\), and \(w_{min}\) combination are equal.
+Instances were generated using the following formula:~\(w_i = w_{min} + i - 1\) and~\(p_i = w_i + \alpha\), for a given~\(w_{min}\) and~\(\alpha\).
+Note that, except by the random capacity, all instances with the same~\(\alpha\),~\(\mathbf{n}\), and~\(w_{min}\) combination are equal.
 The formula doesn't rely on random numbers.
-The PYAsUKP \emph{-form chung -step \(\alpha\)} parameters were used.
+The PYAsUKP \emph{-form chung -step~\(\alpha\)} parameters were used.
 
-Twenty instances were generated with each combination of \(n = 5\times10^3\), \(\alpha \in \{5, -5\}\) and \(w_{min} \in \{10^4, 1.5\times10^4, 5\times10^4\}\). More twenty instances were generated with each combination of \(n = 10^4\), \(\alpha \in \{5, -5\}\) and \(w_{min} \in \{10^4, 5\times10^4, 11\times10^4\}\). Totalling 240 instances.
-Each instance had a random capacity in the range \([20\overline{n}; 100\overline{n}]\).
+Twenty instances were generated with each combination of~\(n = 5\times10^3\),~\(\alpha \in \{5, -5\}\) and~\(w_{min} \in \{10^4, 1.5\times10^4, 5\times10^4\}\).
+Twenty more instances were generated with each combination of~\(n = 10^4\),~\(\alpha \in \{5, -5\}\) and~\(w_{min} \in \{10^4, 5\times10^4, 11\times10^4\}\).
+Totalling 240 instances.
+Each instance had a random capacity in the range~\([20\overline{n}; 100\overline{n}]\).
 
 \subsection{Postponed Periodicity}
 
-Many algorithms benefit from the periodicity property explained in section \ref{XXX} by computing some lower bound on capacity \(y\). For the instances created using the formula below and ``where \(c < 2 \times w_{max}\) and \(n\) is large enough, the periodicity property does not help''\cite[p.~13]{pya}. The idea of such instances seems to be putting all algorithms in an equal footing about which capacity they are solving an instance. 
+Many algorithms benefit from the periodicity property, explained in Section~\ref{sec:periodicity}, by computing some upper bound on capacity~\(y\).
+For the instances created using the formula below and ``where~\(c < 2 \times w_{max}\) and~\(n\) is large enough, the periodicity property does not help''\cite[p.~13]{pya}.
+The idea of such instances seems to be putting all algorithms in an equal footing about which capacity they are solving an instance. 
 
-This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order; \(p_1 = w_1 + rand(1, 500)\); and \(\forall i \in [2, n].~p_i = p_{i-1} + rand(1, 125)\). The \(w_{max}\) is computed as \(10\overline{n}\). The PYAsUKP \emph{-form nsds2 -step 500 -wmax \(w_{max}\)} parameters were used.
+This family of instances is generated by the following method: \textbf{n} distinct weights are generated with~\(rand(w_{min}, w_{max})\) and then sorted by increasing order;~\(p_1 = w_1 + rand(1, 500)\); and~\(\forall i \in [2, n].~p_i = p_{i-1} + rand(1, 125)\).
+The~\(w_{max}\) is computed as~\(10\overline{n}\).
+The PYAsUKP \emph{-form nsds2 -step 500 -wmax~\(w_{max}\)} parameters were used.
 
-Two hundred instances were generated for each combination of \(n = \{2\times10^4, 5\times10^4\}\) and \(w_{min} = \{2\times10^4, 5\times10^4\}\). Totalling 800 instances. Each instance had a random capacity in the range \([w_{max}; 2\times10^6]\).
+Two hundred instances were generated for each combination of~\(n = \{2\times10^4, 5\times10^4\}\) and~\(w_{min} = \{2\times10^4, 5\times10^4\}\).
+Totalling 800 instances.
+Each instance had a random capacity in the range~\([w_{max}; 2\times10^6]\).
 
 \subsection{Without Collective Dominance}
 
-Any items' distribution where the efficiency of the items increase with their weight have no collective, multiple, or simple dominated instances. Threshold dominance exist in such instances, as bigger items will probably dominate solutions comprised of many copies of a smaller item. A distribution with this characteristics was proposed ``to prevent a DP based solver to benefit from the variable reduction due to the collective dominance''\cite[p.~13]{pya}, with the intent of making comparison fairer.
+Any items distribution where the efficiency of the items increase with their weight have no collective, multiple, or simple dominated instances.
+Threshold dominance exist in such instances, as bigger items will probably dominate solutions comprised of many copies of a smaller item.
+A distribution with this characteristics was proposed ``to prevent a DP based solver to benefit from the variable reduction due to the collective dominance''\cite[p.~13]{pya}, with the intent of making comparison fairer.
 
-This family of instances is generated by the following method: \textbf{n} distinct weights are generated with \(rand(w_{min}, w_{max})\) and then sorted by increasing order; \(p_1 = p_{min} + rand(0, 49)\); and \(\forall i \in [2, n].~p_i = \lfloor w_i \times ((p_{i-1}/w_{i-1}) + 0.01)\rfloor + rand(1, 10)\). The given values are: \(w_{min} = p_{min} = \mathbf{n}\) and \(w_{max} = 10\overline{n}\). The PYAsUKP \emph{-form hi -pmin \(p_{min}\) -wmax \(w_{max}\)} parameters were used.
+This family of instances is generated by the following method: \textbf{n} distinct weights are generated with~\(rand(w_{min}, w_{max})\) and then sorted by increasing order;~\(p_1 = p_{min} + rand(0, 49)\); and~\(\forall i \in [2, n].~p_i = \lfloor w_i \times ((p_{i-1}/w_{i-1}) + 0.01)\rfloor + rand(1, 10)\).
+The given values are:~\(w_{min} = p_{min} = \mathbf{n}\) and~\(w_{max} = 10\overline{n}\).
+The PYAsUKP \emph{-form hi -pmin~\(p_{min}\) -wmax~\(w_{max}\)} parameters were used.
 
-Five hundred instances were generated for each combination of \(n = w_{min} \in \{5\times10^3, 10^4, 2\times10^4, 5\times10^4\}\). Totalling 2000 instances. Each instance had a random capacity in the range \([w_{max}; 1000\overline{n}]\).
+Five hundred instances were generated for each combination of~\(n = w_{min} \in \{5\times10^3, 10^4, 2\times10^4, 5\times10^4\}\).
+Totalling 2000 instances.
+Each instance had a random capacity in the range~\([w_{max}; 1000\overline{n}]\).
 
 \subsection{SAW}
 \label{sec:saw_inst}
 
-The SAW instances were proposed in~\cite{pya}. The SAW instances includes the strong correlated instances with \(\alpha > 0\), and as such share the property described in section \ref{XXX}. The main point of the authors of~\cite{pya} for including such instances in the benchmark seems to be testing a new general upper bound proposed in the same work. The new bound it's the tightest known for the SAW instances, and is included in EDUK2.
+The SAW instances were proposed in~\cite{pya}.
+The SAW instances include the strongly correlated instances with~\(\alpha > 0\), and as such share the property described in Section~\ref{sec:sc_inst}.
+The main point of the authors of~\cite{pya} for including such instances in the benchmark seems to be testing a new general upper bound proposed in the same work.
+The new bound is the tightest known for the SAW instances, and is included in EDUK2.
 
-This family of instances is generated by the following method: generate \textbf{n} random weights between \(w_{min}\) and \(w_{max} = 1\overline{n}\) with the following property: \(\forall i \in [2, n].~w_i~mod~w_1 > 0\) (\(w_1\) is the smallest weight); sort by increasing order; then \(p_1 = w_1 + \alpha\) where \(\alpha = rand(1,5)\), and \(\forall i \in [2, n].~p_i = rand(l_i, u_i)\) where \(l_i = max(p_{i-1}, q_i)\), \(u_i = q_i + m_i\), \(q_i = p_1 \times \lfloor w_i / w_1 \rfloor \), and \(m_i = w_i~mod~w_1\). The PYAsUKP \emph{-form saw -step \(\alpha\) -wmax \(w_{max}\)} parameters were used.
+This family of instances is generated by the following method: generate \textbf{n} random weights between~\(w_{min}\) and~\(w_{max} = 1\overline{n}\) with the following property:~\(\forall i \in [2, n].~w_i~mod~w_1 > 0\) (\(w_1\) is the smallest weight); sort by increasing order; then~\(p_1 = w_1 + \alpha\) where~\(\alpha = rand(1,5)\), and~\(\forall i \in [2, n].~p_i = rand(l_i, u_i)\) where~\(l_i = max(p_{i-1}, q_i)\), \(u_i = q_i + m_i\), \(q_i = p_1 \times \lfloor w_i / w_1 \rfloor \), and~\(m_i = w_i~mod~w_1\).
+The PYAsUKP \emph{-form saw -step~\(\alpha\) -wmax~\(w_{max}\)} parameters were used.
 
-Two hundred instances were generated for each combination of \(w_{min} = 10^4\), \(n \in \{10^4, 5\times10^4, 10^5\}\). Additional five hundred instances were generated with \(w_{min} = 5\times10^3\) and \(n = 5\times10^4\). Totalling 1100 instances.
-Each instance had a random capacity in the range \([w_{max}; 10\overline{n}]\).
+Two hundred instances were generated for each combination of~\(w_{min} = 10^4\),~\(n \in \{10^4, 5\times10^4, 10^5\}\).
+Additional 500 instances were generated with~\(w_{min} = 5\times10^3\) and~\(n = 5\times10^4\).
+Totalling 1100 instances.
+Each instance had a random capacity in the range~\([w_{max}; 10\overline{n}]\).
 
 \subsection{PYAsUKP's dataset and reduced PYAsUKP's dataset}
 \label{sec:pya_dat_red_pya_dat}
 
-The dataset described in the last five subsections, and totalling 4540 instances, will be called for the rest of this work: \emph{the PYAsUKP's dataset}. In each of the five smaller datasets, for the same combination of parameters, the number of instances generated was always perfectly divisible by ten. The dataset comprised by one tenth of the PYAsUKP's dataset, following the same distribution, and totalling 454 instances, will be called for the rest of this work: \emph{the reduced PYAsUKP's dataset}.
+The dataset described in the last five subsections, and totalling 4540 instances, will be called for the rest of this work: \emph{the PYAsUKP's dataset}.
+In each of the five smaller datasets, for the same combination of parameters, the number of instances generated was always perfectly divisible by ten.
+The dataset comprised by one tenth of the PYAsUKP's dataset, following the same distribution, and totalling 454 instances, will be called for the rest of this work: \emph{the reduced PYAsUKP's dataset}.
 
 \section{CSP Subproblem Knapsack Instances}
 \label{sec:csp_ukp_inst}
 
-The applied use of the UKP chosen by the author to be developed in this work was: the pricing subproblem generated by solving the continuous relaxation of the set covering formulation for the classic BPP and CSP using the column generation approach. A summary about this use was already given in section \ref{sec:motivation}, together with the explanation of its relevance. In this section, sufficient technical detail will be given, allowing the reader to understand how such instances of the UKP are generated and why is necessary to solve them. Our explanation will allude to the simplex method, but isn't necessary to understand it to understand the explanation. For readers interested in the mathematical proofs, and the longer explanation of \emph{why} the method works, in contrast to \emph{how} it works, the author recommends the reading of the Section 15.2 (page 455 to 459) of \cite{book_ukp_2004} and/or the seminal paper \cite{gg-61}.
+The applied use of the UKP chosen by the author to be developed in this work was: the pricing subproblem generated by solving the continuous relaxation of the set covering formulation for the classic BPP and CSP using the column generation approach.
+A summary about this use was already given in Section~\ref{sec:motivation}, together with the explanation of its relevance.
+In this section, sufficient technical detail will be given, allowing the reader to understand how such instances of the UKP are generated and why it's necessary to solve them.
+Our explanation will allude to the simplex method, but it's not necessary to understand it to follow the explanation.
+For readers interested in the mathematical proofs, and the longer explanation of \emph{why} the method works, in contrast to \emph{how} it works, the author recommends the reading of the Section 15.2 (page 455 to 459) of~\cite{book_ukp_2004} and/or the seminal paper~\cite{gg-61}.
 
 As BPP and CSP are very similar, and instances of one problem can be converted in instances of the other (similarly to 0-1 KP and BKP), the author will explain the relationship only in terms of the CSP.
 %The mathematical notation conflict with the one used with the rest of the work, however it is used only here, and self contained.
 
-An instance of the CSP problem consists in: \(n\) distinct sheet sizes; each sheet size \(i = \{1, \dots, n\}\) has an unidimensional size \(w_i\) and a demand \(d_i > 0\), that needs to be satisfied; to satisfy the demand it's necessary to cut sheets of the desired size from master rolls of size \(c\), where \(c\) is bigger than any sheet size. It's assumed that there's a sufficient amount of master rolls to fill all demands and, as such, the instance don't define a number of master rolls available. The objective of the problem is to find a way to fill all demands while using the smallest possible number of master rolls. If one or more sheets are cut from a master roll, that master roll is considered used, and remaining space is considered waste.
+An instance of the CSP problem consists in:~\(n\) distinct sheet sizes; each sheet size~\(i = \{1, \dots, n\}\) has an unidimensional size~\(w_i\) and a demand~\(d_i > 0\), that needs to be satisfied; to satisfy the demand it's necessary to cut sheets of the desired size from master rolls of size~\(c\), where~\(c\) is bigger than any sheet size.
+It's assumed that there's a sufficient amount of master rolls to fill all demands and, as such, the instance doesn't define a number of master rolls available.
+The objective of the problem is to find a way to fill all demands while using the smallest possible number of master rolls.
+If one or more sheets are cut from a master roll, that master roll is considered used, and remaining space is considered waste.
 
-The previously mentioned Set Covering Formulation (SCF) for BPP and CSP is a tight formulation proposed in \cite{gg-61}. The SCF eliminated the problems of the classic formulation, that was loose and had too many symmetric solutions. However, as consequence, SCF needs to compute all possible cutting patterns, i.e. all combinations of sheet sizes can be cut from a single master roll. As the cutting patterns are combinations, there can be an exponential quantity of them. All cutting patterns \(j = \{1, \dots, m\}\) can be represented by a matrix \(a_{ij}\) that stores the amount of sheets of size \(i\) obtained when the cutting pattern \(j\) is used. If we know all cutting patterns, a solution for the CSP can be represented by a variable  \(x_j\) that stores the amount of master rolls that were cut using an specific cutting pattern \(j\).
+The previously mentioned Set Covering Formulation (SCF) for BPP and CSP is a tight formulation proposed in~\cite{gg-61}.
+The SCF eliminated the problems of the classic formulation, that was loose and had too many symmetric solutions.
+However, as consequence, SCF needs to compute all possible cutting patterns, i.e. all combinations of sheet sizes can be cut from a single master roll.
+As the cutting patterns are combinations, there can be an exponential quantity of them.
+All cutting patterns~\(j = \{1, \dots, m\}\) can be represented by a matrix~\(a_{ij}\) that stores the amount of sheets of size~\(i\) obtained when the cutting pattern~\(j\) is used.
+If we know all cutting patterns, a solution for the CSP can be represented by a variable ~\(x_j\) that stores the amount of master rolls that were cut using an specific cutting pattern~\(j\).
 
 The SCF follows:
 
@@ -213,12 +290,20 @@ subject~to & \sum_{j=1}^m a_{ij} x_j \geq d_i,~~~\forall i \in \{1,...,n\}  \lab
            & x_j \in \mathbb{N}_0,~~~\forall j \in \{1,...,m\} \label{eq:csp_x_integer}
 \end{align}
 
-It's important to remember that, in this work, our objective isn't to solve CSP but its continuous relaxation. The only change this makes to the model above is that \ref{eq:csp_x_integer} is restricted to \(\mathbb{R}\), not \(\mathbb{N}_0\).
+It's important to remember that, in this work, our objective isn't to solve CSP but its continuous relaxation.
+The only change this makes to the model above is that~\ref{eq:csp_x_integer} is restricted to~\(\mathbb{R}\), not~\(\mathbb{N}_0\).
 
-The column generation approach consists in avoiding the enumeration of all \(m\) cutting patterns. The SCF relaxation is initialized with a small set of cutting patterns, that can be computed in polynomial time and in which each sheet size appears at least in one of the patterns. This reduced problem is called the \emph{master problem}. The master problem is solved using the simplex method, as it's a linear programming problem. A by-product of this solving process are the dual variables of the master problem's model. Those variables are used as input for a \emph{pricing problem}. The solution of this pricing problem is the cutting pattern that, if added to the master problem, will give the greatest improvement to master problem's optimal solution.
+The column generation approach consists in avoiding the enumeration of all~\(m\) cutting patterns.
+The SCF relaxation is initialized with a small set of cutting patterns, that can be computed in polynomial time and in which each sheet size appears at least in one of the patterns.
+This reduced problem is called the \emph{master problem}.
+The master problem is solved using the simplex method, as it's a linear programming problem.
+A by-product of this solving process are the dual variables of the master problem's model.
+Those variables are used as input for a \emph{pricing problem}.
+The solution of this pricing problem is the cutting pattern that, if added to the master problem, will give the greatest improvement to master problem's optimal solution.
 
 % As the master problem only have some cutting patterns its optimal solutions probably won't be the optimal solution for the original problem.
-The pricing problem for the column generation of the BPP/CSP is the UKP. An instance of the UKP created by the procedure described above will have the following structure:
+The pricing problem for the column generation of the BPP/CSP is the UKP.
+An instance of the UKP created by the procedure described above will have the following structure:
 
 \begin{align}
   maximize & \sum_{i=1}^n y_i x_i \label{eq:csp_ukp_objfun}\\
@@ -226,35 +311,73 @@ subject~to & \sum_{i=1}^n w_i x_i \leq c \label{eq:csp_ukp_cap}\\
            & x_i \in \mathbb{N}_0,~~~\forall i \in \{1,...,n\} \label{eq:csp_ukp_x_integer}
 \end{align}
 
-The formulation above is clearly equivalent to the formulation presented in Section \ref{sec:formulation}. The sheet sizes \(i = \{1, \dots, n\}\) are the items \(i = \{1, \dots, n\}\). The size of the sheets \(w_i\) is the weight of the items \(w_i\). The value of the dual variable associated to a specific sheet size \(y_i\) is the profit value \(p_i\). The size of the master roll \(c\) is the knapsack's capacity \(c\). The new cutting pattern described by \(x_i\) is an optimal solution for UKP \(x_i\) (items inside the knapsack).
+The formulation above is clearly equivalent to the formulation presented in Section~\ref{sec:formulation}.
+The sheet sizes~\(i = \{1, \dots, n\}\) are the items~\(i = \{1, \dots, n\}\).
+The size of the sheets~\(w_i\) is the weight of the items~\(w_i\).
+The value of the dual variable associated to a specific sheet size~\(y_i\) is the profit value~\(p_i\).
+The size of the master roll~\(c\) is the knapsack's capacity~\(c\).
+The new cutting pattern described by~\(x_i\) is an optimal solution for UKP~\(x_i\) (items inside the knapsack).
 
-The solving process alternates between solving the master problem and the pricing problem, until all cutting patterns that could improve the master problem's solution were already generated and added to the master problem. The profit values of the pricing problem (dual variables) are real numbers close to one. If the value of the optimal solution for the pricing problem is one or less, we have a guarantee that the master problem can't be improved by adding any new cutting patterns to it. The computation could be stopped and the optimal solution for the master problem is the exact optimal solution for the continuous relaxation of the CSP's instance. However, floating point arithmetic is imprecise. In the real world, a code of the pricing problem can return a value slight above one, when it should have returned one or slight less than one. In this case, adding the newly generated cutting pattern will not improve the master problem's solution, and will re-generate the same pricing problem with the same optimal solution value incorrectly above one. Taking this in account, a better method for stopping the computation is verifying if the current pricing problem is equal to the one from last iteration, or if the solution of the pricing problem is equal to the one from the last iteration.
+The solving process alternates between solving the master problem and the pricing problem, until all cutting patterns that could improve the master problem's solution were already generated and added to the master problem.
+The profit values of the pricing problem (dual variables) are real numbers close to \emph{one}.
+If the value of the optimal solution for the pricing problem is \emph{one} or less, we have a guarantee that the master problem can't be improved by adding any new cutting patterns to it.
+The computation could be stopped and the optimal solution for the master problem is the exact optimal solution for the continuous relaxation of the CSP's instance.
+However, floating point arithmetic is imprecise.
+In the real-world, a code of the pricing problem can return a value slight above \emph{one}, when it should have returned \emph{one} or slight less than \emph{one}.
+In this case, adding the newly generated cutting pattern will not improve the master problem's solution, and will re-generate the same pricing problem with the same optimal solution value incorrectly above \emph{one}.
+Taking this in account, a better method for stopping the computation is verifying if the current pricing problem is equal to the one from last iteration, or if the solution of the pricing problem is equal to the one from the last iteration.
 
 %\begin{align}
 %\sum_{i=1}^m w_i \alpha_i \leq c \label{eq:csp_pattern}\\
 %\end{align}
 
-The method described above can generate thousands of UKP's instances for one single instance of the CSP. For the same instance of the CSP, the number of UKP's instances generated, and their exact profit values, can vary based in the choice of optimal solution made by the UKP's solver (for the same pricing problem many cutting patterns can be optimal, but only one among them is added to the master problem). Consequently, such dataset is hard to describe, it has a large and variable number of instances with variable profit values. The best way found by the author assure its results are reproducible is making available the exact codes used for the experiment, together with the list of CSP's instances from the literature used by the experiment. The codes are deterministic, and consequently will give the same results if executed many times over the same CSP instance.
+The method described above can generate thousands of UKP's instances for one single instance of the CSP.
+For the same instance of the CSP, the number of UKP's instances generated, and their exact profit values, can vary based in the choice of optimal solution made by the UKP's solver (for the same pricing problem many cutting patterns can be optimal, but only one among them is added to the master problem).
+Consequently, such dataset is hard to describe, it has a large and variable number of instances with variable profit values.
+The best way found by the author to assure the results are reproducible is making available the exact codes used for the experiment, together with the list of CSP's instances from the literature used by the experiment.
+The codes are deterministic, and consequently will give the same results if executed many times over the same CSP instance.
 
-A recent survey on BPP and CSP gathered the instances from the literature, and also proposed new ones \cite{survey2014}. The total of instances in all datasets presented in the survey is 5692. The author choose ten percent of those instances for experiments. This fraction of the instances was randomly selected among instances within the same dataset or, in the larger datasets, the same generation parameters. The 596 selected instances of CSP are available at the author's GitHub repository\footnote{The instance's specific folder and revision are: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}}.
+A recent survey on BPP and CSP gathered the instances from the literature, and also proposed new ones~\cite{survey2014}.
+The total of instances in all datasets presented in the survey is 5692.
+The author chose ten percent of those instances for experiments.
+This fraction of the instances was randomly selected among instances within the same dataset or, in the larger datasets, the same generation parameters.
+The 596 selected instances of CSP are available at the author's GitHub repository\footnote{The instance's specific folder and revision are: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}}.
 
-The code used for solving the SCF relaxation is available at the same repository\footnote{The code's specific folder and revision are: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}} and can be compiled by calling \emph{make bin/cutstock} in the folder. Unfortunately, the code has external dependencies, and the user will need to install them before having success in the compilation. The dependencies are the Boost C++ library\footnote{The Boost C++ Library is available at: \url{http://www.boost.org/}}, and IBM ILOG CPlex Studio 12.5\footnote{The IBM ILOG CPlex Studio can be available at: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}}. The library paths are configured inside the Makefile. The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section \ref{sec:csp_experiments}.
+The code used for solving the SCF relaxation is available at the same repository\footnote{The code's specific folder and revision are: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}} and can be compiled by calling \emph{make bin/cutstock} in the folder.
+Unfortunately, the code has external dependencies, and the user will need to install them before having success in the compilation.
+The dependencies are the Boost C++ library\footnote{The Boost C++ Library is available at: \url{http://www.boost.org/}}, and IBM ILOG CPLEX Studio 12.5\footnote{The IBM ILOG CPLEX Studio can be available at: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}}.
+The library paths are configured inside the Makefile.
+The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
 
-The discussions in \cite{gg-61,gg-63,gg-66} present some optimizations to the master problem's solver that the author has not implemented. The author believes that these optimizations don't affect considerably the structure of the pricing problem. Also, this work has no intention of providing a state-of-the-art algorithm for solving the CSP continuous relaxation, but only to study algorithms for the UKP in the context of a pricing subproblem and independently. A list of implementation details follows: cutting patterns that aren't used by the last master problem's solution could be removed, however they can end up being valuable again in the future and re-generated by the pricing problem, so the author choose to not remove them; the classic polynomial method for creating the initial set of cutting patterns was used, it consists in creating \(n\) patterns, each one with only one sheet size cut as many times as possible, state-of-the-art solvers often begin using cutting patterns generated by a more sophisticated heuristic; the sheet sizes can be divided in two groups, the half with more demand, and the half with less demand, and the pricing problem can be restricted to the high demand group in some conditions -- this also wasn't done.
+The discussions in~\cite{gg-61,gg-63,gg-66} present some optimizations to the master problem's solver that the author has not implemented.
+The author believes that these optimizations don't affect considerably the structure of the pricing problem.
+Also, this work has no intention of providing a state-of-the-art algorithm for solving the CSP continuous relaxation, but only to study algorithms for the UKP in the context of a pricing subproblem and independently.
+A list of implementation details follows: cutting patterns that aren't used by the last master problem's solution could be removed, however they can end up being valuable again in the future and re-generated by the pricing problem, so the author choose to not remove them; the classic polynomial method for creating the initial set of cutting patterns was used, it consists in creating~\(n\) patterns, each one with only one sheet size cut as many times as possible, state-of-the-art solvers often begin using cutting patterns generated by a more sophisticated heuristic; the sheet sizes can be divided in two groups, the half with more demand, and the half with less demand, and the pricing problem can be restricted to the high demand group in some conditions -- this also wasn't done.
 
-Before ending this section, it's important to correct a false claim published in \cite{sea2016}. The article inform that ``The currently fastest known solver for BPP/CSP[2, 3] uses a column generation technique (introduced in [5]) that needs to solve an UKP instance as the pricing problem at each iteration of a column generation approach.''. The mentioned solver is the one proposed in \cite{belov}, and it was found to be the fastest by the experiments conducted in \cite{survey2014}. It makes use of the column generation approach, however the pricing problem isn't exactly the UKP, as consequence of the way the algorithm add cuts to the relaxation.
+Before ending this section, it's important to correct a false claim published in~\cite{sea2016}.
+The article inform that ``The currently fastest known solver for BPP/CSP[2, 3] uses a column generation technique (introduced in [5]) that needs to solve an UKP instance as the pricing problem at each iteration of a column generation approach.''.
+The mentioned solver is the one proposed in~\cite{belov}, and it was found to be the fastest by the experiments conducted in~\cite{survey2014}.
+It makes use of the column generation approach, however the pricing problem isn't exactly the UKP, as consequence of the way the algorithm adds cuts to the relaxation.
 
 \section{Bottom Right Ellipse Quadrant Instances}
 \label{sec:breq_inst}
 
-The Bottom Right Ellipse Quadrant Instances (`BREQ instances', for short) is a new UKP instance item distribution proposed by the author in this work. This instance distribution was created to illustrate that different item distributions favor different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
+The Bottom Right Ellipse Quadrant Instances (`BREQ instances', for short) is a new UKP instance item distribution proposed by the author in this work.
+This instance distribution was created to illustrate that different item distributions favor different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
 
-Distributions that are easy to solve by the DP approach and hard to solve by the B\&B approach are common in the recent literature. This distribution has the opposite characteristic, it is hard to solve by DP and easy to solve by B\&B. It's important to point that this is an artificially generated distribution that don't model any real world instances (that the author have knowledge). The author discourages the use and study of such artificial instances (including this one), and created this distribution only as a tool to demonstrate that isn't hard to create a distribution that benefits a solving approach over another. It's the author's opinion that research should focus on real-world instances and/or artificially generated instances that clearly model real world instances.
+Distributions that are easy to solve by the DP approach and hard to solve by the B\&B approach are common in the recent literature.
+This distribution has the opposite characteristic, it is hard to solve by DP and easy to solve by B\&B.
+It's important to point that this is an artificially generated distribution that doesn't model any real-world instances (that the author has knowledge).
+The author discourages the use and study of such artificial instances (including this one), and created this distribution only as a tool to demonstrate that it's not hard to create a distribution that benefits a solving approach over another.
+It's the author's opinion that operational research could focus more on real-world instances and/or artificially generated instances that clearly model real-world instances.
 
-The name given to this distribution is derived from the fact that, when plotted on a graph, the items show the form of a quarter of ellipse (specifically, the bottom right quadrant). All items in such distribution respect the following equation: \(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - (w_i^2 \times \frac{p_{max}}{w_{max}}^2)}}\)\footnote{In this context, \(w_{max}\) and \(p_{max}\) define the quadrant top right corner, i.e. the possible maximum value for an item's weight and profit, an item with those exact values doesn't need to exist in a BREQ instance. The rounding down in the formulae can be dropped if the profit is a real number and not an integer.}.
+The name given to this distribution is derived from the fact that, when plotted on a graph, the items show the form of a quarter of ellipse (specifically, the bottom right quadrant).
+All items in such distribution respect the following equation:~\(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - (w_i^2 \times \frac{p_{max}}{w_{max}}^2)}}\).
+In this context,~\(w_{max}\) and~\(p_{max}\) define the quadrant top right corner, i.e. the possible maximum value for an item's weight and profit, an item with those exact values doesn't need to exist in a BREQ instance.
+The rounding down in the formulae can be dropped if the profit is a real number and not an integer.
 
 \begin{figure}[h]
-\caption{A 128-16 BREQ Standard instance with \(n = 2048\)}
+\caption{A 128-16 BREQ Standard instance with~\(n = 2048\)}
 \begin{center}
 <<breq_inst,fig=true,echo=false>>=
 library(ggplot2)
@@ -269,25 +392,60 @@ qplot(w, p, data = t,
 \label{fig:breq_example}
 \end{figure}
 
-A natural consequence of this distribution shape is that the item profit grows quadratically with the item weight. This leads to the inexistance of simple, multiple and collective dominance\footnote{In truth, if the profit is integer, the smallest items can display some of those three dominances because the profit precision loss by rounding, but this is of little relevance and can be safely ignored for most purposes. If profit is an infinite precision real, the statement has no exceptions.}. In other words, for any multiset of two or more items \(s\) and any single item \(i\) (with respective weigths \(w_s\) and \(w_t\), and respective profits \(p_t\) and \(p_i\)), if \(w_s \leq w_i\) then \(p_s < p_i\).
+A natural consequence of this distribution shape is that the item profit grows quadratically with the item weight.
+This leads to the inexistence of simple, multiple and collective dominance\footnote{In truth, if the profit is integer, the smallest items can display some of those three dominances because the profit precision loss by rounding, but this is of little relevance and can be safely ignored for most purposes.
+If profit is an infinite precision real, the statement has no exceptions.}.
+In other words, for any multiset of two or more items~\(s\) and any single item~\(i\) (with respective weights~\(w_s\) and~\(w_t\), and respective profits~\(p_t\) and~\(p_i\)), if~\(w_s \leq w_i\) then~\(p_s < p_i\).
 
-On the other hand, threshold dominance is very common in this instance type. With exception of the best item, any item of any instance (of any distribution, not only BREQ instance) will always be threshold dominated at some capacity. However, in many instances the knapsack capacity is smaller than those threshold values and therefore the threshold dominance isn't applied or relevant. On BREQ instances, as a consequence of the quadratic profit growth, an optimal solution will never include the item \(i\) two or more times if there's an item \(j\) such as that \(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\). Consequently, each item have a good probability of being threshold dominated before the second use. 
+On the other hand, threshold dominance is very common in this instance type.
+With exception of the best item, any item of any instance (of any distribution, not only BREQ instance) will always be threshold dominated at some capacity.
+However, in many instances the knapsack capacity is smaller than those threshold values and therefore the threshold dominance isn't applied or relevant.
+On BREQ instances, as a consequence of the quadratic profit growth, an optimal solution will never include the item~\(i\) two or more times if there's an item~\(j\) such as that~\(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\).
+Consequently, each item have a good probability of being threshold dominated before the second use. 
 
-The solutions of BREQ instances will often contain the maximum number of copies of the largest item (that is also the most profitable, and the most efficient) allowed by the instance capacity. Any gap left will probably be filled by the heaviest item that fits the gap, with this process repeated until no item fits the gap left (or there's no gap). The classical greedy heuristic procedure that follows those steps would probably yield an optimal solution. However, this is not always the case\footnote{A counter-example follows: consider an instance with \(n = 4\), \(c = 512\), \(w_1 = 384\), \(p_1 = 2774\), \(w_2 = 383\), \(p_2 = 2756\), \(w_3 = 129\), \(p_3 = 265\), \(w_4 = 32\) and \(p_4 = 17\); the optimal solution don't use the best item (\(w_1, p_1\)); the best solution when using the best item has a profit value of \(2842 = 2774 + 4\times17\) (weight \(512 = 384 + 4\times32\)) while the best solution when using the second most efficient item has the optimal profit value of \(3021 = 2756 + 265\) (weight \(512 = 383 + 129\)). In this case, between two solutions with the same weight, the one with the best item isn't the best one. The weight and profit values of this example follow the a BREQ distribution with \(w_{max} = 512\) and \(p_{max} = 8192\).}.
+The solutions of BREQ instances will often contain the maximum number of copies of the largest item (that is also the most profitable, and the most efficient) allowed by the instance capacity.
+Any gap left will probably be filled by the heaviest item that fits the gap, with this process repeated until no item fits the gap left (or there's no gap).
+The classical greedy heuristic procedure that follows those steps would probably yield an optimal solution.
+However, this is not always the case\footnote{A counter-example follows: consider an instance with~\(n = 4\),~\(c = 512\),~\(w_1 = 384\),~\(p_1 = 2774\),~\(w_2 = 383\),~\(p_2 = 2756\),~\(w_3 = 129\),~\(p_3 = 265\),~\(w_4 = 32\) and~\(p_4 = 17\); the optimal solution don't use the best item (\(w_1, p_1\)); the best solution when using the best item has a profit value of~\(2842 = 2774 + 4\times17\) (weight~\(512 = 384 + 4\times32\)) while the best solution when using the second most efficient item has the optimal profit value of~\(3021 = 2756 + 265\) (weight~\(512 = 383 + 129\)).
+In this case, between two solutions with the same weight, the one with the best item isn't the best one.
+The weight and profit values of this example follow a BREQ distribution with~\(w_{max} = 512\) and~\(p_{max} = 8192\).}.
 
-The reasons that make BREQ instances favor B\&B over DP can be undestood examinating the two approachs behaviour. The B\&B approach will begin creating a solution using some sort of greedy heuristic similar to the one described at last paragraph. This solution will be very good, if not optimal, and provide a good lower bound. With this lower bound, the search space will be greatly reduced, making the algorithm end almost instantly. In the other side, the DP approach is based in solving subproblems. Subproblems will be solved for increasing capacity values yielding optimal solutions to be reused (combined with other items). However, as seen before, small solutions and/or solutions comprised of small items will generally be less efficient than solutions comprised of the big items, and therefore subproblem solutions are likely to be discarded without affecting the final result.
+The reasons that make BREQ instances favor B\&B over DP can be understood by examining the two approaches behaviour.
+The B\&B approach begins by creating a solution using some sort of greedy heuristic similar to the one described in the last paragraph.
+This solution will be close to optimal, if not optimal, and provides a good lower bound.
+With this lower bound, the search space will be greatly reduced, making the algorithm end almost instantly.
+On the other side, the DP approach is based on solving subproblems.
+Subproblems will be solved for increasing capacity values yielding optimal solutions to be reused (combined with other items).
+However, as seen before, small solutions and/or solutions comprised of small items will generally be less efficient than solutions comprised of the big items, and therefore subproblem solutions are likely to be discarded without affecting the final result.
 
-Our objective is not to explore this distribution and its behaviour with different parameters, only to show that it favors the B\&B approach over the DP. We proposes a subset of the BREQ instances which the only parameters are \(n\) and the seed for the PRNG, with the other instance parameters being computed over the value of \(n\). We call this instance distribution the BREQ 128-16 Standard, it's a BREQ distribution where \(c = 128 \times n\), \(p_{min} = w_{min} = 1\), \(w_{max} = c\) and \(p_{max} = 16 \times w_{max}\). The PRNG seed is used to create \(n\) unique random weight values between \(w_{min}\) and \(w_{max}\) (the random number distribution is uniform); the profit values for each weight are computed using the first formulae presented at this section (and the \(w_{max}\) and \(p_{max}\) values for that \(n\)). 
+The objective is not to explore this distribution and its behaviour with different parameters, only to show that it favors the B\&B approach over the DP.
+The author of this thesis propose a subset of the BREQ instances which the only parameters are~\(n\) and the seed for the PRNG, with the other instance parameters being computed over the value of~\(n\).
+This instance distribution will be called the BREQ 128-16 Standard, it's a BREQ distribution where~\(c = 128 \times n\),~\(p_{min} = w_{min} = 1\),~\(w_{max} = c\) and~\(p_{max} = 16 \times w_{max}\).
+The PRNG seed is used to create~\(n\) unique random weight values between~\(w_{min}\) and~\(w_{max}\) (the random number distribution is uniform); the profit values for each weight are computed using the first formula presented at this section (and the~\(w_{max}\) and~\(p_{max}\) values for that~\(n\)).
 
-The reasoning for the choices made when creating the BREQ 128-16 Standard follows. There was no reason to restrict the \(w_{min}\) to \(w_{max}\) interval to be smaller than \(c\) (there are \(c\) distinct valid weight values). The constant 128 used to compute the capacity \(c\) for a \(n\) value was chosen as the first power of two higher than a hundred. Consequently less than 1\% of all possible items will appear at an instance, making instances generated with different seeds significantly different. The \(p_{min}\) to \(p_{max}\) value interval was chosen to be sixteen times bigger than the \(w_{min}\) to \(w_{max}\) interval to alleviate the effects of rounding the profit value to an integer value (it would not need to be done if the profit was a floating point number with reasonable precision). The efficiency of the items in a BREQ distribution will vary between zero and \(\frac{p_{max}}{w_{max}}\), so if \(p_{max} = w_{min}\) the efficiency would vary between zero and one, giving more relevance to the rounding. At least, for the biggest \(n\) value that we were interested in testing (\(2^20\)), the highest possible value of an item profit is \(2^{31} = 2^{20}\times128\times16\) what keeps the values smaller than 32 bits.
 
-The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying \(n\) and the seed. We propose a benchmark with a hundred instances, with all combinations of \(n = 2^{11} = 2048, 2^{12}, ..., 2^{20} \approx 10^6\) (ten \(n\) values), and ten seed different values. We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
+The reasoning for the choices made when creating the BREQ 128-16 Standard follows.
+There was no reason to restrict the~\(w_{min}\) to~\(w_{max}\) interval to be smaller than~\(c\) (there are~\(c\) distinct valid weight values).
+The constant 128 used to compute the capacity~\(c\) for a~\(n\) value was chosen as the first power of two higher than a hundred.
+Consequently less than 1\% of all possible items will appear in an instance, making instances generated with different seeds significantly different.
+The~\(p_{min}\) to~\(p_{max}\) value interval was chosen to be sixteen times bigger than the~\(w_{min}\) to~\(w_{max}\) interval to alleviate the effects of rounding the profit value to an integer value (it would not need to be done if the profit was a floating point number with reasonable precision).
+The efficiency of the items in a BREQ distribution will vary between zero and~\(\frac{p_{max}}{w_{max}}\), so if~\(p_{max} = w_{min}\) the efficiency would vary between zero and one, giving more relevance to the rounding.
+At least, for the biggest~\(n\) value that we were interested in testing (\(2^20\)), the highest possible value of an item profit is~\(2^{31} = 2^{20}\times128\times16\) what keeps the values smaller than 32 bits.
+
+The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying~\(n\) and the seed.
+We propose a benchmark with a hundred instances, with all combinations of~\(n = 2^{11} = 2048, 2^{12}, ..., 2^{20} \approx 10^6\) (ten~\(n\) values), and ten seed different values.
+We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
 
 \section{Other distributions}
 
-While artificial items' distributions presented in~\cite{pya} were used in the experiments of this work, some other artificial distributions were ignored. The reasons for not using the uncorrelated distribution were extensively presented in this chapter. However, no reason were presented for not using the \emph{weakly correlated} distribution (presented in \cite{mtu1}, \cite{mtu2}, \cite{babayev} and \cite{eduk}) or the \emph{realistic random} distribution (presented in \cite{eduk}).
+While artificial item distributions presented in~\cite{pya} were used in the experiments of this work, some other artificial distributions were ignored.
+The reasons for not using the uncorrelated distribution were extensively presented in this chapter.
+However, no reason was presented for not using the \emph{weakly correlated} distribution, presented in~\cite{mtu1},~\cite{mtu2},~\cite{babayev} and~\cite{eduk}, or the \emph{realistic random} distribution, presented in~\cite{eduk}.
 
-The main reason for using the artificial distributions described in~\cite{pya} was that, almost certainly, questions about the performance of the algorithms in the most recent benchmark dataset for the UKP would arise, and these experiments answer them preemptively. Not using the dataset would cast a shadow of doubt over this work. However, there was no reason to track and implement every single artificial items' distribution already used in the literature, as the criticism presented in this work about artificial items' distributions would apply to them too.
+The main reason for using the artificial distributions described in~\cite{pya} was that, almost certainly, questions about the performance of the algorithms in the most recent benchmark dataset for the UKP would arise, and these experiments answer them preemptively.
+Not using the dataset would raise unfounded suspicion about this choice.
+However, there was no reason to track and implement every single artificial items distribution already used in the literature, as the criticism presented in this work about artificial item distributions would apply to them too.
 
-The author also finds important to show the risks of insufficient bibliographical research, and not re-evaluating the results of experiments presented in the past. In Section \ref{sec:pya_exp}, we will see that simple DP algorithms of fifty years ago seems to be the best for solving the most recent benchmark dataset for UKP. 
+The author also finds important to show the risks of insufficient bibliographical research, and not re-evaluating the results of experiments presented in the past.
+In Section~\ref{sec:pya_exp}, we will see that simple DP algorithms of fifty years ago seems to be the best for solving the most recent benchmark dataset for UKP. 
 

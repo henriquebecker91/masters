@@ -2,33 +2,38 @@
 
 \section{Conclusions}
 
-the concept of periodicity is of little relevance for algorithms that apply threshold or solution dominance, in the end, the reduction of the knapsack size will only reduce the number of iterations where the code was already only adding copies of the best item instead of iterating over all items
+%put in the resume too:
+%one of the most important contributions of this work is to point the behavior of DP algorithms (as UKP5) called weak solution dominance, that makes the concept of periodicity and the application of the dominances directly much less relevant
 
-basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway). The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
-Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
-The lack of literature review and implementation of old methods for comparison is a real problem.
+%the concept of periodicity is of little relevance for algorithms that apply threshold or solution dominance, in the end, the reduction of the knapsack size will only reduce the number of iterations where the code was already only adding copies of the best item instead of iterating over all items
 
-solution dominance make the other domincances little relevant?
+%basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real-world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway).
+%The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
+%Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
+%The lack of literature review and implementation of old methods for comparison is a real problem.
 
-This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
+%solution dominance make the other domincances little relevant?
 
-is a experimental approach where it could be a theoretical one
+%This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
+
+%is a experimental approach where it could be a theoretical one
 
 \section{Future Works}
 \label{sec:future_works}
 
-There's lots of methods for UKP solving, any interessed should do a good review before thinking in creating a new solution
-while a survey implementing all algorithms could be interesting, it only would be valid if tackled real-world instances
-	for the main real-world problem cited at the UKP literature (CSP pricing), it isn't used so much anymore, and there's questions that precede the problem of the fastest UKP solving algorithm: as if adding multiple solutions simulstaneosly is a good idea, or if we should only try to get the first solutions better than 1 (and use a exact method only after failing in this prospect), etc...
+%There's lots of methods for UKP solving, any interessed should do a good review before thinking in creating a new solution
+%while a survey implementing all algorithms could be interesting, it only would be valid if tackled real-world instances
+%	for the main real-world problem cited at the UKP literature (CSP pricing), it isn't used so much anymore, and there's questions that precede the problem of the fastest UKP solving algorithm: as if adding multiple solutions simulstaneosly is a good idea, or if we should only try to get the first solutions better than 1 (and use a exact method only after failing in this prospect), etc...
 
-Many algorithms weren't re-implemented; so much comparison is lacking. Specially Fred Glover's algorithm.
+%Many algorithms weren't re-implemented; so much comparison is lacking.
+%Especially Fred Glover's algorithm.
 
 % Thing interesting to analyze would be: how often knapsacks generated by cutting stock have different optimal solutions (or specifically distinct optimal solutions with the same weight, also, the specific case where the weight is the smallest possible, seems to be very common as the change in the ordering shown so many CSP instances where at least one knapsack diverged); would be adding all optimal solutions (or even, all solutions with profit value over one) at each single knapsack a way to speed up the computation? (there would be any negative effects, as the master model bloating? the trade-off would be valid? someone has already proposed this?) Columns can end up not being used even if choosen between the optimal ones. Dominance exclude solutions with the guarantee at least one optimal solution will remain, disabling dominance would pay off? Varying the CPLEX seed and the choosen optimal solution would make differences of wich magnitude? Could code make use of the gigantic profit dominance of the instances?
-% If we could discover what property the solutions given by the CPlex knapsack solver have that makes the master model needs less iterations, we could adapt the other programming methods to return optimal solution with this property?
+% If we could discover what property the solutions given by the CPLEX knapsack solver have that makes the master model needs less iterations, we could adapt the other programming methods to return optimal solution with this property?
 
 %"If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems." (p. 7) 
 %"It is expensive and time consuming to collect real industrial problems. A random problem generator may be the only alternative if you want a problem with a particular characteristic, e.g. large size, quickly." (p. 8) 
 
-O(nc) is a very loose worst-case complexity for GG-66
+%O(nc) is a very loose worst-case complexity for GG-66
 
-what if EDUK had a C++ implementation?
+%what if EDUK had a C++ implementation?

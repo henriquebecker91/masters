@@ -11,9 +11,9 @@ However, it can be solved in pseudo-polynomial time by using the dynamic program
 \section{Motivation and Scope}
 \label{sec:motivation}
 
-%It's a simpler variant of one of the most classical computer science problems.
+%It's a simpler variant of one of the most classical computer science problems.%,~\cite{pya} (Hybridization between B\&B and DP), and~\cite{DP_inequalities}. % the last is the article from xuequi he, that don't compete with state of the art butonly try new approach
 The unbounded knapsack problem has theoretical and applied uses.
-There are many examples in the literature of using the UKP to test solving approaches that are novel at the time as~\cite{mtu1} (Branch-and-Bound) and~\cite{on_equivalent_greenberg} (Consistency Approach).%,~\cite{pya} (Hybridization between B\&B and DP), and~\cite{DP_inequalities}. % the last is the article from xuequi he, that don't compete with state of the art butonly try new approach
+There are many examples in the literature of using the UKP to test solving approaches that are novel at the time as~\cite{mtu1} (Branch-and-Bound) and~\cite{on_equivalent_greenberg} (Consistency Approach).
 Such interest is commonly found in well-known, easy to understand and to model, NP-hard problems with practical everyday use, as is the case of the UKP and other KPs.
 Recently, the 0-1 KP was used to study how humans solve NP-Hard problems~\cite{humans_solve_complex}.
 The author of this thesis finds the use of UKP (or any other problem) for testing experimental approaches a necessary and relevant line of research.
@@ -99,7 +99,7 @@ Such duplicated items exist in some instance datasets of the literature, and can
 \section{Well-known properties of UKP}
 \label{sec:well_known_prop}
 
-In this section, are presented well-known properties of the UKP that can be exploited to speed-up computation.
+In this section, are presented well-known properties of the UKP that can be exploited to speed-up the solving of an instance of the UKP.
 The main point of these properties is that they are only valid if we have available as many copies of each item type as we could need.
 Consequently, those properties are always valid for UKP and generally not valid for other knapsack variants.
 However, it's interesting to note that, if a BKP or 0-1 KP has as many or more copies of some item type than it can fit in the knapsack, then we have an unbounded quantity of that item type available and the properties described below apply to these item types.
@@ -118,15 +118,16 @@ By definition, an optimal solution is a valid solution with the greatest profit 
 If it's the latter (i.e.~\(i\) and~\(j\) have the same profit value),~\(j\) can be part of an optimal solution.
 However, we would get an optimal solution with the same or less weight, by replacing~\(j\) by~\(i\) in the optimal solution.
 
+%by an algorithm specific for dominance detection,
 If we are interested in obtaining one optimal solution, but not all optimal solutions, we can use dominance relations to reduce the computational effort needed to find a solution.
 This is done by detecting dominance relations, and removing the dominated items, thus reducing the size of the problem.
-The detection can be done in a preprocessing phase%by an algorithm specific for dominance detection,
+The detection can be done in a preprocessing phase
 or within the solving algorithm (reusing computation that it would need to be done anyway).
 Both approaches have upsides and downsides, some of them will be discussed further in this work.
 
-Dominance relations become more interesting when applied to solutions, and not only to single items.
+Dominance relations can also be applied to solution, instead of single items, and this makes the considerably more interesting.
 It's important to reinforce that, in this thesis, the term \emph{solution} is used as an synonym for `item multiset'.
-A solution does not to be valid, or optimal (these qualifiers would be meaningless otherwise), and surely doesn't need to fill the knapsack capacity in a way that no more items can be added to it.
+A solution does not to be valid, or optimal (these qualifiers would be meaningless otherwise), and surely doesn't need to fill the knapsack capacity in a way that no more items can be added to the knapsack. 
 As UKP don't limit the quantity of each item type in a solution, we can treat any solution as a new item type, with weight and profit value equal to the weight and profit value of the solution.
 
 If a solution~\(s\) dominates an item~\(j\), we have the same properties that if~\(s\) was an item.
@@ -138,7 +139,7 @@ Simple dominance can be seen as a special case of multiple dominance, and some a
 
 If a solution~\(s\) dominates a solution~\(t\), and~\(t\) is comprised only of copies of the same item, we have what is called in the literature of \emph{threshold dominance}.
 If~\(t\) is comprised of~\(n\) copies of item~\(j\), then we know that we can disregard solutions with~\(n\) or more copies of item~\(j\) (as each group of~\(n\) copies of~\(j\) can be replaced by~\(s\) without loss to the optimal value).
-Depending on the solving algorithm structure, this can mean that at some point, the item can be excluded from a global item list (reducing the further computational effort of the algorithm).
+Depending on the structure of the solving algorithm, this can mean that at some point, the item can be excluded from a global item list (reducing the further computational effort of the algorithm).
 Collective dominance can be seen as a special case of threshold dominance, where~\(n = 1\) (i.e. the dominated solution~\(t\) is a single item solution).
 
 The simple and multiple dominances were deeply studied. 
@@ -147,12 +148,12 @@ On the other hand, the collective and threshold dominances seem too computationa
 However, in the context of a Dynamic Programming (DP) algorithm, where the optimal solutions of lower capacities can be reused to detect both collective and threshold dominances~\cite{pya}, these dominances are cheap to detect.
 
 The Efficient Dynamic programming for the Unbounded Knapsack problem (EDUK) and the EDUK2 algorithms detect those four types of dominance relations.
-In fact, threshold dominance was first proposed by the EDUK authors in~\cite{ukp_new_results}, and was primary feature of the EDUK algorithm.
+In fact, threshold dominance was first proposed by the EDUK authors in~\cite{ukp_new_results}, and was a primary feature of the EDUK algorithm.
 However, we will see that both algorithms seem to be dominated by algorithms that predate them by about forty years, as the \emph{ordered step-off} from~\cite{gg-66}, and its `improved version' from~\cite{green_improv}.
 These two old algorithms didn't directly apply any of the four types of dominance.
 
 After examination, becomes clear that these two old algorithms indirectly apply all four dominances.
-By \emph{indirectly}, the author mean that, in the course of these algorithms execution, they eventually stop using dominated items to create new solutions, without testing items for each one of the four dominances, and then removing the dominated items from a global items list.
+By \emph{indirectly}, the author means that, in the course of these algorithms execution, they eventually stop using dominated items to create new solutions, and that happens without testing items for each one of the four dominances, and then removing the dominated items from a global items list.
 The approach used by these old algorithms is focused in solutions, not individual items.
 Consequently, would be more adequate to say that they make use of some sort of \emph{solution dominance}.
 Ideally, if solution~\(s\) dominates solution~\(t\) (where both solutions can be comprised of any items), then an optimized algorithm would not generate any solutions that are a superset of~\(t\) (as the respective supersets of~\(s\) would dominate them anyway).
@@ -167,25 +168,26 @@ In the literature, one of the definitions used for dominance is: ``Given an inst
 Simple, multiple and collective dominance are consistent with this definition.
 However, if an item is threshold dominated, it can yet be present in all optimal solutions (only in a bounded quantity).
 Solution dominance isn't covered by this definition, as it's item-centric.
+Finally, such broad definition of dominance does not give hints of how to design a procedure for removing the dominated items (without solving the instance), different from the dominance relations.
 
 \subsection{Periodicity and periodicity bounds}
 \label{sec:periodicity}
 
 % TODO: change y to y^{+} in the context of the capacity limit
 %The UKP has an obvious periodic property that for every knapsack capacity that is a multiple of the best item's weight, the optimal solution for that knapsack capacity is~\(\frac{c}{w_b}\) copies of the best item (it's clearly the most efficient use that can be made of such capacity). The UKP has also a not-so-obvious and more interesting periodic property that states that:
-The UKP has an interesting periodic property that can be stated in the following way: for every set of item types, there exists a capacity~\(y\), for which every capacity~\(y'\) (\(y' > y\)) will have an optimal solution that is an optimal solution for capacity~\(y' - w_b\) with one more copy of the best item added.
-In other words, after some capacity~\(y\), we can find optimal solutions simply by adding copies of the best item to optimal solutions of capacities~\(y\) and lower (all other items aren't relevant anymore).
+The UKP has an interesting periodic property that can be stated in the following way: for every set of item types, there exists a capacity~\(y^+\), for which every capacity~\(y'\) (\(y' > y^+\)) will have an optimal solution that is an optimal solution for capacity~\(y' - w_b\) with one more copy of the best item added.
+In other words, after some capacity~\(y^+\), we can find optimal solutions simply by adding copies of the best item to optimal solutions of capacities~\(y^+\) and lower (all other items aren't relevant anymore).
 In the literature, this periodic property is called \emph{periodicity}.
-It should be clear that, if we knew~\(y\) beforehand, and~\(y < c\), then we can solve UKP for the capacity~\(y^{*} = c - \ceil{\frac{c - y}{w_b}}w_b\) and fill the gap between~\(y^{*}\) and~\(c\) with exactly~\(\frac{c - y^{*}}{w_b}\) copies of the best item (instead of solving UKP until the capacity~\(c\)).
+It should be clear that, if we knew~\(y^+\) beforehand, and~\(y^+ < c\), then we can solve UKP for the capacity~\(y^{*} = c - \ceil{\frac{c - y^+}{w_b}}w_b\) and fill the gap between~\(y^{*}\) and~\(c\) with exactly~\(\frac{c - y^{*}}{w_b}\) copies of the best item (instead of solving UKP for capacity~\(c\)).
 %The focus of this section will be this second periodic property, that we will call simply by `periodicity'.
 
 The periodicity is a direct consequence of the threshold dominance.
 However, the periodicity was discovered much before the concept of threshold dominance.
 For instance, periodicity was already described in~\cite{gg-66}.
-As the concept of threshold dominance was already explained in this work, the author will use it to explain periodicity.
+As the concept of threshold dominance was already explained in this thesis, the author will use it to explain periodicity.
 
 The threshold dominance property states that, if a solution~\(s\) dominates solution~\(t\), and~\(t\) contains only~\(n\) copies of the same item type~\(j\), then solutions with~\(n\) or more copies of~\(j\) can be be replaced by solutions using~\(s\) instead (without loss to the optimal value).
-The periodicity states that after some capacity~\(y\) we can obtain optimal solutions only by adding copies of the best item to the optimal solutions from capacities below~\(y\) (all other items aren't relevant anymore).
+The periodicity states that after some capacity~\(y^+\) we can obtain optimal solutions only by adding copies of the best item to the optimal solutions from capacities \(y^+\) or below (all other items aren't relevant anymore).
 The link between these two properties is that \emph{for a sufficiently big capacity, solutions comprised of copies of the best item will threshold dominate solutions comprised of copies of any other item}.
 
 First, let's verify the truth of the statement above.
@@ -205,18 +207,18 @@ If another copy of any item~\(j\) is added to~\(u\), the resulting solution~\(u'
 Any solution that weights more than solution~\(u\) has only two possibilities: it uses more copies of the best item; or it uses more than~\(n_j\) copies of some non-best item~\(j\).
 In the last case, copies of~\(j\) can be replaced by copies of~\(b\) until the quantity of copies of~\(j\) is smaller than~\(n_j\).
 Consequently, after the knapsack capacity~\(y'' = w_u\), adding copies of other items to a solution would equal to adding copies of the best item (making any other item type except~\(b\) irrelevant).
-Note that~\(y''\) is only an \emph{upper bound} on~\(y\), the value of~\(y\) can be smaller than~\(y''\), as the items that the best item threshold dominate, can themselves threshold dominate other items.
+Note that~\(y''\) is only an \emph{upper bound} on~\(y^+\), the value of~\(y^+\) can be smaller than~\(y''\), as the items that the best item threshold dominate, can themselves threshold dominate other items.
 
-It's important to note that computing the exact value of~\(y\) is a very expensive process that equals to solving UKP for all capacities~\(y\) and lower while checking for threshold dominance.
-None of the algorithms that the authors has knowledge computes the exact value of~\(y\) before starting to solve the UKP.
-The algorithms compute an \emph{upper bound} on the~\(y\) capacity value, as the one presented in last paragraph, that was previously presented in~\cite[p.~215]{book_ukp_2004}.
+It's important to note that computing the exact value of~\(y^+\) is a very expensive process that equals to solving UKP for all capacities~\(y^+\) and lower while checking for threshold dominance.
+None of the algorithms that the authors has knowledge computes the exact value of~\(y^+\) before starting to solve the UKP.
+The algorithms compute an \emph{upper bound} on the~\(y^+\) capacity value, as the one presented in last paragraph, that was previously presented in~\cite[p.~215]{book_ukp_2004}.
 
-An upper bound on~\(y\) is less valuable than~\(y\) itself, but it can be computed in a reasonable polynomial time, before starting the solving process.
+An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in a reasonable polynomial time, before starting the solving process.
 If one algorithm checks for threshold dominance periodically, it can stop when all non-best items have been threshold dominated by the best item.
 Such algorithm would not benefit much from computing an upper bound on the~\(y\) capacity value.
-If this algorithm setup phase (e.g. allocating and initializing memory) is linear to the knapsack's capacity~\(c\) and the upper bound on the~\(y\) capacity value is considerably smaller, then the algorithm could benefit from the upper bound. 
+If this algorithm setup phase (e.g. allocating and initializing memory) is linear to the knapsack's capacity~\(c\) and the upper bound on the~\(y\) capacity value is considerably smaller than \(c\), then the algorithm could benefit from the upper bound. 
 
-There exist many proposed periodicity bounds, but some are time consuming, as the~\(O(n^2)\) periodicity bound presented in~\cite{badbound1}, others depend on specific instance characteristics to be tight, as~\cite{badbound2} and~\cite{pya}.
+There exist many proposed periodicity bounds, but some are time consuming, as the~\(O(n^2)\) periodicity bound presented in~\cite{badbound1}, others depend on specific instance characteristics to be tight, as the ones presented in~\cite{badbound2} and~\cite{pya}.
 For reasons that will be made clear in the conclusions, the author didn't found relevant to present a revision on periodicity bounds in this work.
 The UKP5 algorithm makes use of one simple periodicity bound, and it will be explained together with the algorithm in Section~\ref{sec:ukp5_periodicity}.
 

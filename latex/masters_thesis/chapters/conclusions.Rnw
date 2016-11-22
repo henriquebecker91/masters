@@ -2,28 +2,74 @@
 
 \section{Conclusions}
 
+This master's thesis is characterized by many small contributions, instead of one big contribution.
+Consequently, this work's conclusions are more a listing of those small contributions, and the impression the author has about their relevance in the context given by the literature of the UKP.
+Some of these contributions were clearly and thoroughly expressed, others can have past unnoticed by the reader.
+
+\emph{An algorithm is dominated by other in the context of a dataset.}
+The experiment developed in Sections \ref{breq_XXX} and \ref{mtus_XXX} should make this statement clear.
+MTU2 is the best algorithm between eight algorithms for one dataset, and isn't even competitive for other. 
+The literature review, and the further discussion of instance datasets and solving approaches, have shown how the choice of datasets defined the best algorithm through the last fifty years.
+The unfolding of the events can be summarized as: DP algorithms were proposed together with one applied use of the UKP (pricing problem for BPP and CSP); the comparison criteria becomes solving larger instances faster; datasets of large artificial instances of the UKP are proposed (they don't model the pricing problem instances); B\&B methods solve such artificial instances much faster than DP; these artificial instances are shown to have only a little amount of relevant/undominated items and are discredited; a new DP method is proposed together with new artificial datasets that don't share the same flaws than the old artificial datasets; as the original DP algorithms were forgotten, or excluded from comparison based in the old experiments that used the old datasets, the new DP method only compares to B\&B; the new datasets are hard for B\&B; finally, in this work, the first DP methods proposed are tested for the current dataset, and found to be the state-of-the-art algorithm for solving such datasets.
+
+This leads to another conclusion made by the author.
+\emph{The bibliographical research is important, and should be followed a reevaluation of the evidence chain.}
+The author first reinvented one of the first DP algorithms (while trying to make sense of the problem), published a paper about how it surpassed the state-of-the-art, and then discovered that his bibliographical research was faulty.
+While the author doesn't intend to justify this overlook, it's important to note that, in the context, reading papers about algorithms from fifty years ago, and implementing them to compare with a recent state-of-the-art algorithm didn't seemed as a good use of time.
+If the author didn't end up accidentally reinventing the method, and then recognizing it in an old paper, it's possible that the \emph{terminating/ordered step-off} was simply forgotten.
+Implementing (or obtaining) all algorithms already proposed for a problem, and comparing all of them, clearly isn't a viable strategy.
+However, this work shows that the context of the experiments that concluded that an algorithm is dominated have to be critically evaluated.
+
+\emph{Papers and experiments don't always provide all relevant context.}
+One example of context that is not always provided, or given much attention, is: if the runs were executed in parallel, or not.
+The experiments from Section \ref{} show a significant difference between solving the instance in parallel, or serially, based in the specific algorithm and dataset.
+In one of the computer settings, the average times of UKP5 when executed in parallel were about the double of the average serial times.
+In an indirect comparison between results presented in different papers, this detail could lead to a method being considered significantly faster than other only because one author executed serial runs and the other parallel runs.
+
+The critical analysis developed above, while considered the most important contribution by the author, isn't UKP-specific, and can't be considered a contribution to the state-of-the-art of the problem.
+In the sequence, a more objective and UKP5-specific presentation of the contributions follows. 
+
+The contributions to the knowledge are:
+LIST
+The knowledge about the existence of a DP algorithm that outperforms the DP algorithm that was considered the state-of-the-art, in the most recent benchmark dataset.
+The concept of solution dominance, and its implications for periodicity and the four previously established dominance relations.
+The strong indicative that B\&B algorithms aren't viable for solving pricing subproblems of BPP/CSP.
+The strong indicative that UKP algorithms that are memory intensive should be executed serially.
+LIST
+
 %put in the resume too:
 %one of the most important contributions of this work is to point the behavior of DP algorithms (as UKP5) called weak solution dominance, that makes the concept of periodicity and the application of the dominances directly much less relevant
-
-%the concept of periodicity is of little relevance for algorithms that apply threshold or solution dominance, in the end, the reduction of the knapsack size will only reduce the number of iterations where the code was already only adding copies of the best item instead of iterating over all items
-
-%basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real-world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway).
-%The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
-%Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
-%The lack of literature review and implementation of old methods for comparison is a real problem.
-
 %solution dominance make the other domincances little relevant?
+% MAYBE UKP ISNT SO GOOD FOR THE PROBLEM BECAUSE IT GENERATE PATTERS WITH MAXIMUM WASTE? EVEN SO, B\&B SEEMS TERRIBLE
+%the concept of periodicity is of little relevance for algorithms that apply threshold or solution dominance, in the end, the reduction of the knapsack size will only reduce the number of iterations where the code was already only adding copies of the best item instead of iterating over all items
+% For reasons that will be made clear in the conclusions, the author didn't found relevant to present a revision on periodicity bounds in this work. ADDRESS THIS
 
+% FOR CSP INSTANCES, B\&B don't seem competitive
 %This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
+% Some characteristics of the applied instances can make no sense when solving the general problem, for example, the UKP5 characteristic of returning the smallest optimal solution can be undesired, and this affects the application of dominance, and design decisions
+% the experimental approach used for UKP make little sense outside applied uses, if the intent was to compare algorithms without real-world instances, the could have been a theoretical one, as worst- and average-case complexity
 
-%is a experimental approach where it could be a theoretical one
+The technical or technological contributions are:
+LIST
+The only known implementations of GREENDP and GREENDP1, modernized to use loops.
+The UKP5 implementation, that can be seen as a variant of the terminating step-off.
+New implementations for MTU1 and MTU2: in C++; using templates; the MTU1 implementation is slight faster; the MTU2 implementations too, and don't have the same problem with the subset-sum instances that the original implementation.
+A copy\footnote{} of the exact PYAsUKP benchmark used, and scripts\footnote{} to generate it (based on PYAsUKP).
+LIST
+
+% ADICIONAR A EPIGRAFE?
+%"If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems." (p. 7) 
 
 \section{Future Works}
 \label{sec:future_works}
 
+% FIND REAL WORLD INSTANCES
+
 %There's lots of methods for UKP solving, any interessed should do a good review before thinking in creating a new solution
 %while a survey implementing all algorithms could be interesting, it only would be valid if tackled real-world instances
 %	for the main real-world problem cited at the UKP literature (CSP pricing), it isn't used so much anymore, and there's questions that precede the problem of the fastest UKP solving algorithm: as if adding multiple solutions simulstaneosly is a good idea, or if we should only try to get the first solutions better than 1 (and use a exact method only after failing in this prospect), etc...
+
+%UKP + MTU2
 
 %Many algorithms weren't re-implemented; so much comparison is lacking.
 %Especially Fred Glover's algorithm.
@@ -31,9 +77,19 @@
 % Thing interesting to analyze would be: how often knapsacks generated by cutting stock have different optimal solutions (or specifically distinct optimal solutions with the same weight, also, the specific case where the weight is the smallest possible, seems to be very common as the change in the ordering shown so many CSP instances where at least one knapsack diverged); would be adding all optimal solutions (or even, all solutions with profit value over one) at each single knapsack a way to speed up the computation? (there would be any negative effects, as the master model bloating? the trade-off would be valid? someone has already proposed this?) Columns can end up not being used even if choosen between the optimal ones. Dominance exclude solutions with the guarantee at least one optimal solution will remain, disabling dominance would pay off? Varying the CPLEX seed and the choosen optimal solution would make differences of wich magnitude? Could code make use of the gigantic profit dominance of the instances?
 % If we could discover what property the solutions given by the CPLEX knapsack solver have that makes the master model needs less iterations, we could adapt the other programming methods to return optimal solution with this property?
 
-%"If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems." (p. 7) 
 %"It is expensive and time consuming to collect real industrial problems. A random problem generator may be the only alternative if you want a problem with a particular characteristic, e.g. large size, quickly." (p. 8) 
 
 %O(nc) is a very loose worst-case complexity for GG-66
 
 %what if EDUK had a C++ implementation?
+
+%basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real-world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway).
+%The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
+%Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
+
+
+%basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real-world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway).
+%The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
+%Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
+
+

@@ -9,8 +9,8 @@ Besides the review, the more objective and UKP-specific knowledge contributions 
 \subsection{A critical review}
 
 \emph{An algorithm is dominated by other in the context of a dataset.}
-The experiment developed in Sections \ref{breq_XXX} and \ref{mtus_XXX} should make this statement clear.
-MTU2 is the best algorithm between eight algorithms for one dataset, and isn't even competitive for other five datasets.
+An example present in this thesis is MTU2.
+MTU2 is the best algorithm between eight algorithms for one dataset (see Section \ref{sec:breq_exp}), and isn't even competitive for other five datasets (see Section \ref{sec:pya_exp}).
 The literature review, and the further discussion of instance datasets and solving approaches, have shown \emph{how the choice of datasets defined the best algorithm through the last fifty years}.
 The unfolding of the events can be summarized as:
 
@@ -24,7 +24,7 @@ The unfolding of the events can be summarized as:
 \item[\cite{eduk}] The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments;
 \item[\cite{book_ukp_2004}] The new DP method is considered state-of-the-art.
 \item[\cite{pya}] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares to B\&B. The hybrid method is the new state-of-the-art.
-\item[\cite{sea2016}] An old DP method is re-discovered and outperforms the hybrid method in the most recent datasets.
+\item[\cite{sea2016}] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.
 \item[(this thesis)] Old algorithms are revised, reimplemented and tested. The influence of the datasets and the historical context becomes apparent.
 \end{description}
 It's very important to note that, taking in account the historical context, the choices made by previous researchers were sound and reasonable.
@@ -36,39 +36,40 @@ While the author doesn't intend to justify this overlook, it's important to note
 If the author didn't end up accidentally reinventing the algorithm, and then recognizing it in an old paper, it's possible that the \emph{terminating/ordered step-off} remained ignored.
 A possibility that can only be considered more terrible by the fact that the algorithm's pseudocode is available in \cite{gg-66}, a paper that's cited by many of the works mentioned above.
 Implementing (or obtaining) all algorithms already proposed for a problem clearly isn't a viable strategy.
-However, this work shows that the context of experiments that conclude that an algorithm is dominated by other have to be critically evaluated.
+However, this work shows that the context of one experiment that conclude that an algorithm is dominated by other have to be critically evaluated.
 
 Also, \emph{papers and experiments don't always provide all relevant context.}
 One example of context that is not always provided, or given much attention, is: if the runs were executed in parallel, or not.
-The experiments from Section \ref{} show a significant difference between solving the instance in parallel, or serially.
+The experiments from Section \ref{sec:serial_parallel_exp} show a significant difference between performing an experiment with runs in parallel, or serially.
 The magnitude of the difference vary with the specific algorithm, computer and dataset.
 In one of the computer settings, the average times of UKP5 when executed in parallel were about the double of the average serial times.
 In an indirect comparison between results presented by different papers, this detail could lead to a method being considered significantly faster than other only because one author executed serial runs and the other parallel runs.
 
 \section{UKP-specific knowledge contributions}
 
-An outline of the UKP-specific knowledge contributions follows:
-\begin{itemize}
+An outline of the UKP-specific knowledge contributions follows. It's ordered by the level of importance the author gives to them.
+\begin{enumerate}
 \item The knowledge that an old DP algorithm outperforms a state-of-the-art hybrid algorithm, in the most recent benchmark dataset.
-\item The concept of solution dominance, and its implications for periodicity and the four previously established dominance relations.
+\item The concept of solution dominance, and its implications for periodicity bounds and the four previously established dominance relations.
+\item Evidence that the B\&B approach worst-case can arise when solving pricing subproblems of BPP/CSP.
+\item Evidence that variations in the optimal solution returned by the pricing problem solver can have a strong effect in the number of pricing problems generated.
 \item Evidence that UKP algorithms that are memory intensive should be executed serially for comparison.
-\item Evidence that variations in the solution returned by the pricing problem solver can have strong effect in the number of pricing problems generated.
-\item Evidence that the B\&B algorithms worst-case can present a problem when solving pricing subproblems of BPP/CSP.
-\end{itemize}
+\item Evidence that converting the pricing problem's profit values to large integers don't cause significant loss.
+\end{enumerate}
 
-The author believes that the first contribution is already well exposed (either in this work, or in \cite{sea2016}), and there's nothing to add to its discussion.
-The technical details of the second contribution (i.e. the concept of solution dominance) were already discussed (see Section \ref{XXX}), but not how it impacts the previous techniques described in the literature.
+The author believes that the first contribution is already well exposed, either in Section \ref{sec:pya_exp}, or in \cite{sea2016}, and there's nothing to add to its discussion.
+The technical details of the second contribution (i.e. the concept of solution dominance) were already discussed (see Section \ref{sec:ukp5_sol_dom_expl}), but not how it impacts the previous techniques described in the literature.
 If solution dominance is applied by an algorithm, even in the weak form displayed by the old DP algorithms studied, there's little sense in trying to apply the four dominance relations and/or periodicity bounds in the same algorithm.
-The two approaches are two different ways of dealing with the same task, one involves keeping a global list of undominated items, the other involves keeping a index with each solution to mark which items can be yet added to the solution.
+The two approaches are two different ways of dealing with the same task, one involves keeping a global list of undominated items, the other involves keeping a index in each solution to mark which items can yet be added to the solution.
 Applying one of the approaches reduce how much the other can further improve the algorithm.
 
-The approach used by EDUK gives a strong guarantee that any dominated item will be discarded as soon as possible. 
-However, the weak solution dominance described in Section \ref{XXX} is implemented with almost no overhead, and seem to have a very similar impact in the removal of dominated items/solutions.
+The approach used by EDUK gives a strong guarantee that any dominated item will be discarded and never used again.
+However, the weak solution dominance described in Section \ref{sec:ukp5} is implemented with almost no overhead, and seem to have a very similar impact in the removal of dominated items/solutions.
 One could argue that EDUK can be at disadvantage for being implemented in a functional language, or that better implementations of the algorithm could be written, the author can't refute such claims.
 Maybe new implementations of the EDUK approach can show the superiority of applying the four dominances in the EDUK's fashion, however, for the tested datasets, the weak solution dominance approach seems to be the most efficient one.
 
 The periodicity check exists both in algorithms like EDUK/EDUK2 and the old terminating step-off.
-In EDUK/EDUK2 it's a consequence of applying all four dominances repeatedly, and in the terminating step-off it's a consequence of applying solution dominance.
+In EDUK/EDUK2 it's a consequence of applying all four dominances repeatedly, and in the terminating step-off it's a consequence of applying weak solution dominance.
 A periodicity check can save effort by stop the computation at a capacity~\(y < c\).
 However, in all algorithms that implement the periodicity check, when this early termination happens, it's because the only item that would be used anymore is the best item.
 Consequently, in each one of these last positions (between \(y\) and \(c\)), the algorithm would not execute \(O(n)\) steps anymore, but only \(O(1)\) steps.
@@ -77,84 +78,69 @@ It's a minor improvement over the application of weak solution dominance, or the
 
 The periodicity check (and, by consequence, the dominances) also reduce the utility of periodicity bounds.
 If an upper bound on \(y^+\) could be used to stop the computation before it reaches capacity \(c\), then the periodicity check will stop the computation even before the capacity predicted by the upper bound (with slightly more overhead).
-In an algorithm with periodicity checking, the utility of upper bounds on the periodicity capacity~\(y^+\) is restricted to saving memory and saving the time spent initializing such memory.
+In an algorithm with periodicity checking, the utility of upper bounds on the periodicity capacity~\(y^+\) is restricted to saving memory and saving the time spent initializing such saved memory.
 Note that some algorithms would not even have such benefits, as they don't allocate or initialize the memory in advance.
 
-The evidence that constitute the third knowledge contribution can be found in Section \ref{}.
+The evidence that constitute the third knowledge contribution can be found in Section \ref{sec:csp_experiments}.
 In the majority of the instances, the times spent by both the B\&B and DP approaches when solving pricing problems was significantly smaller than the times solving the master problems of the same instance.
 However, for some instances, the B\&B approach began to present its worst-case behavior.
-For a concrete example, we will focus on instance 201\_2500\_DI\_11.txt, for which MTU1\_CUTSTOCK ended in timeout.
-The pricing problems generated by such instance have \(n < 200\) and \(c = 2472\).
+
+For a single example, we will focus on instance 201\_2500\_DI\_11.txt, for which MTU1\_CUTSTOCK ended in timeout.
+The pricing problems generated when solving such instance have \(n < 200\) and \(c = 2472\).
 Before timeout, MTU1 solved about 700 of those pricing problems in much less than a millisecond each.
-However, there was also a few pricing problems that took ten seconds or more to solve, times like: 10, 12, 13, 13, 26, 32, 49, 54, and 351 seconds.
-All instances shared the same \(n\), \(c\) and the items' weight, the only difference between them is the profit values.
+However, there was also a few pricing problems that took ten seconds or more to solve; times like: 10, 12, 13, 13, 26, 32, 49, 54, and 351 seconds.
+All instances shared the same \(n\), \(c\) and the same items' weights, the only difference between them is the profit values.
 Such behaviour corroborates with what was said about B\&B algorithms being strongly affected by the items distribution, and less by \(n\) and \(c\).
-The 
 
-%In \cite{gg-63}, an B\&B algorithm was used for solving pricing subproblems, it's said that DP used too much time and had to be abandoned.
-%However, in \cite{gg-66}, the same authors only presented DP methods for solving the UKP.
-%The author of this thesis can only speculate that maybe Gilmore and Gomory reached the same conclusions.
-%The B\&B approach was competitive with DP for many small or easy instances, harder instances risk 
+It's important to note that almost all instances that ended in timeout are artificial instances created to be hard to solve and proposed in \cite{survey2014}.
+Unfortunately, the author had not the time to gather CSP problems from the industrial sources, and the experimentation had to stop at the literature instances.
+Consequently, the author can't state that B\&B algorithms aren't viable for solving pricing problems, only that there's evidence that the B\&B worst-case can arise in such circumstances.
 
+While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
 
+In \cite{gg-63}, an B\&B algorithm was used for solving pricing subproblems, it's said that DP used too much time and had to be abandoned.
+However, in \cite{gg-66}, the same authors only presented DP methods for solving the UKP.
+The author of this thesis did not contact Gilmore and Gomory and can only speculate if they reached the same conclusions.
 
-The author does not 
-
-%put in the resume too:
-%one of the most important contributions of this work is to point the behavior of DP algorithms (as UKP5) called weak solution dominance, that makes the concept of periodicity and the application of the dominances directly much less relevant
-%solution dominance make the other domincances little relevant?
-% MAYBE UKP ISNT SO GOOD FOR THE PROBLEM BECAUSE IT GENERATE PATTERS WITH MAXIMUM WASTE? EVEN SO, B\&B SEEMS TERRIBLE
-%the concept of periodicity is of little relevance for algorithms that apply threshold or solution dominance, in the end, the reduction of the knapsack size will only reduce the number of iterations where the code was already only adding copies of the best item instead of iterating over all items
-% For reasons that will be made clear in the conclusions, the author didn't found relevant to present a revision on periodicity bounds in this work. ADDRESS THIS
-
-% FOR CSP INSTANCES, B\&B don't seem competitive
-%This is about 0-1 knapsack, but can be considered: "Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well." (p. 13, "Where are the hard knapsack problems?", David Pisinger)
-% Some characteristics of the applied instances can make no sense when solving the general problem, for example, the UKP5 characteristic of returning the smallest optimal solution can be undesired, and this affects the application of dominance, and design decisions
-% the experimental approach used for UKP make little sense outside applied uses, if the intent was to compare algorithms without real-world instances, the could have been a theoretical one, as worst- and average-case complexity
+The last three contributions are thoroughly discussed in the context of the experiments that originated them (for the fourth and sixth contributions this is Section \ref{sec:csp_experiments}, and for fifth, Section \ref{sec:serial_parallel_exp}).
+The fourth contribution is specially important to a researcher testing an algorithm that needs to solve unbounded knapsack pricing problems.
+Minor changes in the operation of the UKP solver, as the order it receives the items, can change the exact optimal solution returned, and consequently the number of pricing problems generated and the whole algorithm's run time.
+Such chaotic behaviour can lull an experimenter into believing that irrelevant changes have some deeper meaning, or add noise to relevant changes.
+The same can be said about executing memory intensive algorithms in serial, or parallel (fifth contribution).
+The sixth and last contribution, while corroborated by the vast majority of the runs, can have contributed to our only outlier, and needs further validation.
 
 \section{Technological UKP-specific contributions}
+
+An outline of the UKP-specific technological contributions follows.
+
 \begin{itemize}
-\item The only known implementations of GREENDP and GREENDP1, modernized to use loops.
-The UKP5 implementation, that can be seen as a variant of the terminating step-off.
-New implementations for MTU1 and MTU2: in C++; using templates; the MTU1 implementation is slight faster; the MTU2 implementations too, and don't have the same problem with the subset-sum instances that the original implementation.
-A copy\footnote{} of the exact PYAsUKP benchmark used, and scripts\footnote{} to generate it (based on PYAsUKP).
-A new distribution?!
+\item The only known implementations of the GREENDP and GREENDP1 algorithms, modernized to use loops.
+\item The UKP5 implementation, that can be seen as a variant of the terminating step-off.
+\item New implementations for MTU1 and MTU2. Such implementation are coded in C++11 (instead of Fortran77) and use generic templates. MTU1 implementation is slight faster. MTU2 implementation too, and don't have the same problem with the subset-sum instances that the original implementation.
+\item A copy\footnote{Available at: \url{https://drive.google.com/open?id=0B30vAxj_5eaFSUNHQk53NmFXbkE}} of the exact PYAsUKP benchmark used, and scripts\footnote{Available at: \url{https://github.com/henriquebecker91/masters/tree/f5bbabf47d6852816615315c8839d3f74013af5f/codes/sh/pyasukp_paper_bench}. Note that a PYAsUKP's binary compiled from the version in \url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz} has to be in the executable path to the scripts work.} to generate it (based on PYAsUKP).
+\item The BREQ 128-16 Standard Benchmark, that's a new dataset.
 \end{itemize}
 
-% ADICIONAR A EPIGRAFE?
-%"If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems." (p. 7) 
+The author will not discuss such technical contributions as they are only a byproduct of the research, not its goal.
+It's only relevant to note that the author doesn't suggests that the BREQ 128-16 Standard Benchmark should be used for new experiments comparing algorithms for the UKP.
+The dataset can yet be used to study the behaviour of new solving approaches, maybe giving some insight about the approach's inner workings.
+``If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems.''~\cite[p.~7]{portable_rng}.
 
 \section{Future Works}
 \label{sec:future_works}
 
-% SORTINGS OF UKP5
-% FIND REAL WORLD INSTANCES
+Unfortunately, many questions could not be answered in the scope of this thesis.
+The author selected and listed some of such questions in this section.
 
-%There's lots of methods for UKP solving, any interessed should do a good review before thinking in creating a new solution
-%while a survey implementing all algorithms could be interesting, it only would be valid if tackled real-world instances
-%	for the main real-world problem cited at the UKP literature (CSP pricing), it isn't used so much anymore, and there's questions that precede the problem of the fastest UKP solving algorithm: as if adding multiple solutions simulstaneosly is a good idea, or if we should only try to get the first solutions better than 1 (and use a exact method only after failing in this prospect), etc...
-
-%UKP + MTU2
-
-%Many algorithms weren't re-implemented; so much comparison is lacking.
-%Especially Fred Glover's algorithm.
-
-% Thing interesting to analyze would be: how often knapsacks generated by cutting stock have different optimal solutions (or specifically distinct optimal solutions with the same weight, also, the specific case where the weight is the smallest possible, seems to be very common as the change in the ordering shown so many CSP instances where at least one knapsack diverged); would be adding all optimal solutions (or even, all solutions with profit value over one) at each single knapsack a way to speed up the computation? (there would be any negative effects, as the master model bloating? the trade-off would be valid? someone has already proposed this?) Columns can end up not being used even if choosen between the optimal ones. Dominance exclude solutions with the guarantee at least one optimal solution will remain, disabling dominance would pay off? Varying the CPLEX seed and the choosen optimal solution would make differences of wich magnitude? Could code make use of the gigantic profit dominance of the instances?
-% If we could discover what property the solutions given by the CPLEX knapsack solver have that makes the master model needs less iterations, we could adapt the other programming methods to return optimal solution with this property?
-
-%"It is expensive and time consuming to collect real industrial problems. A random problem generator may be the only alternative if you want a problem with a particular characteristic, e.g. large size, quickly." (p. 8) 
-
-%O(nc) is a very loose worst-case complexity for GG-66
-
-%what if EDUK had a C++ implementation?
-
-%basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real-world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway).
-%The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
-%Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
-
-
-%basically there's a lot to do if someone wants to organize the work about this single problem, the question if such effort would pay off for such a easy NP-hard problem with a shortage of real-world problems that need to solve it (or if they exist, need to solve it faster, maybe the instances are very easy anyway).
-%The problem is NP-hard, the worst-cases are well-know and studied for the most common approachs (B\&B and DP), so the relevant would the average-case of the specific methods over instances with specific useful distributions
-%Many problems are grouped in similar complexity classes and the quality of the implementation (and optimizations that don't change assimptotic complexity) make all the difference, so experimental analysis is relevant, yet, experimental analysis over artificially generated that don't mimic real-world problems is hardly defensable.
-
+\begin{itemize}
+\item Which other real-world problems have UKP as a pricing subproblem? There are real-world problems that can be modelled as UKP? Would instances of those problems be easy for the current state-of-the-art?
+\item How similar are the datasets of UKP and BPP/CSP presented in the literature to the ones existent in the real-world?
+\item The instances found in the real-world benefit some approach over other?
+\item A hybrid algorithm based on the UKP5/`terminating step-off' and MTU2 would present the same level of improvement that EDUK2 has over EDUK?
+\item The many times mentioned but never re-implemented CA algorithm from \cite{babayev}, what would be its performance in real-world instances? Or, at least, in the most recent benchmark datasets?
+\item How the traits of the optimal solution computed for the pricing subproblem affect the master problem? Always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem's solution, and not only the best pattern (i.e. optimal solution)?
+\item How often pricing subproblems have multiple optimal solutions? How many of these optimal solutions are cut down because of dominance?
+\item How would an optimized C++ implementation of EDUK(2) perform? How would EDUK(2) perform over real-world instances?
+\item The profit values (and, consequently, the items distributions) of the pricing subproblems are uniform between similar BPP/CSP instances, and/or the same BPP/CSP instance? It's possible that they converge to an specific distribution at each iteration of the column generation?
+\end{itemize}
 

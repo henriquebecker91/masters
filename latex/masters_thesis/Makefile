@@ -8,7 +8,7 @@ DATA = $(patsubst %,$(DATADIR)/%,$(_DATA))
 
 all: ppgc-diss.pdf
 
-TEXREQ = brazilian.babel diss.def english.babel iidefs.sty iiufrgs.cls nominata.def ppgc.def
+TEXREQ = brazilian.babel diss.def english.babel iidefs.sty iiufrgs.cls nominata.def ppgc.def abstract.tex resumo.tex
 
 ppgc-diss.pdf: ppgc-diss.tex $(TEXREQ) $(CHAPTERS) Makefile biblio.bib
 	pdflatex ppgc-diss.tex /dev/null

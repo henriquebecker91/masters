@@ -263,10 +263,10 @@ We grant the majority of the algorithm performance to the ability of applying sp
 At each iteration of capacity~\(y\) sparsity and solution dominance are integrated in a single constant time test~(line~\ref{if_less_than_opt_begin}).
 This test, when combined with an item list sorted by non-increasing efficiency, also helps to avoid propagating big index values for the next positions of~\(d\), benefiting the performance of the solution generation with symmetry pruning (the use of~\(d[y]\) on line~\ref{main_inner_loop_begin}).
 
-\subsubsection{Solution dominance}
+\subsubsection{Weak Solution dominance}
 \label{sec:ukp5_sol_dom_expl}
 
-In this section we will give a more detailed explanation of the workings of the previously cited solution dominance.
+In this section we will give a more detailed explanation of the workings of the previously cited weak solution dominance.
 We use the~\(min_{ix}(s)\) notation to refers to the lowest index among the items that compose the solution~\(s\).
 The~\(max_{ix}(s)\) notation has analogue meaning.
 

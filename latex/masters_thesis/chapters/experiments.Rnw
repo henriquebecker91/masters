@@ -98,6 +98,7 @@ The results confirm our hypothesis.
 Finally, the fifth and last experiment examine UKP as the pricing subproblem described in Section~\ref{sec:csp_ukp_inst}.
 
 \section{Effect of running tests in parallel}
+\label{sec:serial_parallel_exp}
 
 After the publication of~\cite{sea2016}, the author came to perceive that algorithm's times were affected by executing multiple runs in parallel, \emph{even if each run was being executed in a exclusive/isolated core}.
 The author credits this effect to the fact that the L3 memory cache is often shared between cores.

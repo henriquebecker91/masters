@@ -235,6 +235,69 @@ However, this is not a problem because this solution is equivalent to~\([10,5,3,
 %No solution stops being generated, but they will always be generated from the greatest item index to the lowest item index.
 %\footnote{The algorithm would compute~\(\{1, 2, 3\} \cap \{1\}\) and~\(\{1, 1, 2\} \cap \{3\}\), for example.}
 
+\begin{figure}[h]
+\centering
+\edef \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\edef \origin {(0,0)}
+\drawvvector{\origin}{7}{\rx}{\ry}{\scale}
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
+
+\draw[dashed, thick] ++\origin +(1, 3.5) to [out=45,in=315] +(1, 7.5);
+\draw[dashed, thick] ++\origin +(1, 4.5) to [out=45,in=315] +(1, 7.5);
+
+\edef \origin {(3,0)}
+\drawvvector{\origin}{7}{\rx}{\ry}{\scale}
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
+
+\draw[dashed, thick] ++\origin +(1, 4.5) to [out=45,in=315] +(1, 7.5);
+
+\edef \origin {(6,5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(10.5, 0);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(9.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(10.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\def \origin {(6,1.5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\end{tikzpicture}
+
+\caption{The solution \(\{2,1\}\) and \(\{2,1\}\) (with \(w_1 = 3\) and \(w_2 = 4\)) are the same. But it can be constructed by two different ways. The solution \(\{3,2,1\}\) can be also constructed by many ways (with \(w_1 = 4\), \(w_2 = 5\) and \(w_3 = 6\)).}
+\label{fig:symmetry}
+\end{figure}
+
 When the two changes are combined, and the items are sorted by non-increasing efficiency, UKP5 gains in performance. 
 The UKP5 iterates by the item list only when it finds a non-dominated solution, i.e,~\(g[y] > opt\) (line~\ref{if_less_than_opt_begin}). 
 Undominated solutions are more efficient (larger ratio of profit by weight) than the skipped dominated solutions. 

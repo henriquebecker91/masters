@@ -130,6 +130,12 @@ It's important to reinforce that, in this thesis, the term \emph{solution} is us
 A solution does not to be valid, or optimal (these qualifiers would be meaningless otherwise), and surely doesn't need to fill the knapsack capacity in a way that no more items can be added to the knapsack. 
 As UKP don't limit the quantity of each item type in a solution, we can treat any solution as a new item type, with weight and profit value equal to the weight and profit value of the solution.
 
+\begin{figure}
+\begin{tikzpicture}
+\end{tikzpicture}
+\caption{Classic representation of the dominances.}
+\end{figure}
+
 If a solution~\(s\) dominates an item~\(j\), we have the same properties that if~\(s\) was an item.
 Whenever we would use~\(j\), we can use the items that comprise~\(s\) in place of~\(j\).
 In the literature, such dominance relation is called \emph{collective dominance}.

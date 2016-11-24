@@ -37,6 +37,28 @@
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \usepackage{graphicx}           % pacote para importar figuras
 \usepackage{Sweave}
+\usepackage{tikz}
+\newcommand{\drawvvector}[5]{
+	\edef \origin {#1}
+	\edef \ymax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \y in {0,...,\ymax}{
+		\draw [shift={\origin}](0,\y) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, \y + 0.5) {\(\y\)};
+	}
+}
+\newcommand{\drawhvector}[6]{
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin}] (\x,0) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
+	}
+}
+
 
 % Packages for computer code
 \usepackage{algorithm}

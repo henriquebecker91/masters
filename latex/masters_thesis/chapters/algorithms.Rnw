@@ -136,7 +136,7 @@ The book didn't feature the exercises' answers.
 % And there's the 1.C that uses a w_max positions for one of the arrays. Saving memory and using the cache memory better.
 % MAYBE FAST IMPLEMENT BOTH METHODS AND ADD THEM TO THE THESIS? IF NOT TO AN REVISED VERSION THAT WILL BE PUBLISHED ONLINE, AND SHOW THE BEST VERSION OF THE GILMORE AND GOMORY ALGORITHM?
 
-\subsection{UKP5}
+\subsection{UKP5 -- The proposed algorithm}
 \label{sec:ukp5}
 
 UKP5 was inspired by the DP algorithm described by Garfinkel~\cite[p. 221]{garfinkel}. 
@@ -227,14 +227,15 @@ This way, new solutions created from~\(t\) are guaranteed to be dominated by the
 A whole superset of~\(t\) can be discarded without loss to solution optimality. 
 
 The change from~\(n\) to~\(d[y]\) is based on the algorithm from~\cite{garfinkel} and it prunes symmetric solutions.
-In the naive DP algorithm, if the item multiset~\(\{5, 3, 3\}\) is a valid solution, then every permutation of it is reached in different ways, wasting processing time. 
+In the naive DP algorithm, if the item multiset~\(\{1, 2, 3\}\) is a valid solution, then every permutation of it is reached in different ways, wasting processing time. 
 To avoid computing symmetric solutions, we enforce non-increasing order of the items index. 
 Any item inserted on a solution~\(s\) has an index that is equal to or lower than the index of the last item inserted on~\(s\). 
-This way, solution~\([5,3,10,3]\) cannot be reached.
-However, this is not a problem because this solution is equivalent to~\([10,5,3,3]\), and this solution can be reached. 
+This way, solutions like~\(\{1, 2, 3\}\) or~\(\{2, 1, 3\}\) cannot be reached.
+However, this is not a problem because these solutions are equivalent to~\(\{3, 2, 1\}\), and this solution can be reached. 
 %No solution stops being generated, but they will always be generated from the greatest item index to the lowest item index.
 %\footnote{The algorithm would compute~\(\{1, 2, 3\} \cap \{1\}\) and~\(\{1, 1, 2\} \cap \{3\}\), for example.}
 
+\vspace{0.15cm}
 \begin{figure}[h]
 \centering
 \edef \scale {0.5}
@@ -294,7 +295,7 @@ However, this is not a problem because this solution is equivalent to~\([10,5,3,
 
 \end{tikzpicture}
 
-\caption{The solution \(\{2,1\}\) and \(\{2,1\}\) (with \(w_1 = 3\) and \(w_2 = 4\)) are the same. But it can be constructed by two different ways. The solution \(\{3,2,1\}\) can be also constructed by many ways (with \(w_1 = 4\), \(w_2 = 5\) and \(w_3 = 6\)).}
+\caption{The solutions \(\{1,2\}\) and \(\{2,1\}\) (with \(w_1 = 3\) and \(w_2 = 4\)) are equivalent. The solution \(\{3,2,1\}\) can be also constructed by many ways (with \(w_1 = 4\), \(w_2 = 5\) and \(w_3 = 6\)). The figure shows the solution generation with and without symmetry pruning.}
 \label{fig:symmetry}
 \end{figure}
 
@@ -314,10 +315,10 @@ Experimental results show that, after some threshold capacity, the UKP5 inner lo
 %The proof is simple. A valid solution can't weight more than~\(c\), and for any solution~\(s\) that weights less than~\(c - w_{min} + 1\), we can obtain a solution with a bigger profit inserting a copy of~\(i\) to~\(s\), where~\(w_i = w_{min}\). When the algorithm ends, the~\(opt\) variable holds the optimal solution value, and~\(y_{opt}\) holds the the corresponding weight. 
 
 The algorithm ends with the optimal solution stored at~\(opt\).
-The solution's assembly phase isn't described in Algorithm~\ref{alg:ukp5}, but it's similar to the one used by the DP method described in~\cite[p. 221, Steps 6-8]{garfinkel}, and can be used for the already described Algorithms~\ref{alg:naive_dp} and~\ref{alg:gar_dp}.
+The solution's assembly phase isn't described in Algorithm~\ref{alg:ukp5}, but it's similar to the one described in~\cite[p. 221, Steps 6-8]{garfinkel}, and can be used for the already described Algorithms~\ref{alg:naive_dp} and~\ref{alg:gar_dp}.
 Let~\(y_{opt}\) be a capacity where~\(g[y_{opt}] = opt\).
 We add a copy of item~\(i = d[y_{opt}]\) to the solution, then we add a copy of item~\(j = d[y_{opt} - w_i]\), and so on, until~\(d[0]\) is reached. 
-This phase has a~\(O(c)\) time complexity, as the solution can be composed of~\(c\) copies of an item~\(i\) with~\(w_i = 1\).
+This phase has a~\(O(c)\) time complexity, as a solution can be comprised of~\(c\) copies of an item~\(i\) with~\(w_i = 1\).
 
 \subsubsection{A note about UKP5 performance}
 
@@ -543,7 +544,7 @@ The algorithm presented in~\cite{green_improv} is an improvement of the ordered 
 Consequently, it's very similar to UKP5.
 The author doesn't know if it could be defined as a hybrid, but a good definition for it would be a `DP algorithm with bounds'.
 The algorithm wasn't named at the paper, and will be called GREENDP for the rest of the paper.
-The implementation of the GREENDP made by the author of this thesis, and used in the experiments section, will be called MGREENDP (Modernized GREENDP, in the sense that the algorithm now use loops instead of the \verb+goto+ directive). 
+The implementation of the GREENDP made by the author of this thesis, and used in the experiments section, will be called MGREENDP (Modernized GREENDP, in the sense that the algorithm now uses loops instead of the \verb+goto+ directive). 
 
 The GREENDP algorithm consists in solving the UKP using the ordered step-off algorithm, but without using the best item in the DP, and with interruptions at each~\(w_b\) capacity positions, for checking if the DP can be stopped and the remaining capacity filled with copies of the reserved best item.
 In those interruptions, two bounds are computed.

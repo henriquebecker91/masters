@@ -1,5 +1,5 @@
 CHAPDIR = chapters
-_CHAPTERS = introduction.tex prior_work.tex algorithms.tex instance_classes.tex experiments.tex conclusions.tex 
+_CHAPTERS = introduction.tex prior_work.tex algorithms.tex instance_classes.tex experiments.tex conclusions.tex appendix.tex
 CHAPTERS = $(patsubst %,$(CHAPDIR)/%,$(_CHAPTERS))
 
 DATADIR = data

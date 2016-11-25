@@ -143,10 +143,22 @@ Special cases of the collective dominance are the \emph{multiple and simple} dom
 Our example could be regarded as simple dominance if~\(s\) was comprised of one single copy of one item (as the first example of this section); and could be regarded as multiple dominance if~\(s\) was comprised of multiple copies of the same item (without any other item types).
 Simple dominance can be seen as a special case of multiple dominance, and some authors use `multiple dominance' to refer to both~\cite{pya}.
 
+\begin{figure}
+  \centering
+  \includegraphics[width=1\textwidth]{smc_dominance}
+  \caption{Classical graphic representation of the simple, multiple and threshold dominances. Source: \cite{eduk}. It's interesting to note that the tringle slope equals to the items efficiency, and that all points in the shaded area created by an item's or solution's triangle are dominated.}
+\end{figure}
+
 If a solution~\(s\) dominates a solution~\(t\), and~\(t\) is comprised only of copies of the same item, we have what is called in the literature of \emph{threshold dominance}.
 If~\(t\) is comprised of~\(n\) copies of item~\(j\), then we know that we can disregard solutions with~\(n\) or more copies of item~\(j\) (as each group of~\(n\) copies of~\(j\) can be replaced by~\(s\) without loss to the optimal value).
 Depending on the structure of the solving algorithm, this can mean that at some point, the item can be excluded from a global item list (reducing the further computational effort of the algorithm).
 Collective dominance can be seen as a special case of threshold dominance, where~\(n = 1\) (i.e. the dominated solution~\(t\) is a single item solution).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\textwidth]{threshold_dominance}
+  \caption{Classical graphic representation of the threshold dominance. Source: \cite{eduk}. The mentioned \(t_i\) is the \emph{t}hreshold of item \(i\), i.e. the weight of the first solution comprised only by copies of \(i\) that's dominated by another item/solution.}
+\end{figure}
 
 The simple and multiple dominances were deeply studied. 
 Algorithms that remove all simple and multiple dominated items in~\(O(n^2)\), and heuristics with less complexity that don't guarantee removing all simple or multiple dominated items, were proposed, see~\cite{pisinger_thesis} for a good revision about this subject.

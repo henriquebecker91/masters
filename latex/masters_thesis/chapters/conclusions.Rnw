@@ -21,20 +21,20 @@ The unfolding of the events can be summarized as:
 \item[\cite{mtu2}] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.
 \item[\cite{zhu_dominated}] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.
 \item[\cite{ukp_new_results}] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).
-\item[\cite{eduk}] The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments;
-\item[\cite{book_ukp_2004}] The new DP method is considered state-of-the-art.
+\item[\cite{eduk}] The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments.
+\item[\cite{book_ukp_2004}] The new DP method is considered the state-of-the-art.
 \item[\cite{pya}] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares to B\&B. The hybrid method is the new state-of-the-art.
 \item[\cite{sea2016}] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.
 \item[(this thesis)] Old algorithms are revised, reimplemented and tested. The influence of the datasets and the historical context becomes apparent.
 \end{description}
-It's very important to note that, taking in account the historical context, the choices made by previous researchers were sound and reasonable.
+It's very important to note that, taking in account the historical context, the choices taken by previous researchers were sound and reasonable.
 Despite this, an efficient DP algorithm was ignored for decades when it was relevant for the comparisons and experiments realized.
 
 This leads to another conclusion: \emph{the bibliographical research is important, and should be followed by a reevaluation of the evidence chain.}
-The author first reinvented an old DP algorithm (while trying to make sense of the problem), published a paper about how it surpassed the state-of-the-art, and then discovered that his bibliographical research was faulty.
+The author first reinvented an old DP algorithm, published a paper about how it surpassed the state-of-the-art, and then discovered that his bibliographical research was faulty.
 While the author doesn't intend to justify this overlook, it's important to note that, in the context, reading papers about algorithms from fifty years ago, and implementing them to compare with a recent state-of-the-art algorithm didn't seemed as a good use of time, as they were already compared and discarded by works of the same period.
 If the author didn't end up accidentally reinventing the algorithm, and then recognizing it in an old paper, it's possible that the \emph{terminating/ordered step-off} remained ignored.
-A possibility that can only be considered more terrible by the fact that the algorithm's pseudocode is available in \cite{gg-66}, a paper that's cited by many of the works mentioned above.
+A possibility that can only be considered more worrying by the fact that the algorithm's pseudocode is available in \cite{gg-66}, a paper that's cited by many of the works mentioned above.
 Implementing (or obtaining) all algorithms already proposed for a problem clearly isn't a viable strategy.
 However, this work shows that the context of one experiment that conclude that an algorithm is dominated by other have to be critically evaluated.
 
@@ -57,16 +57,19 @@ An outline of the UKP-specific knowledge contributions follows. It's ordered by 
 \item Evidence that converting the pricing problem's profit values to large integers don't cause significant loss.
 \end{enumerate}
 
-The author believes that the first contribution is already well exposed, either in Section \ref{sec:pya_exp}, or in \cite{sea2016}, and there's nothing to add to its discussion.
+The author believes that the first contribution is already well exposed, either in Section \ref{sec:pya_exp}, or in \cite{sea2016}.%, and there's nothing to add to its discussion.
 The technical details of the second contribution (i.e. the concept of solution dominance) were already discussed (see Section \ref{sec:ukp5_sol_dom_expl}), but not how it impacts the previous techniques described in the literature.
-If solution dominance is applied by an algorithm, even in the weak form displayed by the old DP algorithms studied, there's little sense in trying to apply the four dominance relations and/or periodicity bounds in the same algorithm.
-The two approaches are two different ways of dealing with the same task, one involves keeping a global list of undominated items, the other involves keeping a index in each solution to mark which items can yet be added to the solution.
-Applying one of the approaches reduce how much the other can further improve the algorithm.
+The weak solution dominance reduces the further improvement that can be found by applying the four dominance relations and/or periodicity bounds in the same algorithm.
+The weak solution dominance and the four dominance relations are two different ways of dealing with the same task.
+The first involves keeping a index in each solution to mark which items can yet be added to the solution.
+The second involves keeping a global list of undominated items, 
+%Applying one of the approaches reduce how much the other can further improve the algorithm.
 
 The approach used by EDUK gives a strong guarantee that any dominated item will be discarded and never used again.
 However, the weak solution dominance described in Section \ref{sec:ukp5} is implemented with almost no overhead, and seem to have a very similar impact in the removal of dominated items/solutions.
 One could argue that EDUK can be at disadvantage for being implemented in a functional language, or that better implementations of the algorithm could be written, the author can't refute such claims.
-Maybe new implementations of the EDUK approach can show the superiority of applying the four dominances in the EDUK's fashion, however, for the tested datasets, the weak solution dominance approach seems to be the most efficient one.
+Maybe new implementations of the EDUK approach can show the superiority of applying the four dominances in the EDUK's fashion.
+However, for the tested datasets, the weak solution dominance approach seems to be the most efficient one.
 
 The periodicity check exists both in algorithms like EDUK/EDUK2 and the old terminating step-off.
 In EDUK/EDUK2 it's a consequence of applying all four dominances repeatedly, and in the terminating step-off it's a consequence of applying weak solution dominance.
@@ -121,7 +124,7 @@ An outline of the UKP-specific technological contributions follows.
 \item The BREQ 128-16 Standard Benchmark, that's a new dataset.
 \end{itemize}
 
-The author will not discuss such technical contributions as they are only a byproduct of the research, not its goal.
+The author will not discuss such technical contributions as they are only a byproduct of the research.
 It's only relevant to note that the author doesn't suggests that the BREQ 128-16 Standard Benchmark should be used for new experiments comparing algorithms for the UKP.
 The dataset can yet be used to study the behaviour of new solving approaches, maybe giving some insight about the approach's inner workings.
 ``If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems.''~\cite[p.~7]{portable_rng}.
@@ -133,7 +136,7 @@ Unfortunately, many questions could not be answered in the scope of this thesis.
 The author selected and listed some of such questions in this section.
 
 \begin{itemize}
-\item Which other real-world problems have UKP as a pricing subproblem? There are real-world problems that can be modelled as UKP? Would instances of those problems be easy for the current state-of-the-art?
+\item Which other real-world problems have UKP as a pricing subproblem? There are real-world problems that can be modelled as UKP? Would instances of those problems be easy for the current state-of-the-art algorithm?
 \item How similar are the datasets of UKP and BPP/CSP presented in the literature to the ones existent in the real-world?
 \item The instances found in the real-world benefit some approach over other?
 \item A hybrid algorithm based on the UKP5/`terminating step-off' and MTU2 would present the same level of improvement that EDUK2 has over EDUK?

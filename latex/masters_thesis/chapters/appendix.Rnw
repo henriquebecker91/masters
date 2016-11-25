@@ -2,19 +2,68 @@
 
 This appendix follows the sections described in Section \ref{sec:experiments} (Experiments and Analysis).
 
-<<setup,echo=true>>=
+<<setup,echo=F>>=
+library(xtable)
 library(statsr)
 library(dplyr)
 
+get_n <- function(fname) {
+  gsub(".*[^i]n([1-9][0-9]+).*", "\\1", fname)
+}
+
+get_wmin <- function(row) {
+  if (row[8] == 'hi') {
+    row[9]
+  } else {
+    gsub(".*wmin([1-9][0-9]+).*", "\\1", row[2])
+  }
+}
+
+get_dist <- function(fname) {
+  gsub("([^_]+).*", "\\1", fname)
+}
+
+get_alpha <- function(fname) {
+  gsub(".*a([5-][5]?).*", "\\1", fname)
+}
+@
+
+<<pya_table,echo=false>>=
+# THIS IS THE SOURCE FOR THE VALUES IN THE TABLE BELOW,
+# THEY WERE COPIED BY HAND BY THE AUTHOR USING RSTUDIO
 fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
 fast$X <- NULL
 
+t <- fast %>% mutate(dist = get_dist(filename)) %>% mutate(n = get_n(filename))
+t$wmin <- apply(t, 1, get_wmin)
+
+ss2 <- filter(t, dist == "ss2") %>% select(algorithm, internal_time) %>%
+      group_by(algorithm) %>% summarise(avg = mean(internal_time), sd = sd(internal_time), max = max(internal_time))
+
+get_alpha <- function(fname) {
+  gsub(".*a([5-][5]?).*", "\\1", fname)
+}
+
+sc <- filter(t, dist == "sc") %>% mutate(a = get_alpha(filename)) %>%
+      mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
+      select(algorithm, a, n, wmin, internal_time) %>% group_by(algorithm, a, n, wmin) %>%
+      summarise(avg = round(mean(internal_time), digits = 2), sd = round(sd(internal_time), digits = 2), max = round(max(internal_time), digits = 2))
+
+table_for_dist <- function(dist_in) {
+  filter(t, dist == dist_in) %>% mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
+    select(algorithm, n, wmin, internal_time) %>% group_by(algorithm, n, wmin) %>%
+    summarise(avg = round(mean(internal_time), digits = 2), sd = round(sd(internal_time), digits = 2), max = round(max(internal_time), digits = 2))
+}
+
+nsds2 <- table_for_dist("nsds2")
+hi <- table_for_dist("hi")
+saw <- table_for_dist("saw")
 @
 
 \begin{table}
-\caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by UKP5, MGREENDP1 or EDUK2 for the instance dataset described by a row, then the meaning of the columns \textbf{avg} and \textbf{sd}, is, respectively, the arithmetic mean of \(T\) and the standard deviation of \(T\). The time unit of the table values is seconds.}
+\caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by UKP5, MGREENDP1 or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
 \vspace{0.1cm}
-\label{tab:times}
+\label{tab:times_pya}
 \def\arraystretch{1.1}
 \setlength\tabcolsep{4px}
 
@@ -24,68 +73,189 @@ fast$X <- NULL
 \multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{l}{UKP5} & \multicolumn{3}{l}{MGREENDP} & \multicolumn{3}{l}{PYAsUKP}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
-\multicolumn{3}{l}{400 inst. per line} & \multicolumn{8}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
+\multicolumn{3}{l}{400 inst. per line} & \multicolumn{9}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
 \cline{1-3}\cline{4-12}
 
 & \textbf{n} & \(w_{min}\)  & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
-\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & 0.08 & 0.20 & 0.01 & 1.42 & 6.39 & 55.33 & 0.00 & 726.34 & T\\
+\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
 \hline
 
-\multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
+\multicolumn{3}{l}{20 inst. per line} & \multicolumn{9}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
 \cline{1-3}\cline{4-12}
 \textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
- 5 & 5  & 10 & 0.05 & 0.00 & 0.05 & 0.05 & 2.46 & 2.81 & 0.00 & 6.13 & T\\
-   &    & 15 & 0.07 & 0.00 & 0.07 & 0.09 & 5.84 & 2.43 & 0.00 & 8.82 & T\\
-   &    & 50 & 0.20 & 0.06 & 0.08 & 0.24 & 18.35 & 12.64 & 0.00 & 50.58 & T\\
- 5 & 10 & 10 & 0.11 & 0.01 & 0.10 & 0.14 & 0.00 & 0.00 & 0.00 & 0.01 & T\\
-   &    & 50 & 0.49 & 0.03 & 0.47 & 0.60 & 41.97 & 33.97 & 0.00 & 93.18 & T\\
-   &    & 110 & 1.07 & 0.02 & 1.05 & 1.13 & 147.60 & 114.39 & 0.00 & 342.86 & T\\
--5 & 5  & 10 & 0.06 & 0.00 & 0.06 & 0.07 & 5.98 & 4.02 & 0.00 & 11.99 & T\\
-   &    & 15 & 0.09 & 0.00 & 0.08 & 0.10 & 10.37 & 6.73 & 0.00 & 21.00 & T\\
-   &    & 50 & 0.21 & 0.05 & 0.09 & 0.24 & 39.31 & 30.16 & 0.00 & 89.44 & T\\
--5 & 10 & 10 & 0.19 & 0.01 & 0.17 & 0.21 & 13.13 & 12.61 & 0.00 & 33.00 & T\\
-   &    & 50 & 0.54 & 0.02 & 0.52 & 0.59 & 82.97 & 71.22 & 0.00 & 206.74 & T\\
-   &    & 110& 1.08 & 0.02 & 1.07 & 1.13 & 261.61 & 246.21 & 0.00 & 721.89 & T\\
+ 5 & 5  & 10 & 0.03 & 0.00 & 0.03 &  0.24 & 0.03 &  0.29 & 1.57 & 1.78 & 3.62\\
+   &    & 15 & 0.04 & 0.00 & 0.05 &  0.43 & 0.06 &  0.53 & 3.85 & 1.53 & 5.13\\
+   &    & 50 & 0.13 & 0.00 & 0.16 &  1.01 & 0.52 &  1.70 & 12.12 & 8.17 & 28.84\\
+ 5 & 10 & 10 & 0.06 & 0.00 & 0.06 &  0.50 & 0.04 &  0.54 & 0.00 & 0.00 & 0.01\\
+   &    & 50 & 0.29 & 0.00 & 0.30 &  5.93 & 0.82 &  6.79 & 22.43 & 17.85 & 45.19\\
+   &    & 110& 0.66 & 0.00 & 0.66 & 16.05 & 3.36 & 19.68 & 76.53 & 62.54 & 175.61\\
+-5 & 5  & 10 & 0.04 & 0.00 & 0.05 & 0.04 & 0.00 & 0.04 & 4.02 & 2.72 & 7.12\\
+   &    & 15 & 0.05 & 0.00 & 0.05 & 0.05 & 0.00 & 0.05 & 6.76 & 4.22 & 12.24\\
+   &    & 50 & 0.14 & 0.00 & 0.15 & 0.11 & 0.02 & 0.12 & 24.76 & 19.41 & 66.23\\
+-5 & 10 & 10 & 0.10 & 0.00 & 0.10 & 0.11 & 0.01 & 0.13 & 6.74 & 6.28 & 15.38\\
+   &    & 50 & 0.32 & 0.00 & 0.32 & 0.28 & 0.01 & 0.29 & 48.70 & 42.53 & 111.61\\
+   &    & 110& 0.65 & 0.00 & 0.66 & 0.52 & 0.01 & 0.53 & 144.87 & 143.53 & 416.41\\
 \hline
 
-\multicolumn{3}{l}{200 inst. per line} & \multicolumn{8}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
+\multicolumn{3}{l}{200 inst. per line} & \multicolumn{9}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
 \cline{1-3}\cline{4-12}
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
-& 20 & 20 & 1.42 & 0.31 & 0.55 & 2.77 & 17.00 & 17.05 & 0.01 & 63.96\\
-& 50 & 20 & 10.20 & 1.28 & 7.91 & 14.98 & 208.61 & 210.72 & 0.03 & 828.89\\
-& 20 & 50 & 1.59 & 0.32 & 0.96 & 2.99 & 27.68 & 22.79 & 0.02 & 100.96\\
-& 50 & 50 & 6.86 & 1.23 & 4.46 & 11.78 & 233.58 & 187.91 & 2.65 & 682.95\\
+& 20 & 20 & 0.79 & 0.10 & 0.97 & 0.74 & 0.11 & 0.96 & 8.65 & 7.74 & 28.63\\
+& 50 & 20 & 5.70 & 0.37 & 6.54 & 5.12 & 0.65 & 6.13 & 78.34 & 82.46 & 356.67\\
+& 20 & 50 & 0.89 & 0.12 & 1.19 & 0.75 & 0.14 & 1.09 & 11.57 & 8.20 & 39.20\\
+& 50 & 50 & 4.72 & 0.69 & 6.27 & 3.97 & 0.75 & 5.30 & 113.21 & 87.16 & 267.10\\
 \hline
 
-\multicolumn{3}{l}{500 inst. per line} & \multicolumn{8}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
+\multicolumn{3}{l}{500 inst. per line} & \multicolumn{9}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
 \cline{1-3}\cline{4-12}
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
-&  5 & n & 0.05 & 0.01 & 0.03 & 0.10 & 0.78 & 0.59 & 0.00 & 2.66\\
-& 10 & n & 0.49 & 0.15 & 0.21 & 1.10 & 3.38 & 2.80 & 0.00 & 12.31\\
-& 20 & n & 0.99 & 0.19 & 0.63 & 2.02 & 13.08 & 12.80 & 0.01 & 62.12\\
-& 50 & n & 4.69 & 1.22 & 3.51 & 13.18 & 119.18 & 131.22 & 0.04 & 667.42\\
+&  5 & n & 0.07 & 0.03 & 0.14 & 0.04 & 0.01 & 0.07 & 0.59 & 0.44 & 2.03\\
+& 10 & n & 0.65 & 0.31 & 1.30 & 0.33 & 0.10 & 0.60 & 2.34 & 1.86 & 8.44\\
+& 20 & n & 1.04 & 0.32 & 1.91 & 0.72 & 0.12 & 1.31 & 8.62 & 7.64 & 31.22\\
+& 50 & n & 3.64 & 0.36 & 4.74 & 3.56 & 0.20 & 4.46 & 73.49 & 72.26 & 279.01\\
 \hline
 
-\multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{8}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\
+\multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{9}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\
 \cline{1-3}\cline{4-12}
 \textbf{qtd} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
-~200 &  10 & 10 & 0.11 & 0.01 & 0.10 & 0.16 & 1.88 & 1.24 & 0.01 & 4.73\\
-~500 &  50 &  5 & 0.74 & 0.08 & 0.66 & 1.98 & 4.79 & 4.22 & 0.02 & 17.78\\
-~200 &  50 & 10 & 1.01 & 0.03 & 0.97 & 1.27 & 10.44 & 9.02 & 0.03 & 38.69\\
-~200 & 100 & 10 & 14.13 & 2.96 & 9.95 & 21.94 & 60.58 & 54.08 & 0.05 & 192.04\\
+~200 &  10 & 10 & 0.08 & 0.00 & 0.09 & 0.14 & 0.02 & 0.21 & 1.32 & 0.85 & 3.01\\
+~500 &  50 &  5 & 0.50 & 0.01 & 0.53 & 2.09 & 1.00 & 3.75 & 3.36 & 2.86 & 11.16\\
+~200 &  50 & 10 & 0.72 & 0.01 & 0.74 & 2.15 & 0.85 & 3.65 & 6.99 & 5.81 & 23.04\\
+~200 & 100 & 10 & 7.34 & 0.32 & 8.09 & 33.93 & 6.94 & 43.40 & 40.43 & 35.13 & 118.28\\
 \hline
 
 \end{tabular}
 \end{table}
 
-%\section{MTU1 and MTU2 (C++ and Fortran implementations)}
+% MTUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
+
+<<pya_table,echo=false>>=
+# THIS IS THE SOURCE FOR THE VALUES IN THE TABLE BELOW,
+# THEY WERE COPIED BY HAND BY THE AUTHOR USING RSTUDIO
+slow <- read.csv("../data/mtu_impl_desktop_uc1.csv", sep = ";")
+slow$X <- NULL
+
+t <- slow %>% mutate(dist = get_dist(filename)) %>% mutate(n = get_n(filename))
+t$wmin <- apply(t, 1, get_wmin)
+
+ss2 <- filter(t, dist == "ss2") %>% select(algorithm, internal_time) %>%
+      group_by(algorithm) %>% summarise(avg = round(mean(internal_time, na.rm = TRUE), digits = 2), ter = sum(!is.na(internal_time)))
+
+sc <- filter(t, dist == "sc") %>% mutate(a = get_alpha(filename)) %>%
+      mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
+      select(algorithm, a, n, wmin, internal_time) %>% group_by(algorithm, a, n, wmin) %>%
+      summarise(avg = round(mean(internal_time, na.rm = TRUE), digits = 2), ter = sum(!is.na(internal_time)))
+
+table_for_dist <- function(dist_in) {
+  filter(t, dist == dist_in) %>% mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
+    select(algorithm, n, wmin, internal_time) %>% group_by(algorithm, n, wmin) %>%
+    summarise(avg = round(mean(internal_time, na.rm = TRUE), digits = 2), ter = sum(!is.na(internal_time)))
+}
+
+nsds2 <- table_for_dist("nsds2")
+hi <- table_for_dist("hi")
+saw <- table_for_dist("saw")
+
+@
+
+\begin{table}
+\caption{Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{ter}, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\) (i.e. the number of runs that didn't end in timeout). The time unit of the table values is seconds.}
+\vspace{0.1cm}
+\label{tab:times_mtu}
+\def\arraystretch{1.1}
+\setlength\tabcolsep{6px}
+
+\begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrr@{}}
+
+\hline
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{2}{c}{CPP-MTU1} & \multicolumn{2}{c}{CPP-MTU2} & \multicolumn{2}{c}{F77-MTU1} & \multicolumn{2}{c}{F77-MTU2}\\
+\cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
+
+\multicolumn{3}{l}{40 inst. per line} & \multicolumn{8}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
+\cline{1-3}\cline{4-11}
+
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{ter}  & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter}\\
+\cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
+
+\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & 0.04 & 40 & 0.04 & 40 & 0.00 & 40 & 154.97 & 8\\
+\hline
+
+\multicolumn{3}{l}{2 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+\textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{ter}  & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter}\\
+
+\cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
+ 5 & 5  & 10 & 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+   &    & 15 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+   &    & 50 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+ 5 & 10 & 10 & 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+   &    & 50 & 0.04 & 1 &   -- & 0 & 0.03 & 1 &   -- & 0\\
+   &    & 110& 0.01 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+-5 & 5  & 10 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+   &    & 15 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+   &    & 50 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+-5 & 10 & 10 & 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+   &    & 50 & 0.00 & 1 & 0.79 & 1 & 0.00 & 1 & 0.83 & 1\\
+   &    & 110& 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+\hline
+
+\multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
+\cline{1-3}\cline{4-11}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{ter}  & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter}\\
+\cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
+& 20 & 20 &  67.17 & 19 & 67.17 & 19 &  18.05 & 17 &  15.12 & 17\\
+& 50 & 20 & 101.93 & 18 &  2.15 & 20 & 134.09 & 17 & 143.47 & 17\\
+& 20 & 50 &   3.15 & 20 &  1.74 & 20 &   6.33 & 20 &   7.83 & 20\\
+& 50 & 50 &   2.22 & 20 & 21.13 & 20 &   4.45 & 20 &  13.81 & 20\\
+\hline
+
+\multicolumn{3}{l}{50 inst. per line} & \multicolumn{8}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter}\\
+\cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
+&  5 & n &  16.54 & 9 & 37.01 & 9 & 19.85 & 9 & 37.29 & 9\\
+& 10 & n & 147.08 & 6 &  5.84 & 5 & 34.41 & 5 & 10.09 & 5\\
+& 20 & n &  17.95 & 3 & 19.23 & 3 & 27.45 & 3 & 27.78 & 3\\
+& 50 & n &  13.36 & 2 &  1.40 & 2 & 26.73 & 2 &  2.64 & 2\\
+\hline
+
+\multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{8}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\
+\cline{1-3}\cline{4-11}
+\textbf{qtd} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{ter}  & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter} & \textbf{avg} & \textbf{ter}\\
+\cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
+~20 &  10 & 10 &  1.33 & 20 & 12.92 & 20 &  2.54 & 20 &  2.87 & 20\\
+~50 &  50 &  5 & 43.08 & 46 & 43.97 & 19 & 59.14 & 38 & 38.63 & 16\\
+~20 &  50 & 10 & 55.14 & 45 & 87.68 & 19 & 47.05 & 41 & 85.97 & 19\\
+~20 & 100 & 10 & 10.10 & 16 & 38.41 & 17 & 20.23 & 16 & 44.41 & 16\\
+\hline
+\end{tabular}
+\end{table}
+
+<<breq_table,echo=false,results=tex>>=
+breq <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
+breq$X <- NULL
+
+get_n <- function(fname) {
+  gsub(".*-n([1-9][0-9]+).*", "\\1", fname)
+}
+
+t <- breq %>% mutate(n = as.numeric(get_n(filename))) %>%
+  select(algorithm, n, internal_time) %>% group_by(algorithm, n) %>%
+  summarise(avg = round(mean(internal_time, na.rm = TRUE), digits = 2),
+            sd = round(sd(internal_time, na.rm = TRUE), digits = 2),
+            min = round(min(internal_time, na.rm = TRUE), digits = 2),
+            max = round(max(internal_time, na.rm = TRUE), digits = 2),
+            ter = sum(!is.na(internal_time)))
+xtable(t, auto = TRUE, caption = "Results of the BREQ 128-16 Standard Benchmark", tabular.environment="longtable", floating = F)
+@
+
 %\section{CSP Knapsack Subproblem Experiment}
 %\section{Effect of running tests in parallel}
 %\section{Experiment using the BREQ 128-16 Standard Benchmark}

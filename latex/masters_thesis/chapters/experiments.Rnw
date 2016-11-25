@@ -153,8 +153,8 @@ ggplot(csv_no_na_order,
 #  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
   ylab('Time to solve (seconds, log10 scale)') +
   xlab('Instance index when ordered by average time to solve\n(average between the methods)') +
-  scale_colour_grey() +
-  theme_bw() +
+  #scale_colour_grey() +
+  #theme_bw() +
   theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
 @
 \end{center}
@@ -338,7 +338,7 @@ The results confirm our hypothesis that this distribution would be hard for DP a
 \begin{center}
 <<breq,fig=true,echo=false>>=
 csv_no_na <- breq_csv
-csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
+#csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
 csv_no_na$n <- sapply(csv_no_na$filename,
 (function (f) {
   as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))

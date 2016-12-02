@@ -1,0 +1,46 @@
+pre-textual: 10
+motivation: 2
+formulation: 1.5
+dominance: 5
+periodicity: 2
+prior_work: 5.5
+the_instances:
+	introduction: 1.5
+	uncorrelated: 2
+	pyasukp: 4.5
+	CSP: 4.5
+	BREQ: 3
+	Other: 0.5
+approaches:
+	conversion: 1
+	dp:
+		introduction: 0.5
+		naive: 0.5
+		garfinkel: 0.5
+		step-off: 0.5
+		ukp5: 4.5
+		eduk: 2
+	bb:
+		introduction: 1.5
+		mtu1: 1.75
+		mtu2: 1.25
+		other: 0.5
+	hybrid:
+		greenberg: 1
+		eduk2: 1
+	CA:
+		greendp: 1
+		babayev: 0.5
+		other: 0.5
+experiments:
+	intro_setup: 1
+	pyasukp: 5.5
+	MTU: 2
+	BREQ: 2.5
+	CSP: 11
+	env: 5
+conclusions: 6
+future_works: 1
+references: 2.5
+tables: 5
+

@@ -1,0 +1,28 @@
+capa
+outline
+introdução do problema
+formulação
+dominance?
+	4 slides?
+periodicity?
+	exemplo com 2 items e graph bar
+	exemplo c/ vários items
+	explicação pq é um upper bound (um é dominado por outro)
+DP
+	eduk
+	ukp5
+B\&B
+	MTU1
+	MTU2
+Hybrid
+	EDUK
+
+
+juntar todos outros em slides resumo? conversion, CA e outras em um só slide?
+naive: the DP algorithm learned in a CS course
+garfinkel: the naive with symmetry prunning
+step-off: basically UKP5 (dicovered after the fact)
+greendp: basically UKP5 without best item and with use of bounds 
+greendp1: theoretical experiment -- not a good performance
+	Do not cite babayev?
+

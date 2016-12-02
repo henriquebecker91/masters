@@ -53,13 +53,10 @@
 
 \begin{document}
 
-\title{UKP5: a New Algorithm for the Unbounded Knapsack Problem}
-\author{Henrique Becker\footnote{Universidade Federal do Rio Grande do Sul, Brazil\label{ft:ufrgs}} and Luciana S. Buriol\textsuperscript{\ref{ft:ufrgs}}\\
-15th International Symposium on Experimental Algorithms\\
-(SEA 2016)
-}
+\title{Unbounded Knapsack Problem: a critical review}
+\author{Henrique Becker}
 %\logo{\includegraphics[scale=0.2]{inf}}
-\date{Wednesday, June 8}
+\date{Friday, December 16, 2016}
 
 {
 	\setbeamertemplate{footline}{} 
@@ -68,6 +65,7 @@
 	\end{frame}
 }
 
+% LAST THING TODO: create a list of topics and copy it between each section
 {
 	\setbeamertemplate{footline}{} 
 	\begin{frame}[noframenumbering]
@@ -229,6 +227,111 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 
 \draw[dashed, thick] ++\origin +(12.5, 1) to [out=45,in=135] +(19.5, 1);
 \node [scale=\scale, shift={\origin}, font=\LARGE] at (19.5, 0.5) {\(19\)};
+\end{tikzpicture}
+}
+
+% 0,0
+% 25,25
+% 
+% 5,5
+% 7,2
+% 12,4
+% 
+% 10,10
+% 15,15
+% 20,20
+% 12,9
+% 16,13
+% 
+% 3,2
+% 14,11
+% 13,12
+% 
+% 17,21
+
+\frame{\frametitle{A simple (and reusable) example}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+\draw [fill] (5, 5) circle [radius=\myrad];
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [fill] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
+\draw [fill] (17, 21) circle [radius=\myrad];
+
+\node [below, font=\small] at (12.5, 0) {weight};
+\node [rotate=90, above, font=\small] at (0,12.5) {profit};
+%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
+%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Simple Dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+\draw [fill] (5, 5) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
+\draw [fill] (17, 21) circle [radius=\myrad];
+
+\draw [dashed] (5, 0) -- (5, 5) -- (25, 5);
+
+\draw [gray, fill] (7, 2) circle [radius=\myrad];
+\draw [gray, fill] (11, 4) circle [radius=\myrad];
+
+\node [below, font=\small] at (12.5, 0) {weight};
+\node [rotate=90, above, font=\small] at (0,12.5) {profit};
+%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
+%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Time/Memory Tradeoff}
+\begin{itemize}
+\item On many instances, 99\% of the UKP5 time is used on the inner ``for'' of a double loop.
+\item Testing if the item weight is within the array boundaries is inside this ``for''.
+\item This test can be removed if we use \(w_{max}\) extra memory.
+\end{itemize}
+
+\center
+
+\edef \scale {0.58}
+
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\def \origin {(0,0)}
+
+\drawhvectornotext{\origin}{16}{\rx}{\ry}{\scale}
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, 0.5) {\dots};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (10.5, 0.5) {\(c\)};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (16.5, 0.5) {\dots};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (5.5, -1) {Valid Solutions};
+\node [scale=\scale, shift={\origin}, font=\LARGE] at (13.5, 2) {Invalid Solutions};
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(7.5, 1);
+\draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(11.5, 1);
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(12.5, 0);
+\draw[dashed, thick] ++\origin +(7.5, 0) to [out=315,in=225] +(16.5, 0);
 
 \end{tikzpicture}
 }

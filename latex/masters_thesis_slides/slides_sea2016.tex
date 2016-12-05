@@ -304,6 +304,139 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{tikzpicture}
 }
 
+\frame{\frametitle{Multiple dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+
+\draw [fill] (5, 5) circle [radius=\myrad];
+\node [above left, font=\tiny] at (5, 5) {(5, 5)};
+
+\draw [] (10, 10) circle [radius=\myrad];
+\node [above left, font=\tiny] at (10, 10) {(10, 10)};
+\draw [dashed] (10, 0) -- (10, 10) -- (25, 10);
+
+\draw [] (15, 15) circle [radius=\myrad];
+\node [above left, font=\tiny] at (15, 15) {(15, 15)};
+\draw [dashed] (15, 0) -- (15, 15) -- (25, 15);
+
+%\draw [] (20, 20) circle [radius=\myrad];
+%\node [above left, font=\tiny] at (20, 20) {(20, 20)};
+
+\draw [] (0,0) -- (15,15);
+
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [gray, fill] (11, 4) circle [radius=\myrad];
+%\node [below right, font=\tiny] at (11, 4) {(11, 4)};
+\draw [gray, fill] (12, 9) circle [radius=\myrad];
+%\node [below right, font=\tiny] at (12, 9) {(12, 9)};
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [gray, fill] (16, 13) circle [radius=\myrad];
+%\node [below right, font=\tiny] at (16, 13) {(16, 13)};
+\draw [fill] (17, 23) circle [radius=\myrad];
+
+\node [below, font=\small] at (12.5, 0) {weight};
+\node [rotate=90, above, font=\small] at (0,12.5) {profit};
+%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
+%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
+
+\end{tikzpicture}
+}
+
+
+\frame{\frametitle{Collective dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+\node [below right, font=\tiny] at (3, 2) {(3, 2)};
+\draw [] (0,0) -- (3,2);
+
+\draw [fill] (5, 5) circle [radius=\myrad];
+\node [above left, font=\tiny] at (5, 5) {(5, 5)};
+
+\draw [] (10, 10) circle [radius=\myrad];
+\node [above left, font=\tiny] at (10, 10) {(10, 10)};
+
+\draw [] (13, 12) circle [radius=\myrad];
+\node [above left, font=\tiny] at (13, 12) {(13, 12)};
+\draw [dashed] (13, 0) -- (13, 12) -- (25, 12);
+\draw [] (0,0) -- (10,10) -- (13,12);
+
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [fill] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [gray, fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
+\draw [fill] (17, 21) circle [radius=\myrad];
+
+\node [below, font=\small] at (12.5, 0) {weight};
+\node [rotate=90, above, font=\small] at (0,12.5) {profit};
+%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
+%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Threshold dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
+
+\node [below, font=\tiny] at (3, 2) {(3, 2)};
+\draw [fill] (3, 2) circle [radius=\myrad];
+\node [right, font=\tiny] at (6, 4) {(6, 4)};
+\draw [gray] (6, 4) circle [radius=\myrad];
+\draw [dashed] (5, 0) -- (5, 5) -- (25, 5);
+\draw [] (0,0) -- (6,4);
+
+\draw [fill] (5, 5) circle [radius=\myrad];
+\node [above left, font=\tiny] at (5, 5) {(5, 5)};
+
+\draw [] (10, 10) circle [radius=\myrad];
+\node [above left, font=\tiny] at (10, 10) {(10, 10)};
+
+\draw [] (15, 15) circle [radius=\myrad];
+\node [above left, font=\tiny] at (15, 15) {(15, 15)};
+
+\draw [gray] (20, 20) circle [radius=\myrad];
+\node [above, font=\tiny] at (20, 20) {(20, 20)};
+
+\draw [] (0,0) -- (20,20);
+
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [fill] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
+
+\node [above, font=\tiny] at (17, 23) {(17, 23)};
+\draw [fill] (17, 23) circle [radius=\myrad];
+\draw [dashed] (17, 0) -- (17, 23) -- (25, 23);
+
+\node [below, font=\small] at (12.5, 0) {weight};
+\node [rotate=90, above, font=\small] at (0,12.5) {profit};
+%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
+%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
+
+\end{tikzpicture}
+}
+
 \frame{\frametitle{Time/Memory Tradeoff}
 \begin{itemize}
 \item On many instances, 99\% of the UKP5 time is used on the inner ``for'' of a double loop.

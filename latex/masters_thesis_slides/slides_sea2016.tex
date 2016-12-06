@@ -50,6 +50,14 @@
 		%\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
 	}
 }
+\newcommand{\drawaxis}[2]{
+	\edef \xmax {#1}
+	\edef \ymax {#2}
+	\draw [<->, thick] (\xmax,0) -- (0,0) -- (0,\ymax);
+	\node [below, font=\small] at (\xmax/2, 0) {weight};
+	\node [rotate=90, above, font=\small] at (0,\xmax/2) {profit};
+}
+
 
 \begin{document}
 
@@ -107,6 +115,315 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 %}
 
 \section{Prior Work}
+\begin{frame}[allowframebreaks]{Prior Work}
+\begin{description}
+\item[1961] A real-world application of the UKP is proposed.\cite{gg-61} % say that's the BPP and CSP
+\item[1966] DP algorithms for such application are proposed.\cite{gg-66} % says dynamic programming
+\item[1977] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\cite{mtu1} % says that's MTU1
+\item[1990] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.\cite{mtu2}
+\item[1997] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.\cite{zhu_dominated}
+\item[1998] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).\cite{ukp_new_results}
+\item[2000] The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments.\cite{eduk}
+\item[2004] A PhD thesis consider the method to be the state-of-the-art DP for UKP.\cite{book_ukp_2004}
+\item[2009] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares with B\&B.\cite{pya} % say "The hybrid method is the new state-of-the-art, as it clearly improves the old algorithm that was considered state-of-the-art."
+\item[2016] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.\cite{sea2016}
+\item[(this thesis)] Old algorithms are implemented and tested. The influence of the datasets in the comparisons becomes apparent.
+\end{description}
+\end{frame}
+
+\frame{\frametitle{A simple (and reusable) example}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+\draw [fill] (5, 5) circle [radius=\myrad];
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [fill] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
+\draw [fill] (17, 21) circle [radius=\myrad];
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Simple Dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+\draw [fill] (5, 5) circle [radius=\myrad];
+\draw [fill=red] (7, 2) circle [radius=\myrad];
+\draw [fill=red] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
+\draw [fill] (17, 21) circle [radius=\myrad];
+
+\draw [dashed] (5, 0) -- (5, 5) -- (25, 5);
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Multiple dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+
+\draw [blue] (0, 0) -- (15,15);
+\draw [fill] (5, 5) circle [radius=\myrad];
+\node [above left, font=\tiny] at (5, 5) {(5, 5)};
+
+\draw [dashed] (10, 0) -- (10, 10) -- (25, 10);
+\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
+\node [above left, font=\tiny] at (10, 10) {(10, 10)};
+
+\draw [dashed] (15, 0) -- (15, 15) -- (25, 15);
+\draw [blue,fill=white] (15, 15) circle [radius=\myrad];
+\node [above left, font=\tiny] at (15, 15) {(15, 15)};
+
+\draw [fill=red] (7, 2) circle [radius=\myrad];
+\draw [fill=red] (11, 4) circle [radius=\myrad];
+\draw [fill=red] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill=red] (16, 13) circle [radius=\myrad];
+\draw [fill] (17, 23) circle [radius=\myrad];
+
+\end{tikzpicture}
+}
+
+
+\frame{\frametitle{Collective dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\draw [fill] (3, 2) circle [radius=\myrad];
+\node [below, font=\tiny] at (3, 2) {(3, 2)};
+
+\draw [blue] (0,0) -- (10,10) -- (13,12);
+\draw [fill] (5, 5) circle [radius=\myrad];
+\node [above left, font=\tiny] at (5, 5) {(5, 5)};
+
+\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
+\node [above left, font=\tiny] at (10, 10) {(10, 10)};
+
+\draw [dashed] (13, 0) -- (13, 12) -- (25, 12);
+\draw [blue,fill=white] (13, 12) circle [radius=\myrad];
+\node [above left, font=\tiny] at (13, 12) {(13, 12)};
+
+\draw [fill=red] (7, 2) circle [radius=\myrad];
+\draw [fill=red] (11, 4) circle [radius=\myrad];
+\draw [fill=red] (12, 9) circle [radius=\myrad];
+\draw [fill=red] (14, 11) circle [radius=\myrad];
+\draw [fill=red] (16, 13) circle [radius=\myrad];
+\draw [fill] (17, 21) circle [radius=\myrad];
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Threshold dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\draw [dashed] (5, 0) -- (5, 5) -- (25, 5);
+\draw [blue] (0,0) -- (6,4);
+\node [below, font=\tiny] at (3, 2) {(3, 2)};
+\draw [fill] (3, 2) circle [radius=\myrad];
+\node [right, font=\tiny] at (6, 4) {(6, 4)};
+\draw [blue,fill=red] (6, 4) circle [radius=\myrad];
+
+\draw [blue] (0, 0) -- (20,20);
+\draw [fill] (5, 5) circle [radius=\myrad];
+\node [above left, font=\tiny] at (5, 5) {(5, 5)};
+
+\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
+\node [above left, font=\tiny] at (10, 10) {(10, 10)};
+
+\draw [blue,fill=white] (15, 15) circle [radius=\myrad];
+\node [above left, font=\tiny] at (15, 15) {(15, 15)};
+
+\draw [blue,fill=red] (20, 20) circle [radius=\myrad];
+\node [above, font=\tiny] at (20, 20) {(20, 20)};
+
+\draw [fill=red] (7, 2) circle [radius=\myrad];
+\draw [fill=red] (11, 4) circle [radius=\myrad];
+\draw [fill=red] (12, 9) circle [radius=\myrad];
+\draw [fill=red] (14, 11) circle [radius=\myrad];
+\draw [fill=red] (16, 13) circle [radius=\myrad];
+
+\node [above, font=\tiny] at (17, 23) {(17, 23)};
+\draw [fill] (17, 23) circle [radius=\myrad];
+\draw [dashed] (17, 0) -- (17, 23) -- (25, 23);
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Solution dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\node [below, font=\tiny] at (3, 2) {(3, 2)};
+\draw [fill] (3, 2) circle [radius=\myrad];
+
+\draw [blue] (0, 0) -- (15,15) -- (18,17);
+\draw [fill] (5, 5) circle [radius=\myrad];
+\node [above left, font=\tiny] at (5, 5) {(5, 5)};
+
+\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
+\node [above left, font=\tiny] at (10, 10) {(10, 10)};
+
+\draw [blue,fill=white] (15, 15) circle [radius=\myrad];
+\node [above left, font=\tiny] at (15, 15) {(15, 15)};
+
+\draw [blue,fill=red] (18, 17) circle [radius=\myrad];
+\node [right, font=\tiny] at (18,17) {(18, 17)};
+
+\draw [fill=red] (7, 2) circle [radius=\myrad];
+\draw [fill=red] (11, 4) circle [radius=\myrad];
+\draw [fill=red] (12, 9) circle [radius=\myrad];
+\draw [fill=red] (14, 11) circle [radius=\myrad];
+\draw [fill=red] (16, 13) circle [radius=\myrad];
+
+\draw [blue,fill=red,opacity=0.25] (6, 4) circle [radius=\myrad];
+\draw [blue,fill=red,opacity=0.25] (20, 20) circle [radius=\myrad];
+
+\node [above, font=\tiny] at (17, 23) {(17, 23)};
+\draw [fill] (17, 23) circle [radius=\myrad];
+\draw [dashed] (17, 0) -- (17, 23) -- (25, 23);
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Periodicity and Threshold Dominance}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\draw [blue] (0,0) -- (6,4);
+\draw [dashed] (5,0) -- (5,5) -- (25,5);
+\draw [fill] (3, 2) circle [radius=\myrad];
+\draw [blue,fill=red] (6, 4) circle [radius=\myrad];
+
+\draw [blue] (0,0) -- (15,15);
+\draw [dashed] (14,0) -- (14,16) -- (25,16);
+\draw [fill] (5, 5) circle [radius=\myrad];
+\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
+\draw [blue,fill=red] (15, 15) circle [radius=\myrad];
+
+\draw [blue] (0,0) -- (21,24);
+\draw [dashed] (20,0) -- (20,25) -- (25,25);
+\draw [fill] (7, 8) circle [radius=\myrad];
+\draw [blue,fill=white] (14, 16) circle [radius=\myrad];
+\draw [blue,fill=red] (21, 24) circle [radius=\myrad];
+
+\draw [blue,->] (0,0) -- (20.8,26);
+\draw [fill] (20, 25) circle [radius=\myrad];
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Periodicity and bounds in \(x_i\)}
+
+\center
+\edef \scale {0.25}
+\edef \myrad {0.25}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+
+\draw [blue,fill=white] (0,0) -- (3,2);
+\draw [fill] (3, 2) circle [radius=\myrad];
+\node [right, font=\tiny] at (3,2) {\(x_4 \leq 1\)};
+
+\draw [blue] (0,0) -- (10,10);
+\draw [fill] (5, 5) circle [radius=\myrad];
+\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
+\node [right, font=\tiny] at (10,10) {\(x_3 \leq 2\)};
+
+\draw [blue] (0,0) -- (14,16);
+\draw [fill] (7, 8) circle [radius=\myrad];
+\draw [blue,fill=white] (14, 16) circle [radius=\myrad];
+\node [right, font=\tiny] at (14, 16) {\(x_2 \leq 2\)};
+
+\draw [blue,->] (0,0) -- (20.8,26);
+\draw [fill] (20, 25) circle [radius=\myrad];
+\node [left, font=\tiny] at (20, 25) {\(x_1 \in [0, \infty)\)};
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Periodicity and an upper bound on \(y^+\)}
+
+\center
+\edef \scale {0.15}
+\edef \myrad {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{25}{25}
+\draw [<->, thick] (40,0) -- (0,0) -- (0,40);
+
+\draw [dashed] (27,0) -- (27,40);
+\node [right, font=\tiny, align=left] at (27,15) {\(y^+ \leq 2 w_2 + 2 w_3 + w_1\)};
+
+\draw [blue] (0,0) -- (3,2) -- (13,12) -- (27,28);
+\draw [fill] (3, 2) circle [radius=\myrad];
+\node [right, font=\tiny] at (3,2) {\(x_4 = 1\)};
+
+\draw [blue,fill=white] (8, 7) circle [radius=\myrad];
+\draw [blue,fill=white] (13, 12) circle [radius=\myrad];
+\node [right, font=\tiny, align=left] at (13,12) {\(x_3 = 2~\&\) \\ \(x_4 = 1\)};
+
+\draw [blue,fill=white] (20, 20) circle [radius=\myrad];
+\draw [blue,fill=white] (27, 28) circle [radius=\myrad];
+\node [right, font=\tiny, align=left] at (27,28) {\(x_2 = 2~\&\) \\ \(x_3 = 2~\&\) \\ \(x_4 = 1\)};
+
+\draw [blue,->] (0,0) -- (30,37.5);
+\draw [fill] (20, 25) circle [radius=\myrad];
+
+\end{tikzpicture}
+}
+
+\section{The instance classes}
+\subsection{Discredited}
+\subsection{State-of-the-art dataset}
+\subsection{Proposed datasets}
+
+\iffalse
 \frame{\frametitle{Methods on Solving UKP}
 \begin{beamerboxesrounded}[shadow=true]{Dynamic Programming (DP)}
 Strong correlation between \textbf{n} \& \textbf{c} and the time to solve.\\
@@ -229,213 +546,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \node [scale=\scale, shift={\origin}, font=\LARGE] at (19.5, 0.5) {\(19\)};
 \end{tikzpicture}
 }
-
-% 0,0
-% 25,25
-% 
-% 5,5
-% 7,2
-% 12,4
-% 
-% 10,10
-% 15,15
-% 20,20
-% 12,9
-% 16,13
-% 
-% 3,2
-% 14,11
-% 13,12
-% 
-% 17,21
-
-\frame{\frametitle{A simple (and reusable) example}
-
-\center
-\edef \scale {0.25}
-\edef \myrad {0.25}
-\begin{tikzpicture}[scale=\scale]
-
-\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
-
-\draw [fill] (3, 2) circle [radius=\myrad];
-\draw [fill] (5, 5) circle [radius=\myrad];
-\draw [fill] (7, 2) circle [radius=\myrad];
-\draw [fill] (11, 4) circle [radius=\myrad];
-\draw [fill] (12, 9) circle [radius=\myrad];
-\draw [fill] (14, 11) circle [radius=\myrad];
-\draw [fill] (16, 13) circle [radius=\myrad];
-\draw [fill] (17, 21) circle [radius=\myrad];
-
-\node [below, font=\small] at (12.5, 0) {weight};
-\node [rotate=90, above, font=\small] at (0,12.5) {profit};
-%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
-%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
-
-\end{tikzpicture}
-}
-
-\frame{\frametitle{Simple Dominance}
-
-\center
-\edef \scale {0.25}
-\edef \myrad {0.25}
-\begin{tikzpicture}[scale=\scale]
-
-\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
-
-\draw [fill] (3, 2) circle [radius=\myrad];
-\draw [fill] (5, 5) circle [radius=\myrad];
-\draw [fill] (12, 9) circle [radius=\myrad];
-\draw [fill] (14, 11) circle [radius=\myrad];
-\draw [fill] (16, 13) circle [radius=\myrad];
-\draw [fill] (17, 21) circle [radius=\myrad];
-
-\draw [dashed] (5, 0) -- (5, 5) -- (25, 5);
-
-\draw [gray, fill] (7, 2) circle [radius=\myrad];
-\draw [gray, fill] (11, 4) circle [radius=\myrad];
-
-\node [below, font=\small] at (12.5, 0) {weight};
-\node [rotate=90, above, font=\small] at (0,12.5) {profit};
-%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
-%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
-
-\end{tikzpicture}
-}
-
-\frame{\frametitle{Multiple dominance}
-
-\center
-\edef \scale {0.25}
-\edef \myrad {0.25}
-\begin{tikzpicture}[scale=\scale]
-
-\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
-
-\draw [fill] (3, 2) circle [radius=\myrad];
-
-\draw [fill] (5, 5) circle [radius=\myrad];
-\node [above left, font=\tiny] at (5, 5) {(5, 5)};
-
-\draw [] (10, 10) circle [radius=\myrad];
-\node [above left, font=\tiny] at (10, 10) {(10, 10)};
-\draw [dashed] (10, 0) -- (10, 10) -- (25, 10);
-
-\draw [] (15, 15) circle [radius=\myrad];
-\node [above left, font=\tiny] at (15, 15) {(15, 15)};
-\draw [dashed] (15, 0) -- (15, 15) -- (25, 15);
-
-%\draw [] (20, 20) circle [radius=\myrad];
-%\node [above left, font=\tiny] at (20, 20) {(20, 20)};
-
-\draw [] (0,0) -- (15,15);
-
-\draw [fill] (7, 2) circle [radius=\myrad];
-\draw [gray, fill] (11, 4) circle [radius=\myrad];
-%\node [below right, font=\tiny] at (11, 4) {(11, 4)};
-\draw [gray, fill] (12, 9) circle [radius=\myrad];
-%\node [below right, font=\tiny] at (12, 9) {(12, 9)};
-\draw [fill] (14, 11) circle [radius=\myrad];
-\draw [gray, fill] (16, 13) circle [radius=\myrad];
-%\node [below right, font=\tiny] at (16, 13) {(16, 13)};
-\draw [fill] (17, 23) circle [radius=\myrad];
-
-\node [below, font=\small] at (12.5, 0) {weight};
-\node [rotate=90, above, font=\small] at (0,12.5) {profit};
-%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
-%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
-
-\end{tikzpicture}
-}
-
-
-\frame{\frametitle{Collective dominance}
-
-\center
-\edef \scale {0.25}
-\edef \myrad {0.25}
-\begin{tikzpicture}[scale=\scale]
-
-\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
-
-\draw [fill] (3, 2) circle [radius=\myrad];
-\node [below right, font=\tiny] at (3, 2) {(3, 2)};
-\draw [] (0,0) -- (3,2);
-
-\draw [fill] (5, 5) circle [radius=\myrad];
-\node [above left, font=\tiny] at (5, 5) {(5, 5)};
-
-\draw [] (10, 10) circle [radius=\myrad];
-\node [above left, font=\tiny] at (10, 10) {(10, 10)};
-
-\draw [] (13, 12) circle [radius=\myrad];
-\node [above left, font=\tiny] at (13, 12) {(13, 12)};
-\draw [dashed] (13, 0) -- (13, 12) -- (25, 12);
-\draw [] (0,0) -- (10,10) -- (13,12);
-
-\draw [fill] (7, 2) circle [radius=\myrad];
-\draw [fill] (11, 4) circle [radius=\myrad];
-\draw [fill] (12, 9) circle [radius=\myrad];
-\draw [gray, fill] (14, 11) circle [radius=\myrad];
-\draw [fill] (16, 13) circle [radius=\myrad];
-\draw [fill] (17, 21) circle [radius=\myrad];
-
-\node [below, font=\small] at (12.5, 0) {weight};
-\node [rotate=90, above, font=\small] at (0,12.5) {profit};
-%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
-%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
-
-\end{tikzpicture}
-}
-
-\frame{\frametitle{Threshold dominance}
-
-\center
-\edef \scale {0.25}
-\edef \myrad {0.25}
-\begin{tikzpicture}[scale=\scale]
-
-\draw [<->, thick] (25,0) -- (0,0) -- (0,25);
-
-\node [below, font=\tiny] at (3, 2) {(3, 2)};
-\draw [fill] (3, 2) circle [radius=\myrad];
-\node [right, font=\tiny] at (6, 4) {(6, 4)};
-\draw [gray] (6, 4) circle [radius=\myrad];
-\draw [dashed] (5, 0) -- (5, 5) -- (25, 5);
-\draw [] (0,0) -- (6,4);
-
-\draw [fill] (5, 5) circle [radius=\myrad];
-\node [above left, font=\tiny] at (5, 5) {(5, 5)};
-
-\draw [] (10, 10) circle [radius=\myrad];
-\node [above left, font=\tiny] at (10, 10) {(10, 10)};
-
-\draw [] (15, 15) circle [radius=\myrad];
-\node [above left, font=\tiny] at (15, 15) {(15, 15)};
-
-\draw [gray] (20, 20) circle [radius=\myrad];
-\node [above, font=\tiny] at (20, 20) {(20, 20)};
-
-\draw [] (0,0) -- (20,20);
-
-\draw [fill] (7, 2) circle [radius=\myrad];
-\draw [fill] (11, 4) circle [radius=\myrad];
-\draw [fill] (12, 9) circle [radius=\myrad];
-\draw [fill] (14, 11) circle [radius=\myrad];
-\draw [fill] (16, 13) circle [radius=\myrad];
-
-\node [above, font=\tiny] at (17, 23) {(17, 23)};
-\draw [fill] (17, 23) circle [radius=\myrad];
-\draw [dashed] (17, 0) -- (17, 23) -- (25, 23);
-
-\node [below, font=\small] at (12.5, 0) {weight};
-\node [rotate=90, above, font=\small] at (0,12.5) {profit};
-%\draw[dashed, thick] ++\origin +(-1, 1) to +(10, 1);
-%\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
-
-\end{tikzpicture}
-}
+\fi
 
 \frame{\frametitle{Time/Memory Tradeoff}
 \begin{itemize}
@@ -511,9 +622,9 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 %\node [scale=\scale, shift={\origin}, font=\LARGE] at (4.5, 0.5) {\(\cancel{87}\)};
 
 \end{tikzpicture}
-
 }
 
+\iffalse
 \frame{\frametitle{Time/Memory Tradeoff}
 \begin{itemize}
 \item On many instances, 99\% of the UKP5 time is used on the inner ``for'' of a double loop.
@@ -553,6 +664,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \item This means we can compute a smaller knapsack and combine with \(x\) copies of the best item.
 \end{itemize}
 }
+\fi
 
 \section{UKP5}
 \frame{\frametitle{UKP5}
@@ -775,9 +887,8 @@ Contact: hbecker@inf.ufrgs.br, henriquebecker91@gmail.com
 \setbeamertemplate{footline}{}
 \begin{frame}[allowframebreaks]{References}
 \small
-\bibliography{slides_sea2016.bib}
+\bibliography{biblio}
 \end{frame}
 \backupend
-
 \end{document}
 

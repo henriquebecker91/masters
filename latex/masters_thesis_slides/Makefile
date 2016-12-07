@@ -4,7 +4,7 @@ DATA = $(patsubst %,$(DATADIR)/%,$(_DATA))
 
 all: slides_sea2016.pdf
 
-TEXREQ = inf.eps inf-eps-converted-to.pdf splncs03.bst
+TEXREQ = inf.eps splncs03.bst
 
 slides_sea2016.pdf: slides_sea2016.tex instances_pya.tex $(TEXREQ) Makefile biblio.bib 
 	pdflatex slides_sea2016.tex /dev/null

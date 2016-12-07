@@ -1,0 +1,14 @@
+\begin{figure}[h]
+%\caption{}
+%\begin{center}
+<<breq_inst,fig=true,echo=false>>=
+library(ggplot2)
+
+t <- read.csv('data/hi_n5000-0-s731232778c5052835.csv', sep = ';')
+ggplot(t, aes(x = t$w, y = t$p, xlab = 'weight', ylab = 'profit'))
+@
+%\end{center}
+%\legend{Source: the author.}
+%\label{fig:breq_example}
+\end{figure}
+

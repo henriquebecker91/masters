@@ -58,6 +58,13 @@
 	\node [rotate=90, above, font=\small] at (0,\xmax/2) {profit};
 }
 
+\newcommand{\dominate}[3]{
+	\edef \xx {#1}
+	\edef \yy {#2}
+	\edef \xmax {#3}
+	\draw [dashed] (\xx, 0) -- (\xx,\yy) -- (\xmax,\yy);
+}
+
 
 \begin{document}
 
@@ -119,18 +126,27 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \begin{description}
 \item[1961] A real-world application of the UKP is proposed.\cite{gg-61} % say that's the BPP and CSP
 \item[1966] DP algorithms for such application are proposed.\cite{gg-66} % says dynamic programming
-\item[1977] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\cite{mtu1} % says that's MTU1
-\item[1990] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.\cite{mtu2}
-\item[1997] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.\cite{zhu_dominated}
-\item[1998] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).\cite{ukp_new_results}
-\item[2000] The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments.\cite{eduk}
-\item[2004] A PhD thesis consider the method to be the state-of-the-art DP for UKP.\cite{book_ukp_2004}
+\item[1977] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\cite{mtu1} % says that's MTU1? say that the original benchmark using real world instances was already abandoned
+\item[1990] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.\cite{mtu2} % we don't know if there's real world instances of the UKP so large as these artificial datasets
+\item[1997] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.\cite{zhu_dominated} % we will see more about this in the future
+\item[1998] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).\cite{ukp_new_results} % the return to the application didn't occur
+\item[2000] The new DP method only compares to B\&B and naive DP.\cite{eduk} % the old non-naive DP algorithms were forgotten or excluded because of previous experiments.
+\item[2004] A PhD thesis on KP's consider the method to be the state-of-the-art DP for UKP.\cite{book_ukp_2004}
 \item[2009] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares with B\&B.\cite{pya} % say "The hybrid method is the new state-of-the-art, as it clearly improves the old algorithm that was considered state-of-the-art."
 \item[2016] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.\cite{sea2016}
-\item[(this thesis)] Old algorithms are implemented and tested. The influence of the datasets in the comparisons becomes apparent.
 \end{description}
 \end{frame}
 
+\subsection{Current Work}
+\frame{\frametitle{Current Work}
+\centering
+\begin{description}
+\item[(this thesis)] Old algorithms are implemented and tested. The influence of the datasets in the comparisons becomes apparent.
+\end{description}
+}
+
+\section{Exploitable properties of the UKP}
+\subsection{Dominance Relations}
 \frame{\frametitle{A simple (and reusable) example}
 
 \center
@@ -325,6 +341,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \end{tikzpicture}
 }
 
+\subsection{Periodicity}
 \frame{\frametitle{Periodicity and Threshold Dominance}
 
 \center
@@ -397,6 +414,9 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \drawaxis{25}{25}
 \draw [<->, thick] (40,0) -- (0,0) -- (0,40);
 
+\draw [fill] (5, 5) circle [radius=\myrad];
+\draw [fill] (7, 8) circle [radius=\myrad];
+
 \draw [dashed] (27,0) -- (27,40);
 \node [right, font=\tiny, align=left] at (27,15) {\(y^+ \leq 2 w_2 + 2 w_3 + w_1\)};
 
@@ -419,9 +439,382 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 }
 
 \section{The instance classes}
-\subsection{Discredited}
+\subsection{Discredited and not used}
+
+\frame{\frametitle{Uncorrelated}
+\center
+\edef \scale {0.60}
+\edef \myrad {0.125}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{10}{10}
+
+\draw[fill] (0.01, 7.85) circle [radius=\myrad];
+\draw[fill] (0.02, 7.7) circle [radius=\myrad];
+\draw[fill] (0.04, 8.51) circle [radius=\myrad];
+\draw[fill] (0.08, 8.25) circle [radius=\myrad];
+\draw[fill] (0.08, 8.22) circle [radius=\myrad];
+\draw[fill] (0.38, 4.65) circle [radius=\myrad];
+\draw[fill] (0.39, 6.79) circle [radius=\myrad];
+\draw[fill] (0.43, 7.3) circle [radius=\myrad];
+\draw[fill] (0.83, 7.2) circle [radius=\myrad];
+\draw[fill] (0.86, 1.34) circle [radius=\myrad];
+\draw[fill] (0.9, 7.94) circle [radius=\myrad];
+\draw[fill] (1.18, 3.56) circle [radius=\myrad];
+\draw[fill] (1.35, 7.34) circle [radius=\myrad];
+\draw[fill] (1.39, 4.11) circle [radius=\myrad];
+\draw[fill] (1.41, 4.12) circle [radius=\myrad];
+\draw[fill] (1.58, 8.63) circle [radius=\myrad];
+\draw[fill] (1.72, 0.3) circle [radius=\myrad];
+\draw[fill] (1.9, 1.8) circle [radius=\myrad];
+\draw[fill] (1.98, 4.28) circle [radius=\myrad];
+\draw[fill] (2.08, 1.14) circle [radius=\myrad];
+\draw[fill] (2.09, 1.29) circle [radius=\myrad];
+\draw[fill] (2.17, 4.15) circle [radius=\myrad];
+\draw[fill] (2.34, 9.18) circle [radius=\myrad];
+\draw[fill] (2.41, 1.87) circle [radius=\myrad];
+\draw[fill] (2.56, 4.53) circle [radius=\myrad];
+\draw[fill] (2.62, 1.36) circle [radius=\myrad];
+\draw[fill] (2.72, 4.52) circle [radius=\myrad];
+\draw[fill] (2.87, 2.17) circle [radius=\myrad];
+\draw[fill] (3.06, 2.88) circle [radius=\myrad];
+\draw[fill] (3.34, 7.2) circle [radius=\myrad];
+\draw[fill] (3.34, 5.32) circle [radius=\myrad];
+\draw[fill] (3.47, 3.25) circle [radius=\myrad];
+\draw[fill] (3.6, 3.17) circle [radius=\myrad];
+\draw[fill] (3.76, 5.93) circle [radius=\myrad];
+\draw[fill] (3.8, 1.49) circle [radius=\myrad];
+\draw[fill] (3.89, 6.32) circle [radius=\myrad];
+\draw[fill] (3.91, 9.2) circle [radius=\myrad];
+\draw[fill] (3.99, 7.79) circle [radius=\myrad];
+\draw[fill] (4.32, 7.34) circle [radius=\myrad];
+\draw[fill] (4.36, 0.81) circle [radius=\myrad];
+\draw[fill] (4.47, 2.34) circle [radius=\myrad];
+\draw[fill] (4.58, 6.09) circle [radius=\myrad];
+\draw[fill] (4.63, 5.36) circle [radius=\myrad];
+\draw[fill] (4.75, 6.13) circle [radius=\myrad];
+\draw[fill] (4.8, 4.81) circle [radius=\myrad];
+\draw[fill] (5.15, 7.95) circle [radius=\myrad];
+\draw[fill] (5.15, 6.81) circle [radius=\myrad];
+\draw[fill] (5.15, 3.95) circle [radius=\myrad];
+\draw[fill] (5.16, 1.13) circle [radius=\myrad];
+\draw[fill] (5.2, 9.63) circle [radius=\myrad];
+\draw[fill] (5.61, 8.29) circle [radius=\myrad];
+\draw[fill] (5.64, 7.48) circle [radius=\myrad];
+\draw[fill] (5.67, 1.97) circle [radius=\myrad];
+\draw[fill] (5.82, 9.19) circle [radius=\myrad];
+\draw[fill] (6.12, 6.24) circle [radius=\myrad];
+\draw[fill] (6.19, 1.5) circle [radius=\myrad];
+\draw[fill] (6.2, 7.32) circle [radius=\myrad];
+\draw[fill] (6.4, 9.45) circle [radius=\myrad];
+\draw[fill] (6.42, 9.43) circle [radius=\myrad];
+\draw[fill] (6.46, 2.6) circle [radius=\myrad];
+\draw[fill] (6.57, 5.36) circle [radius=\myrad];
+\draw[fill] (6.68, 1.95) circle [radius=\myrad];
+\draw[fill] (6.76, 9.35) circle [radius=\myrad];
+\draw[fill] (6.78, 1.88) circle [radius=\myrad];
+\draw[fill] (6.86, 9.38) circle [radius=\myrad];
+\draw[fill] (6.94, 1.17) circle [radius=\myrad];
+\draw[fill] (7.06, 0.03) circle [radius=\myrad];
+\draw[fill] (7.2, 8.37) circle [radius=\myrad];
+\draw[fill] (7.2, 1.37) circle [radius=\myrad];
+\draw[fill] (7.35, 0.54) circle [radius=\myrad];
+\draw[fill] (7.37, 7.4) circle [radius=\myrad];
+\draw[fill] (7.38, 9.04) circle [radius=\myrad];
+\draw[fill] (7.44, 7.44) circle [radius=\myrad];
+\draw[fill] (7.49, 7.76) circle [radius=\myrad];
+\draw[fill] (7.6, 6.02) circle [radius=\myrad];
+\draw[fill] (7.76, 7.43) circle [radius=\myrad];
+\draw[fill] (7.85, 3.95) circle [radius=\myrad];
+\draw[fill] (8.12, 6.04) circle [radius=\myrad];
+\draw[fill] (8.29, 3.18) circle [radius=\myrad];
+\draw[fill] (8.31, 3.89) circle [radius=\myrad];
+\draw[fill] (8.33, 5.8) circle [radius=\myrad];
+\draw[fill] (8.37, 7.25) circle [radius=\myrad];
+\draw[fill] (8.5, 5.36) circle [radius=\myrad];
+\draw[fill] (8.88, 1.71) circle [radius=\myrad];
+\draw[fill] (9.05, 3.57) circle [radius=\myrad];
+\draw[fill] (9.06, 9.63) circle [radius=\myrad];
+\draw[fill] (9.07, 7.65) circle [radius=\myrad];
+\draw[fill] (9.15, 6.27) circle [radius=\myrad];
+\draw[fill] (9.26, 0.73) circle [radius=\myrad];
+\draw[fill] (9.34, 1.3) circle [radius=\myrad];
+\draw[fill] (9.35, 7.52) circle [radius=\myrad];
+\draw[fill] (9.38, 2.18) circle [radius=\myrad];
+\draw[fill] (9.41, 5.38) circle [radius=\myrad];
+\draw[fill] (9.47, 5.9) circle [radius=\myrad];
+\draw[fill] (9.58, 8.18) circle [radius=\myrad];
+\draw[fill] (9.71, 2.94) circle [radius=\myrad];
+\draw[fill] (9.74, 7.8) circle [radius=\myrad];
+\draw[fill] (9.79, 0.02) circle [radius=\myrad];
+\draw[fill] (9.83, 5.51) circle [radius=\myrad];
+\draw[fill] (9.89, 5.74) circle [radius=\myrad];
+\end{tikzpicture}
+}
+
+\frame{\frametitle{Uncorrelated}
+\center
+\edef \scale {0.60}
+\edef \myrad {0.125}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{10}{10}
+
+\dominate{0.01}{7.85}{10}
+\draw[fill] (0.01, 7.85) circle [radius=\myrad];
+\dominate{0.02}{7.7}{10};
+\draw[fill] (0.02, 7.7) circle [radius=\myrad];
+\dominate{0.04}{8.51}{10};
+\draw[fill] (0.04, 8.51) circle [radius=\myrad];
+\draw[fill=red] (0.08, 8.25) circle [radius=\myrad];
+\draw[fill=red] (0.08, 8.22) circle [radius=\myrad];
+\draw[fill=red] (0.38, 4.65) circle [radius=\myrad];
+\draw[fill=red] (0.39, 6.79) circle [radius=\myrad];
+\draw[fill=red] (0.43, 7.3) circle [radius=\myrad];
+\draw[fill=red] (0.83, 7.2) circle [radius=\myrad];
+\draw[fill=red] (0.86, 1.34) circle [radius=\myrad];
+\draw[fill=red] (0.9, 7.94) circle [radius=\myrad];
+\draw[fill=red] (1.18, 3.56) circle [radius=\myrad];
+\draw[fill=red] (1.35, 7.34) circle [radius=\myrad];
+\draw[fill=red] (1.39, 4.11) circle [radius=\myrad];
+\draw[fill=red] (1.41, 4.12) circle [radius=\myrad];
+\dominate{1.58}{8.63}{10};
+\draw[fill] (1.58, 8.63) circle [radius=\myrad];
+\draw[fill=red] (1.72, 0.3) circle [radius=\myrad];
+\draw[fill=red] (1.9, 1.8) circle [radius=\myrad];
+\draw[fill=red] (1.98, 4.28) circle [radius=\myrad];
+\draw[fill=red] (2.08, 1.14) circle [radius=\myrad];
+\draw[fill=red] (2.09, 1.29) circle [radius=\myrad];
+\draw[fill=red] (2.17, 4.15) circle [radius=\myrad];
+\dominate{2.34}{9.18}{10};
+\draw[fill] (2.34, 9.18) circle [radius=\myrad];
+\draw[fill=red] (2.41, 1.87) circle [radius=\myrad];
+\draw[fill=red] (2.56, 4.53) circle [radius=\myrad];
+\draw[fill=red] (2.62, 1.36) circle [radius=\myrad];
+\draw[fill=red] (2.72, 4.52) circle [radius=\myrad];
+\draw[fill=red] (2.87, 2.17) circle [radius=\myrad];
+\draw[fill=red] (3.06, 2.88) circle [radius=\myrad];
+\draw[fill=red] (3.34, 7.2) circle [radius=\myrad];
+\draw[fill=red] (3.34, 5.32) circle [radius=\myrad];
+\draw[fill=red] (3.47, 3.25) circle [radius=\myrad];
+\draw[fill=red] (3.6, 3.17) circle [radius=\myrad];
+\draw[fill=red] (3.76, 5.93) circle [radius=\myrad];
+\draw[fill=red] (3.8, 1.49) circle [radius=\myrad];
+\draw[fill=red] (3.89, 6.32) circle [radius=\myrad];
+\dominate{3.91}{9.2}{10};
+\draw[fill] (3.91, 9.2) circle [radius=\myrad];
+\draw[fill=red] (3.99, 7.79) circle [radius=\myrad];
+\draw[fill=red] (4.32, 7.34) circle [radius=\myrad];
+\draw[fill=red] (4.36, 0.81) circle [radius=\myrad];
+\draw[fill=red] (4.47, 2.34) circle [radius=\myrad];
+\draw[fill=red] (4.58, 6.09) circle [radius=\myrad];
+\draw[fill=red] (4.63, 5.36) circle [radius=\myrad];
+\draw[fill=red] (4.75, 6.13) circle [radius=\myrad];
+\draw[fill=red] (4.8, 4.81) circle [radius=\myrad];
+\draw[fill=red] (5.15, 7.95) circle [radius=\myrad];
+\draw[fill=red] (5.15, 6.81) circle [radius=\myrad];
+\draw[fill=red] (5.15, 3.95) circle [radius=\myrad];
+\draw[fill=red] (5.16, 1.13) circle [radius=\myrad];
+\dominate{5.2}{9.63}{10};
+\draw[fill] (5.2, 9.63) circle [radius=\myrad];
+\draw[fill=red] (5.61, 8.29) circle [radius=\myrad];
+\draw[fill=red] (5.64, 7.48) circle [radius=\myrad];
+\draw[fill=red] (5.67, 1.97) circle [radius=\myrad];
+\draw[fill=red] (5.82, 9.19) circle [radius=\myrad];
+\draw[fill=red] (6.12, 6.24) circle [radius=\myrad];
+\draw[fill=red] (6.19, 1.5) circle [radius=\myrad];
+\draw[fill=red] (6.2, 7.32) circle [radius=\myrad];
+\draw[fill=red] (6.4, 9.45) circle [radius=\myrad];
+\draw[fill=red] (6.42, 9.43) circle [radius=\myrad];
+\draw[fill=red] (6.46, 2.6) circle [radius=\myrad];
+\draw[fill=red] (6.57, 5.36) circle [radius=\myrad];
+\draw[fill=red] (6.68, 1.95) circle [radius=\myrad];
+\draw[fill=red] (6.76, 9.35) circle [radius=\myrad];
+\draw[fill=red] (6.78, 1.88) circle [radius=\myrad];
+\draw[fill=red] (6.86, 9.38) circle [radius=\myrad];
+\draw[fill=red] (6.94, 1.17) circle [radius=\myrad];
+\draw[fill=red] (7.06, 0.03) circle [radius=\myrad];
+\draw[fill=red] (7.2, 8.37) circle [radius=\myrad];
+\draw[fill=red] (7.2, 1.37) circle [radius=\myrad];
+\draw[fill=red] (7.35, 0.54) circle [radius=\myrad];
+\draw[fill=red] (7.37, 7.4) circle [radius=\myrad];
+\draw[fill=red] (7.38, 9.04) circle [radius=\myrad];
+\draw[fill=red] (7.44, 7.44) circle [radius=\myrad];
+\draw[fill=red] (7.49, 7.76) circle [radius=\myrad];
+\draw[fill=red] (7.6, 6.02) circle [radius=\myrad];
+\draw[fill=red] (7.76, 7.43) circle [radius=\myrad];
+\draw[fill=red] (7.85, 3.95) circle [radius=\myrad];
+\draw[fill=red] (8.12, 6.04) circle [radius=\myrad];
+\draw[fill=red] (8.29, 3.18) circle [radius=\myrad];
+\draw[fill=red] (8.31, 3.89) circle [radius=\myrad];
+\draw[fill=red] (8.33, 5.8) circle [radius=\myrad];
+\draw[fill=red] (8.37, 7.25) circle [radius=\myrad];
+\draw[fill=red] (8.5, 5.36) circle [radius=\myrad];
+\draw[fill=red] (8.88, 1.71) circle [radius=\myrad];
+\draw[fill=red] (9.05, 3.57) circle [radius=\myrad];
+\draw[fill=red] (9.06, 9.63) circle [radius=\myrad];
+\draw[fill=red] (9.07, 7.65) circle [radius=\myrad];
+\draw[fill=red] (9.15, 6.27) circle [radius=\myrad];
+\draw[fill=red] (9.26, 0.73) circle [radius=\myrad];
+\draw[fill=red] (9.34, 1.3) circle [radius=\myrad];
+\draw[fill=red] (9.35, 7.52) circle [radius=\myrad];
+\draw[fill=red] (9.38, 2.18) circle [radius=\myrad];
+\draw[fill=red] (9.41, 5.38) circle [radius=\myrad];
+\draw[fill=red] (9.47, 5.9) circle [radius=\myrad];
+\draw[fill=red] (9.58, 8.18) circle [radius=\myrad];
+\draw[fill=red] (9.71, 2.94) circle [radius=\myrad];
+\draw[fill=red] (9.74, 7.8) circle [radius=\myrad];
+\draw[fill=red] (9.79, 0.02) circle [radius=\myrad];
+\draw[fill=red] (9.83, 5.51) circle [radius=\myrad];
+\draw[fill=red] (9.89, 5.74) circle [radius=\myrad];
+\end{tikzpicture}
+}
+
+
+\frame{\frametitle{Uncorrelated}
+\center
+\edef \scale {0.45}
+\edef \myrad {0.125}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{10}{10}
+
+\dominate{0.02}{15.7}{10}
+\draw[blue] (0.01,7.85) -- (0.02,15.7);
+\draw[fill] (0.01,7.85) circle [radius=\myrad];
+\draw[blue,fill=white] (0.02, 15.7) circle [radius=\myrad];
+\draw[fill=red] (0.02, 7.7) circle [radius=\myrad];
+\draw[fill=red] (0.04, 8.51) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.08, 8.25) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.08, 8.22) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.38, 4.65) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.39, 6.79) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.43, 7.3) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.83, 7.2) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.86, 1.34) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (0.9, 7.94) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (1.18, 3.56) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (1.35, 7.34) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (1.39, 4.11) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (1.41, 4.12) circle [radius=\myrad];
+\draw[fill=red] (1.58, 8.63) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (1.72, 0.3) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (1.9, 1.8) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (1.98, 4.28) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.08, 1.14) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.09, 1.29) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.17, 4.15) circle [radius=\myrad];
+\draw[fill=red] (2.34, 9.18) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.41, 1.87) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.56, 4.53) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.62, 1.36) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.72, 4.52) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (2.87, 2.17) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.06, 2.88) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.34, 7.2) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.34, 5.32) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.47, 3.25) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.6, 3.17) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.76, 5.93) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.8, 1.49) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.89, 6.32) circle [radius=\myrad];
+\draw[fill=red] (3.91, 9.2) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (3.99, 7.79) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (4.32, 7.34) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (4.36, 0.81) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (4.47, 2.34) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (4.58, 6.09) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (4.63, 5.36) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (4.75, 6.13) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (4.8, 4.81) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.15, 7.95) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.15, 6.81) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.15, 3.95) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.16, 1.13) circle [radius=\myrad];
+\draw[fill=red] (5.2, 9.63) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.61, 8.29) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.64, 7.48) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.67, 1.97) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (5.82, 9.19) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.12, 6.24) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.19, 1.5) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.2, 7.32) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.4, 9.45) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.42, 9.43) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.46, 2.6) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.57, 5.36) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.68, 1.95) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.76, 9.35) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.78, 1.88) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.86, 9.38) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (6.94, 1.17) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.06, 0.03) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.2, 8.37) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.2, 1.37) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.35, 0.54) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.37, 7.4) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.38, 9.04) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.44, 7.44) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.49, 7.76) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.6, 6.02) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.76, 7.43) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (7.85, 3.95) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (8.12, 6.04) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (8.29, 3.18) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (8.31, 3.89) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (8.33, 5.8) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (8.37, 7.25) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (8.5, 5.36) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (8.88, 1.71) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.05, 3.57) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.06, 9.63) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.07, 7.65) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.15, 6.27) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.26, 0.73) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.34, 1.3) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.35, 7.52) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.38, 2.18) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.41, 5.38) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.47, 5.9) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.58, 8.18) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.71, 2.94) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.74, 7.8) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.79, 0.02) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.83, 5.51) circle [radius=\myrad];
+\draw[fill=red,opacity=0.35] (9.89, 5.74) circle [radius=\myrad];
+\end{tikzpicture}
+}
+
 \subsection{State-of-the-art dataset}
+
+\frame{\frametitle{Subset-Sum}
+\center
+\edef \scale {0.45}
+\edef \myrad {0.125}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{10}{10}
+
+\end{tikzpicture}
+}
+
+
 \subsection{Proposed datasets}
+
+\frame{\frametitle{BREQ}
+\include{instances_pya}
+}
+
+\frame{\frametitle{BREQ}
+\center
+\edef \scale {0.45}
+\edef \myrad {0.125}
+\begin{tikzpicture}[scale=\scale]
+
+\drawaxis{10}{10}
+
+\end{tikzpicture}
+}
 
 \iffalse
 \frame{\frametitle{Methods on Solving UKP}

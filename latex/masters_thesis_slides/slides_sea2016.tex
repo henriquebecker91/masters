@@ -65,6 +65,7 @@
 	\draw [dashed] (\xx, 0) -- (\xx,\yy) -- (\xmax,\yy);
 }
 
+\newcommand{\semitransp}[2][35]{\color{fg!#1}#2}
 
 \begin{document}
 
@@ -137,7 +138,6 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \end{description}
 \end{frame}
 
-\subsection{Current Work}
 \frame{\frametitle{Current Work}
 \centering
 \begin{description}
@@ -787,34 +787,109 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 
 \subsection{State-of-the-art dataset}
 
+% SWEAVE was not used because the default width of the images was terrible
+% and changing it was a pain in the ass
 \frame{\frametitle{Subset-Sum}
-\center
-\edef \scale {0.45}
-\edef \myrad {0.125}
-\begin{tikzpicture}[scale=\scale]
-
-\drawaxis{10}{10}
-
-\end{tikzpicture}
+\includegraphics{data/ss2_wmin1000wmax1000000n10000-0-s827183242c7523725.pdf}
 }
 
+\frame{\frametitle{Strong Correlation}
+\includegraphics{data/sc_a5n10000wmin10000-0-c6020768.pdf}
+}
+
+\frame{\frametitle{Postponed Periodicity}
+\includegraphics{data/nsds2_n50000wmin50000-0-s155213243c1070927.pdf}
+}
+
+\frame{\frametitle{Without Collective Dominance}
+\includegraphics{data/hi_n5000-0-s731232778c5052835.pdf}
+}
+
+\frame{\frametitle{SAW}
+\includegraphics{data/saw_n10000wmin10000-0-s985850175c608451.pdf}
+}
 
 \subsection{Proposed datasets}
 
 \frame{\frametitle{BREQ}
-\includegraphics{}
+\includegraphics{data/128_16_std_breqd-n16384-s0.pdf}
 }
 
-\frame{\frametitle{BREQ}
+\frame{\frametitle{CSP}
+\begin{description}
+\item[1961] A real-world application of the UKP is proposed.\cite{gg-61} % say that's the BPP and CSP
+\semitransp{
+\item[1966] DP algorithms for such application are proposed.\cite{gg-66} % says dynamic programming
+\item[1977] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\cite{mtu1} % says that's MTU1? say that the original benchmark using real world instances was already abandoned
+\item[1990] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.\cite{mtu2} % we don't know if there's real world instances of the UKP so large as these artificial datasets
+\item[1997] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.\cite{zhu_dominated} % we will see more about this in the future
+}
+\end{description}
+}
+
+\frame{\frametitle{CSP (objective)}
 \center
-\edef \scale {0.45}
-\edef \myrad {0.125}
+\edef \origin {(0,0)}
+\edef \scale {0.65}
 \begin{tikzpicture}[scale=\scale]
 
-\drawaxis{10}{10}
+\draw[thick] ++\origin +(0, 0) rectangle +(2, 10);
+\draw[fill=blue,fill opacity=0.75] ++\origin +(0, 0) rectangle +(2, 3);
+\draw[fill=blue,fill opacity=0.75] ++\origin +(0, 3) rectangle +(2, 6);
+\draw[thick] ++\origin +(3, 0) rectangle +(5, 10);
+\draw[fill=red,fill opacity=0.75] ++\origin +(3, 0) rectangle +(5, 6);
+\draw[thick] ++\origin +(6, 0) rectangle +(8, 10);
+\draw[fill=red,fill opacity=0.75] ++\origin +(6, 0) rectangle +(8, 6);
+\draw[ultra thick, ->] (9, 5) -- (10, 5);
+
+\edef \origin {(11,0)};
+\draw[thick] ++\origin +(0, 0) rectangle +(2, 10);
+\draw[fill=blue,fill opacity=0.75] ++\origin +(0, 6) rectangle +(2, 9);
+\draw[fill=red,fill opacity=0.75] ++\origin +(0, 0) rectangle +(2, 6);
+\draw[thick] ++\origin +(3, 0) rectangle +(5, 10);
+\draw[fill=blue,fill opacity=0.75] ++\origin +(3, 6) rectangle +(5, 9);
+\draw[fill=red,fill opacity=0.75] ++\origin +(3, 0) rectangle +(5, 6);
 
 \end{tikzpicture}
 }
+
+\frame{\frametitle{CSP (column generation method)}
+
+\center
+\edef \scale {0.65}
+\begin{tikzpicture}[scale=\scale]
+
+\draw[] (5, 5) rectangle (10, 10);
+\draw[dashed, ultra thick, ->] (7.5, 10) to [out=45,in=135] (17.5, 10);
+\draw[] (15, 5) rectangle (20, 10);
+\draw[dashed, ultra thick, ->] (17.5, 5) to [out=225,in=315] (7.5, 5);
+\node [scale=\scale, font=\LARGE, align=center] at (7.5, 7.5) {Master Problem \\ (choose among \\ existing patterns)};
+\node [scale=\scale, font=\LARGE, align=center] at (17.5, 7.5) {Pricing Problem \\ (create new pattern \\ to improve solution)};
+\node [scale=\scale, font=\large, align=center] at (12.5, 4) {Loop until there's no pattern \\ that can improve the solution};
+
+\end{tikzpicture}
+}
+
+\frame{\frametitle{CSP Pricing Problem (the UKP)}
+\center
+\edef \origin {(0,0)}
+\edef \scale {0.65}
+\begin{tikzpicture}[scale=\scale]
+
+\node [right, scale=\scale, font=\LARGE, align=center] at +(2, 10.25) {knapsack capacity or \emph{master roll size}};
+\draw[thick] ++\origin +(0, 0) rectangle +(2, 10);
+\node [right, scale=\scale, font=\LARGE, align=center] at (2,9.5) {unused knapsack space or \emph{wasted paper}};
+\draw[fill=blue,fill opacity=0.75] ++\origin +(0, 6) rectangle +(2, 9);
+\node [right, scale=\scale, font=\LARGE, align=center] at +(2,7.5) {weight of an item or \emph{a sheet size}};
+\draw[fill=red,fill opacity=0.75] ++\origin +(0, 0) rectangle +(2, 6);
+
+\node [right, scale=\scale, font=\LARGE, align=left] at +(2,3) {The items' profits (not shown here) are the \\ dual variables of the master problem's model. \\ They measure how much a pattern (knapsack solution) \\ with that sheet (item) would benefit the\\ master problem solution.};
+
+\end{tikzpicture}
+}
+
+%\begin{description}
+%\end{description}
 
 \iffalse
 \frame{\frametitle{Methods on Solving UKP}
@@ -940,6 +1015,7 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{tikzpicture}
 }
 \fi
+
 
 \frame{\frametitle{Time/Memory Tradeoff}
 \begin{itemize}
@@ -1177,6 +1253,60 @@ Algorithm 1.B (Ordered Step-off)
 
 \section{Experiments and Results}
 
+\frame{\frametitle{PYAsUKP Benchmark}
+\includegraphics[scale=1]{data/ALL.pdf}
+}
+
+\frame{\frametitle{Subset-Sum}
+\includegraphics[scale=1]{data/SS.pdf}
+}
+
+\frame{\frametitle{Strong Correlation}
+\includegraphics[scale=1]{data/SC.pdf}
+}
+
+\frame{\frametitle{Postponed Periodicity}
+\includegraphics[scale=1]{data/PP.pdf}
+}
+
+\frame{\frametitle{Without Collective Dominance}
+\includegraphics[scale=1]{data/WCD.pdf}
+}
+
+\frame{\frametitle{SAW}
+\includegraphics[scale=1]{data/SAW.pdf}
+}
+
+\subsection{Comparison of implementations (MTU1 and MTU2)}
+\frame{\frametitle{MTU1 (C++ vs Fortran)}
+\includegraphics[scale=1]{data/mtu1.pdf}
+}
+\frame{\frametitle{MTU2 (C++ vs Fortran)}
+\includegraphics[scale=1]{data/mtu2.pdf}
+}
+
+\subsection{BREQ}
+\frame{\frametitle{BREQ}
+\includegraphics[scale=1]{data/breq_exp.pdf}
+}
+
+% TODO: check this sections names
+\subsection{CSP}
+
+\frame{\frametitle{TODO}
+\includegraphics[scale=1]{data/pricing_time.pdf}
+}
+
+\frame{\frametitle{TODO}
+\includegraphics[scale=1]{data/pricing_percentage.pdf}
+}
+
+\subsection{Serial Runs vs Parallel Runs}
+\frame{\frametitle{Serial Runs vs Parallel Runs}
+\includegraphics[scale=1]{data/env_influence.pdf}
+}
+
+\iffalse
 \frame{\frametitle{The instances}
 \begin{itemize}
 \item A set of 4540 ``hard'' instances proposed in \cite{pya} (EDUK2 paper), with \(10^3 \leq n \leq 10^5\) and \(10^6 \leq c \leq 10^8\)  %(Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B\&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
@@ -1252,6 +1382,7 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \item A clear definition of the usefulness of each approach is necessary. %(We need to know for what instance sizes and other instance characteristics each approach is better, and we need to base this on solid empiric evidence.)
 \end{itemize}
 }
+\fi
 
 \frame{\frametitle{Future Works}
 \begin{beamerboxesrounded}[shadow=true]{A survey on the UKP}

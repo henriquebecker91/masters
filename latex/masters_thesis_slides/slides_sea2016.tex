@@ -113,38 +113,6 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \end{itemize}
 }
 
-%\frame{\frametitle{UKP Model}
-%\LARGE
-%\begin{align}
-%  maximize &\sum_{i=1}^n p_i x_i\label{eq:objfun}\\
-%subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
-%            &x_i \in \mathbb{N}_0\label{eq:x_integer}
-%\end{align}
-%}
-
-\section{Prior Work}
-\begin{frame}[allowframebreaks]{Prior Work}
-\begin{description}
-\item[1961] A real-world application of the UKP is proposed.\cite{gg-61} % say that's the BPP and CSP
-\item[1966] DP algorithms for such application are proposed.\cite{gg-66} % says dynamic programming
-\item[1977] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\cite{mtu1} % says that's MTU1? say that the original benchmark using real world instances was already abandoned
-\item[1990] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.\cite{mtu2} % we don't know if there's real world instances of the UKP so large as these artificial datasets
-\item[1997] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.\cite{zhu_dominated} % we will see more about this in the future
-\item[1998] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).\cite{ukp_new_results} % the return to the application didn't occur
-\item[2000] The new DP method only compares to B\&B and naive DP.\cite{eduk} % the old non-naive DP algorithms were forgotten or excluded because of previous experiments.
-\item[2004] A PhD thesis on KP's consider the method to be the state-of-the-art DP for UKP.\cite{book_ukp_2004}
-\item[2009] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares with B\&B.\cite{pya} % say "The hybrid method is the new state-of-the-art, as it clearly improves the old algorithm that was considered state-of-the-art."
-\item[2016] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.\cite{sea2016}
-\end{description}
-\end{frame}
-
-\frame{\frametitle{Current Work}
-\centering
-\begin{description}
-\item[(this thesis)] Old algorithms are implemented and tested. The influence of the datasets in the comparisons becomes apparent.
-\end{description}
-}
-
 \section{Exploitable properties of the UKP}
 \subsection{Dominance Relations}
 \frame{\frametitle{A simple (and reusable) example}
@@ -438,7 +406,42 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \end{tikzpicture}
 }
 
+\section{Prior Work}
+\begin{frame}[allowframebreaks]{Prior Work}
+\begin{description}
+\item[1961] A real-world application of the UKP is proposed.\cite{gg-61} % say that's the BPP and CSP
+\item[1966] DP algorithms for such application are proposed.\cite{gg-66} % says dynamic programming
+\item[1977] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\cite{mtu1} % says that's MTU1? say that the original benchmark using real world instances was already abandoned
+\item[1990] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.\cite{mtu2} % we don't know if there's real world instances of the UKP so large as these artificial datasets
+\item[1997] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.\cite{zhu_dominated} % we will see more about this in the future
+\item[1998] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).\cite{ukp_new_results} % the return to the application didn't occur
+\item[2000] The new DP method only compares to B\&B and naive DP.\cite{eduk} % the old non-naive DP algorithms were forgotten or excluded because of previous experiments.
+\item[2004] A PhD thesis on KP's consider the method to be the state-of-the-art DP for UKP.\cite{book_ukp_2004}
+\item[2009] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares with B\&B.\cite{pya} % say "The hybrid method is the new state-of-the-art, as it clearly improves the old algorithm that was considered state-of-the-art."
+\item[2016] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.\cite{sea2016}
+\end{description}
+\end{frame}
+
+\frame{\frametitle{Current Work}
+\centering
+\begin{description}
+\item[(this thesis)] Old algorithms are implemented and tested. The influence of the datasets in the comparisons becomes apparent.
+\end{description}
+}
+
 \section{The instance classes}
+
+\frame{\frametitle{The instance classes}
+\begin{itemize}
+\item The majority of the UKP instances in the literature is artificial.
+\item The items distribution has a strong effect in the instance hardness.
+\item An efficient method for some dataset can be inefficient for another.
+  \begin{itemize}
+    \item Specially: efficient algorithms for some artificial dataset can be inefficient for real-world datasets and vice-versa.
+  \end{itemize}
+\end{itemize}
+}
+
 \subsection{Discredited and not used}
 
 \frame{\frametitle{Uncorrelated}
@@ -670,7 +673,6 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \end{tikzpicture}
 }
 
-
 \frame{\frametitle{Uncorrelated}
 \center
 \edef \scale {0.45}
@@ -815,7 +817,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \includegraphics{data/128_16_std_breqd-n16384-s0.pdf}
 }
 
-\frame{\frametitle{CSP}
+\frame{\frametitle{CSP (first use with UKP)}
 \begin{description}
 \item[1961] A real-world application of the UKP is proposed.\cite{gg-61} % say that's the BPP and CSP
 \semitransp{
@@ -827,7 +829,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \end{description}
 }
 
-\frame{\frametitle{CSP (objective)}
+\frame{\frametitle{CSP (objective description)}
 \center
 \edef \origin {(0,0)}
 \edef \scale {0.65}
@@ -870,7 +872,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \end{tikzpicture}
 }
 
-\frame{\frametitle{CSP Pricing Problem (the UKP)}
+\frame{\frametitle{CSP (pricing problem \(\equiv\) UKP)}
 \center
 \edef \origin {(0,0)}
 \edef \scale {0.65}
@@ -886,36 +888,6 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \node [right, scale=\scale, font=\LARGE, align=left] at +(2,3) {The items' profits (not shown here) are the \\ dual variables of the master problem's model. \\ They measure how much a pattern (knapsack solution) \\ with that sheet (item) would benefit the\\ master problem solution.};
 
 \end{tikzpicture}
-}
-
-%\begin{description}
-%\end{description}
-
-\iffalse
-\frame{\frametitle{Methods on Solving UKP}
-\begin{beamerboxesrounded}[shadow=true]{Dynamic Programming (DP)}
-Strong correlation between \textbf{n} \& \textbf{c} and the time to solve.\\
-
-\small
-Ex.: Garfinkel\cite{gar72},  T.C. Hu\cite{tchu}, G\&G\cite{gg66}, Greenberg \& Feldman\cite{greenberg_improved_ukp5}, Greenberg\cite{greenberg_2}, EDUK\cite{eduk}.
-\end{beamerboxesrounded}	
-\vspace{2mm}
-\begin{beamerboxesrounded}[shadow=true]{Branch and Bound (B\&B)}
-Strong correlation between instance's distribution and time to solve.\\
-
-\small
-Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
-\end{beamerboxesrounded}	
-}
-
-\frame{\frametitle{EDUK2/PYAsUKP (State-of-the-art)}
-\begin{beamerboxesrounded}[shadow=true]{Knapsack Problems, 2004, by Kellerer, Pferschy, and Pisinger.}
-``EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p. 223]{knapsackproblems2004}
-\end{beamerboxesrounded}
-\begin{itemize}
-\item EDUK2 is the algorithm, PYAsUKP is the only known implementation (OCaml). %(As the algorithm uses many functional concepts the authors found that it would be so much easier to implement the algorithm on a functional language. Even if c++ is the de facto language for scientific computing.)
-\item \textbf{Hybrid Approach}: Tries to solve by B\&B, if it fails to solve quickly with B\&B, then switches to DP. %(Only hybrid method known.)
-\end{itemize}
 }
 
 \section{Optimizations applicable to UKP}
@@ -1014,8 +986,6 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \node [scale=\scale, shift={\origin}, font=\LARGE] at (19.5, 0.5) {\(19\)};
 \end{tikzpicture}
 }
-\fi
-
 
 \frame{\frametitle{Time/Memory Tradeoff}
 \begin{itemize}
@@ -1093,7 +1063,11 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 \end{tikzpicture}
 }
 
-\iffalse
+\section{Algorithms and Approaches}
+
+\frame{\frametitle{Time/Memory Tradeoff}
+}
+
 \frame{\frametitle{Time/Memory Tradeoff}
 \begin{itemize}
 \item On many instances, 99\% of the UKP5 time is used on the inner ``for'' of a double loop.
@@ -1125,15 +1099,6 @@ Ex.: G\&G\cite{gg63-bb}, MTU1\cite{mtu1}, MTU2\cite{mtu2}.
 
 \end{tikzpicture}
 }
-
-\frame{\frametitle{Periodicity}
-\begin{itemize}
-\item The item with the biggest profit-to-weight ratio is often called the ``best item''.
-\item The optimal solution of instances with big capacities have a lower bound on the quantity of best items.
-\item This means we can compute a smaller knapsack and combine with \(x\) copies of the best item.
-\end{itemize}
-}
-\fi
 
 \section{UKP5}
 \frame{\frametitle{UKP5}
@@ -1290,77 +1255,19 @@ Algorithm 1.B (Ordered Step-off)
 \includegraphics[scale=1]{data/breq_exp.pdf}
 }
 
-% TODO: check this sections names
 \subsection{CSP}
 
-\frame{\frametitle{TODO}
+\frame{\frametitle{Time spent solving pricing problems}
 \includegraphics[scale=1]{data/pricing_time.pdf}
 }
 
-\frame{\frametitle{TODO}
+\frame{\frametitle{Time spent solving pricing problems (\% of total time)}
 \includegraphics[scale=1]{data/pricing_percentage.pdf}
 }
 
 \subsection{Serial Runs vs Parallel Runs}
 \frame{\frametitle{Serial Runs vs Parallel Runs}
 \includegraphics[scale=1]{data/env_influence.pdf}
-}
-
-\iffalse
-\frame{\frametitle{The instances}
-\begin{itemize}
-\item A set of 4540 ``hard'' instances proposed in \cite{pya} (EDUK2 paper), with \(10^3 \leq n \leq 10^5\) and \(10^6 \leq c \leq 10^8\)  %(Hard is a little complex to define here. Some formulae were proven to create instances that are hard to solve by B\&B (hard to reach upper bound); some are guaranteed to be resistent to methods that allow to reduce the number of items or the capacity of the instance).
-\item Used the same tool and similar parameters to generate them. %(The tool is the own pyasukpt, that isn't only an implementation of the EDUK2 but also a implementation of many instance generators.)
-\item Five different classes of instances.%(We adopted the same five classes used on PYAsUKP, and only augmented one of the classes because with the hardwere evolution it had become too easy to solve.)
-\begin{itemize}
-	\item Instances with no collective dominance -- 2000;
-	\item Instances with postponed periodicity -- 800;
-	\item Strong correlated (profit and weight) -- 240;
-	\item SAW (proved to be hard to solved by B\&B\cite{chung}) -- 1100;
-	\item Subset~sum instances -- 400;
-\end{itemize}
-\end{itemize}
-}
-
-\begin{frame}
-\frametitle{Times table (seconds)}
-\center
-\begin{tabular}{llllll}
-        &  & UKP5 & PYA & UKP5 & PYA\\ \hline
-Class & \#	& avg & avg & sd & sd \\ \hline
-W.C.D. & 2000 	& \textbf{1.55} & 34.11 & \textbf{1.94} & 82.35 \\ \hline
-S.S. & 400 	& \textbf{0.08} & 6.39 & \textbf{0.20} & 55.33 \\ \hline
-S.C. & 240 	& \textbf{0.34} & 52.46 & \textbf{0.36} & 110.24 \\ \hline
-SAW & 1100	& \textbf{3.10} & 15.43 & \textbf{5.35} & 31.82 \\ \hline
-P.P. & 800 	& \textbf{5.01} & 121.71 & \textbf{3.81} & 173.30 \\
-\pause
-Class & \#	& min & min & max & max \\ \hline
-W.C.D. & 2000 	& 0.02 & \textbf{0.00} & \textbf{13.17} & 667.80 \\ \hline
-S.S. & 400 	& 0.01 & \textbf{0.00} & \textbf{1.42} & 726.34 \\ \hline
-S.C. & 240 	& 0.04 & \textbf{0.00} & \textbf{1.13} & 721.88 \\ \hline
-SAW & 1100 	& 0.09 & \textbf{0.01} & \textbf{21.93} & 192.03 \\ \hline
-P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
-%W.C.D. & 2000 & 1.5581567411 & 1.9448457081 & 0.0288475 & 13.1754 & 34.117780105 & 82.3560955348 & 0 & 667.80327 \\ \hline
-%S.S. & 400 & 0.08 & 0.20 & 0.01 & 1.42 & 6.39 & 55.33 & 0.00 & 726.34 \\ \hline
-%S.C. & 240 & 0.3468662025 & 0.3618682953 & 0.046731 & 1.13176 & 52.4671329583 & 110.2489829781 & 0 & 721.88659 \\ \hline
-%SAW & 1100 & 3.1080885875 & 5.3562777737 & 0.0984506 & 21.9394 & 15.4338201 & 31.828562601 & 0.01333 & 192.03665 \\ \hline
-%P.P. & 800 & 5.0175573 & 3.8174543896 & 0.549045 & 14.9801 & 121.7176255625 & 173.3084120879 & 0.01 & 828.89325 \\
-\end{tabular}
-\end{frame}
-
-\frame{\frametitle{Times charts}
-\centering
-\includegraphics[scale=0.6]{six_plots.png} 
-}
-
-\begin{frame}[plain]%\frametitle{Times charts}
-\centering
-\includegraphics[scale=0.37]{all.png} 
-\end{frame}
-
-\frame{\frametitle{Times charts}
-\centering
-\includegraphics[scale=0.6]{six_plots.png} 
 }
 
 \section{Analysis and Final Remarks}
@@ -1382,7 +1289,6 @@ P.P. & 800 	& 0.54 & \textbf{0.01} & \textbf{14.98} & 828.89 \\
 \item A clear definition of the usefulness of each approach is necessary. %(We need to know for what instance sizes and other instance characteristics each approach is better, and we need to base this on solid empiric evidence.)
 \end{itemize}
 }
-\fi
 
 \frame{\frametitle{Future Works}
 \begin{beamerboxesrounded}[shadow=true]{A survey on the UKP}

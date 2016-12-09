@@ -69,8 +69,8 @@ ukp_time_comp_plot <- function (data, legend) {
     breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
     labels = c('0.001', '0.01', '0.1', '1', '10', '100', '1000')
   )
-  p <- p + xlab("Instances ordered by mean time to solve\n(mean between algorithms) ")
-  p <- p + ylab("Time to solve\n(seconds, log10 scale)")
+  p <- p + xlab("Instances ordered by mean time to solve")
+  p <- p + ylab("Seconds to solve")
   p <- p + theme(legend.position = legend)
 }
 

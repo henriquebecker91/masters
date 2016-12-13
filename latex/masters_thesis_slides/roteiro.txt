@@ -1,28 +1,225 @@
-capa
-outline
-introdução do problema
-formulação
-dominance?
-	4 slides?
-periodicity?
-	exemplo com 2 items e graph bar
-	exemplo c/ vários items
-	explicação pq é um upper bound (um é dominado por outro)
-DP
-	eduk
-	ukp5
-B\&B
-	MTU1
-	MTU2
-Hybrid
-	EDUK
+Slide 0/1 (Capa):
+	Olá, meu nome é Henrique Becker, e hoje eu irei apresentar meu trabalho de mestrado "O problema da mochila com repetições: uma revisão crítica".
+Slide 0/2 (Outline):
+	Esse é o outline da apresentação, que segue os tópicos apresentados na dissertação.
+Slide 0/3 (Outline for "Introduction"): (passar sem falar nada)
+Slide 1/4 (What is UKP?):
+	O 'unbounded knapsack problem' é um problema muito similar aos famosos 'bounded knapsack problem' e o 'knapsack zero-um'.
+	A única distinção é que o 'unbounded knapsack problem' não limita o número de cópias de um mesmo item que pode ser utilizado.
+	Dessa forma o modelo matemático é extremamente simples, consistindo em um única restrição.
+	O problema então consiste em maximizar o lucro dos items colocados na mochila, enquanto respeitando a capacidade da mochila.
+	O 'unbounded knapsack problem' é um subproblema que precisa ser solucionado centenas ou milhares de vezes quando solucionando outros problemas, como o 'Cutting Stock Problem' e o 'bin packing problem', usando uma técnica específica. O que veremos mais adiante.
+Slide 1/5 (Outline for "Exploitable ..."):
+	Agora nós veremos algumas propriedades bem conhecidas do UKP que podem ser exploradas para melhorar a performance de um algoritmo para solução.
+Slide 2/6 (A simple and reusable example):
+	A explicação de todas relações de dominância usará esse mesmo exemplo, onde cada ponto é um item. O valor de x do ponto é o seu peso, e o valor de y é a sua altura.
+Slide 3/7 (Simple Dominance):
+	A mais simple de todas dominâncias.
+	Se um item dá mais lucro que outro, e é mais leve que outro, qualquer momento que se poderia usar um desses items em vermelho, seria simplesmente melhor usar o item em preto que domina eles.
+	Item dominados, portanto, podem ser removidos do problema sem perda para solução ótima.
+
+Slide 4/8 (Multiple Dominance):
+	Nós podemos criar pseudo-items que são na verdade múltiplas cópias do mesmo item.
+	Aqui temos um pseudo-item formado por duas cópias do item (5,5), e por três cópias do item (5,5).
+	Eles por sua vez também dominam outros items, ou seja podemos usar duas ou três cópias de (5,5) no lugar desses items dominados (apontar para área).
+Slide 5/9 (Collective Dominance):
+	Esses pseudo-items podem ser formados por cópias de diferentes items.
+	Aqui um pseudo-item formado por duas cópias de (5,5) e uma de (3,2) dominam um item que havia escapado da dominância múltipla antes (vai e volta no slide).
+Slide 6/10 (Threshold Dominance):
+	trash-hold dominance é um pouco mais complicada. Não são os items em sí que são dominados mas soluções com N cópias desses items.
+	Nós podemos ver aqui que duas cópias do item (3,2), que formam (6,4) são dominadas por (5,5), logo nenhuma solução ótima usaria mais que uma cópia do item  (3,2). O mesmo vale para (20,20) e portanto nenhuma solução ótima teria mais que 3 cópias de (5,5). Quatro cópias de (5,5) seriam substituidas por (17,23).
+Slide 7/11 (Solution Dominance):
+	Por fim, solution dominance é algo que não foi explorado amplamente explorado na literatura, mas que é parcialmente realizado por alguns métodos que serão apresentados.
+	Nesse caso, uma solução composta por três cópias de (5,5) e uma de (3,2) é dominada. Dessa forma, nenhuma solução que tivesse esses 4 items simultaneamente é ótima, e todas soluções que são superconjunto desses quatro items poderiam ser ignoradas.
+	(volta slide) Perceba que isso não é uma consequência direta da trash-hold dominance, já que ela só dominava 4 ou mais cópias de (5,5) e duas ou mais cópias de (3,2).
+Slide 8/12 (Periodicity and Threshold Dominance):
+	A periodicidade é uma consequência da trash-hold dominance.
+Slide 9/13 (Periodicity and Bounds in x_i):
+	Com exceção do item com a maior razão lucro-peso, que é o com a linha de maior ângulo, todo item é dominado por trash-hold em alguma capacidade.
+	Há um limite do número de cópias de um mesmo item, portanto.
+Slide 10/14 (Periodicity and an Upper Bound in y^+):
+	Combinando a "quantidade máxima" de cada item, nós temos uma solução com peso ipslon-mais. Qualquer solução mais pesada que ipslon-mais substitui cópias de algum item por cópias do item mais eficiente (x1). Logo todos os outros items deixam de ser relevantes após essa capacidade.
+Slide 10/15 (Outline for "Prior Work"):
+	Agora uma passagem rápida pelo "Prior Work".
+Slide 11/16 (Prior Work I):
+	Em 1961 o uso do UKP com geração de colunas para solucionar o 'Cutting Stock Problem' é proposto, veremos mais sobre isso a frente.
+	Em 1966 os mesmos autores propõem alguns algoritmos de DP para o UKP nesse contexto.
+	Em 1977 um método de branch and bound é proposto, mas a comparação com DP é feita sobre instâncias artificiais pequenas não relacionadas ao uso aplicado do UKP.
+	Em 1990, o método de branch and bound é melhorado com foco em instância gigantescas artificiais, novamente não relacionadas a aplicação do UKP de 1966. Para essas instâncias o método é melhor que a programação dinâmica.
+	Vários trabalhos, incluindo um de 1997, mostram que algumas das instâncias artificiais tem poucos items não dominados e não são um bom benchmark.
+Slide 12/17 (Prior Work II):
+	Em 1988, um novo método de programação dinâmica é proposto, e com ele novas instâncias que não possuem o mesmo problemas.
+	Em 2000, uma comparação desse novo método é feita, mas inclui só o branch-and-bound e uma programação dinâmica ingênua.
+	Em 2004, uma tese sobre knapsack problems considera esse novo método de programação dinâmica o estado-da-arte em DP para o UKP.
+	Em 2009, essa nova DP é hibridizada com branch-and-bound e se torna o novo estado da arte (compara só com a versão anterior e com B\&B).
+	Este ano, um algoritmo de programação de 1966 é reinventado e publicado erroneamente como novo, ele ganha na comparação com e estado da arte no mais recente benchmark.
+Slide 13/18 (Current Work):
+	Finalmente, nesta dissertação, algoritmos antigos são reimplementados e testados, a influência dos conjuntos de dados nas comparações se torna aparente.
+Slide 13/19 (The Instance Classes):
+	Agora nós vamos ver mais a fundo os tipos de instâncias proposta na literatura e neste trabalho para o 'unbounded knapsack problem'.
+Slide 14/20 (The Instance Classes):
+	Antes de começarmos a ver as instâncias específicas, alguns pontos-chave:
+	A maioria das instâncias propostas na literatura é artificial, ou seja, não vem de um problema de mundo real, mas é gerado só com a intenção de permitir comparações.
+	A distribuição dos items tem influência considerável na dificuldade de solucionar uma instância.
+	REVER ESSE SLIDE, ISSO NÃO PARECE CABER AQUI:
+	Um método que soluciona um grupo de instâncias rapidamente pode não conseguir solucionar outro, e vice-versa.
+Slide 15/21 (Uncorrelated):
+	Uma instância não-correlacionada é formada por items que formam uma amostra de pontos aleatórios dentro de um retângulo.
+Slide 16/22 (Uncorrelated):
+	O problema desse tipo de instância é que a grande maioria dos items é irrelevante para o problema, sendo dominado por dominância simples.
+Slide 17/23 (Uncorrelated):
+	Não só isso, como frequentemente, duas cópia do item mais eficiente dominam TODOS OS OUTROS ITEMS.
+	Por essa razão esse tipo de instância foi abandonado. Ele diz pouco sobre a eficiência do método em si, e muito sobre a decisão de executar uma fase de remoção da dominância simples e a eficiência desse algoritmo de detecção de dominância simples.
+Slide 18/24 (Subset-Sum):
+	Agora começando as instâncias do dataset mais recente da literatura anterior a esse trabalho.
+	Instâncias do tipo Subset-Sum são instâncias onde todos os items tem a mesma razão lucro-custo. Os item são uma amostra dos pontos em um segmento de reta iniciando em (0,0), que é 45 graus se o lucro e o custo são iguais.
+Slide 19/25 (Strong Correlation):
+	Instâncias fortemente correlacionadas são uma generalização de instâncias de subset-sum. Um valor constante alpha que pode ser negativo ou positivo é somado a todos os itens, deslocando o ponto origim da reta de (0,0) para alguma outra posição. Nessa instância isso não é visível, mas acreditem em mim que cada ponto tem lucro igual ao peso mais cinco unidades. Ou seja está levemente puxado para cima.
+Slide 20/26 (Postponed Periodicity):
+	Como já deve ter ficado perceptivel, para evitar ter os mesmos problemas que a distribuição não correlacionada, a maioria das distribuições posteriores forma uma linha reta que evita a existência de dominância simples (totalmente ou em larga escala).
+	Essa distribuição, em conjunto com certos valores de capacidade, evita que a propriedade da periodicidade, discutida anteriormente possa ser explorada. Ou seja, não há muita possibilidade de abandonar todos os outros items e preencher o resto da mochila com cópias do item mais eficiente.
+Slide 21/27 (Without Collective Dominance):
+	Essa distribuição evita a existência de items simples, multiplo ou coletivamente dominados.
+Slide 22/28 (SAW):
+	Uma variação das instâncias fortemente correlacionadas. Elas parecem ter sido adicionadas ao dataset porque elas tem um algoritmo específico para calcular o limite superior no valor da solução, o que favorece certos algoritmos de branch-and-bound.
+Slide 23/29 (BREQ):
+	As instâncias BREQ foram propostas nesse trabalho, elas tem esse nome porque elas são pontos amostrados em a Bottom Right Ellipse Quadrant.
+	Essas instâncias também não possuem as dominâncias simples, multipla e coletiva. Contanto elas possuem uma grande quantidade de dominância de limiar (trash-hold dominance), e foram criadas só para mostrar que é possível fazer instâncias que favorecem um método de solução sobre outro.
+	No caso, essas instâncias são fáceis de solucionar usando bounds, como com branch-and-bound e difíceis para programação dinâmica.
+Slide 24/30 (CSP first use with UKP):
+	Por fim, nós vamos olhar instâncias que servem a aplicação de mundo-real proposta em 1961, que nós citamos anteriormente.
+Slide 25/31 (CSP objective description):
+	O 'Cutting Stock Problem' que faz uso do 'unbounded knapsack problem' é o problema de cortar folhas de papel de folhas maiores de um mesmo tamanho, chamados rolos mestre. O objetivo é disperdiçar a menor quantidade de papel possível, e consequentemente usar a menor quantidade de rolos mestre possível para atender todas as demandas por folhas de menores tamanhos.
+Slide 26/32 (CSP column generation method):
+	O método de geração de colunas usado para solucionar a relaxação contínua do CSP envolve duas etapas que se alternam.
+	Uma delas é dentre os padrões de corte existentes, escolher aqueles que minimizam o número de rolos mestre usados.
+	A outra etapa é criar novos padrões de corte, baseado nos existentes no momento e a melhor solução atual. Isso é necessário porque se começassemos com todos padrões de corte já gerados, isso exigiria tum tempo combinatorial e potencialmente exponencial sobre o número de tamanhos diferentes.
+	Essas duas etapas se alternam até ser possível provar matemáticamente que nenhum novo padrão de corte pode melhorar a situação atual.
+Slide 27/33 (CSP pricing problem = UKP):
+	Esse problema de 'pricing', que é criar um novo padrão de corte, é na verdade o UKP. O tamanho da mochila é o tamanho do rolo mestre, o o papel disperdiçado é o espaço disperdiçado na mochila, o peso dos items é o tamanho das folhas encomendadas. O lucro dos items, que não é mostrado aqui, é uma medida de quanto cortar um determinado tipo de folha iria contribuir para melhor a solução do master problem.
+
+Slide 27/34 (Outline for "Algorithms and Approaches"):
+	Agora nós apresentamos rapidamente as abordagens e algoritmos usados para solucionar este problema.
+
+Slide 28/35 (Naive DP/'Garfinkel'):
+	A programação dinâmica ingênua para o UKP simplemente vai preenchendo cada posição de um vetor de c posições com uma solução ótima para aquela capacidade.
+	Para cada posição o algoritmo itera por todos os items da lista de items, logo a complexidade é O(nc).
+	O algoritmo de garfinkel é muito similar, mas ele pula algumas leituras no vetor em certas circunstâncias.
+
+Slide 29/36 (UKP5/'Ordered Step-Off'):
+	O `Ordered Step-Off' foi proposto em 1966 e reinventado em 2016 com o nome de UKP5 (e algumas diferenças menores).
+	Ele executa itera por todos os items na posição zero, e cria soluções com cada um deles.
+	Depois ele itera pelas capacidades, pulando as que não tem nenhuma solução gravada.
+	E então repete o processo iterando só por uma fração da lista de items, que é o índice do último elemento usado ou menor. Isso elimina soluções simétricas.
+	Soluções que tem exatamente o mesmo peso podem acabar sendo atualizadas para soluções melhores.
+	Por fim, algumas soluções podem ser puladas por serem dominadas. Isso é parte da dominância de solução vista anteriormente. A tendência de 'i' é diminuir, mas pode haver posições com picos de valores de 'i'.
+
+Slide 30/37 (GREENDP):
+	O GREENDP é baseado no ordered step-off recem visto.
+	Ele reserva o melhor item (que é o mais eficiente) e vai solucionando sem ele como se fosse o ordered step-off.
+	Além de não usar o item mais eficiente, a principal diferença é que a cada fatia do tamanho do item mais eficiente, ele verifica se dá para abandonar a programação dinâmica e preencher o resto do array com cópias do melhor item.
+
+Slide 31/38 (EDUK):
+	O algoritmo de DP que foi considerado estado da arte.
+	É consideravelmente mais complexo que isso, mas a ideia básica é:
+	Solucionar para fatias.
+	Fazer uma rodada de testes de dominância.
+	Ir usando as melhores soluções para ir removendo items da lista global de items. Nenhum algoritmo até o momento remove items da lista global. Só pode evitar iterar por todos eles.
+
+Slide 32/39 (MTU):
+	A FAZER
 
 
-juntar todos outros em slides resumo? conversion, CA e outras em um só slide?
-naive: the DP algorithm learned in a CS course
-garfinkel: the naive with symmetry prunning
-step-off: basically UKP5 (dicovered after the fact)
-greendp: basically UKP5 without best item and with use of bounds 
-greendp1: theoretical experiment -- not a good performance
-	Do not cite babayev?
+Slide 33/40 (MTU2):
+	Pode ser visto como um envoltório para o MTU1.
+	Chama o MTU1 sobre uma fração dos items.
+	Vefifica se a solução do problema reduzido é ótima para o problema original.
+	Usa a solução gerada para eliminar items que não tem como contribuir.
+	Repete o processo até usar ou eliminar todos os items, ou ainda, a solução puder ser provada como ótima para o problema original.
+
+Slide 34/41 (EDUK2/PYAsUKP):
+	O EDUK2 hybridiza EDUK com B\&B, e é o algoritmo.
+	PYAsUKP é o nome da implementação.
+	Ele adiciona as seguintes etapas.
+	O algoritmo tenta solucionar por branch-and-bound, avaliando no máximo B =10000 nós.
+	Usa os limites gerados pelo branch-and-bound para descartar items e soluções a cada fatia.
+
+Slide 35/42 (GREENDP1):
+	Não confundir com GREENDP, que é o que remove o melhor item. Os dois são do mesmo autor, greenberg.
+	Usa uma técnica que combina tanto a maxização quanto a restrição em uma única equação.
+	A abordagem talvez seja eficiente, mas o algoritmo proposto era muito ineficiente.
+
+Slide 35/43 (Outline for "Experiments as Results"):
+	Finalmente, nossa última seção longa, os experimentos realizados e sua análize. Estas seções são basicamente combinações das instâncias e algoritmos apresentados antes.
+
+Slide 36/44 (S.S. + S.C. + P.P. + W.C.D. + SAW):
+	Só os três códigos mais eficientes são usados nesse teste, que são: o mgreendp, uma implementação modernizada do GREENDP, escrita por mim; a implementação original do EDUK2; e o UKP5 que é quase uma implementação do `Ordered Step-Off'.
+	A maioria dos gráficos vai estar organizada por o número de segundos para solucionar, em escala logaritimica, e o índice da instância se ordenada por o tempo médio para solucionar com os vários algoritmos.
+	O UKP5 e MGREENDP disputam o melhor tempo, com o EDUK2 sendo mais lento, especialemente para as instâncias mais difíceis, onde o UKP5 não passa dos 10 segundos, e o PYAsUKP se aproxima dos 1000.
+
+Slide 37/45 (Subset-Sum):
+	O MGREENDP não funciona nessas instâncias devido pois os bounds que ele usa falham se o primeiro e o segundo melhor items tiverem a mesma eficiência.
+
+Slide 38/46 (Strong Correlated):
+	O MGREENDP tem mais dificuldade que o UKP5, apesar de ser um 'melhoramento', o que tem a ver com o fato de tirar o melhor item da lista.
+
+Slide 39/47 (Postponed Periodicity):
+	MGREENDP e UKP5 são relativamente equivalentes com alguma vantagem para o MGREENDP. Essa segunda curva do PYAsUKP é relativa a instâncias que provavelmente foram consideravelmente beneficiadas pela hybridização com B\&B.
+
+Slide 40/48 (Without Collective Dominance):
+	As mesmas características do gráfico anterior também são encontradas aqui.
+
+Slide 41/49 (SAW):
+	Outra distribuição em que a remoção do melhor item prejudica fortemente o MGREENDP.
+
+Slide 42/50 (MTU1 C++ vs Fortran):
+	Esse teste usou 10% das instâncias dos testes anteriores (454 portanto), pois o MTU1 se mostrou usar muito tempo para algumas instâncias.
+	Se comparou a implementação original em Fortran do código com a reimplementalção feita por mim.
+	Como era de se esperar, as suas implementações tem uma eficiência muito similar.
+	O time limit era 1000 segundos, o pior caso do B\&B que é exponencial causou problemas em várias instâncias. Claramente MTU1 não é competitivo.
+
+Slide 43/51 (MTU2 C++ vs Fortran):
+	A diferença com MTU2 foi maior porque uma sutil modificação na ordenação fez muita diferença para as instâncias de Subset-Sum. Quando os item empatam na eficiência (que é todos os casos do Subset-Sum), nós ordenamos eles por ordem crescente de peso, isso não é feito no algoritmo original. O algoritmo de ordenação também é mais eficiente em muitos casos.
+	O MTU2 também não é competitivo.
+
+Slide 44/52 (BREQ):
+	10 instâncias de cada um de 10 diferentes tamanhos (de 2^11 items até 2^2) foram testados com todos métodos disponíveis
+	Fora o GREENDP1 que é a abordagem de consistência, que foi muito ineficiente, os algoritmos se dividem em dois grandes grupos:
+	Os B\&B e Hybridos, que usando bounds solucionam o problem quase instântaneamente.
+	Os programação dinâmica, que crescem muito mais rápido e logo atingem o time limit.
+
+Slide 45/53 (Time spent solving pricing problems):
+	As instâncias do CSP, aqui cada ponto é a soma de todos os tempos de problema de mochila para uma mesma instância do CSP.
+	Muitos métodos não puderam ser utilizados por detalhes técnicos.
+	O que podemos concluir é que o CPLEX não é eficiente, e que o MTU1 também apresenta problema do pior caso exponencial.
+	Algumas variações do UKP5 tem pequenas vantagens sobre outras.
+	Os lucros que são ponto-flutuante podem ser adaptados para grandes inteiros sem perda.
+
+Slide 46/54 (Time spent solving pricing problems):
+	A maior part do tempo usado foi dispendida no master problem, com exceção do próprio CPLEX, e das instâncias em que o MTU1 se aproximou do pior caso.
+	Seria interessante usar um solver para o master problem que fosse específico, para ter uma melhor noção da dimensão do pricing dentro da abordagem.
+	Instâncias difíceis podem ter pricing que se torne o maior consumo de tempo.
+
+Slide 47/55 (Serial Runs vs Parallel Runs):
+	Por fim, todos os testes realizados foram feitos executando um único programa por vez.
+	Isso porque alguns testes foram feitos para ver a diferença entre executar um único programa por vez, e executar vários em cores isolados.
+	Os resultados foram que dependendo do computador e do algoritmo a execução é afetada mais ou menos, provavelmente pelo compartilhamento de cache L2 e L3.
+	Aqui no gráfico temos o tempo que uma execução levou de forma serial, e quantas vezes mais a mesma execução levou com vários algoritmos ao mesmo tempo.
+	O UKP5 em um notebook foi o mais afetado, a múltiplas execuções simultâneas em cores isolados levaram mais do que 2.5 vezes am algumas situações.
+
+Slide 47/56 (Outline for "Final Remarks and Future Works"):
+	Breves conclusões e trabalhos futuros.
+
+Slide 48/57 (Final Remarks):
+	Um algoritmo de 1966 (o `ordered step-off') teve um desempenho consideravelmente melhor que o que era considerado o estado-da-arte.
+	Ficou claro que como a instância é gerada define o que é o melhor algoritmo.
+	Um uma aplicação mais realistica que seria o CSP, o uso de B\&B se mostrou broblemático.
+
+Slide 49/58 (Future Works):
+	Um conjunto de dados do mundo real para o UKP/CSP/BPP seriam muito interessantes.
+	Se a programação dinâmica do UKP5 parece ser tão eficiente, poderia se combinar ela com MTU1 como o EDUK2 fez.
+	Se o EDUK e o EDUK2 fossem implementados em C++ e não e OCaml os resultados seriam diferentes?
+	Um algoritmo da abordagem de consistência não foi implementado mas apresentava bons resultados. Desde de que EDUK foi proposto, re-implementar esse algoritmo está no future works de vários artigos.
+
+	
 

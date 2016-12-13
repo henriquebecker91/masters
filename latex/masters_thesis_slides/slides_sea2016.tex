@@ -938,7 +938,8 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw[dashed, thick] ++\origin +(2.5, 1) to [out=45,in=135] +(10.5, 1);
 \draw[dashed, thick] ++\origin +(5.5, 1) to [out=45,in=135] +(10.5, 1);
 \draw[dashed, thick] ++\origin +(7.5, 1) to [out=45,in=135] +(10.5, 1);
-\node [above, font=\small, align=center] at (10.5, 1.5) {\(O(n)\)\\ \(\Theta(n)\)};
+\node [above, font=\small, align=center] at (10.5, 1.5) {\(O(n)\)};
+\node [below, font=\small, align=center] at (20.5, 0) {c};
 \def \origin {(0,-5)}
 \drawhvectornotext{\origin}{20}{\rx}{\ry}{\scale}
 \drawhvectorfill{\origin}{10}{\rx}{\ry}{\scale}{gray}
@@ -946,7 +947,8 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw[dashed, thick] ++\origin +(3.5, 1) to [out=45,in=135] +(11.5, 1);
 \draw[dashed, thick] ++\origin +(6.5, 1) to [out=45,in=135] +(11.5, 1);
 \draw[dashed, thick] ++\origin +(8.5, 1) to [out=45,in=135] +(11.5, 1);
-\draw[above, font=\small, align=center, shift=\origin] node at +(11.5, 1.5) {\(O(n)\)\\ \(\Theta(n)\)};
+\draw[above, font=\small, align=center, shift=\origin] node at +(11.5, 1.5) {\(O(n)\)};
+\draw[below, font=\small, align=center, shift=\origin] node at +(20.5, 0) {c};
 
 \end{tikzpicture}
 }
@@ -1023,6 +1025,30 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \EndFor
 \EndProcedure
 \end{algorithmic}
+\center
+\edef \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\def \origin {(0,0)}
+\drawhvectornotext{\origin}{20}{\rx}{\ry}{\scale}
+\draw [shift={\origin},fill=gray] +(0,0) rectangle +(1,1);
+
+\draw [shift={\origin},fill=gray] +(5,0) rectangle +(6,1);
+%\draw [shift={\origin},fill=red] +(7,0) rectangle +(8,1);
+\draw [shift={\origin},fill=black] +(10,0) rectangle +(11,1);
+
+\draw [shift={\origin},fill=gray] +(12,0) rectangle +(13,1);
+\draw [shift={\origin},fill=gray] +(15,0) rectangle +(16,1);
+
+%\draw [shift={\origin},fill=gray] +(17,0) rectangle +(18,1);
+\draw [shift={\origin},fill=gray] +(20,0) rectangle +(21,1);
+\draw [ultra thick] (8,-1) -- (8,2);
+\draw [ultra thick] (15,-1) -- (15,2);
+
+\end{tikzpicture}
 }
 
 \frame{\frametitle{EDUK}
@@ -1097,7 +1123,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 }
 
 \subsection{Hybrid}
-\frame{\frametitle{EDUK2}
+\frame{\frametitle{EDUK2/PYAsUKP}
 \begin{algorithmic}[1]
 \Procedure{EDUK2}{}
 \State try to solve by B\&B (evaluate max \(B\) nodes)
@@ -1129,7 +1155,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \mysection{Experiments and Results}
 \subsection{PYAsUKP dataset}
 
-\frame{\frametitle{All datasets together}
+\frame{\frametitle{S.S. + S.C. + P.P. + W.C.D. + SAW}
 \includegraphics[scale=1]{data/ALL.pdf}
 }
 
@@ -1201,7 +1227,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \begin{itemize}
 \setlength\itemsep{1.5em}
 \item Find real-world UKP/CSP/BPP instances?
-\item Combine the UKP5/`Ordered Step-Off' with MTU2? % as EDUK2 did with EDUK and MTU2
+\item Combine the UKP5/`Ordered Step-Off' with MTU1? % as EDUK2 did with EDUK and MTU2
 \item Re-implement EDUK and EDUK2 in C++? % how would be its performance
 \item Implement and test Babayev's algorithm? (see \cite{babayev}) % publicado antes do EDUK e nunca reimplementado para comparação, citado por eduk
 \item ... % e muitas outras

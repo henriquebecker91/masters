@@ -81,7 +81,7 @@ Slide 20/26 (Postponed Periodicity):
 Slide 21/27 (Without Collective Dominance):
 	Essa distribuição evita a existência de items simples, multiplo ou coletivamente dominados.
 Slide 22/28 (SAW):
-	Uma variação das instâncias fortemente correlacionadas. Elas parecem ter sido adicionadas ao dataset porque elas tem um algoritmo específico para calcular o limite superior no valor da solução, o que favorece certos algoritmos de branch-and-bound.
+	Um casso específico das instâncias fortemente correlacionadas. Elas parecem ter sido adicionadas ao dataset porque elas tem um algoritmo específico para calcular o limite superior no valor da solução, o que favorece certos algoritmos de branch-and-bound.
 Slide 23/29 (BREQ):
 	As instâncias BREQ foram propostas nesse trabalho, elas tem esse nome porque elas são pontos amostrados em a Bottom Right Ellipse Quadrant.
 	Essas instâncias também não possuem as dominâncias simples, multipla e coletiva. Contanto elas possuem uma grande quantidade de dominância de limiar (trash-hold dominance), e foram criadas só para mostrar que é possível fazer instâncias que favorecem um método de solução sobre outro.
@@ -126,9 +126,8 @@ Slide 31/38 (EDUK):
 	Fazer uma rodada de testes de dominância.
 	Ir usando as melhores soluções para ir removendo items da lista global de items. Nenhum algoritmo até o momento remove items da lista global. Só pode evitar iterar por todos eles.
 
-Slide 32/39 (MTU):
-	A FAZER
-
+Slide 32/39 (MTU1):
+	O MTU1 é um algoritmo de branch-and-bound. Ele pode ser visto como uma busca em profundidade em uma árvore que define a quantidade de cada item usada. Ele começa sempre pela direita no lado com maior número de cópias de um item. Os items estão ordenados por eficienncia. Isso pode fazer com que não seja possível colocar cópias de outros items ou não. Ele usa bounds para reduzir o tamanho da árvore que ele tem de iterar.
 
 Slide 33/40 (MTU2):
 	Pode ser visto como um envoltório para o MTU1.
@@ -158,7 +157,7 @@ Slide 36/44 (S.S. + S.C. + P.P. + W.C.D. + SAW):
 	O UKP5 e MGREENDP disputam o melhor tempo, com o EDUK2 sendo mais lento, especialemente para as instâncias mais difíceis, onde o UKP5 não passa dos 10 segundos, e o PYAsUKP se aproxima dos 1000.
 
 Slide 37/45 (Subset-Sum):
-	O MGREENDP não funciona nessas instâncias devido pois os bounds que ele usa falham se o primeiro e o segundo melhor items tiverem a mesma eficiência.
+	O MGREENDP não funciona nessas instâncias pois os bounds que ele usa falham se o primeiro e o segundo melhor items tiverem a mesma eficiência. O que sempre ocorrem em subset-sum.
 
 Slide 38/46 (Strong Correlated):
 	O MGREENDP tem mais dificuldade que o UKP5, apesar de ser um 'melhoramento', o que tem a ver com o fato de tirar o melhor item da lista.
@@ -174,7 +173,7 @@ Slide 41/49 (SAW):
 
 Slide 42/50 (MTU1 C++ vs Fortran):
 	Esse teste usou 10% das instâncias dos testes anteriores (454 portanto), pois o MTU1 se mostrou usar muito tempo para algumas instâncias.
-	Se comparou a implementação original em Fortran do código com a reimplementalção feita por mim.
+	Se comparou a implementação original em Fortran do código com a reimplementação em C+++ feita por mim.
 	Como era de se esperar, as suas implementações tem uma eficiência muito similar.
 	O time limit era 1000 segundos, o pior caso do B\&B que é exponencial causou problemas em várias instâncias. Claramente MTU1 não é competitivo.
 

@@ -213,7 +213,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [blue,fill=white] (15, 15) circle [radius=\myrad];
 \node [above left, font=\tiny] at (15, 15) {(15, 15)};
 
-\draw [fill=red] (7, 2) circle [radius=\myrad];
+\draw [fill] (7, 2) circle [radius=\myrad];
 \draw [fill=red] (11, 4) circle [radius=\myrad];
 \draw [fill=red] (12, 9) circle [radius=\myrad];
 \draw [fill] (14, 11) circle [radius=\myrad];
@@ -247,11 +247,11 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [blue,fill=white] (13, 12) circle [radius=\myrad];
 \node [above left, font=\tiny] at (13, 12) {(13, 12)};
 
-\draw [fill=red] (7, 2) circle [radius=\myrad];
-\draw [fill=red] (11, 4) circle [radius=\myrad];
-\draw [fill=red] (12, 9) circle [radius=\myrad];
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [fill] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
 \draw [fill=red] (14, 11) circle [radius=\myrad];
-\draw [fill=red] (16, 13) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
 \draw [fill] (17, 23) circle [radius=\myrad];
 
 \end{tikzpicture}
@@ -286,11 +286,11 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [blue,fill=red] (20, 20) circle [radius=\myrad];
 \node [above, font=\tiny] at (20, 20) {(20, 20)};
 
-\draw [fill=red] (7, 2) circle [radius=\myrad];
-\draw [fill=red] (11, 4) circle [radius=\myrad];
-\draw [fill=red] (12, 9) circle [radius=\myrad];
-\draw [fill=red] (14, 11) circle [radius=\myrad];
-\draw [fill=red] (16, 13) circle [radius=\myrad];
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [fill] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
 
 \node [above, font=\tiny] at (17, 23) {(17, 23)};
 \draw [fill] (17, 23) circle [radius=\myrad];
@@ -324,14 +324,14 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [blue,fill=red] (18, 17) circle [radius=\myrad];
 \node [right, font=\tiny] at (18,17) {(18, 17)};
 
-\draw [fill=red] (7, 2) circle [radius=\myrad];
-\draw [fill=red] (11, 4) circle [radius=\myrad];
-\draw [fill=red] (12, 9) circle [radius=\myrad];
-\draw [fill=red] (14, 11) circle [radius=\myrad];
-\draw [fill=red] (16, 13) circle [radius=\myrad];
+\draw [fill] (7, 2) circle [radius=\myrad];
+\draw [fill] (11, 4) circle [radius=\myrad];
+\draw [fill] (12, 9) circle [radius=\myrad];
+\draw [fill] (14, 11) circle [radius=\myrad];
+\draw [fill] (16, 13) circle [radius=\myrad];
 
-\draw [blue,fill=red,opacity=0.25] (6, 4) circle [radius=\myrad];
-\draw [blue,fill=red,opacity=0.25] (20, 20) circle [radius=\myrad];
+\draw [blue,opacity=0.5] (6, 4) circle [radius=\myrad];
+\draw [blue,opacity=0.5] (20, 20) circle [radius=\myrad];
 
 \node [above, font=\tiny] at (17, 23) {(17, 23)};
 \draw [fill] (17, 23) circle [radius=\myrad];
@@ -434,44 +434,70 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [blue,->] (0,0) -- (30,37.5);
 \draw [fill] (20, 25) circle [radius=\myrad];
 
+\draw [thick] (30,-1) -- (30,1);
+\draw [below right] node at (30,0) {\(c\)};
+
 \end{tikzpicture}
 }
 
 \mysection{Prior Work}
-\begin{frame}[allowframebreaks]{Prior Work}
+\begin{frame}[t]{Prior Work I}
+\setbeamercovered{transparent=50}
 \begin{description}
-\item[1961] A real-world application of the UKP is proposed.\cite{gg-61} % say that's the BPP and CSP
-\item[1966] DP algorithms for such application are proposed.\cite{gg-66} % says dynamic programming
-\item[1977] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\cite{mtu1} % says that's MTU1? say that the original benchmark using real world instances was already abandoned
-\item[1990] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.\cite{mtu2} % we don't know if there's real world instances of the UKP so large as these artificial datasets
-\item[1997] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.\cite{zhu_dominated} % we will see more about this in the future
-\item[1998] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).\cite{ukp_new_results} % the return to the application didn't occur
-\item[2000] The new DP method only compares to B\&B and naive DP.\cite{eduk} % the old non-naive DP algorithms were forgotten or excluded because of previous experiments.
-\item[2004] A PhD thesis on KP's consider the method to be the state-of-the-art DP for UKP.\cite{book_ukp_2004}
-\item[2009] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares with B\&B.\cite{pya} % say "The hybrid method is the new state-of-the-art, as it clearly improves the old algorithm that was considered state-of-the-art."
-\item[2016] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.\cite{sea2016}
+\item<1-1>[1961] A real-world application of the UKP is proposed.\alt<1-1>{\alert{\cite{gg-61}}}{\cite{gg-61}} % say that's the BPP and CSP
+\item<2-2>[1966] DP algorithms for such application are proposed.\alt<2-2>{\alert{\cite{gg-66}}}{\cite{gg-66}} % says dynamic programming
+\item<3-3>[1977] A B\&B method is proposed (MTU1), and then compared with the DP algorithms over small artificial instances, obtaining marginally better results.\alt<3-3>{\alert{\cite{mtu1}}}{\cite{mtu1}} % says that's MTU1? say that the original benchmark using real world instances was already abandoned
+\item<4-4>[1990] The goal changes to solving larger instances faster. Artificial datasets are used. For such datasets, DP methods are clearly dominated by B\&B methods.\alt<4-4>{\alert{\cite{mtu2}}}{\cite{mtu2}} % we don't know if there's real world instances of the UKP so large as these artificial datasets
+\item<5-5>[1997] The large artificial instances have only a little amount of undominated items and are discredited.\alt<5-5>{\alert{\cite{zhu_dominated}}}{\cite{zhu_dominated}} % we will see more about this in the future
+\end{description}
+\only<1-1>{\alert{\cite{gg-61}} Gilmore, P.C., Gomory, R.E.: A linear programming approach to the cutting-stock problem.}
+\only<2-2>{\alert{\cite{gg-66}} Gilmore, P., Gomory, R.: The theory and computation of knapsack functions. \emph{Algorithm}: `Ordered Step-Off'}
+\only<3-3>{\alert{\cite{mtu1}} Martello, S., Toth, P.: Branch-and-bound algorithms for the solution of the general unidimensional knapsack problem.}
+\only<4-4>{\alert{\cite{mtu2}} Martello, S., Toth, P.: An exact algorithm for large unbounded knapsack problems. \emph{Algorithm:} MTU2}
+\only<5-5>{\alert{\cite{zhu_dominated}} Zhu, N., Broughan, K.: On dominated terms in the general knapsack problem.}
+\end{frame}
+
+\begin{frame}{Prior Work II}
+\setbeamercovered{transparent=50}
+\begin{description}
+\item<1-1>[1998] A new DP is proposed (EDUK), together with new artificial datasets (without the same flaws).\alt<1-1>{\alert{\cite{ukp_new_results}}}{\cite{ukp_new_results}} % the return to the application didn't occur
+\item<2-2>[2000] The new DP method only compares to B\&B and naive DP.\alt<2-2>{\alert{\cite{eduk}}}{\cite{eduk}} % the old non-naive DP algorithms were forgotten or excluded because of previous experiments.
+\item<3-3>[2004] A PhD thesis on KP's consider the method to be the state-of-the-art DP for UKP.\alt<3-3>{\alert{\cite{book_ukp_2004}}}{\cite{book_ukp_2004}}
+\item<4-4>[2009] The new DP method is hybridized with B\&B (EDUK2/PYAsUKP), and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compares with B\&B.\alt<4-4>{\alert{\cite{pya}}}{\cite{pya}} % say "The hybrid method is the new state-of-the-art, as it clearly improves the old algorithm that was considered state-of-the-art."
+\item<5-5>[2016] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.\alt<5-5>{\alert{\cite{sea2016}}}{\cite{sea2016}}
+\end{description}
+\only<1-1>{\alert{\cite{ukp_new_results}} Poirriez, V., Andonov, R.: Unbounded knapsack problem: new results.}
+\only<2-2>{\alert{\cite{eduk}} Andonov, R., Poirriez, V., Rajopadhye, S.: Unbounded knapsack problem: Dynamic programming revisited.}
+\only<3-3>{\alert{\cite{book_ukp_2004}} Hans, K., Ulrich, P., David, P.: Knapsack problems\\~}
+\only<4-4>{\alert{\cite{pya}} Poirriez, V., Yanev, N., Andonov, R.: A hybrid algorithm for the unbounded knapsack problem.}
+\only<5-5>{\alert{\cite{sea2016}} Becker, H., Buriol, L.S.: \emph{UKP5}: A new algorithm for the unbounded knapsack problem. \emph{Old algorithm:} `Ordered Step-Off'}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Current Work}
+\centering
+\begin{description}
+%\item[(this thesis)] Old algorithms are implemented and tested. The influence of the datasets in the comparisons becomes apparent.
+\item[(this thesis)] \begin{itemize}
+\item Implement and test many old algorithms over many instance datasets proposed in the literature.
+\item Proposes a new dominance relation (solution dominance, already seen).
+\item Proposes a new instance dataset (BREQ).
+\end{itemize}
 \end{description}
 \end{frame}
 
-\frame{\frametitle{Current Work}
-\centering
-\begin{description}
-\item[(this thesis)] Old algorithms are implemented and tested. The influence of the datasets in the comparisons becomes apparent.
-\end{description}
-}
-
 \mysection{The Instance Classes}
 
-\frame{\frametitle{The Instance Classes}
-\begin{itemize}
-\item The majority of the UKP instances in the literature is artificial.
-\item The items distribution has a strong effect in the instance hardness.
-\item An efficient method for some dataset can be inefficient for another.
-  \begin{itemize}
-    \item Specially: efficient algorithms for some artificial dataset can be inefficient for real-world datasets and vice-versa.
-  \end{itemize}
-\end{itemize}
-}
+%\frame{\frametitle{The Instance Classes}
+%\begin{itemize}
+%\item The majority of the UKP instances in the literature is artificial.
+%\item The items distribution has a strong effect in the instance hardness.
+%\item An efficient method for some dataset can be inefficient for another.
+%  \begin{itemize}
+%    \item Specially: efficient algorithms for some artificial dataset can be inefficient for real-world datasets and vice-versa.
+%  \end{itemize}
+%\end{itemize}
+%}
 
 \subsection{Discredited and not used}
 
@@ -924,7 +950,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \mysection{Algorithms and Approaches}
 \subsection{DP}
 
-\frame{\frametitle{`Naive DP'/Garfinkel}
+\frame{\frametitle{`Naive DP' and Garfinkel}
 \center
 \edef \scale {0.5}
 \begin{tikzpicture}[scale=\scale]
@@ -1014,6 +1040,85 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw[dashed, thick] ++\origin +(0.5, 1) to [out=45,in=135] +(7.5, 1);
 
 \end{tikzpicture}
+}
+
+\frame{\frametitle{UKP5 Code}
+%\scriptsize
+\small
+%\begin{algorithm}
+%\caption{UKP5 -- Computation of $opt$}\label{alg:ukp5}
+\begin{algorithmic}[1]
+\Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
+  \State \(g \gets\) array of \(c + w_{max}\) positions each one initialized with \(0\)\label{create_g}
+  \State \(d \gets\) array of \(c + w_{max}\) positions each one initialized with \(n\)\label{create_d}
+  
+  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}\Comment{Creates all single-item solutions}
+    \If{\(g[w_i] < p_i\)}
+      \State \(g[w_i] \gets p_i\)
+      \State \(d[w_i] \gets i\)
+    \EndIf
+  \EndFor\label{end_trivial_bounds}
+
+  \State \(opt \gets 0\)\label{init_opt}
+
+  \For{\(y \gets w_{min}, c\)}\label{main_ext_loop_begin}\Comment{Iterate the stored solutions}
+%    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}%\Comment{Handles sparsity and pruning of dominated solutions}
+    	\State \textbf{if} \(g[y] \leq opt\) \textbf{then skips to next iteration}%\label{if_less_than_opt_begin}\label{alg:continue}%\Comment{Ends current iteration and begins the next}
+%    \EndIf\label{if_less_than_opt_end}
+    
+    \State \(opt \gets g[y]\)\label{update_opt}
+    
+    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}\Comment{Combine current solution with items}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
+        \State \(g[y + w_i] \gets g[y] + p_i\)
+        \State \(d[y + w_i] \gets i\)
+      \EndIf\label{if_new_lower_bound_end}
+    \EndFor\label{main_inner_loop_end}
+  \EndFor\label{main_ext_loop_end}
+  \State \textbf{return} \(opt\)
+\EndProcedure
+\end{algorithmic}
+%\end{algorithm}
+}
+
+\frame{\frametitle{GG66 Code}
+\includegraphics[scale=0.175]{gg66.png} 
+}
+
+\begin{comment}
+\frame{\frametitle{GG66 Code 2}
+Algorithm 1.B (Ordered Step-off)
+\begin{itemize}
+\item[I.] Reorder the lengths so that \(\pi_1/l_1 \leq \pi_2/l_2 \leq \dots \leq \pi_m/l_m\). Initialize \(F^*(x) = 0\), for \(0 \leq x \leq L\), \(l^*(0) = 1\) and \(x_2 = 0\).
+\item[II.] \begin{itemize}
+	\item[1] Let \(j = l^*(x_2)\).
+	\item[2] If \(x_2 + l_j \leq L\) then let \(V = \pi_{j} + F^*(x_2)\) and go to II.3. Otherwise go to II.4.
+	\item[3] If \(V \geq F^*(l_j+x_2)\) then let \(F^*(l_j+x_2) = V\), let \(l^*(l_j+x2) = j\), and go II.4. Otherwise go to II.4.
+	\item[4] If \(j < m\) then let \(j = j + 1\) and go to II.2. Otherwise go to III.1.
+\end{itemize}
+\item[III.] \begin{itemize}
+	\item[1] If \(x_2 < L\), let \(x_2 = x_2 + 1\) and go to III.2. Otherwise stop.
+	\item[2] If \(F^*(x_2) > F^*(x_2 - 1)\) go to II.1. Otherwise let \(F^*(x_2) = F^*(x_2-1)\), let \(l^*(x_2) = m + 1\), and go to III.1.
+\end{itemize}
+\end{itemize}
+}
+\end{comment}
+
+\frame{\frametitle{GG66 Code (changed notation)}
+Algorithm 1.B (Ordered Step-off)
+\begin{itemize}
+\item[I.] Reorder the lenghts so that \(p_1/w_1 \leq p_2/w_2 \leq \dots \leq p_n/w_n\). Initialize \(F^*(y') = 0\), for \(0 \leq y' \leq c\), \(l^*(0) = 1\) and \(y = 0\).
+\item[II.] \begin{itemize}
+	\item[1] Let \(i = l^*(y)\).
+	\item[2] If \(y + w_i \leq c\) then let \(v = p_i + F^*(y)\) and go to II.3. Otherwise go to II.4.
+	\item[3] If \(v \geq F^*(y+w_i)\) then let \(F^*(y+w_i) = v\), let \(l^*(y+w_i) = i\), and go II.4. Otherwise go to II.4.
+	\item[4] If \(i < n\) then let \(i = i + 1\) and go to II.2. Otherwise go to III.1.
+\end{itemize}
+\item[III.] \begin{itemize}
+	\item[1] If \(y < c\), let \(y = y + 1\) and go to III.2. Otherwise stop.
+	\item[2] If \(F^*(y) > F^*(y - 1)\) go to II.1. Otherwise let \(F^*(y) = F^*(y-1)\), let \(l^*(y) = n + 1\), and go to III.1.
+\end{itemize}
+\end{itemize}
 }
 
 \frame{\frametitle{GREENDP}
@@ -1198,18 +1303,18 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 
 \subsection{CSP}
 
-\frame{\frametitle{Time spent solving pricing problems}
+\frame{\frametitle{CSP Pricing Problem Instances}
 \includegraphics[scale=1]{data/pricing_time.pdf}
 }
 
-\frame{\frametitle{Time spent solving pricing problems (\% of total time)}
+\frame{\frametitle{CSP Pricing Problem Instances (\% of total time)}
 \includegraphics[scale=1]{data/pricing_percentage.pdf}
 }
 
-\subsection{Serial Runs vs Parallel Runs}
-\frame{\frametitle{Serial Runs vs Parallel Runs}
-\includegraphics[scale=1]{data/env_influence.pdf}
-}
+%\subsection{Serial Runs vs Parallel Runs}
+%\frame{\frametitle{Serial Runs vs Parallel Runs}
+%\includegraphics[scale=1]{data/env_influence.pdf}
+%}
 
 \mysection{Final Remarks and Future Works}
 

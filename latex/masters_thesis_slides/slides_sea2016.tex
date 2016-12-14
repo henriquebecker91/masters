@@ -1,6 +1,7 @@
 \documentclass{beamer}
 
 \usepackage[utf8]{inputenc}
+\usepackage{verbatim}
 
 \AtBeginSection[]
 {
@@ -161,7 +162,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [fill] (12, 9) circle [radius=\myrad];
 \draw [fill] (14, 11) circle [radius=\myrad];
 \draw [fill] (16, 13) circle [radius=\myrad];
-\draw [fill] (17, 21) circle [radius=\myrad];
+\draw [fill] (17, 23) circle [radius=\myrad];
 
 \end{tikzpicture}
 }
@@ -182,7 +183,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [fill] (12, 9) circle [radius=\myrad];
 \draw [fill] (14, 11) circle [radius=\myrad];
 \draw [fill] (16, 13) circle [radius=\myrad];
-\draw [fill] (17, 21) circle [radius=\myrad];
+\draw [fill] (17, 23) circle [radius=\myrad];
 
 \draw [dashed] (5, 0) -- (5, 5) -- (25, 5);
 
@@ -251,7 +252,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \draw [fill=red] (12, 9) circle [radius=\myrad];
 \draw [fill=red] (14, 11) circle [radius=\myrad];
 \draw [fill=red] (16, 13) circle [radius=\myrad];
-\draw [fill] (17, 21) circle [radius=\myrad];
+\draw [fill] (17, 23) circle [radius=\myrad];
 
 \end{tikzpicture}
 }
@@ -866,21 +867,21 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \begin{tikzpicture}[scale=\scale]
 
 \draw[thick] ++\origin +(0, 0) rectangle +(2, 10);
-\draw[fill=blue,fill opacity=0.75] ++\origin +(0, 0) rectangle +(2, 3);
-\draw[fill=blue,fill opacity=0.75] ++\origin +(0, 3) rectangle +(2, 6);
+\draw[thick,fill=blue,fill opacity=0.75] ++\origin +(0, 0) rectangle +(2, 3);
+\draw[thick,fill=green,fill opacity=0.75] ++\origin +(0, 3) rectangle +(2, 7);
 \draw[thick] ++\origin +(3, 0) rectangle +(5, 10);
-\draw[fill=red,fill opacity=0.75] ++\origin +(3, 0) rectangle +(5, 6);
+\draw[thick,fill=red,fill opacity=0.75] ++\origin +(3, 0) rectangle +(5, 6);
 \draw[thick] ++\origin +(6, 0) rectangle +(8, 10);
-\draw[fill=red,fill opacity=0.75] ++\origin +(6, 0) rectangle +(8, 6);
+\draw[thick,fill=red,fill opacity=0.75] ++\origin +(6, 0) rectangle +(8, 6);
 \draw[ultra thick, ->] (9, 5) -- (10, 5);
 
 \edef \origin {(11,0)};
 \draw[thick] ++\origin +(0, 0) rectangle +(2, 10);
-\draw[fill=blue,fill opacity=0.75] ++\origin +(0, 6) rectangle +(2, 9);
-\draw[fill=red,fill opacity=0.75] ++\origin +(0, 0) rectangle +(2, 6);
+\draw[thick,fill=blue,fill opacity=0.75] ++\origin +(0, 6) rectangle +(2, 9);
+\draw[thick,fill=red,fill opacity=0.75] ++\origin +(0, 0) rectangle +(2, 6);
 \draw[thick] ++\origin +(3, 0) rectangle +(5, 10);
-\draw[fill=blue,fill opacity=0.75] ++\origin +(3, 6) rectangle +(5, 9);
-\draw[fill=red,fill opacity=0.75] ++\origin +(3, 0) rectangle +(5, 6);
+\draw[thick,fill=green,fill opacity=0.75] ++\origin +(3, 6) rectangle +(5, 10);
+\draw[thick,fill=red,fill opacity=0.75] ++\origin +(3, 0) rectangle +(5, 6);
 
 \end{tikzpicture}
 }
@@ -1066,8 +1067,10 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \subsection{Branch \& Bound}
 
 \begin{frame}[fragile]{MTU1}
+\includegraphics[scale=0.555]{mtu1.pdf}
 % Create simple tree image
 % http://www.texample.net/tikz/examples/merge-sort-recursion-tree/
+\begin{comment}
 \center
 \edef \scale {0.6}
 \begin{tikzpicture}[level/.style={sibling distance=60mm/#1},scale=\scale]
@@ -1106,6 +1109,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \path (x1qnx2) -- (r) node [midway] {=};
 \path (x0qn) -- (t) node [midway] {=};
 \end{tikzpicture}
+\end{comment}
 \end{frame}
 
 \frame{\frametitle{MTU2}
@@ -1227,7 +1231,7 @@ subject~to &\sum_{i=1}^n w_i x_i \leq c\label{eq:capcons}\\
 \begin{itemize}
 \setlength\itemsep{1.5em}
 \item Find real-world UKP/CSP/BPP instances?
-\item Combine the UKP5/`Ordered Step-Off' with MTU1? % as EDUK2 did with EDUK and MTU2
+\item Combine the UKP5/`Ordered Step-Off' with MTU1? % as EDUK2 did with EDUK and MTU1
 \item Re-implement EDUK and EDUK2 in C++? % how would be its performance
 \item Implement and test Babayev's algorithm? (see \cite{babayev}) % publicado antes do EDUK e nunca reimplementado para comparação, citado por eduk
 \item ... % e muitas outras

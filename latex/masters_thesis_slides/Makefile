@@ -6,7 +6,7 @@ MOREDATADIR = ../../masters/thesis
 _MOREDATA = 128_16_std_breqd_all.csv cutstock_knap_solvers.csv env_influence.csv mtu_impl_desktop_uc1.csv mtus.csv pya_ukp5.csv
 MOREDATA = $(patsubst %,$(MOREDATADIR)/%,$(_MOREDATA))
 
-IMAGES = $(DATA:csv=pdf) $(DATADIR)/ALL.pdf $(DATADIR)/breq_exp.pdf $(DATADIR)/env_influence.pdf $(DATADIR)/mtu1.pdf $(DATADIR)/mtu2.pdf $(DATADIR)/PP.pdf $(DATADIR)/pricing_percentage.pdf $(DATADIR)/pricing_time.pdf $(DATADIR)/Rplots.pdf $(DATADIR)/SAW.pdf $(DATADIR)/SC.pdf $(DATADIR)/SS.pdf $(DATADIR)/WCD.pdf
+IMAGES = $(DATA:csv=pdf) $(DATADIR)/ALL.pdf $(DATADIR)/breq_exp.pdf $(DATADIR)/env_influence.pdf $(DATADIR)/mtu1.pdf $(DATADIR)/mtu2.pdf $(DATADIR)/PP.pdf $(DATADIR)/pricing_percentage.pdf $(DATADIR)/pricing_time.pdf $(DATADIR)/Rplots.pdf $(DATADIR)/SAW.pdf $(DATADIR)/SC.pdf $(DATADIR)/SS.pdf $(DATADIR)/WCD.pdf mtu1.pdf
 
 all: slides_sea2016.pdf
 
@@ -25,5 +25,5 @@ cleanaux: Makefile
 	rm *.log *.aux *.toc *.lof *.out *.bbl *.lot *.blg
 
 clean: cleanaux
-	rm *.pdf data/*.pdf
+	rm slides_sea2016.pdf data/*.pdf
 

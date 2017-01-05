@@ -463,7 +463,7 @@ The author plans to remake the experiments with a greater timeout before publish
 The dual values of the CSP master model can be negative or zero (non-positive).
 Such non-positive values can break codes optimized with the assumption that all items have a positive profit.
 Consequently, in the implementations of this experiment, those items are removed before solving the pricing problem with a non-CPLEX solver (CPLEX has no problem with such non-positive profits).
-The indexes of the items in the solutions of the pricing problems are remapped to their original values before returning the solution to the master problem.
+The indices of the items in the solutions of the pricing problems are remapped to their original values before returning the solution to the master problem.
 The same process of remapping is already done for algorithm that change the items order.
 The time taken by sorting, conversion and remapping procedures is accounted in the times taken by the UKP's algorithms to solve the pricing subproblems.
 

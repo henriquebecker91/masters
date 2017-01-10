@@ -222,7 +222,7 @@ Consequently, after the knapsack capacity~\(y'' = w_u\), adding copies of other 
 Note that~\(y''\) is only an \emph{upper bound} on~\(y^+\), the value of~\(y^+\) can be smaller than~\(y''\), as the items that the best item threshold dominate, can themselves threshold dominates other items.
 
 It's worth mentioning that computing the exact value of~\(y^+\) is a very expensive process that equals to solving UKP for all capacities~\(y^+\) and lower while checking for threshold dominance.
-The author don't know any algorithm for solving the UKP that computes the exact value of~\(y^+\) before starting to solve the UKP.
+The author do not know any algorithm for solving the UKP that computes the exact value of~\(y^+\) before starting to solve the UKP.
 The algorithms compute an \emph{upper bound} on the~\(y^+\) capacity value, as the one presented in the previous paragraph, that was presented in~\cite[p.~215]{book_ukp_2004}.
 
 An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in a reasonable polynomial time, before starting the solving process.

@@ -17,7 +17,7 @@ ppgc-diss.pdf: ppgc-diss.tex $(TEXREQ) $(CHAPTERS) Makefile biblio.bib
 	pdflatex ppgc-diss.tex > /dev/null
 
 $(CHAPDIR)/%.tex: $(CHAPDIR)/%.Rnw $(DATA) Makefile
-	cd $(CHAPDIR) && R CMD Sweave `basename $<`
+	cd $(CHAPDIR) && R CMD Sweave --encoding=utf8 `basename $<`
 
 cleanaux: Makefile
 	rm *.log *.aux *.toc *.lof *.out *.bbl *.lot *.blg

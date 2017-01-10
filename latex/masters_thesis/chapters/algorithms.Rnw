@@ -42,7 +42,7 @@ The DP worst-case space complexity is~\(O(n + c)\), which can be considerably gr
 However, the space needed can be reduced by many optimizations.
 Some of these optimizations are: using a periodicity bound as explained in Section~\ref{sec:periodicity}; using modular arithmetic to reduce~\(c\) to~\(w_{max}\) in at least one array, see~\cite[p.~17]{gg-66}; using binary heaps instead of arrays, as the heap can use less memory than an array of~\(c\) positions if~\(w_{min}\) is sufficiently big.
 
-The DP approach often gives an optimal solution for each capacity smaller then~\(c\).
+The DP approach often gives an optimal solution for each capacity smaller than~\(c\).
 However, some space optimizations can remove such feature.
 
 \subsection{The naive algorithm}
@@ -538,7 +538,7 @@ This last paper has presented four variations of a DP algorithm for the UKP, but
 
 As would be expected, some algorithms tried to combine the best of two most popular approaches (DP and B\&B) for better results.
 
-\subsection{An ordered step-off improvement by Greenberg and Feldman}
+\subsection{GREENDP}
 
 The algorithm presented in~\cite{green_improv} is an improvement of the ordered step-off from~\cite{gg-66}.
 Consequently, it's very similar to UKP5.
@@ -590,7 +590,7 @@ In other words, an equation where the values of the variables/unknowns are restr
 The combination procedure preserves the set of valid solutions, consequently, an optimal solution for the UKP can be sought by testing values for the equation variables/unknowns until the equation holds true.
 Such variables are often, in one side, the quantity of each item in a solution (\(x_i\)), and, on the other side, a tentative value derived from the optimal solution upper bound (\(\beta\)).
 
-\subsection{GREENDP}
+\subsection{GREENDP1}
 
 The only algorithm implemented by the author with this approach was the first algorithm described in~\cite{on_equivalent_greenberg}.
 The algorithm, that wasn't named at the original paper, will be called GREENDP1 for the rest of the article (because it's the first of the two algorithms from the same paper, and because GREENDP is an older algorithm from the same author).

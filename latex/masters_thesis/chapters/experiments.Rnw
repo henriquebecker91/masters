@@ -271,7 +271,7 @@ However, the first algorithm proved itself very time- and memory-consuming, and 
 After some tests it became clear that the intent of the paper was a theoretical exploration of new approaches, not proposing efficient algorithms, and the algorithms were discarded from experimentation over this benchmark instances.
 Readers interested in those methods can check implementations of them, made available at Github\footnote{The C++ code implementing both methods can be found at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}.
 
-\section{Results for MTU1 and MTU2 (C++ and Fortran implementations)}
+\section{Results for MTU1 and MTU2 (C++ and Fortran)}
 \label{sec:mtu_exp}
 
 %As the algorithms don't make a heavy memory use (and has good locality of reference), five isolated cores of the computer were used in parallel for running the experiment. The computer setup was: XXX.

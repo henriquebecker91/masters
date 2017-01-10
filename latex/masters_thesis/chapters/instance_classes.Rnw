@@ -69,8 +69,8 @@ qplot(w, p, data = t,
 \label{fig:uncorrelated_example}
 \end{figure}
 
-We has chosen to not use uncorrelated instances in our experiments.
-The main reasons behind this choice are that: \emph{the times used by an algorithm to solve uncorrelated instances have little to do with the algorithm's capability of solving a NP-hard problem, and much to do with the polynomial algorithms or heuristics it uses to remove simple and multiple dominated items}.
+We have chosen to not use uncorrelated instances in our experiments.
+The main reason behind this choice is that: \emph{the times used by an algorithm to solve uncorrelated instances have little to do with the algorithm's capability of solving a NP-hard problem, and much to do with the polynomial algorithms or heuristics it uses to remove simple and multiple dominated items}.
 More than that, the uncorrelated distribution is artificially generated, it does not model any class of instances that arise in real-world problems, and polynomial methods for removing simple and multiple dominated items, which are often the vast majority of the items in such instances, were already studied in depth~\cite[p.~216]{book_ukp_2004}.
 
 The following subsections present a detailed critical analysis about two uncorrelated instance datasets used in the literature (and the parameters used to generate them).
@@ -336,42 +336,41 @@ The codes are deterministic, and consequently will produce the same results if e
 
 A recent survey on BPP and CSP gathered the instances from the literature, and also proposed new ones~\cite{survey2014}.
 The total number of instances in all datasets presented in the survey is 5692.
-The author chose ten percent of those instances for experiments.
+The author of this thesis chose ten percent of those instances for the experiments presented at Section \ref{sec:csp_experiments}.
 This fraction of the instances was randomly selected among instances within the same dataset or, in the larger datasets, the same generation parameters.
-The 596 selected instances of CSP are available at the author's GitHub repository\footnote{The instance's specific folder and revision are: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}}.
-
-The code used for solving the SCF relaxation is available at the same repository\footnote{The code's specific folder and revision are: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}} and can be compiled by calling \emph{make bin/cutstock} in the folder.
+The 596 selected instances of CSP are available in the author's GitHub repository\footnote{The instances can be found at \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}, and the code used to solve the SCF relaxation can be found in the same repository (\url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}). The code can be compiled by executing \emph{make bin/cutstock} in the folder.
 Unfortunately, the code has external dependencies, and the user will need to install them before having success in the compilation.
-The dependencies are the Boost C++ library\footnote{The Boost C++ Library is available at: \url{http://www.boost.org/}}, and IBM ILOG CPLEX Studio 12.5\footnote{The IBM ILOG CPLEX Studio can be available at: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}}.
+The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}).
 The library paths are configured inside the Makefile.
-The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
+The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.}.
 
-The discussions in~\cite{gg-61,gg-63,gg-66} present some optimizations to the master problem's solver that the author has not implemented.
-The author believes that these optimizations do not affect considerably the structure of the pricing problem.
+\cite{gg-61,gg-63,gg-66} present some optimizations to the master problem solver that we have not implemented.
+The author of this thesis believes that these optimizations do not considerably affect the structure of the pricing problem.
 Also, this work has no intention of providing a state-of-the-art algorithm for solving the CSP continuous relaxation, but only to study algorithms for the UKP in the context of a pricing subproblem and independently.
 
-A list of implementation details follows: cutting patterns that are not used by the last master problem's solution could be removed, however they can end up being valuable again in the future and re-generated by the pricing problem, so the author choose to not remove them; the classic polynomial method for creating the initial set of cutting patterns was used, it consists in creating~\(n\) patterns, each one with only one sheet size that is cut as many times as possible, state-of-the-art solvers often begin using cutting patterns generated by a more sophisticated heuristic; the sheet sizes can be divided in two groups, the half with more demand, and the other half, and the pricing problem can be restricted to the high demand group in some conditions -- this also was not done.
+A list of implementation details follows: cutting patterns that are not used by the last solution for the master problem could be removed, however they can end up being valuable again in the future and re-generated by the pricing problem, so the author chose not to remove them; the classic polynomial method for creating the initial set of cutting patterns was used: it consists in creating~\(n\) patterns, each one with only one sheet size that is cut as many times as possible, state-of-the-art solvers often begin using cutting patterns generated by a more sophisticated heuristic; the sheet sizes can be divided in two groups, half with higher demand, and half with lower demand; and the pricing problem can be restricted to the high demand group in some conditions -- this also has not been done in our experiments.
 
 Before ending this section, it is important to correct a false claim published in~\cite{sea2016}.
-The article inform that ``The currently fastest known solver for BPP/CSP[2, 3] uses a column generation technique (introduced in [5]) that needs to solve an UKP instance as the pricing problem at each iteration of a column generation approach.''.
+The article stated that ``The currently fastest known solver for BPP/CSP[2, 3] uses a column generation technique (introduced in [5]) that needs to solve an UKP instance as the pricing problem at each iteration of a column generation approach.''.
 The mentioned solver is the one proposed in~\cite{belov}, and it was found to be the fastest by the experiments conducted in~\cite{survey2014}.
 It makes use of the column generation approach, however the pricing problem is not exactly the UKP, as consequence of the way the algorithm adds cuts to the continuous relaxation.
 
 \section{Bottom Right Ellipse Quadrant Instances}
 \label{sec:breq_inst}
 
-The Bottom Right Ellipse Quadrant Instances (`BREQ instances', for short) is a new UKP instance item distribution proposed by the author in this work.
-This instance distribution was created to illustrate that different item distributions favor different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
+The Bottom Right Ellipse Quadrant Instances (`BREQ instances', for short) is a new UKP instance item distribution proposed by the author of this thesis.
+This instance distribution was created to illustrate that different item distributions favors different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
+These instances will be used in the experiments presented in Section \ref{sec:breq_exp}.
 
 Distributions that are easy to solve by the DP approach and hard to solve by the B\&B approach are common in the recent literature.
 This distribution has the opposite characteristic, it is hard to solve by DP and easy to solve by B\&B.
-It is important to point that this is an artificially generated distribution that does not model any real-world instances (that the author has knowledge).
+It is worth mentioning that this is an artificially generated distribution that does not model any real-world instances (that the author is aware of).
 The author discourages the use and study of such artificial instances (including this one), and created this distribution only as a tool to demonstrate that it is not hard to create a distribution that benefits a solving approach over another.
-It is the author's opinion that operational research could focus more on real-world instances and/or artificially generated instances that clearly model real-world instances.
+It is the author's opinion that operational research community could focus more on real-world instances and/or artificially generated instances that clearly model real-world instances.
 
 The name given to this distribution is derived from the fact that, when plotted on a graph, the items show the form of a quarter of ellipse (specifically, the bottom right quadrant).
-All items in such distribution respect the following equation:~\(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - (w_i^2 \times \frac{p_{max}}{w_{max}}^2)}}\).
-In this context,~\(w_{max}\) and~\(p_{max}\) define the quadrant top right corner, i.e. the possible maximum value for an item's weight and profit, an item with those exact values does not need to exist in a BREQ instance.
+All items with such distribution respect the following equation:~\(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - (w_i^2 \times \frac{p_{max}}{w_{max}}^2)}}\).
+In this context,~\(w_{max}\) and~\(p_{max}\) define the quadrant top right corner, i.e. the possible maximum value for an item weight and profit, an item with those exact values does not need to exist in a BREQ instance.
 The rounding down in the formula can be dropped if the profit is a real number and not an integer.
 
 \begin{figure}[h]
@@ -391,20 +390,20 @@ qplot(w, p, data = t,
 \end{figure}
 
 A natural consequence of this distribution shape is that the item profit grows quadratically with the item weight.
-This leads to the inexistence of simple, multiple and collective dominance\footnote{In truth, if the profit is integer, the smallest items can display some of those three dominances because the profit precision loss by rounding, but this is of little relevance and can be safely ignored for most purposes.
+This leads to the inexistence of simple, multiple and collective dominance\footnote{If the profit is integer, the smallest items can display some of those three dominances because the profit precision loss by rounding, but this is of little relevance and can be safely ignored for most purposes.
 If profit is an infinite precision real, the statement has no exceptions.}.
 In other words, for any solution~\(s\) comprised of two or more items and any single item~\(i\) (with respective weights~\(w_s\) and~\(w_t\), and respective profits~\(p_t\) and~\(p_i\)), if~\(w_s \leq w_i\) then~\(p_s < p_i\).
 
 On the other hand, threshold dominance is very common in this instance type.
-With exception of the best item, any item of any instance (of any distribution, not only BREQ instances) will always be threshold dominated at some capacity.
+Except for the best item, any item of any instance (of any distribution, not only BREQ instances) will always be threshold dominated at some capacity.
 However, in many instances the knapsack capacity is smaller than those threshold values and therefore the threshold dominance is not applied or relevant.
 On BREQ instances, as a consequence of the quadratic profit growth, an optimal solution will never include the item~\(i\) two or more times if there is an item~\(j\) such as that~\(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\).
-Consequently, each item have a good probability of being threshold dominated before the second use. 
+%Consequently, each item has a good probability of being threshold dominated before the second use. 
 
 The solutions of BREQ instances will often contain the maximum number of copies of the largest item (that is also the most profitable, and the most efficient) allowed by the instance capacity.
-Any gap left will probably be filled by the heaviest item that fits the gap, with this process repeated until no item fits the gap left (or there is no gap).
+Any gap left will probably be filled with the heaviest item that fits the gap. The process should be repeated until no item fits the gap left (or there is no gap).
 The classical greedy heuristic procedure that follows those steps would probably yield an optimal solution.
-However, this is not always the case\footnote{A counter-example follows: consider an instance with~\(n = 4\),~\(c = 512\),~\(w_1 = 384\),~\(p_1 = 2774\),~\(w_2 = 383\),~\(p_2 = 2756\),~\(w_3 = 129\),~\(p_3 = 265\),~\(w_4 = 32\) and~\(p_4 = 17\); the optimal solution do not use the best item (\(w_1, p_1\)); the best solution when using the best item has a profit value of~\(2842 = 2774 + 4\times17\) (weight~\(512 = 384 + 4\times32\)) while the best solution when using the second most efficient item has the optimal profit value of~\(3021 = 2756 + 265\) (weight~\(512 = 383 + 129\)).
+However, this is not always the case\footnote{A counter-example follows: consider an instance with~\(n = 4\),~\(c = 512\),~\(w_1 = 384\),~\(p_1 = 2774\),~\(w_2 = 383\),~\(p_2 = 2756\),~\(w_3 = 129\),~\(p_3 = 265\),~\(w_4 = 32\) and~\(p_4 = 17\); the optimal solution does not use the best item (\(w_1, p_1\)); the best solution when using the best item has a profit value of~\(2842 = 2774 + 4\times17\) (weight~\(512 = 384 + 4\times32\)) while the best solution when using the second most efficient item has the optimal profit value of~\(3021 = 2756 + 265\) (weight~\(512 = 383 + 129\)).
 In this case, between two solutions with the same weight, the one with the best item is not the best one.
 The weight and profit values of this example follow a BREQ distribution with~\(w_{max} = 512\) and~\(p_{max} = 8192\).}.
 
@@ -413,38 +412,37 @@ The B\&B approach begins by creating a solution using some sort of greedy heuris
 This solution will be close to optimal, if not optimal, and provides a good lower bound.
 With this lower bound, the search space will be greatly reduced, making the algorithm end almost instantly.
 On the other side, the DP approach is based on solving subproblems.
-Subproblems will be solved for increasing capacity values yielding optimal solutions to be reused (combined with other items).
+Subproblems which will be solved for increasing capacity values yielding optimal solutions to be reused (combined with other items).
 However, as seen before, small solutions and/or solutions comprised of small items will generally be less efficient than solutions comprised of the big items, and therefore subproblem solutions are likely to be discarded without affecting the final result.
 
-The objective is not to explore this distribution and its behaviour with different parameters, only to show that it favors the B\&B approach over the DP.
-The author of this thesis propose a subset of the BREQ instances which the only parameters are~\(n\) and the seed for the PRNG, with the other instance parameters being computed over the value of~\(n\).
-This instance distribution will be called the BREQ 128-16 Standard, it is a BREQ distribution where~\(c = 128 \times n\),~\(p_{min} = w_{min} = 1\),~\(w_{max} = c\) and~\(p_{max} = 16 \times w_{max}\).
+The objective is not to explore this distribution and its behaviour with different parameters, we only intend to show that it favors the B\&B approach over the DP.
+The author of this thesis proposes a subset of the BREQ instances which the only parameters are~\(n\) and the seed for the PRNG, with the other instance parameters being computed over the value of~\(n\).
+This instance distribution will be called the BREQ 128-16 Standard: a BREQ distribution where~\(c = 128 \times n\),~\(p_{min} = w_{min} = 1\),~\(w_{max} = c\) and~\(p_{max} = 16 \times w_{max}\).
 The PRNG seed is used to create~\(n\) unique random weight values between~\(w_{min}\) and~\(w_{max}\) (the random number distribution is uniform); the profit values for each weight are computed using the first formula presented at this section (and the~\(w_{max}\) and~\(p_{max}\) values for that~\(n\)).
 
-
-The reasoning for the choices made when creating the BREQ 128-16 Standard follows.
+The reasoning for the choices made when defining the BREQ 128-16 Standard follows.
 There was no reason to restrict the~\(w_{min}\) to~\(w_{max}\) interval to be smaller than~\(c\) (there are~\(c\) distinct valid weight values).
 The constant 128 used to compute the capacity~\(c\) for a~\(n\) value was chosen as the first power of two higher than a hundred.
-Consequently less than 1\% of all possible items will appear in an instance, making instances generated with different seeds significantly different.
+Consequently, less than 1\% of all possible items will appear in an instance, making instances generated with different seeds significantly different.
 The~\(p_{min}\) to~\(p_{max}\) value interval was chosen to be sixteen times bigger than the~\(w_{min}\) to~\(w_{max}\) interval to alleviate the effects of rounding the profit value to an integer value (it would not need to be done if the profit was a floating point number with reasonable precision).
 The efficiency of the items in a BREQ distribution will vary between zero and~\(\frac{p_{max}}{w_{max}}\), so if~\(p_{max} = w_{min}\) the efficiency would vary between zero and one, giving more relevance to the rounding.
-At least, for the biggest~\(n\) value that we were interested in testing (\(2^{20}\)), the highest possible value of an item profit is~\(2^{31} = 2^{20}\times128\times16\) what keeps the values smaller than 32 bits.
+Finally, for the biggest~\(n\) value that we were interested in testing (\(2^{20}\)), the highest possible value of an item profit is~\(2^{31} = 2^{20}\times128\times16\), what keeps the values smaller than 32 bits.
 
-The BREQ 128-16 Standard allows us to create a simple benchmark dataset, where we only need to worry about varying~\(n\) and the seed.
+The BREQ 128-16 Standard allows us to create a simple benchmark dataset, in which we only need to worry about varying~\(n\) and the seed.
 We propose a benchmark with a hundred instances, with all combinations of~\(n = 2^{11} = 2048,~2^{12},~...,~2^{20} \approx 10^6\) (ten~\(n\) values), and ten different seed values.
 We will refer to it as the BREQ 128-16 Standard Benchmark (or BREQ 128-16 SB).
 
 \section{Other distributions}
 
-While artificial item distributions presented in~\cite{pya} were used in the experiments of this work, some other artificial distributions were ignored.
-The reasons for not using the uncorrelated distribution were extensively presented in this chapter.
+While artificial item distributions presented in~\cite{pya} are used in the experiments of this work, some other artificial distributions are ignored.
+The reasons for not using the uncorrelated distribution were extensively discussed in this chapter.
 However, no reason was presented for not using the \emph{weakly correlated} distribution, presented in~\cite{mtu1},~\cite{mtu2},~\cite{babayev} and~\cite{eduk}, or the \emph{realistic random} distribution, presented in~\cite{eduk}.
 
-The main reason for using the artificial distributions described in~\cite{pya} was that, almost certainly, questions about the performance of the algorithms in the most recent benchmark dataset for the UKP would arise, and these experiments answer these questions preemptively.
+The main reason for using the artificial distributions described in~\cite{pya} was that questions about the performance of the algorithms in the most recent benchmark dataset for the UKP would most certainly arise. Moreover, these experiments answer these questions preemptively.
 Not using the dataset would raise unfounded suspicion about this choice.
 However, there was no reason to track and implement every single artificial items distribution already used in the literature, as the criticism presented in this work about artificial item distributions would apply to them too.
-The BREQ instances are a special case, as their purpose is exactly showing that it is easy to design an items distribution that favors one approach over other.
+The BREQ instances are a special case, as their purpose is exactly showing that it is easy to design a items distribution that favors one approach over another. 
 
 The author also finds important to show the risks of insufficient bibliographical research, and not re-evaluating the results of experiments presented in the past.
-In Section~\ref{sec:pya_exp}, we will see that simple DP algorithms of fifty years ago seems to be the best for solving the most recent benchmark dataset for UKP. 
+In Section~\ref{sec:pya_exp}, we will see that simple DP algorithms of fifty years ago seem to be the best for solving the most recent benchmark dataset for UKP. 
 

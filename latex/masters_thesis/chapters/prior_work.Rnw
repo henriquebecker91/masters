@@ -4,16 +4,16 @@
 It is important to note that the name ``Unbounded Knapsack Problem'' is more recent than the problem itself.
 To the best of our knowledge, this name was used for the first time in~\cite{mtu2}.
 Earlier papers simply referred to `a' or `the' knapsack problem(s) the variant discussed was specified by the model presented in the paper.
-An earlier paper from the same author tackled both UKP and BKP~\cite{mtu1} and called them, respectively, the General Unconstrained Knapsack Problem (GUKP) and General Constrained Knapsack Problem (GCKP).
+An earlier paper from the same author tackled both the UKP and the BKP~\cite{mtu1} and called them, respectively, the General Unconstrained Knapsack Problem (GUKP) and General Constrained Knapsack Problem (GCKP).
 In the paper, the adjective unidimensional was also used to characterize both variants.
-More recently, the term UKP seems to be well accepted. Also, unidimensional is considered the default, and the term multi-dimensional is used to differ from it.
+More recently, the term `UKP' seems to be well accepted. Also, unidimensional is considered the default, and the term multi-dimensional is used to differ from it.
 A researcher making a literature review about a specific variant of the knapsack problem should be aware of such caveat.
 
 This literature review starts with~\cite{gg-61}, when the \emph{column generation} approach was proposed.
 The main utility of the column generation approach was to avoid the existence of an exponential number of variables when solving the tightest linear programming model of BPP and CSP.
-The relationship between UKP and BPP/CSP was already briefly described at Section~\ref{sec:motivation}, and its technical details will be described at Section~\ref{sec:csp_ukp_inst}.
+The relationship between the UKP and the BPP/CSP was already briefly described at Section~\ref{sec:motivation}, and its technical details will be described at Section~\ref{sec:csp_ukp_inst}.
 The UKP is not solved, it is only said that ``the auxiliary problem will be of the integer programming variety, but of such a special type (the `knapsack' type) that it is solvable by several methods''~\cite[p.~2]{gg-61}.
-Two years later, in~\cite{gg-63}, the authors proposed a specific algorithm for UKP, and experiments solving BPP and CSP instances were executed.
+Two years later, in~\cite{gg-63}, the authors proposed a specific algorithm for the UKP, and experiments solving BPP and CSP instances were executed.
 Some findings of this experiments will be discussed in Sections~\ref{sec:csp_ukp_inst} and~\ref{sec:csp_experiments}.
 
 %In this paper, the algorithm for UKP that was first described at~\cite{gg-63} is discussed more profoundly.
@@ -56,13 +56,13 @@ This trend could indicate that for big instances, the G.G. algorithm would have 
 
 %The MTU1 paper~\cite{gen_uni_knap_prob} also makes an indirect comparison with Cabot's B\&B algorithm. The MTU1 paper uses the dataset described in Cabot's paper~\cite{cabot}, and arrives at the conclusion Cabot's algorithm is clearly dominated by MTU1. The instance dimensions are only a little different to the ones used in their experiment described above (number of items up to 80, only uncorrelated distribution).
 
-The experiments described above were used by the authors on another paper to state that ``The most efficient algorithms for the exact solution of UKP [...] consist of two main steps: Step 1. Sort the item types according to (5). Step 2. Find the optimal solution through branch-and-bound.''~\cite{mtu2}. This comment established B\&B as most efficient approach for the UKP.
+The experiments described above were used by the authors on another paper to state that ``The most efficient algorithms for the exact solution of the UKP [...] consist of two main steps: Step 1. Sort the item types according to (5). Step 2. Find the optimal solution through branch-and-bound.''~\cite{mtu2}. This comment established B\&B as most efficient approach for the UKP.
 The paper introduced the MTU2 algorithm (and the author will refer to it as the `MTU2 paper').
 
 The MTU2 algorithm was designed for large instances (up to 250,000 items).
 Only sorting the items list was already computationally expensive for the period, and the solutions often involved only the most efficient items.
 The MTU2 main feature was grouping and sorting only the~\(k = max(100, \frac{n}{100})\) most efficient items, and calling MTU1 over them.
-The instance of UKP comprised of this reduced items list was called `tentative core problem'.
+The instance of the UKP comprised of this reduced items list was called `tentative core problem'.
 If the optimal solution of the tentative core problem was proven to be optimal for the original problem, the algorithm stopped.
 Otherwise, the optimal solution of the tentative core problem was used as a lower bound to remove dominated items.
 After this, the~\(k\) most efficient items outside the tentative core problem were added to it, restarting the process. 
@@ -78,7 +78,7 @@ However, MTU2 does not completely dominate MTU1, it simply was better for the ch
 Instances in which the MTU2 needs to repeat the process of adding items to the tentative core problem many times can be more easily solved by MTU1 than by MTU2.
 Unfortunately, the works that followed chose to compare their algorithms only against MTU2.
 
-EDUK (\emph{Efficient Dynamic programming for the Unbounded Knapsack problem}), a novel DP algorithm for UKP, was proposed in a conference paper~\cite{ukp_new_results} and then presented in a journal paper~\cite{eduk}.
+EDUK (\emph{Efficient Dynamic programming for the Unbounded Knapsack problem}), a novel DP algorithm for the UKP, was proposed in a conference paper~\cite{ukp_new_results} and then presented in a journal paper~\cite{eduk}.
 EDUK is very different from the previous DP algorithms, and its main features are the application of threshold dominance (proposed in the same paper), and the use of a sparse representation of the iteration domain.
 This last feature was implemented by using lazy lists, mainly because EDUK was implemented in the functional language OCaml.
 EDUK is strongly based on the ideas first discussed in~\cite{algo_tech_cut}.
@@ -94,7 +94,7 @@ The weakly and strongly correlated distributions are also used in \cite{eduk}, b
 For those instances, MTU2 dominates EDUK when the weight of the smallest item is close to one, but MTU2 times grow much faster than EDUK times when~\(w_{min}\) is increased.
 Only one comparison is made against another DP algorithm.
 The DP algorithm used seems to be a na{\"i}ve DP algorithm with a preprocessing phase that removes simple dominance.
-The comparison uses a completely different dataset of small instances, in an effort to take into account real-world applications of UKP, as the ones provenient from solving BPP and CSP with column generation.
+The comparison uses a completely different dataset of small instances, in an effort to take into account real-world applications of the UKP, as the ones provenient from solving BPP and CSP with column generation.
 The average runtimes in this comparison are smaller than 0.1 seconds, and the difference between the average times of EDUK and the naive DP are about 20\% (with EDUK being faster).
 
 EDUK2 is an improvement of EDUK proposed in~\cite{pya}.
@@ -108,19 +108,19 @@ The experiments are then remade using the same distributions with larger coeffic
 MTU2 has integer overflow problems and is left out of the comparison.
 Between EDUK and EDUK2, EDUK2 has the best results, as expected. 
 
-Both~\cite{eduk} and~\cite{pya} cite~\cite{babayev}, which presents an algorithm for solving UKP using the Consistency Approach (CA).
+Both~\cite{eduk} and~\cite{pya} cite~\cite{babayev}, which presents an algorithm for solving the UKP using the Consistency Approach (CA).
 The algorithm described in~\cite{babayev} was tested against MTU2 and had better times, but the instances used in the experiment make it difficult to have an idea of what would be its performance using more recent datasets (see Section~\ref{sec:babayev_uncorrelated} for further discussion).
 The CA was already discussed in~\cite{on_equivalent_greenberg}.
-However, the algorithm proposed in~\cite{babayev} considered performance as a priority, while other works treated applying CA to UKP as an interesting theoretical problem.
+However, the algorithm proposed in~\cite{babayev} considered performance as a priority, different from previous works that treated applying CA to the UKP as an interesting theoretical problem.
 As the authors of~\cite{eduk} and~\cite{pya}, we tried to obtain a copy of the code from the authors of~\cite{babayev}, but did not obtain success.
 The author of this thesis suggests the implementation and comparison of this algorithm as a future work.
 
-Before ending this literature review, we would like to discuss the chapters about UKP in the following textbooks:~\cite{tchu} and~\cite{garfinkel}.
+Before ending this literature review, we would like to discuss the chapters about the UKP in the following textbooks:~\cite{tchu} and~\cite{garfinkel}.
 Those textbooks are especially relevant because they are cited by many of the papers presented at this section.
 The chapter about the UKP in~\cite[p.~311]{tchu} has a good introduction about the problem, the simplest DP method for solving it, and the basics of the periodicity.
 
-The chapter about UKP in~\cite[p.~214]{garfinkel} has an extensive bibliographical review of the works about UKP that predates it (1972), which is very relevant as the name UKP was only established some years later.
-The chapter also discusses in depth many of the approaches used to solve UKP in that period, yet making heavy use of mathematical notation.
+The chapter about the UKP in~\cite[p.~214]{garfinkel} has an extensive bibliographical review of the works about the UKP that predates it (1972), which is very relevant as the name `UKP' was only established some years later.
+%The chapter also discusses in depth many of the approaches used to solve the UKP in that period, yet making heavy use of mathematical notation.
 In Section~\ref{sec:gg_algs}, we discuss a limitation of the review proposed in that chapter.
 %In the Section 6.4 of the book, a DP algorithm is presented as the last of a series of improvements over the naive DP algorithm. However, if we check the chapter notes, there's the comment ``6.4: The recursion of this section is based on Gilmore and Gomory (1966). See Exercise 21 for a variation that will be more efficient for some data sets.''. The algorithm presented in section 6.4 was a version of the algorithm in~\cite{gg-66} with \emph{some} of its main optimizations removed, and in exercise 21 is expected of the reader to recreate \emph{one} of those optimizations based in hints given at the exercise. The author of this thesis believes that this fact can have been unnoticed by previous authors that cited the work. The book didn't featured the exercises' answers. % TODO XXX COPY THIS PARAGRAPH TO ALGORITHMS SECTION
 

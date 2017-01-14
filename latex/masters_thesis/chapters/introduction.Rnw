@@ -2,7 +2,7 @@
 \label{sec:introduction}
 
 The Unbounded Knapsack Problem (UKP) is a simpler variant of the well-known Bounded Knapsack Problem (BKP) and the 0-1 Knapsack Problem (0-1 KP).
-The only difference between UKP and these other KP variants is that UKP does not impose a bound on the available quantity of each item type.
+The only difference between the UKP and these other KP variants is that the UKP does not impose a bound on the available quantity of each item type.
 The UKP can also be seen as a special case of the BKP in which, for each item type, there are more copies available than is possible to fit in the knapsack capacity.
 
 The UKP is NP-Hard and, thus, has no known polynomial-time algorithm for solving it. 
@@ -13,11 +13,11 @@ However, it can be solved in pseudo-polynomial time by using the dynamic program
 
 %It's a simpler variant of one of the most classical computer science problems.%,~\cite{pya} (Hybridization between B\&B and DP), and~\cite{DP_inequalities}. % the last is the article from xuequi he, that don't compete with state of the art butonly try new approach
 The UKP has theoretical and applied uses.
-Literature in the area shows many examples of UKP being used to test solving approaches that are novel at the time as~\cite{mtu1} (Branch-and-Bound) and~\cite{on_equivalent_greenberg} (Consistency Approach).
+Literature in the area shows many examples of the UKP being used to test solving approaches that were novel at the time as~\cite{mtu1} (Branch-and-Bound) and~\cite{on_equivalent_greenberg} (Consistency Approach).
 Such interest is commonly found in well-known, easy to understand and model, NP-hard problems with practical everyday use, as is the case of the UKP and other KPs.
-Recently, the 0-1 KP has been used to study how humans solve NP-Hard problems~\cite{humans_solve_complex}.
-The author of this thesis finds the use of the UKP (or any other problem) for testing experimental approaches a necessary and relevant line of research.
-However, the author has a critical view about the performance comparison of algorithms over artificial instances that do not model any real-world items distributions.
+%Recently, the 0-1 KP has been used to study how humans solve NP-Hard problems~\cite{humans_solve_complex}.
+%The author of this thesis finds the use of the UKP (or any other problem) for testing experimental approaches a necessary and relevant line of research.
+%However, the author has a critical view about the performance comparison of algorithms over artificial instances that do not model any real-world items distributions.
 
 % CHECAR COM BURIOL
 % ``surrogate relaxation of IP problems with non-negative coefficients'' PISINGER p. 147 motivation
@@ -37,7 +37,7 @@ It is relevant to note that such conjecture was proven false by generating artif
 Also, to the author's knowledge, no BPP or CSP instance proved false the conjecture that all BPP and CSP instances have the Modified Integer Round-Up Property (MIRUP).
 If an instance of the BPP or CSP has the MIRUP, the rounding-up of the relaxation's optimal value will be, at maximum, one unity smaller than the optimal value of the original problem~\cite{survey2014}.
 
-The author of this thesis acknowledges the existence of many very good heuristics and approximations for solving the UKP, including the existence of fully polynomial time approximation schemes (FPTAS) for UKP.
+The author of this thesis acknowledges the existence of many very good heuristics and approximations for solving the UKP, including the existence of fully polynomial time approximation schemes (FPTAS) for the UKP.
 However, this thesis will only discuss exact methods, in order to limit its scope and, also, other reasons listed in advance.
 While this thesis focuses on the study of the exact algorithms proposed in the literature, and on the instance datasets used to compare them, it also addresses the UKP in the context of the CSP and BPP problems.
 
@@ -101,7 +101,7 @@ Such duplicated items exist in some instance datasets of the literature, and can
 
 This section presents well-known properties of the UKP that can be exploited to speed-up solving of an instance of the UKP.
 The main point of these properties is that they are only valid if we have available as many copies of each item type as we could need.
-Consequently, those properties are always valid for UKP and generally not valid for other knapsack variants.
+Consequently, those properties are always valid for the UKP and generally not valid for other knapsack variants.
 However, it is interesting to note that, if a BKP or 0-1 KP has as many or more copies of some item type than it can fit in the knapsack, then we have an unbounded quantity of that item type available and the properties described below apply to these item types.
 If every item type~\(i\) of an instance of the BKP (or 0-1 KP) has at least~\(\floor{\frac{c}{w_i}}\) copies available, then the instance can be solved as if it were an instance of the UKP.
 
@@ -190,7 +190,7 @@ Finally, such broad definition of dominance does not give hints on how to design
 The UKP has an interesting periodic property that can be stated the following way: for every set of item types, there exists a capacity~\(y^+\), for which every capacity~\(y'\) (\(y' > y^+\)) will have an optimal solution that is an optimal solution for capacity~\(y' - w_b\) with one more copy of the best item added.
 In other words, after some capacity~\(y^+\), we can find optimal solutions simply by adding copies of the best item to optimal solutions of capacities~\(y^+\) and lower (all other items are not relevant anymore).
 In the literature, this periodic property is called \emph{periodicity}.
-It should be clear that if we knew~\(y^+\) beforehand, and~\(y^+ < c\), then we can solve UKP for the capacity~\(y^{*} = c - \ceil{\frac{c - y^+}{w_b}}w_b\) and fill the gap between~\(y^{*}\) and~\(c\) with exactly~\(\frac{c - y^{*}}{w_b}\) copies of the best item (instead of solving UKP for capacity~\(c\)).
+It should be clear that if we knew~\(y^+\) beforehand, and~\(y^+ < c\), then we can solve the UKP for the capacity~\(y^{*} = c - \ceil{\frac{c - y^+}{w_b}}w_b\) and fill the gap between~\(y^{*}\) and~\(c\) with exactly~\(\frac{c - y^{*}}{w_b}\) copies of the best item (instead of solving the UKP for capacity~\(c\)).
 %The focus of this section will be this second periodic property, that we will call simply by `periodicity'.
 
 The periodicity is a direct consequence of the threshold dominance.
@@ -210,18 +210,18 @@ In other words, a solution comprised only by~\(m_j\) copies of the best item wil
 
 It is important to notice that, in the case of an instance in which all items have the same efficiency, the best item (that will have weight~\(w_{min}\) by definition) will threshold dominate each other item at the capacity that is the \emph{lowest common multiple} between their weights (as shown in the last paragraph).
 However, if the best item~\(b\) is more efficient than the non-best item~\(j\) (which is more common), then a smaller solution~\(s\) comprised only of copies of~\(b\) can be more profitable than a bigger solution~\(t\) comprised only of copies of~\(j\).
-The weights of the two solutions do not have do be the same.
+The weights of the two solutions do not have to be the same.
 
 Now, we explain how periodicity is a direct consequence of threshold dominance.
 As we have seen, for each non-best item~\(j\), there will exist a positive integer~\(n_j\), in a way that solutions with~\(n_j\) copies of~\(j\) are dominated by solutions that use~\(m_j\) copies of~\(b\) instead.
 We will assume that there exists a solution~\(u\) comprised of~\(n_j - 1\) copies of each item~\(j\).
 If another copy of any item~\(j\) is added to~\(u\), the resulting solution~\(u' = u~\cup~\{j\}\) could be replaced by another solution~\(v\) that contains no copies of~\(j\), and~\(m_j\) additional copies of~\(b\).
-Any solution that weights more than solution~\(u\) has only two possibilities: it uses more copies of the best item; or it uses more than~\(n_j\) copies of some non-best item~\(j\).
+Any solution that weight more than solution~\(u\) has only two possibilities: it uses more copies of the best item; or it uses more than~\(n_j\) copies of some non-best item~\(j\).
 In the last case, copies of~\(j\) can be replaced by copies of~\(b\) until the quantity of copies of~\(j\) is smaller than~\(n_j\).
 Consequently, after the knapsack capacity~\(y'' = w_u\), adding copies of other items to a solution would be equal to adding copies of the best item (making any other item type except~\(b\) irrelevant).
 Note that~\(y''\) is only an \emph{upper bound} on~\(y^+\), the value of~\(y^+\) can be smaller than~\(y''\), as the items that the best item threshold dominate, can themselves threshold dominates other items.
 
-It's worth mentioning that computing the exact value of~\(y^+\) is a very expensive process that equals to solving UKP for all capacities~\(y^+\) and lower while checking for threshold dominance.
+It's worth mentioning that computing the exact value of~\(y^+\) is a very expensive process that equals to solving the UKP for all capacities~\(y^+\) and lower while checking for threshold dominance.
 The author do not know any algorithm for solving the UKP that computes the exact value of~\(y^+\) before starting to solve the UKP.
 The algorithms compute an \emph{upper bound} on the~\(y^+\) capacity value, as the one presented in the previous paragraph, that was presented in~\cite[p.~215]{book_ukp_2004}.
 

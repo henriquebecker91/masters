@@ -283,6 +283,16 @@ print(lt)
 @
 \end{landscape}
 \fi
+
+\section{Data and code related to CSP pricing subproblem dataset}
+\label{sec:csp_appendix}
+The 596 selected instances of CSP are available in \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}, and the code used to solve the SCF relaxation can be found in the same repository (\url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}).
+The code can be compiled by executing \emph{make bin/cutstock} in the folder.
+Unfortunately, the code has external dependencies, and the user will need to install them before having success in the compilation.
+The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}).
+The library paths are configured inside the Makefile.
+The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
+
 \clearpage
 
 \section{Capítulo de resumo em português}
@@ -299,7 +309,7 @@ Instâncias do PMR são compostas pelo limite de peso \(c\) suportado pela mochi
 Cada item tem dois valores associados: seu peso e o seu lucro.
 O objetivo do PMR é maximizar o lucro dos itens colocados dentro da mochila, enquanto respeitando o limite de peso da mochila.
 
-A aplicação prática do PMR discutida nessa dissertação é: resolver os problemas de avaliação (\emph{pricing problem}) que são gerados quando se resolve a relaxação contínua de uma instância do \emph{Bin Packing Problem} (BPP) ou do \emph{Cutting Stock Problem} (CSP) usando a formulação de cobertura de conjuntos e a abordagem de geração de colunas.
+A aplicação prática do PMR discutida nessa dissertação é: resolver os problemas de avaliação (\emph{pricing subproblem}) que são gerados quando se resolve a relaxação contínua de uma instância do \emph{Bin Packing Problem} (BPP) ou do \emph{Cutting Stock Problem} (CSP) usando a formulação de cobertura de conjuntos e a abordagem de geração de colunas.
 O BPP e o CSP são problemas clássicos da área de pesquisa operacional e importantes para a indústria, vide~\cite{survey2014} e~\cite{gg-61,gg-63}.
 Os melhores limites inferiores para a solução ótima desses dois problemas são os valores das soluções ótimas de suas relaxações contínuas.
 A formulação do BPP/CSP com menos simetrias tem um número exponencial de colunas e, por causa disso, é resolvida usando a abordagem de geração de colunas~\cite{gg-61}.
@@ -347,7 +357,7 @@ Essa distribuição reduzida será referenciada como: \emph{o conjunto de instâ
 \subsubsection{Problemas de avaliação gerados a partir do BPP/CSP}
 
 O \emph{Bin Packing Problem} (BPP) e o \emph{Cutting Stock Problem} (CSP) são problemas clássicos da área de pesquisa operacional.
-Quando a relaxação contínua de uma instância do BPP/CSP é resolvida usando a formulação de cobertura de conjuntos e a abordagem de geração de colunas, são gerados de dezenas até milhares de `problemas de avaliação' (\emph{pricing problems}).
+Quando a relaxação contínua de uma instância do BPP/CSP é resolvida usando a formulação de cobertura de conjuntos e a abordagem de geração de colunas, são gerados de dezenas até milhares de `problemas de avaliação' (\emph{pricing subproblems}).
 Cada um desses problemas de avaliação é uma instância do PMR.
 
 Para uma mesma instância do BPP/CSP, o número de instâncias do PMR geradas, e o lucro dos itens em uma dada instância, pode variar baseado na escolha da solução ótima.
@@ -445,5 +455,5 @@ A análise crítica da literatura, conjuntamente com o resultado dos experimento
 Este algoritmo é o \emph{ordered step-off} que é implementado, com pequenas alterações, pelo UKP5.
 
 Outras contribuições são o conceito de dominância de solução (fraca e forte), que é utilizado pelo \emph{ordered step-off} mas não havia sido conceitualizado.
-Além da evidência trazidas pelos experimentos de que: o pior caso do B\&B pode ocorrer em problemas de avaliação (\emph{pricing problems}); a escolha entre soluções ótimas para um problema de avaliação altera consideravelmente o número de problemas de avaliação gerados subsequentemente (para uma mesma instância do BPP/CSP); algoritmos do PMR que fazem uso intensivo da memória apresentam alteração nos tempos quando executados concorrentemente porém em \emph{cores} isolados; a conversão do lucro dos problemas de avaliação de ponto flutuante para inteiro não causa perda significativa no valor da solução ótima da instância do BPP/CSP subjacente. 
+Além da evidência trazidas pelos experimentos de que: o pior caso do B\&B pode ocorrer em problemas de avaliação (\emph{pricing subproblems}); a escolha entre soluções ótimas para um problema de avaliação altera consideravelmente o número de problemas de avaliação gerados subsequentemente (para uma mesma instância do BPP/CSP); algoritmos do PMR que fazem uso intensivo da memória apresentam alteração nos tempos quando executados concorrentemente porém em \emph{cores} isolados; a conversão do lucro dos problemas de avaliação de ponto flutuante para inteiro não causa perda significativa no valor da solução ótima da instância do BPP/CSP subjacente. 
 

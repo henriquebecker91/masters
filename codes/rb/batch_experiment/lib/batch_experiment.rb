@@ -90,19 +90,23 @@ module BatchExperiment
   # terminated commands on comms_executed.
   def self.update_finished(free_cpus, comms_running, comms_executed) #:nodoc
     comms_running.delete_if do | job |
-      # Don't call '#exited?' twice, store value at variable. If you call
+      # Don't call '#exited?' twice, store its value in a variable. If you call
       # it twice it's possible to remove it from the list of running commands
-      # without freeing a cpu, what will end locking all cpus forever.
+      # without freeing a cpu, what will mark the cpu as busy forever.
       exited = job[:proc].exited?
       if exited
         free_cpus.push(job[:cpu])
-        File.delete(job[:lockfname])
+        job[:out_file].close
+        job[:err_file].close
+        File.open(job[:run_fname], 'a') do | f |
+          f.write(
+            "command: #{job[:command]}\n" +
+            "date_before: #{job[:date_before].utc.to_s}\n" +
+            "date_after: #{Time.now.utc.to_s}\n" +
+            "hostname: #{Socket.gethostname}\n"
+          )
+        end
         comms_executed << job[:command]
-        out = job[:out_file]
-        out.write("\ncommand: " + job[:command])
-        out.write("\ndate_before: " + job[:date_before].utc.to_s)
-        out.write("\ndate_after: " + Time.now.utc.to_s)
-        out.write("\nhostname: " + Socket.gethostname)
       end
       exited # bool returned to delete_if
     end
@@ -114,13 +118,15 @@ module BatchExperiment
   #
   # The output filenames are derived from the commands. The ones with '.out'
   # are the ones with the command standard output. The analogue is valid for
-  # '.err' and standard error. Right before starting a command, a '.unfinished'
-  # file is created. After the command ends its execution this file is
-  # removed. If the command ends its execution by means of a timeout the file
-  # is also removed. The file only remains if the batch procedure is
-  # interrupted (script was killed, or system crashed). This '.unfinished' file
-  # will contain the process pid, if the corresponding process started with
-  # success.
+  # '.err' and standard error. The filenames ending in '.run' are created only
+  # after the process has ended (naturally or by timeout) and contain: the 
+  # sh command, the date before starting the job (up to the second), the date
+  # after the process has ended (up to the second), and the hostname of the
+  # computer where the command was executed. The '.run' files have a second
+  # utility that is to mark which commands were already executed. If a power
+  # outage turns of the computer, or you decide to kill the script, the '.run'
+  # files will store which executions already happened, and if you execute the
+  # script again it will (by default) skip the already executed commands.
   #
   # @param commands [Array<String>] The shell commands.
   # @param conf [Hash] The configurations, as follows:
@@ -144,13 +150,13 @@ module BatchExperiment
   #     and convert it (possibly losing information), to a valid filename. Used
   #     over the commands to define the output files of commands. Default:
   #     BatchExperiment::Comm2FnameConverter.new.
-  #   * skip_done_comms [FalseClass,TrueClass] Skip any command for what a
-  #     corresponding '.out' file exists, except if both a '.out' and a
-  #     '.unfinished' file exists, in the last case the command is always
-  #     be executed. If false, execute all commands and overwrite any previous
-  #     outputs. Default: true.
-  #   * unfinished_ext [String] Extension to be used in place of
-  #     '.unfinished'. Default: '.unfinished'.
+  #   * skip_done_comms [FalseClass,TrueClass] If true then, for each command,
+  #     verify if a corresponding '.run' file exists, if it exists, skip the
+  #     command, if it does not exist then execute the command. If false then it
+  #     removes the corresponding out/err/run files before executing each
+  #     command. Default: true.
+  #   * run_ext [String] Extension to be used in place of '.run'.
+  #     Default: '.run'.
   #   * out_ext [String] Extension to be used in place of '.out'.
   #     Default: '.out'.
   #   * err_ext [String] Extension to be used in place of '.err'.
@@ -193,9 +199,9 @@ module BatchExperiment
     # provided. Don't change the conf argument, only our version of conf.
     conf = conf.clone
     conf[:time_fmt]         ||= 'ext_time: %e\\next_mem: %M\\n'
-    conf[:unfinished_ext]   ||= '.unfinished'
     conf[:out_ext]          ||= '.out'
     conf[:err_ext]          ||= '.err'
+    conf[:run_ext]          ||= '.run'
     conf[:busy_loop_sleep]  ||= 0.1
     conf[:post_timeout]     ||= 5
     conf[:converter]        ||= BatchExperiment::Comm2FnameConverter.new
@@ -213,20 +219,19 @@ module BatchExperiment
       commfname = conf[:converter].call(command)
       out_fname = conf[:output_dir] + commfname + conf[:out_ext]
       err_fname = conf[:output_dir] + commfname + conf[:err_ext]
-      lockfname = conf[:output_dir] + commfname + conf[:unfinished_ext]
+      run_fname = conf[:output_dir] + commfname + conf[:run_ext]
 
-      if conf[:skip_done_comms] && File.exists?(out_fname)
-        if File.exists?(lockfname)
-          puts "Found file #{out_fname}, but a #{lockfname} also exists:"
-          puts "Will execute command '#{command}' anyway."
-        else
-          puts "Found file #{commfname}, skipping command: #{command}"
-          STDOUT.flush
-          next
-        end
+      if conf[:skip_done_comms] && File.exists?(run_fname)
+        puts "Found file #{commfname} -- skipping command: #{command}"
+        STDOUT.flush
+        next
+      else
+        File.delete(out_fname)
+        File.delete(err_fname)
+        File.delete(run_fname)
       end
 
-      puts "Waiting to execute command: #{command}"
+      puts "Next command in the queue: #{command}"
       STDOUT.flush
 
       while free_cpus.empty? do
@@ -238,7 +243,7 @@ module BatchExperiment
 
       cproc = ChildProcess.build(
         'taskset', '-c', cpu.to_s,
-        'time', '-f', conf[:time_fmt], '--append', '-o', out_fname,
+        'time', '-f', conf[:time_fmt], '--append', '-o', run_fname,
         'timeout', '--preserve-status', '-k', "#{conf[:post_timeout]}s",
           "#{conf[:timeout]}s",
         'sh', '-c', command
@@ -246,7 +251,6 @@ module BatchExperiment
 
       cproc.cwd = conf[:cwd]
 
-      File.open(lockfname, 'w') {} # empty on purpose
       out = File.open(out_fname, 'w')
       err = File.open(err_fname, 'w')
       cproc.io.stdout = out
@@ -258,16 +262,14 @@ module BatchExperiment
       comms_running << {
         proc: cproc,
         cpu: cpu,
-        lockfname: lockfname,
         command: command,
         date_before: date_before,
         out_file: out,
+        err_file: err,
+        run_fname: run_fname,
       }
 
-      # The lock file now stores the process pid for debug reasons.
-      File.open(lockfname, 'w') { | f | f.write cproc.pid }
-
-      puts "command assigned to cpu#{cpu}"
+      puts "The command was assigned to cpu#{cpu}."
       STDOUT.flush
     end
 
@@ -438,8 +440,8 @@ module BatchExperiment
     #conf[:skip_commands] defaults to false/nil
 
     # Get some of the batch config that we use inside here too.
+    run_ext         = batch_conf[:run_ext]        || '.run'
     out_ext         = batch_conf[:out_ext]        || '.out'
-    unfinished_ext  = batch_conf[:unfinished_ext] || '.unfinished'
     output_dir      = batch_conf[:output_dir]     || './'
     converter = batch_conf[:converter].clone unless batch_conf[:converter].nil?
     converter ||= BatchExperiment::Comm2FnameConverter.new
@@ -521,18 +523,18 @@ module BatchExperiment
       curr_line = [algorithm, filename, run_number]
 
       partial_fname = converter.call(exp_comm)
+      run_fname = output_dir + partial_fname + run_ext
       out_fname = output_dir + partial_fname + out_ext
-      lockfname = output_dir + partial_fname + unfinished_ext
       extractor = run_info[:comm_info][:extractor]
 
-      if File.exists?(out_fname)
-        if File.exists?(lockfname)
-          puts "Ignored file '#{out_fname}' because there was a"
-             + "  '#{lockfname}' file too."
-        else
-          f_content = File.open(out_fname, 'r') { | f | f.read }
-          curr_line << extractor.extract(f_content)
-        end
+      if File.exists?(run_fname)
+        run_info = File.open(run_fname, 'r') { | f | f.read }
+        output = File.open(out_fname, 'r') { | f | f.read }
+        # TODO: in the future change the extractors to receive
+        # three inputs (out/err/run). If the runs create arbitrary files
+        # with relevant info, the extractor will need to find, and open
+        # them itself (i.e. it's not our job).
+        curr_line << extractor.extract(output + "\n" + run_info)
       end
 
       body << curr_line.join(conf[:separator])

@@ -62,7 +62,7 @@ The paper introduced the MTU2 algorithm (and the author will refer to it as the 
 The MTU2 algorithm was designed for large instances (up to 250,000 items).
 Only sorting the items list was already computationally expensive for the period, and the solutions often involved only the most efficient items.
 The MTU2 main feature was grouping and sorting only the~\(k = max(100, \frac{n}{100})\) most efficient items, and calling MTU1 over them.
-The instance of the UKP comprised of this reduced items list was called `tentative core problem'.
+The UKP instance consisting of this reduced items list and the original knapsack capacity was called `tentative core problem'.
 If the optimal solution of the tentative core problem was proven to be optimal for the original problem, the algorithm stopped.
 Otherwise, the optimal solution of the tentative core problem was used as a lower bound to remove dominated items.
 After this, the~\(k\) most efficient items outside the tentative core problem were added to it, restarting the process. 
@@ -95,7 +95,7 @@ For those instances, MTU2 dominates EDUK when the weight of the smallest item is
 Only one comparison is made against another DP algorithm.
 The DP algorithm used seems to be a na{\"i}ve DP algorithm with a preprocessing phase that removes simple dominance.
 The comparison uses a completely different dataset of small instances, in an effort to take into account real-world applications of the UKP, as the ones provenient from solving BPP and CSP with column generation.
-The average runtimes in this comparison are smaller than 0.1 seconds, and the difference between the average times of EDUK and the naive DP are about 20\% (with EDUK being faster).
+The average run times in this comparison are smaller than 0.1 seconds, and the difference between the average times of EDUK and the naive DP are about 20\% (with EDUK being faster).
 
 EDUK2 is an improvement of EDUK proposed in~\cite{pya}.
 The main improvement brought up by EDUK2 is the hybridization of EDUK with the B\&B approach.

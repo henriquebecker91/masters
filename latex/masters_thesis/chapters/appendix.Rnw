@@ -59,7 +59,7 @@ saw <- table_for_dist("saw")
 @
 
 \begin{table}
-\caption{Results for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by UKP5, MGREENDP1 or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
+\caption{Results for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by UKP5, MGREENDP1 or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
 \vspace{0.1cm}
 \label{tab:times_pya}
 \def\arraystretch{1.1}
@@ -163,7 +163,7 @@ saw <- table_for_dist("saw")
 
 @
 \begin{table}
-\caption{Results for the MTU implementatios over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{ter}, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\) (i.e. the number of runs that didn't end in timeout). The time unit of the table values is seconds.}
+\caption{Results for the MTU implementatios over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{ter}, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\) (i.e. the number of runs that didn't end in timeout). The time unit of the table values is seconds.}
 \vspace{0.1cm}
 \label{tab:times_mtu}
 \def\arraystretch{1.1}
@@ -255,7 +255,7 @@ t <- breq %>% mutate(n = as.integer(get_n(filename))) %>%
             min = format_n(min(internal_time, na.rm = TRUE)),
             max = format_n(max(internal_time, na.rm = TRUE)),
             ter = sum(!is.na(internal_time)))
-lt <- xtable(t, caption = "Results of the BREQ 128-16 Standard Benchmark (see Section \\ref{sec:breq_exp}). For each row, there's a set \\(T\\) comprised by the times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We don't count the time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{ter} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that didn't end in timeout). The time unit of the table values is seconds.", label = 'tab:breq')
+lt <- xtable(t, caption = "Results of the BREQ 128-16 Standard Benchmark (see Section \\ref{sec:breq_exp}). For each row, there is a set \\(T\\) comprised by the run times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We do not count the run time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{ter} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that did not end in timeout). The time unit of the table values is seconds.", label = 'tab:breq')
 align(lt) <- c('r', 'c', rep('r', 5), 'c')
 print(lt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, add.to.row = list(pos = list(0), command = "\\hline \\endhead ")) 
 @
@@ -284,6 +284,8 @@ print(lt)
 \end{landscape}
 \fi
 
+\clearpage
+
 \section{Data and code related to CSP pricing subproblem dataset}
 \label{sec:csp_appendix}
 The 596 selected instances of CSP are available in \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}, and the code used to solve the SCF relaxation can be found in the same repository (\url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}).
@@ -292,8 +294,6 @@ Unfortunately, the code has external dependencies, and the user will need to ins
 The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}).
 The library paths are configured inside the Makefile.
 The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
-
-\clearpage
 
 \section{Capítulo de resumo em português}
 
@@ -410,7 +410,7 @@ Os algoritmos híbridos que são usados nos experimentos são: EDUK2 e GREENDP.
 Os seguintes algoritmos foram implementados em C++ pelo autor desse trabalho para realização de experimentos: UKP5, MTU1, MTU2 e GREENDP.
 Os seguintes algoritmos já possuiam uma implementação disponível publicamente: EDUK (OCaml), EDUK2 (OCaml), MTU1 (Fortran77) e MTU2 (Fortran77).
 
-\subsection{Experimentos e análise}
+\subsection{Experimentos e análises}
 
 Cinco experimentos são apresentados nessa seção.
 O primeiro experimento consistiu na execução de UKP5, EDUK2, e GREENDP sobre o conjunto de instâncias do PYAsUKP.

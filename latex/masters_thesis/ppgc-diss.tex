@@ -30,6 +30,16 @@
 % Use unicode
 \usepackage[utf8]{inputenc} % pacote para acentuação
 
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{hyperref}
+\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%  save the current 一
+  \do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j%
+  \do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t%
+  \do\u\do\v\do\w\do\x\do\y\do\z\do\A\do\B\do\C\do\D%
+  \do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L\do\M\do\N%
+  \do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X%
+  \do\Y\do\Z\do\1\do\2\do\3\do\4\do\5\do\6\do\7\do\8\do\9\do\0}
+%\usepackage{bigfoot}          % needed to allow \verb in footnotes % removed for breaking footnotes between pages
 % Necessário para incluir figuras
 \usepackage{mathtools}          % for \DeclarePairedDelimiter
 \usepackage{amssymb}
@@ -166,7 +176,7 @@ Don’t you see that there’s something wrong with that?''\\}
 \noindent
 To my parents for their unending patience, and for completely supporting my choices, while offering criticism.\\\\
 To my advisor funnily for the exact same reasons, while in a little more specific context.\\\\
-To my hometown friends for helping me recover my energy (and sanity) in the weekends, and understanding when that wasn't possible.\\\\
+To my hometown friends for helping me recover my energy (and sanity) in the weekends, and understanding when that was not possible.\\\\
 To my brother for the unfiltered discussions and exchange of ideas, and also for making me laugh.\\\\
 To my college teachers for always seeing in me a future colleague of the profession.\\\\
 To my friend Didi for accepting, on short notice, the job of revising my terrible English.\\\\

@@ -1,4 +1,4 @@
-\chapter{Conclusions and Future Work}
+\chapter{Conclusions and future work}
 
 \section{Conclusions}
 
@@ -43,7 +43,7 @@ Also, \emph{papers and experiments do not always provide all relevant context.}
 One example of context that is not always provided, or given much attention, is if the runs were executed in parallel, or not.
 The experiments from Section \ref{sec:serial_parallel_exp} show a significant difference between performing an experiment with runs in parallel, or serially.
 The magnitude of the difference vary with the specific algorithm, computer and dataset.
-In one of the computer settings, the average times of UKP5 when executed in parallel were about the double of the average serial times.
+In one of the computer settings, the average run times of UKP5 when executed in parallel were about the double of the average serial run times.
 In an indirect comparison between results presented by different papers, this detail could lead to a method being considered significantly faster than other only because one author executed serial runs and the other parallel runs.
 
 \section{UKP-specific knowledge contributions}
@@ -86,18 +86,18 @@ In an algorithm with periodicity checking, the utility of upper bounds on the pe
 Note that some algorithms would not even have such benefits, as they do not allocate or initialize the memory in advance.
 
 The evidence that constitutes the third knowledge contribution can be found in Section \ref{sec:csp_experiments}.
-In the majority of the instances, the times spent by both the B\&B and DP approaches when solving pricing problems was significantly smaller than the times solving the master problems of the same instance.
+In the majority of the instances, the time spent by both the B\&B and DP approaches when solving pricing problems was significantly smaller than the times solving the master problems of the same instance.
 Nevertheless, for some instances, the B\&B approach has presented its worst-case behavior and, in these instances, more time was spent solving pricing subproblems then solving the master problem.
 
 For a single example, we will focus on instance 201\_2500\_DI\_11.txt, for which MTU1\_CUTSTOCK ended in timeout.
 The pricing problems generated when solving such instance have \(n < 200\) and \(c = 2472\).
 Before timeout, MTU1 solved about 700 of those pricing problems in much less than a millisecond each.
-However, there was also a few pricing problems that took ten seconds or more to solve; times like: 10, 12, 13, 13, 26, 32, 49, 54, and 351 seconds.
+However, there was also a few pricing problems that took ten seconds or more to solve; run times like: 10, 12, 13, 13, 26, 32, 49, 54, and 351 seconds.
 All instances shared the same \(n\), \(c\) and the same items weights, the only difference between them is the profit values.
 Such behaviour corroborates with what was said about B\&B algorithms being strongly affected by the items distribution, and less by \(n\) and \(c\).
 
 It is worth mentioning that almost all instances that ended in timeout are artificial instances created to be hard to solve.
-They were proposed in \cite{survey2014}.
+Such instances were proposed in \cite{survey2014}.
 Unfortunately, the author of this thesis did not have the time to gather CSP problems from industrial sources, and the experimentation had to stop at the literature instances.
 Consequently, we cannot state that B\&B algorithms are not viable for solving pricing problems, only that there is evidence that the B\&B worst-case can arise in such circumstances.
 
@@ -109,7 +109,7 @@ While the following quote was written in the context of the 0-1 KP, the author f
 
 The last three contributions are thoroughly discussed in the context of the experiments that originated them (for the fourth and sixth contributions see Section \ref{sec:csp_experiments}, and for the fifth, Section \ref{sec:serial_parallel_exp}).
 The fourth contribution is specially important to a researcher testing an algorithm that needs to solve unbounded knapsack pricing problems.
-Minor changes in the operation of the UKP solver, as the order it receives the items, can change the exact optimal solution returned, and consequently the number of pricing problems generated and the whole algorithm runtime.
+Minor changes in the operation of the UKP solver, as the order it receives the items, can change the exact optimal solution returned, and consequently the number of pricing problems generated and the whole algorithm run time.
 Such chaotic behaviour can lull an experimenter into believing that irrelevant changes have some deeper meaning, or add noise to relevant changes.
 The same can be said about executing memory intensive algorithms in serial, or parallel (fifth contribution).
 The sixth and last contribution, while corroborated by the vast majority of the runs, maybe has contributed to our only outlier, and needs further validation.
@@ -127,11 +127,11 @@ An outline of the UKP-specific technological contributions follows.
 \end{itemize}
 
 The author will not discuss such technical contributions as they are only a byproduct of the research.
-It is only relevant to note that the author does not suggests that the BREQ 128-16 Standard Benchmark should be used for new experiments comparing algorithms for the UKP.
+The author does not suggests that the BREQ 128-16 Standard Benchmark should be used for new experiments comparing algorithms for the UKP.
 The dataset can yet be used to study the behaviour of new solving approaches, maybe giving some insight about the approach inner workings.
-``If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems.''~\cite[p.~7]{portable_rng}.
+%``If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems.''~\cite[p.~7]{portable_rng}.
 
-\section{Future Work}
+\section{Future work}
 \label{sec:future_works}
 
 Unfortunately, many questions could not be answered in the scope of this thesis.

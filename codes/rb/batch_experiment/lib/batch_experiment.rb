@@ -5,6 +5,16 @@ require 'socket'
 # The main module, the two main utility methods offered are ::batch and
 # ::experiment.
 module BatchExperiment
+  # Exception class raised when multiple extractor objects passed to
+  # ::experiment (by the comms_info parameter) disagree on the content of the
+  # columns. Ex.: If we call ::experiment with different extractor objects, all
+  # arrays returned by the #names method of those extractors should be equal or
+  # a prefix of the biggest array. Ex.: ['a', 'b'], ['a', 'b'], ['a'] and
+  # ['a', 'b', 'c'] works, but adding ['a', 'c'] will end the program with
+  # this exception. This is made to avoid making the mistake of generating a
+  # csv where the same column has a different meaning for each row.
+  class ColumnSpecError < ArgumentError; end
+
   # The default callable object used by Comm2FnameConverter to convert
   # a command into a filename. Comm2FnameConverter don't create a sanitized
   # filename from the command string (it uses its first argument to do this,
@@ -222,13 +232,13 @@ module BatchExperiment
       run_fname = conf[:output_dir] + commfname + conf[:run_ext]
 
       if conf[:skip_done_comms] && File.exists?(run_fname)
-        puts "Found file #{commfname} -- skipping command: #{command}"
+        puts "Found file: #{commfname} -- skipping command: #{command}"
         STDOUT.flush
         next
       else
-        File.delete(out_fname)
-        File.delete(err_fname)
-        File.delete(run_fname)
+        if File.exists? out_fname then File.delete out_fname end
+        if File.exists? err_fname then File.delete err_fname end
+        if File.exists? run_fname then File.delete run_fname end
       end
 
       puts "Next command in the queue: #{command}"
@@ -324,16 +334,6 @@ module BatchExperiment
     end
     ret
   end
-
-  # Exception class raised when multiple extractor objects passed to
-  # ::experiment (by the comms_info parameter) disagree on the content of the
-  # columns. Ex.: If we call ::experiment with different extractor objects, all
-  # arrays returned by the #names method of those extractors should be equal or
-  # a prefix of the biggest array. Ex.: ['a', 'b'], ['a', 'b'], ['a'] and
-  # ['a', 'b', 'c'] works, but adding ['a', 'c'] will end the program with
-  # this exception. This is made to avoid making the mistake of generating a
-  # csv where the same column has a different meaning for each row.
-  class ColumnSpecError < ArgumentError; end
 
   # @!visibility private
   # Check if the headers can be combined, if they can return a shallow copy of

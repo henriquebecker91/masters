@@ -163,7 +163,7 @@ ggplot(csv_no_na_order,
   theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:pya_fast}
 \end{figure}
 
@@ -297,7 +297,7 @@ p2 <- ukp_time_comp_plot(mtu2, 'bottom') + ggtitle("MTU2 (Fortran vs C++)")
 grid.arrange(p1, p2)
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:breq_bench}
 \end{figure}
 
@@ -362,7 +362,7 @@ ggplot(csv_no_na,
   theme(legend.position = 'bottom')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:breq_bench}
 \end{figure}
 
@@ -508,7 +508,7 @@ ggplot(master_time,
   theme(legend.position = 'bottom')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:csp_total_time}
 \end{figure}
 
@@ -551,7 +551,7 @@ ggplot(csv_no_na_order,
   theme(legend.position = 'bottom')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:csp_knapsack_time}
 \end{figure}
 
@@ -593,7 +593,7 @@ ggplot(corr_time,
   theme(legend.position = 'bottom')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:percentage_knap_subproblem}
 \end{figure}
 
@@ -635,7 +635,7 @@ ggplot(master_time,
   theme(legend.position = 'bottom')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:master_time}
 \end{figure}
 
@@ -669,7 +669,7 @@ ggplot(iter_t,
   theme(legend.position = 'bottom')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:relative_iter_count}
 \end{figure}
 
@@ -747,7 +747,7 @@ ggplot(t,
   facet_wrap(~ type) + geom_point()
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:comp_num_iter}
 \end{figure}
 
@@ -888,7 +888,7 @@ ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) +
   scale_x_continuous(trans = 'log10', breaks = c(0.1, 10, 100))
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:mean_time_env_infl}
 \end{figure}
 
@@ -970,7 +970,7 @@ ggplot(data = com_sd,
        geom_point() + facet_wrap(~ env, scales = 'free')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:sd_env_infl}
 \end{figure}
 

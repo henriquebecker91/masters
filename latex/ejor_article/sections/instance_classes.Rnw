@@ -68,7 +68,7 @@ qplot(w, p, data = t,
   ylab = 'profit')
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:uncorrelated_example}
 \end{figure}
 
@@ -393,7 +393,7 @@ qplot(w, p, data = t,
   ylab = 'profit')     
 @
 \end{center}
-\legend{Source: the author.}
+%\legend{Source: the author.}
 \label{fig:breq_example}
 \end{figure}
 

@@ -1,0 +1,640 @@
+\chapter{Approaches and algorithms}
+\label{sec:app_and_alg}
+
+In this chapter, some approaches and algorithms for solving the UKP will be discussed.
+The objectives of this chapter are: to present relevant details that did not fit in the literature review; to further develop what was said in the last section, about some approaches favoring some item distributions; to give readers some base to understand the results of the experiments (Section~\ref{sec:exp_and_res}); and to explain the concept of solution dominance, mentioned in Section~\ref{sec:dom_rel}.
+The objective is not to present an exhaustive list of approaches and algorithms.
+
+%Two techniques are often used for solving UKP: dynamic programming (DP)~\cite{eduk},~\cite[p. 214]{garfinkel},~\cite[p. 311]{tchu} and branch and bound (B\&B)~\cite{mtu2}. 
+%The DP approach has a stable pseudo-polynomial time algorithm linear on the capacity and number of items. 
+%The B\&B approach can be less stable. 
+%It can be faster than DP on instances with some characteristics, such as when the remainder of the division between the weight of the best item by the capacity is small; or the items have a big efficiency variance. Nonetheless, B\&B has always the risk of an exponential time worst case.
+% The state-of-the-art solver for the UKP, introduced by~\cite{pya}, is a hybrid solver that combines DP and B\&B. 
+%It tries to solve the problem by B\&B, and if this fails to solve the problem quickly, it switches to DP using some data gathered by the B\&B to speed up the process. 
+%The solver's name is PYAsUKP, and it is an implementation of the EDUK2 algorithm.
+
+\section{Conversion to other KP variants}
+
+In Section~\ref{sec:introduction}, it was pointed out that the UKP can be seen as a special case of BKP where, for each item type~\(i\), there are at least~\(\floor{\frac{c}{w_i}}\) copies of that item type available in an instance.
+Consequently, it is possible to convert any instance of the UKP in an instance of the BKP, and to solve it with an algorithm designed to solve the BKP.
+In this work, this approach will not be used or thoroughly studied.
+The rationale for this choice is that such approach cannot yield competitive performance results, for reasons that are explained next paragraph.
+
+An algorithm designed to solve the BKP needs a mechanism to prevent solutions from exceeding the available amount of each item.
+An algorithm designed for the UKP does not have this overhead.
+An algorithm designed for the UKP needs to keep track of the items used in the solutions, but does not need to frequently access this information (as to check if it can add an additional copy of one item to a solution).
+Also, an algorithm designed for the UKP can fully exploit the properties described in Section~\ref{sec:well_known_prop}.
+
+In~\cite{mtu1}, experiments converting instances of the UKP into instances of the BKP were realized.
+The experiments yielded the expected result (i.e. the BKP algorithms performed poorly in comparison to UKP-specific algorithms).
+The conclusions derived from the experiment are fragile, because only small instances were used.
+However, based on the rationale exposed in the last paragraph, the author of this thesis believes it is safe to assume that, for the same instance of the UKP, and the same solving approach (DP, B\&B, \dots), a state-of-the-art algorithm for the UKP will outperform a state-of-the-art algorithm for the BKP.
+
+\section{Dynamic Programming}
+\label{sec:dp_algs}
+
+The Dynamic Programming (DP) approach is the oldest one found in the literature review (Section~\ref{sec:prior_work}).
+Its worst-case time complexity is~\(O(nc)\) (pseudo-polynomial).
+The DP approach can be considered stable, or predictable, compared to other approaches.
+Stable in the sense that its run time variation when solving many instances with the same characteristics (i.e.~\(n\),~\(c\) and items distribution) can be lower than other approaches. 
+Predictable in the sense that it is easier to predict a reasonable time interval for solving an instance based in the characteristics just mentioned, than it is with other approaches.
+
+The DP worst-case space complexity is~\(O(n + c)\), which can be considerably greater than other approaches that do not allocate memory linear to~\(c\).
+However, the space needed can be reduced by many optimizations.
+Some of these optimizations are: using a periodicity bound as explained in Section~\ref{sec:periodicity}; using modular arithmetic to reduce~\(c\) to~\(w_{max}\) in at least one array, see~\cite[p.~17]{gg-66}; using binary heaps instead of arrays, as the heap can use less memory than an array of~\(c\) positions if~\(w_{min}\) is sufficiently big.
+
+The DP approach often gives an optimal solution for each capacity smaller than~\(c\).
+However, some space optimizations can remove such feature.
+
+\subsection{The naïve algorithm}
+
+In this thesis, the author sometimes mentions to the naïve (or basic) DP algorithm for the UKP.
+The naive algorithm is an algorithm specifically designed for the UKP, but that applies no optimizations.
+It is the most straightforward implementation of the recursion that describes the problem.
+This algorithm will always execute about~\(n\times c\) operations (which is the worst case performance for other DP algorithms).
+It does not implement any dominance relation\footnote{The only exception is that when two or more distinct solutions have the same weight only one of them is kept.}, does not use periodicity or prunes symmetric solutions. 
+
+\begin{algorithm}[!t]
+\caption{Naive DP algorithm}\label{alg:naive_dp}
+\begin{algorithmic}[1]
+\Procedure{NaiveDP}{$n, c, w, p, w_{min}$}
+  \State \(g \gets\) array of~\(c + 1\) positions, range~\([0,~w_{min})\) initialized to~\(0\)
+  \State \(d \gets\) array of~\(c + 1\) positions, range~\([0,~w_{min})\) initialized to~\(0\)
+  
+  \For{\(y \gets w_{min},~c\)}
+    \State \(g[y] \gets 0\)
+    \For{\(i \gets1,~n\)}
+      \If{\(w_i > y\)}
+      	\State \textbf{end inner loop}
+      \EndIf
+      \If{\(g[y - w_i] + p_i > g[y]\)}
+        \State \(g[y] \gets g[y - w_i] + p_i\)
+        \State \(d[y] \gets i\)
+      \EndIf
+    \EndFor
+  \EndFor
+  \State \textbf{return}~\(g[c]\)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The pseudo-code of the naive DP algorithm can be seen in Algorithm~\ref{alg:naive_dp}.
+The notation is the one introduced in Section~\ref{sec:formulation}.
+The letter~\(y\) will be used in this and other algorithms to denote an arbitrary capacity value.
+This implementation of the algorithm considers that the items~\(i \in \{1,~...,~n\}\) are ordered by non-decreasing weight (i.e.~\(w_1 \leq w_2 \leq ... \leq w_n\)).
+The arrays indices will always be base zero, and the items list indices base one.
+The procedure to recover the items that constitute the optimal solution will not be given for this and the remaining DP algorithms because, in general, it is the same procedure explained in UKP5 (see Section \ref{sec:ukp5}).
+
+\subsection{The algorithm of Garfinkel and Nemhauser}
+
+The algorithm given in~\cite[p.~221]{garfinkel} can be seen as variation of the naive DP algorithm (see Algorithm~\ref{alg:gar_dp}).
+While it does not seem to be much of an improvement, the use of the~\(i \leq d[y - w_i]\) test eliminates solution symmetry.
+This test, together with the items being ordered by non-increasing efficiency (\(\frac{p_1}{w_1} \geq \frac{p_2}{w_2} \geq ... \geq \frac{p_n}{w_n}\)), can considerably improve the running times.
+The condition can also be seen as: add a new item to a pre-existing solution if, and only if, the new item is the most efficient item already in the solution, or an item even more efficient.
+
+\begin{algorithm}[!t]
+\caption{Garfinkel's DP algorithm}\label{alg:gar_dp}
+\begin{algorithmic}[1]
+\Procedure{GarDP}{$n, c, w, p, w_{min}$}
+  \State~\(g \gets\) array of~\(c + 1\) positions, range~\([0,~w_{min})\) initialized to~\(0\)
+  \State~\(d \gets\) array of~\(c + 1\) positions, range~\([0,~w_{min})\) initialized to~\(n\)
+  
+  \For{\(y \gets w_{min},~c\)}
+    \State~\(g[y] \gets 0\)
+    \For{\(i \gets1,~n\)}
+      \If{\(w_i \leq y~\) \textbf{and}~\(i \leq d[y - w_i]\) \textbf{and}~\(g[y - w_i] + p_i > g[y]\)}
+        \State~\(g[y] \gets g[y - w_i] + p_i\)
+        \State~\(d[y] \gets i\)
+      \EndIf
+    \EndFor
+  \EndFor
+  \State \textbf{return}~\(g[c]\)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{The step-off algorithms of Gilmore and Gomory}
+\label{sec:gg_algs}
+
+Four DP algorithms for the UKP are described in~\cite[p.~14~to~17]{gg-66}. 
+With the exception of the first algorithm, each one of the three remaining algorithms is an improvement of the previous one.
+The second and third algorithms (respectively, the `ordered step-off' and the `terminating step-off') are very similar to the UKP5.
+The second algorithm is basically UKP5 without a periodicity check, and the third algorithm is an UKP5 with a different periodicity check.
+To avoid repetition, we will ignore small implementation differences, and present only UKP5, in the next section. 
+The first and the fourth DP algorithms can be ignored because the first is dominated by the second/third versions; and the fourth algorithm reduce memory usage at cost of a little extra processing (not an interesting trade-off in the context of this work).
+
+As already mentioned, the author of this thesis proposed UKP5 in~\cite{sea2016}, believing it was novel.
+The UKP5 algorithm was thought as an improvement of the Garfinkel's DP Algorithm presented in last section. 
+The~\cite{gg-66} paper was not checked at time because it was cited in~\cite{garfinkel}, and we did not expect the book to provide a worsened version of the algorithm on purpose.
+In Section 6.4 of that book, a DP algorithm was presented as the last of a series of improvements over the naive DP algorithm.
+However, if we check the chapter notes, there is the comment: ``6.4: The recursion of this section is based on Gilmore and Gomory (1966).
+See Exercise 21 for a variation that will be more efficient for some data sets.''.
+The algorithm presented in Section 6.4 was a version of the algorithm in~\cite{gg-66} with \emph{many} of its relevant optimizations removed, and in exercise 21 it is expected of the reader to recreate \emph{one} of these optimizations based on hints given at the exercise.
+The author of this thesis believes that this fact went unnoticed by previous authors that cited the book.
+The book did not provide the answers for the exercises.
+
+% After the 1.B Ordered Step-Off, there is a `terminating' version of it that uses a different version of my periodicity check, The gg check needs a vector with the max weight between the first and the item ix when they are ordered by efficiency (ex: for w = {3, 5, 2, 8}, the array would be w' = {3, 5, 5, 8}), at position y it checks if y < y' + w'[d[y]]. The y' variable is update when y reaches a solution where d[y] > 0 && g[y] > 0 (a solution that the most efficientitem used is not the best item). The gg way is better as solutions stored that are changed to use the best item do not count. The UKP5 version do not use the extra array, but if a position is first saved with a bad solution and after changed to a good solution that uses the best item, tha position is yet marked as used by a non-best item, while the gg version will not. 
+% And there is the 1.C that uses a w_max positions for one of the arrays. Saving memory and using the cache memory better.
+% MAYBE FAST IMPLEMENT BOTH METHODS AND ADD THEM TO THE THESIS? IF NOT TO AN REVISED VERSION THAT WILL BE PUBLISHED ONLINE, AND SHOW THE BEST VERSION OF THE GILMORE AND GOMORY ALGORITHM?
+
+\subsection{UKP5}
+\label{sec:ukp5}
+
+UKP5 was inspired by the DP algorithm described by Garfinkel~\cite[p. 221]{garfinkel}. 
+The name ``UKP5'' is due to five improvements applied over that algorithm:
+
+\begin{enumerate}
+  \item \textbf{Symmetry pruning}: symmetric solutions are pruned in a more efficient fashion than in~\cite{garfinkel};
+  \item \textbf{Sparsity}: not every position of the optimal solutions value array has to be computed;
+  \item \textbf{Dominated solutions pruning}: dominated solutions are pruned;
+  \item \textbf{Time/memory trade-off}: the test~\(w_i \leq y\) from the algorithm in~~\cite{garfinkel} was removed, the trade-off was using O(\(w_{max}\)) memory;
+  \item \textbf{Periodicity}: the periodicity check suggested in~\cite{garfinkel}, but not implemented there, was adapted and implemented.
+\end{enumerate}
+
+As already pointed out, UKP5 is very similar to the ordered step-off algorithm from~\cite{gg-66}.
+Aside for minor adaptations, this section is the same as the one presented in~\cite{sea2016}, written when the author was not yet aware of those similarities.
+The discussion about the similarities between UKP5 and the DP algorithms from Gilmore and Gomory is restricted to Section~\ref{sec:gg_algs}.
+
+\begin{algorithm}[!t]
+\caption{UKP5 -- Computation of $opt$}\label{alg:ukp5}
+\begin{algorithmic}[1]
+\Procedure{UKP5}{$n, c, w, p, w_{min}, w_{max}$}
+  \State~\(g \gets\) array of~\(c + w_{max} - w_{min}\) positions each one initialized with~\(0\)\label{create_g}
+  \State~\(d \gets\) array of~\(c + w_{max} - w_{min}\) positions, not initialized
+  
+  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
+    \If{\(g[w_i] < p_i\)}
+      \State~\(g[w_i] \gets p_i\)
+      \State~\(d[w_i] \gets i\)
+    \EndIf
+  \EndFor\label{end_trivial_bounds}
+
+  \State~\(opt \gets 0\)\label{init_opt}
+
+  \For{\(y \gets w_{min}, c - w_{min}\)}\label{main_ext_loop_begin}\Comment{Can end earlier because of periodicity check}
+    \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}\Comment{Handles sparsity and prunes dominated solutions}
+    	\State \textbf{continue}\label{alg:continue}\Comment{Ends current iteration and begins the next}
+    \EndIf\label{if_less_than_opt_end}
+    
+    \State~\(opt \gets g[y]\)\label{update_opt}
+    
+    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}\Comment{Creates new solutions (never symmetric)}
+      \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
+        \State~\(g[y + w_i] \gets g[y] + p_i\)
+        \State~\(d[y + w_i] \gets i\)
+%      \ElsIf{\(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\)}
+%        \State~\(d[y + w_i] \gets i\)
+      \EndIf\label{if_new_lower_bound_end}
+    \EndFor\label{main_inner_loop_end}
+  \EndFor\label{main_ext_loop_end}
+
+  \For{\(y \gets c - w_{min} + 1, c\)}
+    \If{\(g[y] > opt\)}
+      \State~\(opt \gets g[y]\)
+    \EndIf
+  \EndFor
+  \State \textbf{return}~\(opt\)
+
+%  \For{\(y \gets c-w_{min}+1, c\)}\label{get_y_opt_loop_begin}\Comment{Removal of dominated solutions}
+%    \If{\(g[y] > opt\)}\label{last_loop_inner_if}
+%      \State~\(opt \gets g[y]\)
+%      \State~\(y_{opt} \gets y\)
+%    \EndIf
+%  \EndFor\label{get_y_opt_loop_end}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+A pseudocode of UKP5 is presented in Algorithm~\ref{alg:ukp5}.
+We have two main data structures, the arrays~\(g\) and~\(d\), both with dimension~\(c + w_{max} - w_{min}\). 
+\(g\) is a sparse array where we store solutions profit.
+If~\(g[y] > 0\) then there exists a non-empty solution~\(s\) with~\(w_s = y\) and~\(p_s = g[y]\). 
+The~\(d\) array stores the index of the last item used on a solution.
+If~\(g[y] > 0 \land d[y] = i\) then the solution~\(s\) with~\(w_s = y\) and~\(p_s = g[y]\) has at least one copy of item~\(i\). 
+This array makes it trivial to recover the optimal solution, but its main use is to prune solution symmetry.
+
+Our first loop (lines~\ref{begin_trivial_bounds} to~\ref{end_trivial_bounds}) simply stores all single item solutions in the arrays~\(g\) and~\(d\). 
+For a moment, let us ignore lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}, and replace~\(d[y]\) (at line~\ref{main_inner_loop_begin}) by~\(n\). 
+With these changes, the second loop (between lines~\ref{main_ext_loop_begin} and~\ref{main_ext_loop_end}) 
+iterates~\(g\) and when it finds a stored solution (\(g[y] > 0\)) it tests~\(n\) new solutions 
+(the combinations of the current solution with every item). 
+The new solutions are stored at~\(g\) and~\(d\), replacing solutions already stored if the new solution has the same weight but a greater profit value.
+
+When we add the lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end} to the algorithm, it stops creating new solutions from dominated solutions. 
+%We use the \textbf{continue} keyword at line~\ref{alg:continue} meaning the current iteration ends, and the next iteration begins (as is common in C-like programming languages). 
+If a solution~\(s\) with a smaller weight (\(w_s < y\)) has a bigger profit (\(p_s = opt > p_t\), where~\(w_t = y \land p_t = g[y]\)), then~\(s\) dominates~\(t\). 
+If a solution~\(s\) dominates~\(t\) then, for any item~\(i\), the~\(s \cap \{i\}\) solution will dominate the~\(t \cap \{i\}\) solution. 
+This way, new solutions created from~\(t\) are guaranteed to be dominated by the solutions created from~\(s\). 
+A whole superset of~\(t\) can be discarded without loss to solution optimality. 
+
+The change from~\(n\) to~\(d[y]\) is based on the algorithm from~\cite{garfinkel} and it prunes symmetric solutions.
+In the naive DP algorithm, if the item multiset~\(\{1, 2, 3\}\) is a valid solution, then every permutation of it is reached in different ways, wasting processing time. 
+To avoid computing symmetric solutions, we enforce non-increasing order of the items index. 
+Any item inserted in a solution~\(s\) has an index that is equal to or lower than the index of the last item inserted on~\(s\). 
+This way, solutions like~\(\{1, 2, 3\}\) or~\(\{2, 1, 3\}\) cannot be reached.
+However, this is not a problem because these solutions are equivalent to~\(\{3, 2, 1\}\), and this solution can be reached. 
+%No solution stops being generated, but they will always be generated from the greatest item index to the lowest item index.
+%\footnote{The algorithm would compute~\(\{1, 2, 3\} \cap \{1\}\) and~\(\{1, 1, 2\} \cap \{3\}\), for example.}
+
+\vspace{0.15cm}
+\begin{figure}[h]
+\centering
+\edef \scale {0.5}
+\begin{tikzpicture}[scale=\scale]
+
+\edef \rx {1}
+\edef \ry {1}
+
+\edef \origin {(0,0)}
+\drawvvector{\origin}{7}{\rx}{\ry}{\scale}
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
+
+\draw[dashed, thick] ++\origin +(1, 3.5) to [out=45,in=315] +(1, 7.5);
+\draw[dashed, thick] ++\origin +(1, 4.5) to [out=45,in=315] +(1, 7.5);
+
+\edef \origin {(3,0)}
+\drawvvector{\origin}{7}{\rx}{\ry}{\scale}
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 3.5);
+\draw[dashed, ultra thick] ++\origin +(0, 0.5) to [out=135,in=225] +(0, 4.5);
+
+\draw[dashed, thick] ++\origin +(1, 4.5) to [out=45,in=315] +(1, 7.5);
+
+\edef \origin {(6,5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(4.5, 0) to [out=315,in=225] +(10.5, 0);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(9.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(10.5, 1) to [out=45,in=135] +(15.5, 1);
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\def \origin {(6,1.5)}
+\drawhvector{\origin}{15}{\rx}{\ry}{\scale}
+
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(4.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(5.5, 1);
+\draw[dashed, ultra thick] ++\origin +(0.5, 1) to [out=45,in=135] +(6.5, 1);
+
+\draw[dashed, thick] ++\origin +(5.5, 0) to [out=315,in=225] +(9.5, 0);
+
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(10.5, 0);
+\draw[dashed, thick] ++\origin +(6.5, 0) to [out=315,in=225] +(11.5, 0);
+
+\draw[dashed] ++\origin +(11.5, 1) to [out=45,in=135] +(15.5, 1);
+
+\end{tikzpicture}
+
+\caption{The solutions \(\{1,2\}\) and \(\{2,1\}\) (with \(w_1 = 3\) and \(w_2 = 4\)) are equivalent. The solution \(\{3,2,1\}\) can be also constructed in many ways (with \(w_1 = 4\), \(w_2 = 5\) and \(w_3 = 6\)). The figure shows the solution generation with and without symmetry pruning.}
+\label{fig:symmetry}
+\end{figure}
+
+When the two changes are combined and the items are sorted by non-increasing efficiency, UKP5 gains in performance. 
+The UKP5 iterates the item list only when it finds a non-dominated solution, i.e,~\(g[y] > opt\) (line~\ref{if_less_than_opt_begin}). 
+Undominated solutions are more efficient (larger ratio of profit by weight) than the skipped dominated solutions. 
+%Efficient solutions are efficient because are composed by efficient items. 
+%When sorted by non-increasing efficiency, efficient items have the lowest index values. 
+Therefore, the UKP5 inner loop (lines~\ref{main_inner_loop_begin} to~\ref{main_inner_loop_end}) often iterates up to a low~\(d[y]\) value. 
+Experimental results show that, after some threshold capacity, the UKP5 inner loop consistently iterates over only for a small fraction of the item list.
+%The threshold capacity depends on the value of~\(w_{max}\).
+%, sometimes only the 2\% most efficient items, for the remaining capacities.
+
+%The third loop (lines~\ref{get_y_opt_loop_begin} to~\ref{get_y_opt_loop_end}) gets the optimal solution value, and the corresponding optimal solution weight. 
+%Any optimal solution %not excluded by our solution dominance test (\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), 
+%is guaranteed to have weight between~\(c - w_{min} + 1\) and~\(c\) (both inclusive). 
+%The proof is simple. A valid solution cannot weight more than~\(c\), and for any solution~\(s\) that weights less than~\(c - w_{min} + 1\), we can obtain a solution with a bigger profit inserting a copy of~\(i\) to~\(s\), where~\(w_i = w_{min}\). When the algorithm ends, the~\(opt\) variable holds the optimal solution value, and~\(y_{opt}\) holds the the corresponding weight. 
+
+The algorithm ends with the optimal solution stored in~\(opt\).
+The solution assembly phase is not described in Algorithm~\ref{alg:ukp5}, but it is similar to the one described in~\cite[p. 221, Steps 6-8]{garfinkel}, and can be used for the already described Algorithms~\ref{alg:naive_dp} and~\ref{alg:gar_dp}.
+Let~\(y_{opt}\) be a capacity where~\(g[y_{opt}] = opt\).
+We add a copy of item~\(i = d[y_{opt}]\) to the solution, then we add a copy of item~\(j = d[y_{opt} - w_i]\), and so on, until~\(d[0]\) is reached. 
+This phase has a~\(O(c)\) time complexity, as a solution can be composed of~\(c\) copies of an item~\(i\) with~\(w_i = 1\).
+
+\subsubsection{A note about UKP5 performance}
+
+In the computational results section we will show that UKP5 outperforms PYAsUKP (EDUK2 original implementation) by a considerable amount of time.
+We grant the majority of the algorithm performance to the ability of applying sparsity, solution dominance and symmetry pruning with almost no overhead.
+At each iteration of capacity~\(y\), sparsity and solution dominance are integrated in a single constant time test~(line~\ref{if_less_than_opt_begin}).
+This test, when combined with an item list sorted by non-increasing efficiency, also helps to avoid propagating big index values for the next positions of~\(d\), benefiting the performance of the solution generation with symmetry pruning (the use of~\(d[y]\) on line~\ref{main_inner_loop_begin}).
+
+\subsubsection{Weak solution dominance}
+\label{sec:ukp5_sol_dom_expl}
+
+In this section we will give a more detailed explanation of the workings of the previously cited weak solution dominance.
+We use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\).
+The notation~\(max_{ix}(s)\) has analogue meaning.
+
+When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u\), where~\(t \subset u\), are not generated. 
+If~\(s\) dominates~\(t\), and~\(t \subset u\), and~\(max_{ix}(u - t) \leq min_{ix}(t)\), then~\(u\) is not generated by UKP5. 
+For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by UKP5, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
+Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it will be dominated by a solution~\(u'\) where~\(s \subset u'\) anyway. 
+It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
+
+%(yet increasing capacity for the same item set will not make considerable difference for an optimizaed algorithm, see solution dominance)
+
+%We would like to point again that a dominated solution and its supersets can always be excluded from the problem without affecting the optimal solution value. 
+%A dominated solution always have a dominant solution, and the dominant solution have the same or more profit value, and the same or less weight. This way, the dominant solution can always be used in place of the dominated one without loss to the optimal solution value. 
+%\footnote{Note that, on ukp5, the lowest index of an item in a solution is also the index of the last item inserted in the solution (and consequently the value stored at~\(d[y]\) where~\(y\) is the solution weight).}
+
+\subsubsection{Implementation details}
+\label{sec:ukp5_periodicity}
+
+With the purpose of making the initial explanation simpler, we have omitted some steps that are relevant to the algorithm performance, but not essential for assessing its correctness. 
+A complete overview of the omitted steps is presented in this section.
+
+% A QUESTAO DO NAO USO DAS DOMINANCIAS JA E DITA ANTES, REMOVER AQUI?
+All the items are sorted by non-increasing efficiency and, among items with the same efficiency, by increasing weight. 
+This speeds up the algorithm but does not affect its correctness.
+%The simple/multiple, collective or threshold dominances are not used by UKP5, as this is often counterproductive for hard instances, where the undominated-to-all-items ratio is close to one, and superseded by our implicit solution dominance. 
+
+A periodicity bound is computed as in~\cite[p. 223]{garfinkel} and used to reduce the~\(c\) value. 
+We further proposed an UKP5-specific periodicity check that was successfully applied. 
+This periodicity check is not used to reduce the~\(c\) capacity before starting UKP5, as~\(y^{*}\). 
+The periodicity check is a stopping condition inside UKP5 main loop (lines \ref{main_ext_loop_begin} to~\ref{main_ext_loop_end}). 
+Let~\(y\) be the value of the variable~\(y\) in line~\ref{main_ext_loop_begin}, and let~\(y'\) be the biggest capacity where~\(g[y'] \neq 0 \land d[y'] > 1\). 
+If at some moment~\(y > y'\) then we can stop the computation and fill the remaining capacity with copies of the first item (that has index 1).
+This periodicity check works only if the first item is the best item. 
+If this assumption is false, then the described condition will never happen, and the algorithm will iterate until~\(y = c - w_{min}\) as usual.
+The algorithm correctness is not affected.
+
+There is an \emph{else if} test at line~\ref{if_new_lower_bound_end}. 
+If~\(g[y + w_i] = g[y] + p_i\) and \(i < d[y + w_i]\) then~\(d[y] \gets i\). 
+This may seem unnecessary, as appears to be an optimization of a rare case, where two distinct item multisets have the same weight and profit. 
+Nonetheless, without this test, UKP5 was about 1800 (one thousand and eight hundreds) times slower on some subset-sum instance datasets.
+%presented at Table~\ref{tab:times}.
+%For other instance classes, no significant speedup was observed.
+
+%We iterate only until~\(c-w_{min}\) (instead of~\(c\), in line~\ref{main_ext_loop_begin}), as it is the last~\(y\) value that can affect~\(g[c]\)). After this we search for a value greater than~\(opt\) in the range~\(g[c-w_{min}+1]\) to~\(g[c]\) and update~\(opt\).
+
+%We used only a UKP5-specific periodicity bound described later and the~\(y^{*}\) bound described in~\cite[p. 223]{garfinkel}.
+%The~\(y^*\) is~\(O(1)\) on an item list ordered by non-increasing efficiency,  and it is generic, being successfuly applied on instances of most classes.
+%Assuming~\(i\) is the best item, and~\(j\) is the second most efficient item, then \mbox{\(y^{*} = p_i / (e_i - e_j)\)}.
+
+\subsection{EDUK}
+\label{sec:eduk}
+
+The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) is a complex DP algorithm for the UKP, first mentioned in~\cite{ukp_new_results}.
+However, only in~\cite{eduk} the algorithm essentials were described for the first time.
+The author of this thesis, however, is partial to the algorithm description to be found in~\cite[p.~223]{book_ukp_2004}.
+Some basic ideas used by EDUK were already exposed by a simple and functional-oriented algorithm proposed in~\cite{algo_tech_cut}\footnote{The author of this thesis tried to implement this simple and functional-oriented algorithm in Haskell and in C++.
+Both codes had a very poor performance and were not even considered for the experiments.
+The author of this thesis admits that the reason of the poor performance could be the poor quality of his implementations.
+The C++ code can be accessed in \url{https://github.com/henriquebecker91/masters/blob/663324e4f071b5bca22ab5301e29273b9db88a41/codes/cpp/lib/eduk.hpp}, and the Haskell code can be accessed in \url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/hs/ukp.hs}.}.
+Before EDUK2 was proposed, EDUK was considered by some the state-of-the-art DP algorithm for the UKP.
+An example is the comment in~\cite[p.~]{book_ukp_2004}: ``[...] EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''.
+
+A version of the original code of the EDUK and EDUK2 algorithms is available here\footnote{PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}}.
+Unfortunately, this version is not stable and has some bugs.
+Consequently, the author of this thesis recommends the use of the version available here\footnote{The repository of this master's thesis: \url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}.}.
+We were given access to the latter version by Vincent Poirriez in January 11th, 2016.
+
+It is important to admit that we do not have full understanding of the EDUK algorithm inner workings.
+The original code is written in OCaml (a functional language), and we had difficulties in our attempts to analyze it.
+Furthermore, EDUK is a more complex algorithm than any other algorithm described in this chapter (with the obvious exception of EDUK2).
+A basic overview of the EDUK algorithm essentials is given here, in which we recommend the sources mentioned in the first paragraph of this section for the reader who is interested in a deeper analysis. 
+
+The authors of EDUK cite threshold dominance (that generalizes collective, multiple and simple dominances), a sparse representation of the iteration domain and the periodicity property to explain the efficiency of the algorithm.
+In~\cite[p.~223~to~227]{book_ukp_2004}, the reasons given are ``the detection of various notions of dominance not only as a preprocessing step but also during the dynamic programming computation'' and ``the test for collective dominance of an item type by a previously computed entry of the dynamic programming array''.
+The EDUK algorithm sorts the item list in increasing weight order, differently from the majority of the algorithms for the UKP that use the non-increasing efficiency order.
+
+The sparse representation of the iteration domain is achieved by using lazy lists (a functional programming concept) instead of an array of size~\(c\) (or more) to store the solutions.
+Consequently, the memory use is less dependent of~\(c\) and~\(w_{max}\) than other DP algorithms.
+In~\cite{algo_tech_cut}, where the sparse representation idea was first presented, the solutions are represented as pairs of weight and profit value, as the solution was a pseudo-item (i.e. a set of items that can be treated as it was a single item).
+For example, a solution~\(s\) consisting of the items~\(i\) and~\(j\) is represented by the following pair:~\((w_i + w_j, p_i + p_j)\).
+Adding an item to a solution is equivalent to adding the weight and profit values of a pair to another.
+For some instances, especially the ones with big~\(w_{min}\) and~\(c\) values, this sparse representation allows for saving time and memory.
+In UKP5, for example, the algorithm allocates memory, initializes, and iterates over many capacities~\(y\) that are accessed and then skipped immediately because a solution~\(s\) with~\(w_s = y\) does not exist.
+In EDUK, such skipped capacities are never explicitly enumerated to begin with, and no memory is allocated for them, or time used iterating over them. 
+A similar effect could be obtained in UKP5 by using a \verb+std::map+ instead of an \verb+std::vector+ for the data structures~\(g\) and~\(d\) .
+
+Both the item list and the knapsack capacities are broken down and evaluated in slices.
+Each slice of the item list, beginning with the ones with smallest items, is then processed.
+The items inside the current slice are combined with each other to generate solutions with weight up to the slice~\(w_{max}\).
+The solutions are used to test collective dominance between the items inside the slice and in the next slices.
+A global list of the undominated items is kept, and after an item is dominated, it is not used again.
+After evaluating all slices of the item list, and if~\(c > w_{max}\), EDUK begins to evaluate slices of the capacity values, using the items that were not eliminated by the collective dominance tests.
+After each one of those capacity slices, the EDUK algorithm tests the items for threshold dominance, potentially removing some of them from the global list of undominated items. 
+If this list ends up consisting only of the best item (that can never be threshold dominated), then the EDUK stops and fills the remaining capacity with copies of the best item.
+Otherwise, EDUK solves the UKP up until capacity~\(c\).
+
+\section{Branch-and-Bound}
+
+The B\&B approach was established in the seventies as the most efficient approach for solving the UKP, what is greatly a consequence of the datasets, items distributions, and generation parameters used at the time.
+The author of this thesis believes that this claim was first made in~\cite{mtu2}, and then other papers as~\cite{babayev} began repeating it.
+The fact that only the code for MTU1 and MTU2 was readily available also did not help the situation, as some began to claim that MTU2 was the \emph{de facto} standard algorithm for the UKP, see~\cite{ukp_new_results}.
+
+The author does not intend to give a complete introduction to the B\&B approach, but he believes a quick overview is in order.
+The B\&B approach can be seen as an improvement of the brute-force approach.
+The brute-force approach consists in exhaustively checking all solutions in the search space.
+A B\&B algorithm will keep track of the best solution found so far.
+In the case of a maximization problem like the UKP, this solution is called a lower bound on the optimal solution (in the sense that `the optimal solution is at least this good').
+A B\&B algorithm will divide the search space in two or more (often exclusive) subdivisions.
+In the case of the UKP, an example would be `all solutions with 4 or less copies of item~\(i\)' and `all solutions with 5 or more copies of item~\(i\)'.
+An optimistic guess for the best value to be found in each subdivision of the search space is computed: these are called upper bounds.
+An upper bound is a value that is guaranteed to be equal to or greater than the value of the best solution to be found in the correspondent subdivision of the search space.
+The subdivisions are recursively and systematically divided in smaller subdivisions.
+If the upper bound of any subdivision is smaller than or equal to the global lower bound, then the solutions of that subdivision of the search space do not need to be examined (i.e. the best solution known at the moment is already equal to or better than any solution that can be found in that subdivision of the search space).
+If, by the use of the lower and upper bounds, the B\&B algorithm obtains proof that no solution in all the search space can be better than the best solution found so far, the B\&B algorithm stops.
+
+Regarding the explanation above, one thing should be clear: the quality of a B\&B algorithm is directly correlated with the quality of its bounds.
+Also, the time taken to solve an instance will vary based on how much of the search space can be safely skipped/ignored by the use of the bounds.
+The time taken by a B\&B algorithm over an instance of the UKP can be hard to predict, and is not very dependent on the magnitude of~\(n\) and~\(c\), but more dependent on the item distribution.
+In the worst case, a B\&B algorithm cannot eliminate a significant portion of the search space by the use of bounds and then, consequently, it needs to examine all search space.
+In the case of the UKP, the search space is clearly combinatorial (all possible items combinations that fit the knapsack), so the worst-case of an B\&B approach for the UKP can be exponential.
+
+The memory use of a B\&B algorithm can follow its worst case and be exponential too, as for many times a tree is used to keep the enumeration of the subdivisions.
+However, some optimized algorithms can avoid enumerating the tree explicitly, and keep a constant memory use linear in~\(n\) (even in the worst case).
+The B\&B algorithms for the UKP often are not affected by the magnitude of~\(c\), however they can be affect by how close~\(c\) is from a capacity that can be entirely filled by copies of the best item.
+The B\&B algorithms for the UKP will often solve the problem instantly if~\(c~mod~w_b\) is small, because the greedy heuristic lower bound will probably be optimal, and will exclude the remaining search space easily.
+
+The fact that this approach is not significantly affected by huge values of~\(n\) and~\(c\), and more by the distribution used, makes it clear why it was considered the best approach in the seventies.
+The datasets used back then had large~\(n\) and~\(c\) values, and items distributions that made easy to exclude large portions of the search space with the greedy lower bound solution (the uncorrelated distribution is the perfect example).
+
+%REMEMBER THAT B\&B ALGORITHMS BEFORE MTU1 and MTU2 can have been excluded unfairly because of big flaws at the experiment design. THIS WILL BE SAID AT PRIOR WORK PROBABLY
+
+\subsection{MTU1}
+\label{sec:mtu1}
+
+The MTU1 algorithm is a B\&B algorithm for the UKP that avoids the explicit unfolding of the typical B\&B tree~\cite{mtu1}.
+The implicit tree used by MTU1 is described in what follows, as this makes the algorithm easier to visualize and understand.
+The MTU1 sorts the items in non-increasing efficiency order before beginning.
+Such ordering is needed to assure the correctness of the bounds and, consequently, of the algorithm itself.
+In the algorithms description, it is to be assumed that the items are ordered in the mentioned order
+%MTU1 begins by creating a lower bound solution using a greedy heuristic procedure.
+%Given that the items are ordered by non-increasing efficiency, the greedy procedure simply fills the knapsack with as much copies as possible of the first item, and then repeats the procedure for the remaining gap and the second item, until there is no gap or all items were tried
+%This solution is duplicated and saved as the global lower bound, and as the current solution being enumerated.
+
+The implicit enumeration tree of MTU1 has~\(n + 1\) levels.
+The root node represents all the search space, for convenience the author will consider it level zero.
+The first level of the tree contains~\(\floor{\frac{c}{w_1}} + 1\) nodes.
+Each of those nodes represents a subdivision of the search space where the solution has a specific number of copies of the first item (from zero to~\(\floor{\frac{c}{w_1}}\) copies).
+The nodes of the second level subdivide the search space by the amount of copies of the second item in a solution, and so on (until the last item, in level~\(n\)).
+From the second level on, the levels have a variable number of nodes.
+There are~\(\floor{\frac{c}{w_2}} + 1\) nodes in the second level that are children of the first level node that represents the solutions with zero copies of the first item, this because as all of the knapsack capacity~\(c\) is empty.
+Consequently, there are only~\(\floor{\frac{c~mod~w_1}{w_2}} + 1\) nodes in the second level that are children of the first level node that represents the solutions with~\(\floor{\frac{c}{w_1}}\) copies of the first item.
+
+The MTU1 algorithm can be seen as the application of a modified depth-first search over the implicit tree described above.
+In each level, the first node to be visited will always be the one representing the use of the greatest amount of copies of the current level item type, and the last node to be visited will be the one representing zero copies.
+This visiting order, together with the items non-increasing efficiency order, result in an intuitive behaviour: the first solutions tried will be the ones with the greatest amount of copies of the most efficient items.
+
+As it is common in B\&B algorithms, at each visited node MTU1 computes an upper bound for the tree below the current node and, if this upper bound is equal to or lower than the global lower bound, MTU1 will skip the subtree and backtrack to the parent node.
+These upper bounds consist of a solution with the amount of items already described by the path between the root node and the current node, and a pseudo-item with weight equal to the capacity gap and efficiency equal to the efficiency of the next level item type.
+
+When visiting a leaf node, MTU1 will check if the solution described by the path from root to the leaf node is better than the lower bound, and update the lower bound if this is the case.
+
+For convenience and to reduce the size of the tree, if the capacity gap left by a node is smaller than~\(w_{min}\), then that node is a leaf node (no need for a list of nodes indicating zero copies of the remaining item types).
+Consequently, every node (leaf or not) represents a unique solution (denoted by the path from the root node to it).
+As the nodes/solutions are visited in a systematic order, for any given node/solution, it is possible to know what part of the `search space'/tree was already visited or skipped, and what part has not yet been explored.
+Consequently, the tree does not need to be enumerated explicitly, the current node/solution is sufficient to know which solutions should be tried next.
+
+\subsection{MTU2}
+\label{sec:mtu2}
+
+The MTU2 algorithm was first proposed in~\cite{mtu2}.
+The objective of MTU2 is to improve MTU1 run time when it is used in very large instances (e.g. up to 250,000 items).
+MTU2 calls MTU1 internally to solve the UKP: it can be seen as a wrapper around MTU1 that avoids unnecessary computational effort.
+The two main factors that motivated the creation of MTU2 were: 1) for the majority of the instances used in the period\footnote{For an example, one of the datasets of the paper that introduced MTU2 was analyzed in Section~\ref{sec:martello_uncorrelated}.}, an optimal solution is composed of the most efficient items; 2) for some of those instances, sorting the entire items list was more expensive than solving the instance with MTU1.
+
+The explanation of the inner workings of the MTU1 (Section~\ref{sec:mtu1}) should make it easier to understand how solving the UKP with MTU1 can require less time than the sorting phase, for instances with the characteristic above mentioned (i.e. only the most efficient items are present in an optimal solution).
+MTU1 first investigates the regions of the search space with the biggest amount of the most efficient items. 
+If instances with a large amount of items have optimal solutions among the first ones tested by MTU1, then the implicit enumeration tree will never be explored in depth, and the vast majority of the items will be ignored.
+The time spent sorting any items other than the most efficient ones was unnecessary.
+
+To address this waste of computational effort, and to solve even larger instances, MTU2 was proposed.
+MTU2 is based on the concept of `core problem' that was already introduced in other works of the period, such as~\cite{core_problem}.
+Informally, the core problem would be a knapsack instance sharing an optimal solution, the knapsack capacity, and a small fraction of the items list with the original instance.
+
+The size of the core problem cannot be defined a priori.
+Consequently, the idea is to guess a value~\(k\), where~\(k \leq n\), find and sort only the~\(k\) most efficient items, and then solve this tentative core problem (in the specific case of MTU2, the solver used is MTU1).
+If the optimal solution value of the tentative core problem is equal to an upper bound for the full instance, then the algorithm has found an optimal solution of the full instance and can stop.
+Otherwise, the algorithm uses the solution found as a lower bound to remove items outside of the tentative core problem.
+For each item~\(j\) that is not in the core problem, an upper bound is computed over the solutions with one single copy of item~\(j\).
+If this upper bound is equal to or smaller than the value of the lower bound, then the item can be discarded without loss to the optimal solution value.
+If all items not in the tentative core problem are discarded by this procedure, the algorithm also stops.
+Otherwise, more items from outside the core problem are added to it, and the process restart with a larger core problem, and the reduced item list outside of it.
+
+\subsection{Other B\&B algorithms}
+
+Some B\&B algorithms were not implemented or deeply studied by the author of this thesis, but are cited here for completeness.
+In~\cite{cabot}, a B\&B algorithm for the UKP is presented.
+In that period, the B\&B algorithms were often referred to as `enumeration algorithms'.
+As already said in Section~\ref{sec:prior_work}, Cabot's algorithm was indirectly compared with MTU1 in~\cite{mtu1}, and MTU1 has shown better times.
+However, it would be interesting to see a comparison with more extensive and recent datasets.
+
+Another B\&B algorithm is proposed in~\cite{gg-63}.
+The author is not aware of any work where the proposed algorithm was compared to any other algorithms.
+Three years after proposing this algorithm, the same authors wrote~\cite{gg-66}, which focused on the one-dimensional and two-dimensional knapsack problems.
+This last paper presented four variations of a DP algorithm for the UKP, but does not appear to have mentioned the old B\&B algorithm.
+
+\section{Hybrid (DP and B\&B)}
+
+As expected, some algorithms try to combine the best of two most popular approaches (DP and B\&B) for better results.
+
+\subsection{GREENDP}
+
+The algorithm presented in~\cite{green_improv} is an improvement on the ordered step-off from~\cite{gg-66}.
+It is very similar to UKP5.
+The author does not know if it could be defined as a hybrid, but a good definition for it would be a `DP algorithm with bounds'.
+The algorithm was not named in the paper and will be called GREENDP for the rest of the thesis.
+The implementation of the GREENDP made by the author of this thesis, and used in the experiments (Section \ref{sec:exp_and_res}), will be called MGREENDP (Modernized GREENDP, in the sense that the algorithm now uses loops instead of the \verb+goto+ directive). 
+
+The GREENDP algorithm consists in solving the UKP by using the ordered step-off algorithm, but without using the best item in the DP, and with interruptions at each~\(w_b\) capacity positions, for checking if the DP can be stopped and the remaining capacity filled with copies of the best item.
+In those interruptions, two bounds are computed.
+A lower bound for solutions using the best item is computed by combining the current best solution of the DP with as many copies of the best item as possible.
+An upper bound for solutions not using the best item is computed by combining the current best solution of the DP with a pseudo-item that would fill the entire capacity gap and has the same efficiency as the second best item (it could also be seen as solving a continuous relaxation of the UKP without the best item, and only for the remaining capacity).
+If the algorithm discovers that the lower bound with the best item is better than the upper bound without the best item, then the lower bound solution is optimal and the DP can be stopped.
+
+This approach using bounds is fundamentally different from the periodicity check used by UKP5 (or the periodicity check used by the `terminating step-off').
+For example, the use of bounds save computational time of GREENDP when it is used to solve BREQ instances, the periodicity check do not save computational time of UKP5 when it is used to solve the same instances (see experiments of the Section~\ref{sec:breq_exp}).
+However this seems to have an impact on other families of instances (see experiments of the Section~\ref{sec:pya_exp}).
+
+A weakness of this bounds calculation is that it fails if the two most efficient items have the same efficiency.
+In this case, the algorithm would be the same as running UKP5 with a little overhead.
+
+\subsection{EDUK2}
+
+The EDUK2 algorithm was proposed in~\cite{pya}, and it is an hybridization of EDUK (a DP algorithm) and MTU2 (a B\&B algorithm).
+The author of this thesis gives here a quick overview of the hybridization, but more details can be found in the paper above mentioned.
+Just as with EDUK, the author does not claim to fully comprehend the EDUK2 internals, and only summarizes what is said in the original paper.
+The author recommends reading Sections~\ref{sec:eduk} (EDUK) and~\ref{sec:mtu2} (MTU2) before the explanation below, as it is strongly based in both algorithms.
+The comments made about EDUK code in its own section also apply to EDUK2.
+
+The description of the changes in EDUK caused by the hybridization follows.
+The~\(k = min(n, max(100, \frac{n}{100}))\) most efficient items are gathered in a tentative core problem.
+A B\&B algorithm ``similar to the one in MTU1''\footnote{Quoted from \cite{pya}.} tries to solve the tentative core problem.
+This B\&B algorithm has the possibility of choosing among three bound formulas, and stops after exploring~\(B = 10,000\) nodes (of the implicit enumeration tree).
+If the B\&B algorithm returns a solution with value equal to an upper bound for the whole instance, then the DP algorithm never executes.
+Otherwise, the solution given by the B\&B algorithm is used as a global lower bound in the hybridized EDUK algorithm.
+The hybridized EDUK algorithm works like EDUK would do, with the addition of an extra phase between the slices.
+The extra phase uses the lower bound to eliminate items \emph{and solutions for lesser capacities} from the algorithm.
+This phase is very similar to a phase of MTU2: an upper bound is computed for solutions using one copy of the respective item (a solution~\(s\) can be treated as a pseudo-item (\(w_s, p_s\))).
+If this upper bound is equal to or smaller than the global lower bound, then the item (or solution) is abandoned by the algorithm.
+A new lower bound is computed for each solution that was not removed by the process described above.
+The lower bound consists in filling the remaining capacity with a greedy algorithm.
+If this new lower bound is better than the global lower bound, it replaces it. 
+
+%SKIP DIDI
+%Basically eduk, but with a B\&B pre-phase that can help with bounds computation
+
+\section{Consistency Approach}
+
+The Consistency Approach (CA) consists in combining both the objective function (i.e.~\(maximize~p_i x_i\)) and the UKP only constraint (i.e.~\(w_i x_i \leq c\)) in a single Diophantine equation\footnote{``A Diophantine equation is an equation in which only integer solutions are allowed.''~\cite{diophantine}.
+In other words, an equation where the values of the variables/unknowns are restricted to the integer numbers.} (\(\alpha_i x_i = \beta\), where~\(\alpha_i\) are coefficients computed for each item, and~\(\beta\) is the analogue of an optimal solution upper bound).
+The combination procedure preserves the set of valid solutions, consequently, an optimal solution for the UKP can be sought by testing values for the equation variables/unknowns until the equation holds true.
+Such variables are often the quantity of each item in a solution (\(x_i\)) (on one side of the equation) and a tentative value derived from the optimal solution upper bound (\(\beta\)) (on the other side of the equation).
+
+\subsection{GREENDP1}
+
+The only algorithm implemented by the author of this thesis that uses the consistency approach is the first algorithm described in~\cite{on_equivalent_greenberg}.
+The algorithm, that was not named in the original paper, will be called GREENDP1 for the rest of the thesis (because it is the first of the two algorithms from the same paper, and because GREENDP is an older algorithm by the same author).
+The implementation of GREENDP1 made by the author of this thesis, and used in the experiments section, will be called MGREENDP1 (Modernized GREENDP1, in the sense that the algorithm now use loops instead of the \verb+goto+ directive).
+The algorithm was meant to be a theoretical experiment, and did not have performance as a priority.
+
+The basic idea of the GREENDP1 algorithm consists in encoding both profit and weight in a single integer value.
+Let us call the value given by this encoding for a weight and profit pair, the \emph{coefficient} of such pair.
+If the coefficient of two items is summed, the result is a coefficient that encodes the weight and profit value of the solution composed of the two items. 
+The algorithm then enumerates all valid solutions by adding the items coefficients to each other, and to the coefficients of the solutions it creates\footnote{It is important to note here, for future research in the subject, that in~\cite{on_equivalent_greenberg}, the algorithms description is incomplete.
+The author believes that on step 2d of the first algorithm, the assignment `D(z) = k' should be executed together with the other assignments; and on step 2d of the second algorithm, the assignment `D(x) = k' should also be executed together with the other assignments.
+If these statements are not included, then the algorithm cannot backtrack the items that form an optimal solution.}.
+The enumeration process is very similar to a basic DP algorithm with solution symmetry pruning, and dispensable extra arrays. 
+After the process of enumerating all valid solutions, the algorithm has to find the optimal solution.
+The algorithm will start with an upper bound on the optimal solution value, and will check if some solution has this profit value (in~\(O(1)\)), if not, it will decrease the bound in one unity, and repeat the process.
+A DP algorithm with solution symmetry pruning would probably outperform MGREENDP1 in most instances.
+
+\subsection{Babayev's algorithm}
+
+In~\cite{babayev}, a CA algorithm for the UKP designed with performance on mind was proposed.
+Unfortunately, the author did not obtain access to the code, and the algorithm demanded considerable time and effort to implement\footnote{The author started to implement the algorithm, but because of time restraints had to abandon the implementation.
+The current state of the implementation can be found at \url{https://github.com/henriquebecker91/masters/blob/2623472fad711bac10bf4d34c437b24b3fd7f30f/codes/cpp/lib/babayev.hpp}.}.
+The algorithm is similar to GREENDP1, but presents some improvements: the encoding tries to create the smallest coefficients as possible; the enumeration of the solutions (or `consistency check') can be done using the Dijkstra's algorithm (shortest path,~\(O(n + \alpha^2)\)), or a method for solving group problems developed in~\cite{glover1969integer} (\(O(n \times \alpha)\)).
+As the algorithm can choose between the method with the best complexity for a given instance, its overall complexity is~\(O(min(n + \alpha^2, n \times \alpha))\), where~\(\alpha\) is the value of the smallest coefficient for an item of the instance.
+
+% discussed in garfinkel
+% The first algorithm is exact, uses only integer arithmetic, and always find the solution. The ideia of the algorithm is to aggregate the capacity constraint and the objective (sum of the profits) on one equation. Instead of working over weights and profits, we work over numbers that aggregate both. The items are remade this way: the weight is multiplied by the upper bound + 1 and summed to the profit. The generated solutions are simple the sum of those item-numbers. As the sum of the profits will never become so big as the upper bound + 1 you can get the weight with 'solution-number / upper bound + 1' (the integer division) and the profit with 'solution-number % upper bound + 1' (the '%' is the modulo operator). A fully functional and commented version of the algorithm is available at https://github.com/henriquebecker91/masters/blob/e2beb54b579a84d291e0a47a6a993becd02d2c3a/codes/cpp/greendp.hpp (search for mgreendp1)
+%IT'S VERY IMPORTANT TO NOTE THAT GREENBERG FORGOT TO INCLUDE ONE LINE ON BOTH ALGORITHMS: on step 2d of the algorithm 1 the assignment "D(z) = k" should be executed together with the other assignments, and on step 2d of algorithm 2 the assignment "D(x) = k" should be executed together with the other assignments. If this is not done, the algorithm can not backtrack the solution after finding the optimal solution value.
+
+% Hirschberg and Wong (1976) and Kannan (1980): in the end of the paper reading priority queue, as their solution is for an very special case (only two items).
+% Garfinkel and Nemhauser (1972): Implemented, UKP5 was based on it. The original is many orders of magnitude slower than UKP5.
+% Hu (1969): Only presents the most basic/naive algorithm. It's a textbook, and it is not worried over efficiency.
+
+\section{Other approaches}
+
+The UKP is an optimization problem that have one single constraint and, consequently, is simple to model.
+Probably, many approaches could be applied to it, and many will, even if with only theoretical interest.
+The list presented in this chapter has no intent of being exhaustive, but only to give the readers a base to understand most of the discussion carried here.
+
+Examples of approaches that were not covered in this chapter are the \emph{shortest path formulations} and \emph{group knapsack formulations}.
+Such approaches are discussed in~\cite[p.~239]{garfinkel}, and~\cite{book_ukp_2004}, and internally used by the algorithm described in~\cite{babayev}, mentioned last section. % TODO XXX CHECK BOOK INFO
+The author finds both approaches to be similar to DP, in the sense that they are more like ways to interpret the problem and then solve it by a correspondent DP algorithm, and less like B\&B, which is a completely different approach when compared to DP.
+

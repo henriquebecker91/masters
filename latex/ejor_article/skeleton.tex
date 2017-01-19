@@ -1,0 +1,122 @@
+\documentclass{elsarticle}
+
+% Use unicode
+\usepackage[utf8]{inputenc} % pacote para acentuação
+
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{hyperref}
+\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%  save the current 一
+  \do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j%
+  \do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t%
+  \do\u\do\v\do\w\do\x\do\y\do\z\do\A\do\B\do\C\do\D%
+  \do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L\do\M\do\N%
+  \do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X%
+  \do\Y\do\Z\do\1\do\2\do\3\do\4\do\5\do\6\do\7\do\8\do\9\do\0}
+
+\usepackage{mathtools}          % for \DeclarePairedDelimiter
+\usepackage{amssymb}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\usepackage{graphicx}           % pacote para importar figuras
+\usepackage{Sweave}
+\usepackage{tikz}
+\newcommand{\drawvvector}[5]{
+	\edef \origin {#1}
+	\edef \ymax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \y in {0,...,\ymax}{
+		\draw [shift={\origin}](0,\y) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, \y + 0.5) {\(\y\)};
+	}
+}
+\newcommand{\drawhvector}[6]{
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \scale {#5}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin}] (\x,0) rectangle +\rs;
+		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
+	}
+}
+
+% Packages for computer code
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{longtable}
+\usepackage{pdflscape}
+
+\author[rvt]{C.V.~Radhakrishnan\corref{cor1}\fnref{fn1}}
+\ead{cvr@river-valley.com}
+\author[rvt,focal]{K.~Bazargan\fnref{fn2}}
+\ead{kaveh@river-valley.com}
+\author[els]{S.~Pepping\corref{cor2}\fnref{fn1,fn3}}
+\ead[url]{http://www.elsevier.com}
+
+\cortext[cor1]{Corresponding author}
+\cortext[cor2]{Principal corresponding author}
+\fntext[fn1]{This is the specimen author footnote.}
+\fntext[fn2]{Another author footnote, but a little more longer}
+\fntext[fn3]{Yet another author footnote. Indeed you can have any number of author footnotes.}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+%\begin{listofabbrv}{PRNG}
+%        \item[B\&B] Branch and Bound
+%        \item[BKP] Bounded Knapsack Problem
+%        \item[BPP] Bin Packing Problem
+%	\item[CA] Consistency Approach
+%	\item[CPU] Central Processing Unit
+%        \item[CSP] Cutting Stock Problem
+%        \item[DP] Dynamic Programming
+%	\item[FP] Floating Point
+%	\item[GUKP] General Unconstrained Knapsack Problem
+%	\item[GCKP] General Constrained Knapsack Problem
+%        \item[KP] Knapsack Problem
+%        \item[PRNG] Pseudo-Random Number Generator
+%	\item[SCF] Set Covering Formulation
+%	\item[SD] Standard Deviation
+%        \item[UKP] Unbounded Knapsack Problem
+%\end{listofabbrv}
+
+% idem para a lista de símbolos
+%\begin{listofsymbols}{$\alpha\beta\pi\omega$}
+%       \item[$\sum{\frac{a}{b}}$] Somatório do produtório
+%       \item[$\alpha\beta\pi\omega$] Fator de inconstância do resultado
+%\end{listofsymbols}
+
+% lista de figuras
+%\listoffigures
+
+% lista de tabelas
+%\listoftables
+
+% sumario
+%\tableofcontents
+
+% to make latex see the pdfs created by Sweave
+\graphicspath{{sections/}}
+
+\include{sections/introduction}
+\include{sections/prior_work}
+\include{sections/instance_classes}
+\include{sections/algorithms}
+\include{sections/experiments}
+\include{sections/conclusions}
+
+\bibliographystyle{abntex2-alf}
+\bibliography{biblio}
+
+\appendix
+\include{sections/appendix}
+
+\end{document}
+

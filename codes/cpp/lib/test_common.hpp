@@ -82,9 +82,9 @@ namespace hbm {
         int hijacked_argc = argc + 1;
 
         run_t<W, P, I> run;
-        int status = hbm_test_common_impl::run_ukp(ukp_solver, hijacked_argc, &hijacked_argv[0], run);
+        int status = hbm_test_common_impl::run_ukp(ukp_solver, hijacked_argc, hijacked_argv, run);
 
-        delete hijacked_argv;
+        delete[] hijacked_argv;
         if (status == EXIT_SUCCESS) {
           P expected = instances_data[i].expected_opt;
           P obtained = run.result.opt;

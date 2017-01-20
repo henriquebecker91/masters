@@ -13,7 +13,7 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (all means "all except debug/profile build" in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev bin/cutstock
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev bin/cutstock bin/ordered_step_off
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -163,6 +163,15 @@ bin/babayev: bin/run_babayev.out bin/test_babayev.out
 
 bin/bench_babayev_hard.out: mains/bench_babayev_hard.cpp lib/chung.hpp lib/mtu.hpp lib/ukp5.hpp $(H_DEPS)
 	$(CC) -o $@ mains/bench_babayev_hard.cpp $(CFLAGS) $(DEFS) $(LBOOST) -DHBM_PROFILE
+
+bin/run_ordered_step_off.out: mains/run_ordered_step_off.cpp lib/stepoff.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_ordered_step_off.cpp $(CFLAGS) $(DEFS)
+
+bin/test_ordered_step_off.out: mains/test_ordered_step_off.cpp lib/stepoff.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_ordered_step_off.cpp $(CFLAGS) $(DEFS)
+
+bin/ordered_step_off: bin/run_ordered_step_off.out bin/test_ordered_step_off.out
+	touch $@
 
 # Cutting-stock with multiple different knapsack solvers
 

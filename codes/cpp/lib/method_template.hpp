@@ -166,11 +166,7 @@ namespace hbm {
   /// An overloaded function, it's used as argument to test_common functions.
   ///
   /// The only parameter recognized is "--already-sorted". If this parameter is
-  /// given the ukpi.items will NOT be sorted by non-increasing efficiency. If
-  /// it's ommited the ukpi.items will be sorted by non-increasing efficiency.
-  /// If more than one item have the same efficiency, then those items will be
-  /// sorted by weight (in relation to each other).
-  ///
+  /// given the ukpi.items will NOT be sorted by TODO: WHAT ORDERING?
   /// @see main_take_path
   /// @see greendp(instance_t<W, P> &, solution_t<W, P, I> &, bool)
   template<typename W, typename P, typename I>

@@ -13,7 +13,7 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (all means "all except debug/profile build" in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev bin/cutstock bin/ordered_step_off
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/babayev bin/cutstock bin/ordered_step_off bin/terminating_step_off
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -32,7 +32,7 @@ LBOOST += -fpermissive
 # To understand the utility of the pipe below ("| bin"), see
 # https://www.gnu.org/software/make/manual/make.html#Prerequisite-Types
 H_DEPS=lib/ukp_common.hpp lib/test_common.hpp lib/type_name.hpp lib/workarounds.hpp | bin
-DEFS=-DHBM_XOR_SWAP
+DEFS=-DHBM_XOR_SWAP -DHBM_PROFILE
 
 # ukp5 specific
 UKP5_DEPS=lib/ukp5.hpp lib/periodicity.hpp lib/dominance.hpp
@@ -171,6 +171,15 @@ bin/test_ordered_step_off.out: mains/test_ordered_step_off.cpp lib/stepoff.hpp l
 	$(CC) -o $@ mains/test_ordered_step_off.cpp $(CFLAGS) $(DEFS)
 
 bin/ordered_step_off: bin/run_ordered_step_off.out bin/test_ordered_step_off.out
+	touch $@
+
+bin/run_terminating_step_off.out: mains/run_terminating_step_off.cpp lib/stepoff.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/run_terminating_step_off.cpp $(CFLAGS) $(DEFS)
+
+bin/test_terminating_step_off.out: mains/test_terminating_step_off.cpp lib/stepoff.hpp lib/wrapper.hpp $(H_DEPS)
+	$(CC) -o $@ mains/test_terminating_step_off.cpp $(CFLAGS) $(DEFS)
+
+bin/terminating_step_off: bin/run_terminating_step_off.out bin/test_terminating_step_off.out
 	touch $@
 
 # Cutting-stock with multiple different knapsack solvers

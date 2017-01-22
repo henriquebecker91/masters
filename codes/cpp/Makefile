@@ -32,7 +32,7 @@ LBOOST += -fpermissive
 # To understand the utility of the pipe below ("| bin"), see
 # https://www.gnu.org/software/make/manual/make.html#Prerequisite-Types
 H_DEPS=lib/ukp_common.hpp lib/test_common.hpp lib/type_name.hpp lib/workarounds.hpp | bin
-DEFS=-DHBM_XOR_SWAP -DHBM_PROFILE
+DEFS=-DHBM_XOR_SWAP #-DHBM_PROFILE
 
 # ukp5 specific
 UKP5_DEPS=lib/ukp5.hpp lib/periodicity.hpp lib/dominance.hpp

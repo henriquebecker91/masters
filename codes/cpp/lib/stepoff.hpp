@@ -18,8 +18,8 @@
 
 namespace hbm {
   template <typename W, typename P, typename I>
-  struct terminating_step_off_extra_info_t : extra_info_t {
-    std::string algorithm_name{"terminating_step_off"};
+  struct ordered_step_off_extra_info_t : extra_info_t {
+    std::string algorithm_name{"ordered_step_off"};
     #ifdef HBM_PROFILE
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
@@ -28,8 +28,8 @@ namespace hbm {
     double sol_time{0};    ///< Time used to assemble solution.
     double total_time{0};  ///< Time used by all the algorithm.
     #endif //HBM_PROFILE
-    I n{0};      ///< Instance number of items.
-    W c{0};      ///< Instance capacity.
+    I n{0};  ///< Instance number of items.
+    W c{0};  ///< Instance capacity.
 
     virtual std::string gen_info(void) {
       std::stringstream out("");
@@ -81,8 +81,8 @@ namespace hbm {
   };
 
   template <typename W, typename P, typename I>
-  struct ordered_step_off_extra_info_t : extra_info_t {
-    std::string algorithm_name{"ordered_step_off"};
+  struct terminating_step_off_extra_info_t : extra_info_t {
+    std::string algorithm_name{"terminating_step_off"};
     #ifdef HBM_PROFILE
     double sort_time{0};        ///< Time used sorting items.
     double vector_alloc_time{0};///< Time used allocating vectors for DP.
@@ -93,6 +93,7 @@ namespace hbm {
     #endif //HBM_PROFILE
     I n{0};      ///< Instance number of items.
     W c{0};      ///< Instance capacity.
+    W x0{0}; ///< Last capacity computed (the algorithm can terminate early). 
 
     virtual std::string gen_info(void) {
       std::stringstream out("");
@@ -103,8 +104,9 @@ namespace hbm {
       out << "type_W: " << hbm::type_name<W>::get() << std::endl;
       out << "type_P: " << hbm::type_name<P>::get() << std::endl;
       out << "type_I: " << hbm::type_name<I>::get() << std::endl;
-      HBM_PRINT_VAR(c);
       HBM_PRINT_VAR(n);
+      HBM_PRINT_VAR(c);
+      HBM_PRINT_VAR(x0);
 
       #ifdef HBM_PROFILE
       out << "HBM_PROFILE: defined" << std::endl;
@@ -331,7 +333,7 @@ namespace hbm {
       l_star[0] = static_cast<I>(1);
       W y = static_cast<W>(0); // y == x2, in the article
       W x_star = 0;
-      W lambda = lambda_[x_star + 1];
+      W lambda = lambda_[1];
       I j;
       P V;
       HBM_STOP_TIMER(eip->vector_alloc_time);
@@ -367,12 +369,16 @@ namespace hbm {
         goto stop;
       }
       III_2:
-      if (l_star[y] < n) {
-        x_star = y;
-        lambda = lambda_[l_star[y]];
-      }
-      III_3:
+      //III_3:
       if (F_star[y] > F_star[y - 1]) {
+        // The 'if' below could be outside of the 'if' above, but this would
+        // make necessary to initialize all of l_star with n+1 before starting
+        // the algorithm. In the original paper this 'if' below was step III.2,
+        // probably G&G initialized the l_star positions with n+1.
+        if (l_star[y] < n) {
+          x_star = y;
+          lambda = lambda_[l_star[y]];
+        }
         goto II_1;
       } else {
         F_star[y] = F_star[y - 1];
@@ -383,17 +389,19 @@ namespace hbm {
       stop:
       HBM_STOP_TIMER(eip->dp_time);
       HBM_START_TIMER();
-      auto &out = cout; 
-      HBM_PRINT_VAR(y);
       // store the solution in our format
       vector<I> qts_its(n, 0);
-      I ly;
+      eip->x0 = x_star + lambda;
+      if (y == eip->x0) { // if the algorithm terminated early
+        qts_its[n-1] = ((c - y)/w[n]) + 1;
+        y = c - qts_its[n-1]*w[n];
+      }
       while (y != 0 && l_star[y] == n + 1) --y;
-      sol.y_opt = y;
+      sol.y_opt = y + qts_its[n-1]*w[n];
       while (y != 0) {
-        ly = l_star[y];
+        I ly = l_star[y];
         y -= w[ly];
-        ++qts_its[ly - 1];
+        ++qts_its[ly - 1]; // return solution to base zero
       }
 
       sol.opt = 0;

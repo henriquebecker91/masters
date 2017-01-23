@@ -10,6 +10,14 @@
 #define MGREENDP    8 // can fail if two items have the same efficiency, what is not uncommon in the cutting stock instances (specially items with the double of the weight of the other and the exact double of the profit value)
 #define MGREENDP1   9 // needs smaller coefficients or is killed by bad alloc (trying to alloc memory linear to an upper bound on the optimal solution profit). UPDATE: even with smaller coefficients (2^20) it's terribly slow
 // MGREENDP2 isn't exact, so isn't here
+// ORDSO = ORDered Step-Off
+#define ORDSO_FP     10
+#define ORDSO_FP_NS  11
+#define ORDSO_INT    12
+#define ORDSO_INT_NS 13
+// TERSO = TERminating Step-Off
+#define TERSO_FP     14
+#define TERSO_INT    15
 
 #define WEIGHT uint_fast32_t
 #define INT_P  uint_fast64_t
@@ -27,9 +35,11 @@
 #include <cstdint>
 #include <vector>
 
-#if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_INT || \
-    KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
-    KNAPSACK_SOLVER == MGREENDP1
+#if KNAPSACK_SOLVER == UKP5_FP   || KNAPSACK_SOLVER == UKP5_INT || \
+    KNAPSACK_SOLVER == MTU1      || KNAPSACK_SOLVER == MGREENDP || \
+    KNAPSACK_SOLVER == MGREENDP1 || KNAPSACK_SOLVER == ORDSO_FP || \
+    KNAPSACK_SOLVER == ORDSO_INT || KNAPSACK_SOLVER == TERSO_FP || \
+    KNAPSACK_SOLVER == TERSO_INT
 #include <numeric> // for iota, used in the indirect sorting
 #endif
 
@@ -40,14 +50,20 @@
 #include "mtu.hpp"
 #elif KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
 #include "greendp.hpp"
+#elif KNAPSACK_SOLVER == ORDSO_FP  || KNAPSACK_SOLVER == ORDSO_FP_NS  || \
+      KNAPSACK_SOLVER == ORDSO_INT || KNAPSACK_SOLVER == ORDSO_INT_NS || \
+      KNAPSACK_SOLVER == TERSO_FP  || KNAPSACK_SOLVER == TERSO_INT
+#include "stepoff.hpp"
 #endif
 
-#if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS || \
-    KNAPSACK_SOLVER == CPLEX
+#if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
+    KNAPSACK_SOLVER == ORDSO_FP || KNAPSACK_SOLVER == ORDSO_FP_NS || \
+    KNAPSACK_SOLVER == TERSO_FP || KNAPSACK_SOLVER == CPLEX
   #define PROFIT FP_P
-#elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-      KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
-      KNAPSACK_SOLVER == MGREENDP1
+#elif KNAPSACK_SOLVER == UKP5_INT  || KNAPSACK_SOLVER == UKP5_INT_NS  || \
+      KNAPSACK_SOLVER == MTU1      || KNAPSACK_SOLVER == MGREENDP     || \
+      KNAPSACK_SOLVER == MGREENDP1 || KNAPSACK_SOLVER == ORDSO_INT_NS || \
+      KNAPSACK_SOLVER == ORDSO_INT || KNAPSACK_SOLVER == TERSO_INT
   #define PROFIT INT_P
 #endif
 
@@ -84,6 +100,18 @@ int main(int argc, char **argv)
   name = "mgreendp";
   #elif KNAPSACK_SOLVER == MGREENDP1
   name = "mgreendp1";
+  #elif KNAPSACK_SOLVER == ORDSO_INT
+  name = "ordered_int";
+  #elif KNAPSACK_SOLVER == ORDSO_INT_NS
+  name = "ordered_int_ns";
+  #elif KNAPSACK_SOLVER == ORDSO_FP
+  name = "ordered_fp";
+  #elif KNAPSACK_SOLVER == ORDSO_FP_NS
+  name = "ordered_fp_ns";
+  #elif KNAPSACK_SOLVER == TERSO_INT
+  name = "terminating_int";
+  #elif KNAPSACK_SOLVER == TERSO_FP
+  name = "terminating_fp";
   #else
     #error VALUE FOR MACRO KNAPSACK_SOLVER WAS NOT EXPECTED
   #endif
@@ -149,9 +177,12 @@ int main(int argc, char **argv)
   patSolver.setParam(IloCplex::RandomSeed, 42);
   patSolver.setParam(IloCplex::EpGap,       0);
   patSolver.setParam(IloCplex::Threads,     1);
-  #elif KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
-        KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-        KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
+  #elif KNAPSACK_SOLVER == UKP5_FP   || KNAPSACK_SOLVER == UKP5_FP_NS   || \
+        KNAPSACK_SOLVER == UKP5_INT  || KNAPSACK_SOLVER == UKP5_INT_NS  || \
+        KNAPSACK_SOLVER == MTU1      || KNAPSACK_SOLVER == MGREENDP     || \
+        KNAPSACK_SOLVER == ORDSO_FP  || KNAPSACK_SOLVER == ORDSO_FP_NS  || \
+        KNAPSACK_SOLVER == ORDSO_INT || KNAPSACK_SOLVER == ORDSO_INT_NS || \
+        KNAPSACK_SOLVER == TERSO_FP  || KNAPSACK_SOLVER == TERSO_INT    || \
         KNAPSACK_SOLVER == MGREENDP1
   hbm::instance_t<WEIGHT, PROFIT> ukpi;
   ukpi.c = static_cast<WEIGHT>(rollWidth);
@@ -180,8 +211,10 @@ int main(int argc, char **argv)
   conf.use_y_star_per = false;
   #endif
 
-  #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT || \
-      KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
+  #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT  || \
+      KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1 || \
+      KNAPSACK_SOLVER == ORDSO_FP || KNAPSACK_SOLVER == ORDSO_INT || \
+      KNAPSACK_SOLVER == TERSO_FP || KNAPSACK_SOLVER == TERSO_INT
   std::vector<IX_TYPE> idx(nWdth, 0);
   hbm::instance_t<WEIGHT, PROFIT> sorted_ukpi;
   sorted_ukpi.c = static_cast<WEIGHT>(rollWidth);
@@ -216,8 +249,10 @@ int main(int argc, char **argv)
   std::vector<IX_TYPE> positive_items_ix(nWdth, 0);
 
   //double sigma = ldexp(1, -40); // == 1*pow(2, -40) ~= pow(10, 12)
-  #if KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-      KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP
+  #if KNAPSACK_SOLVER == UKP5_INT  || KNAPSACK_SOLVER == UKP5_INT_NS  || \
+      KNAPSACK_SOLVER == MTU1      || KNAPSACK_SOLVER == MGREENDP     || \
+      KNAPSACK_SOLVER == ORDSO_INT || KNAPSACK_SOLVER == ORDSO_INT_NS || \
+      KNAPSACK_SOLVER == TERSO_INT
   double multiplier = ldexp(1, 40);
   /*PROFIT one = static_cast<PROFIT>((1.0 + sigma) * multiplier);
    *cout << "int_threshold: " << one << endl;*/
@@ -279,11 +314,14 @@ int main(int argc, char **argv)
       #else
       if (p > 0) {
         positive_items_ix[new_index] = i;
-        #if KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS
+        #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
+            KNAPSACK_SOLVER == ORDSO_FP || KNAPSACK_SOLVER == ORDSO_FP_NS || \
+            KNAPSACK_SOLVER == TERSO_FP
         ukpi.items[new_index].p = p;
         #elif KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \
-              KNAPSACK_SOLVER == MTU1     || KNAPSACK_SOLVER == MGREENDP    || \
-              KNAPSACK_SOLVER == MGREENDP1
+              KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MTU1        || \
+              KNAPSACK_SOLVER == ORDSO_INT || KNAPSACK_SOLVER == MGREENDP1  || \
+              KNAPSACK_SOLVER == TERSO_INT || KNAPSACK_SOLVER == ORDSO_INT_NS
         ukpi.items[new_index].p = static_cast<PROFIT>(multiplier * p);
         #endif
         ukpi.items[new_index].w = static_cast<WEIGHT>(size[i]);
@@ -320,17 +358,28 @@ int main(int argc, char **argv)
     after = steady_clock::now();
     curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
     // All methods that receive a instance_t and order the items by
-    // non-increasing efficiency.
-    #elif KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT || \
-          KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
+    // efficiency (non-increasing or non-decreasing).
+    #elif KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT  || \
+          KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1 || \
+          KNAPSACK_SOLVER == ORDSO_FP || KNAPSACK_SOLVER == ORDSO_INT || \
+          KNAPSACK_SOLVER == TERSO_FP || KNAPSACK_SOLVER == TERSO_INT
     // initialize vector with 0, 1, 2, ... n
     before = steady_clock::now();
     idx.resize(ukpi.items.size());
     std::iota(idx.begin(), idx.end(), 0);
     // sort idx in a way that: if idx[i] == j, then the ukpi.items[j] is the
-    // i-esim most efficient item.
+    // i-esim most (or least) efficient item.
+    #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_INT  || \
+          KNAPSACK_SOLVER == MGREENDP || KNAPSACK_SOLVER == MGREENDP1
+    // sort with the most efficient in the beggining
     sort(idx.begin(), idx.end(),
       [&ukpi](size_t a, size_t b) { return ukpi.items[a] < ukpi.items[b]; });
+    #elif KNAPSACK_SOLVER == ORDSO_FP || KNAPSACK_SOLVER == ORDSO_INT || \
+           KNAPSACK_SOLVER == TERSO_FP || KNAPSACK_SOLVER == TERSO_INT
+    // sort with the most efficient in the end
+    sort(idx.begin(), idx.end(),
+      [&ukpi](size_t a, size_t b) { return ukpi.items[b] < ukpi.items[a]; });
+    #endif
 
     // Sort the items using the idx, to avoid sorting again.
     sorted_ukpi.items.resize(ukpi.items.size());
@@ -348,6 +397,10 @@ int main(int argc, char **argv)
     hbm::mgreendp(sorted_ukpi, sol, true);
     #elif KNAPSACK_SOLVER == MGREENDP1
     hbm::mgreendp1(sorted_ukpi, sol, true);
+    #elif KNAPSACK_SOLVER == ORDSO_FP  || KNAPSACK_SOLVER == ORDSO_INT
+    hbm::ordered_step_off(sorted_ukpi, sol, true);
+    #elif KNAPSACK_SOLVER == TERSO_FP  || KNAPSACK_SOLVER == TERSO_INT
+    hbm::terminating_step_off(sorted_ukpi, sol, true);
     #endif
 
     // Save the solution on the CPlex data structure format.
@@ -360,9 +413,14 @@ int main(int argc, char **argv)
     sol.used_items.clear();
     after = steady_clock::now();
     curr_knapsack_time = duration_cast<duration<double>>(after - before).count();
-    #elif KNAPSACK_SOLVER == UKP5_FP_NS || KNAPSACK_SOLVER == UKP5_INT_NS
+    #elif KNAPSACK_SOLVER == UKP5_FP_NS || KNAPSACK_SOLVER == UKP5_INT_NS || \
+          KNAPSACK_SOLVER == ORDSO_FP_NS  || KNAPSACK_SOLVER == ORDSO_INT_NS
     before = steady_clock::now();
+    #if KNAPSACK_SOLVER == UKP5_FP_NS || KNAPSACK_SOLVER == UKP5_INT_NS
     hbm::ukp5(ukpi, sol, conf);
+    #elif KNAPSACK_SOLVER == ORDSO_FP_NS  || KNAPSACK_SOLVER == ORDSO_INT_NS
+    hbm::ordered_step_off(ukpi, sol, true);
+    #endif
     for (IloInt i = 0; i < nWdth; i++) newPatt[i] = 0;
     for (auto &it : sol.used_items) {
       IX_TYPE original_index = positive_items_ix[it.ix];
@@ -430,13 +488,17 @@ int main(int argc, char **argv)
     //if (patSolver.getValue(ReducedCost) <= 1.0 + sigma) last_iter = true;
     cout << "hex_opt: " << hexfloat << patSolver.getValue(ReducedCost) << endl;
     cout << "dec_opt: " << defaultfloat << patSolver.getValue(ReducedCost) << endl;
-    #elif KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS
+    #elif KNAPSACK_SOLVER == UKP5_FP || KNAPSACK_SOLVER == UKP5_FP_NS   || \
+          KNAPSACK_SOLVER == ORDSO_FP || KNAPSACK_SOLVER == ORDSO_FP_NS || \
+          KNAPSACK_SOLVER == TERSO_FP
     //if (sol.opt <= 1.0 + sigma) last_iter = true;
 
     cout << "hex_opt: " << hexfloat << sol.opt << endl;
     cout << "dec_opt: " << defaultfloat << sol.opt << endl;
-    #elif KNAPSACK_SOLVER == UKP5_INT  || KNAPSACK_SOLVER == UKP5_INT_NS || \
-          KNAPSACK_SOLVER == MGREENDP  || KNAPSACK_SOLVER == MGREENDP1
+    #elif KNAPSACK_SOLVER == UKP5_INT  || KNAPSACK_SOLVER == UKP5_INT_NS  || \
+          KNAPSACK_SOLVER == MGREENDP  || KNAPSACK_SOLVER == MGREENDP1    || \
+          KNAPSACK_SOLVER == ORDSO_INT || KNAPSACK_SOLVER == ORDSO_INT_NS || \
+          KNAPSACK_SOLVER == TERSO_INT
     //if (sol.opt <= one) last_iter = true;
     cout << "int_opt: " << sol.opt << endl;
     #elif KNAPSACK_SOLVER == MTU1

@@ -214,6 +214,14 @@ MTU1=6
 MTU2=7
 MGREENDP=8
 MGREENDP1=9
+# ORDSO = ORDered Step-Off
+ORDSO_FP=10
+ORDSO_FP_NS=11
+ORDSO_INT=12
+ORDSO_INT_NS=13
+# TERSO = TERminating Step-Off
+TERSO_FP=14
+TERSO_INT=15
 
 COMMON_DEPS = lib/ukp_common.hpp lib/type_name.hpp lib/workarounds.hpp | bin
 
@@ -230,6 +238,9 @@ MTU_FLAGS = -DHBM_XOR_SWAP
 
 GREENDP_DEPS  = lib/greendp.hpp lib/wrapper.hpp $(COMMON_DEPS)
 GREENDP_FLAGS = -DHBM_XOR_SWAP
+
+STEPOFF_DEPS  = lib/stepoff.hpp lib/wrapper.hpp $(COMMON_DEPS)
+STEPOFF_FLAGS = -DHBM_XOR_SWAP
 
 bin/cplex_cutstock.out: mains/cutstock.cpp $(UKP5_DEPS)
 	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(CPLEX) $(CPLEX_EFLAGS)
@@ -255,10 +266,28 @@ bin/mgreendp_cutstock.out: mains/cutstock.cpp $(GREENDP_DEPS)
 bin/mgreendp1_cutstock.out: mains/cutstock.cpp $(GREENDP_DEPS)
 	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(MGREENDP1) $(GREENDP_FLAGS) $(CPLEX_EFLAGS)
 
-bin/cutstock: bin/cplex_cutstock.out bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out bin/mgreendp_cutstock.out bin/mgreendp1_cutstock.out
+bin/ordso_fp_cutstock.out: mains/cutstock.cpp $(STEPOFF_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(ORDSO_FP) $(STEPOFF_FLAGS) $(CPLEX_EFLAGS)
+
+bin/ordso_fp_ns_cutstock.out: mains/cutstock.cpp $(STEPOFF_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(ORDSO_FP_NS) $(STEPOFF_FLAGS) $(CPLEX_EFLAGS)
+
+bin/ordso_int_cutstock.out: mains/cutstock.cpp $(STEPOFF_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(ORDSO_INT) $(STEPOFF_FLAGS) $(CPLEX_EFLAGS)
+
+bin/ordso_int_ns_cutstock.out: mains/cutstock.cpp $(STEPOFF_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(ORDSO_INT_NS) $(STEPOFF_FLAGS) $(CPLEX_EFLAGS)
+
+bin/terso_fp_cutstock.out: mains/cutstock.cpp $(STEPOFF_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(TERSO_FP) $(STEPOFF_FLAGS) $(CPLEX_EFLAGS)
+
+bin/terso_int_cutstock.out: mains/cutstock.cpp $(STEPOFF_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ -DKNAPSACK_SOLVER=$(TERSO_INT) $(STEPOFF_FLAGS) $(CPLEX_EFLAGS)
+
+bin/cutstock: bin/cplex_cutstock.out bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out bin/mgreendp_cutstock.out bin/mgreendp1_cutstock.out bin/ordso_fp_cutstock.out bin/ordso_fp_ns_cutstock.out bin/ordso_int_cutstock.out bin/ordso_int_ns_cutstock.out bin/terso_fp_cutstock.out bin/terso_int_cutstock.out
 	touch $@
 
-bin/fast_cutstock: bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out
+bin/fast_cutstock: bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out bin/ordso_fp_cutstock.out bin/ordso_fp_ns_cutstock.out bin/ordso_int_cutstock.out bin/ordso_int_ns_cutstock.out bin/terso_fp_cutstock.out bin/terso_int_cutstock.out
 	touch $@
 
 .PHONY: clean

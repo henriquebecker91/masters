@@ -197,7 +197,7 @@ namespace hbm {
 
       HBM_START_TIMER();
       vector<P> F_star(c + 1, static_cast<P>(0));
-      myvector<P> l_star;
+      myvector<I> l_star;
       l_star.resize(c+1); // myvector does not initialize the memory in resize
       l_star[0] = static_cast<I>(1);
       W y = static_cast<W>(0); // y == x2, in the article
@@ -263,7 +263,7 @@ namespace hbm {
         if (qts_its[i] > 0) {
           auto it = ukpi.items[i];
           sol.used_items.emplace_back(it, qts_its[i], i);
-          sol.opt += it.p * qts_its[i];
+          sol.opt += it.p * static_cast<P>(qts_its[i]);
         }
       }
       sol.used_items.shrink_to_fit();
@@ -328,7 +328,7 @@ namespace hbm {
 
       HBM_START_TIMER();
       vector<P> F_star(c + 1, static_cast<P>(0));
-      myvector<P> l_star;
+      myvector<I> l_star;
       l_star.resize(c+1); // myvector does not initialize the memory in resize
       l_star[0] = static_cast<I>(1);
       W y = static_cast<W>(0); // y == x2, in the article
@@ -409,7 +409,7 @@ namespace hbm {
         if (qts_its[i] > 0) {
           auto it = ukpi.items[i];
           sol.used_items.emplace_back(it, qts_its[i], i);
-          sol.opt += it.p * qts_its[i];
+          sol.opt += it.p * static_cast<P>(qts_its[i]);
         }
       }
       sol.used_items.shrink_to_fit();

@@ -312,7 +312,7 @@ namespace hbm {
       for (W y = w_min; y <= last_position_used; ++y) {
         if (g[y] > opt) {
           ++(qt_non_skipped_ys);
-          qt_inner_loop_executions += static_cast<W>(d[y]);
+          qt_inner_loop_executions += static_cast<W>(d[y]) + 1;
           non_skipped_d[y] = d[y];
           
           opt = g[y];

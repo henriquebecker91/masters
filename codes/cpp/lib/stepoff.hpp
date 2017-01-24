@@ -217,8 +217,17 @@ namespace hbm {
         goto II_4;
       }
       II_3:
-      if (V >= F_star[y + w[j]]) {
+      // The original algorithm has 'V >= ...' and no 'else if' in this step.
+      // This small change makes the algorithm to be 20~40 times faster in
+      // some instances. For example, the original version takes 24.0287
+      // seconds or 17238430636 inner loop operations to solve the
+      // instance sc_a-5n10000wmin110000-17-c9492344.ukp; the modified
+      // version (including the 'else if') takes 0.869493 seconds ot
+      // 608781965 inner loop operations to solve the same instance.
+      if (V > F_star[y + w[j]]) {
         F_star[y + w[j]] = V;
+        l_star[y + w[j]] = j;
+      } else if (V == F_star[y + w[j]] && l_star[y + w[j]] < j) {
         l_star[y + w[j]] = j;
       }
       II_4:
@@ -268,6 +277,15 @@ namespace hbm {
       }
       sol.used_items.shrink_to_fit();
       HBM_STOP_TIMER(eip->sol_time);
+
+      // debug dump
+      //auto &out = std::cout;
+      //size_t num_ops = 0;
+      //for (size_t y = 0; y <= c; ++y) {
+        //cout << y << ";" << (l_star[y] == n + 1 ? 0 : n - l_star[y]) << endl;
+        //num_ops += (n + 1) - l_star[y];
+      //}
+      //HBM_PRINT_VAR(num_ops);
 
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_ordered_step_off_begin);
@@ -350,8 +368,17 @@ namespace hbm {
         goto II_4;
       }
       II_3:
-      if (V >= F_star[y + w[j]]) {
+      // The original algorithm has 'V >= ...' and no 'else if' in this step.
+      // This small change makes the algorithm to be 20~40 times faster in
+      // some instances. For example, the original version takes 24.0287
+      // seconds or 17238430636 inner loop operations to solve the
+      // instance sc_a-5n10000wmin110000-17-c9492344.ukp; the modified
+      // version (including the 'else if') takes 0.869493 seconds ot
+      // 608781965 inner loop operations to solve the same instance.
+      if (V > F_star[y + w[j]]) {
         F_star[y + w[j]] = V;
+        l_star[y + w[j]] = j;
+      } else if (V == F_star[y + w[j]] && l_star[y + w[j]] < j) {
         l_star[y + w[j]] = j;
       }
       II_4:

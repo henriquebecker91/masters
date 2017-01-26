@@ -48,6 +48,9 @@
 \usepackage{longtable}
 \usepackage{pdflscape}
 
+\usepackage{newclude} % for include*{...} remove before final version 
+\usepackage{verbatim} % for \begin{comment} remove before final version
+
 \title{This is a specimen title\tnoteref{t1,t2}}
 \tnotetext[t1]{This document is a collaborative effort.}
 \tnotetext[t2]{The second title footnote which is a longer
@@ -119,12 +122,12 @@ Amsterdam, Netherlands}
 % to make latex see the pdfs created by Sweave
 \graphicspath{{sections/}}
 
-\include{sections/introduction}
-\include{sections/prior_work}
-\include{sections/instance_classes}
-\include{sections/algorithms}
-\include{sections/experiments}
-\include{sections/conclusions}
+\include*{sections/introduction}
+\include*{sections/prior_work}
+\include*{sections/algorithms}
+%\include*{sections/instance_classes}
+%\include*{sections/experiments}
+%\include*{sections/conclusions}
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{biblio}

@@ -1,44 +1,20 @@
-\chapter{Prior Work}
+\section{Algorithms from the literature}
 \label{sec:prior_work}
 
-It is important to note that the name ``Unbounded Knapsack Problem'' is more recent than the problem itself.
-To the best of our knowledge, this name was used for the first time in~\cite{mtu2}.
-Earlier papers simply referred to `a' or `the' knapsack problem(s) the variant discussed was specified by the model presented in the paper.
-An earlier paper from the same author tackled both the UKP and the BKP~\cite{mtu1} and called them, respectively, the General Unconstrained Knapsack Problem (GUKP) and General Constrained Knapsack Problem (GCKP).
-In the paper, the adjective unidimensional was also used to characterize both variants.
-More recently, the term `UKP' seems to be well accepted. Also, unidimensional is considered the default, and the term multi-dimensional is used to differ from it.
-A researcher making a literature review about a specific variant of the knapsack problem should be aware of such caveat.
-
 This literature review starts with~\cite{gg-61}, when the \emph{column generation} approach was proposed.
-The main utility of the column generation approach was to avoid the existence of an exponential number of variables when solving the tightest linear programming model of BPP and CSP.
-The relationship between the UKP and the BPP/CSP was already briefly described at Section~\ref{sec:motivation}, and its technical details will be described at Section~\ref{sec:csp_ukp_inst}.
-The UKP is not solved, it is only said that ``the auxiliary problem will be of the integer programming variety, but of such a special type (the `knapsack' type) that it is solvable by several methods''~\cite[p.~2]{gg-61}.
-Two years later, in~\cite{gg-63}, the authors proposed a specific algorithm for the UKP, and experiments solving BPP and CSP instances were executed.
-Some findings of this experiments will be discussed in Sections~\ref{sec:csp_ukp_inst} and~\ref{sec:csp_experiments}.
+% TODO: put the phrase from introduction here
+%The main utility of the column generation approach was to avoid the existence of an exponential number of variables when solving the tightest linear programming model of BPP and CSP.
+%The relationship between the UKP and the BPP/CSP was already briefly described at Section~\ref{sec:motivation}, and its technical details will be described at Section~\ref{sec:csp_ukp_inst}.
+%The UKP is not solved, it is only said that ``the auxiliary problem will be of the integer programming variety, but of such a special type (the `knapsack' type) that it is solvable by several methods''~\cite[p.~2]{gg-61}.
+%Two years later, in~\cite{gg-63}, the authors proposed a specific algorithm for the UKP, and experiments solving BPP and CSP instances were executed.
+%Some findings of this experiments will be discussed in Sections~\ref{sec:csp_ukp_inst} and~\ref{sec:csp_experiments}.
 
 %In this paper, the algorithm for UKP that was first described at~\cite{gg-63} is discussed more profoundly.
-In~\cite{gg-66}, the one-dimensional and two-dimensional knapsack problems related to BPP and CSP were discussed.
-The author of this thesis reinvented one algorithm from~\cite{gg-66} and published a paper about it, believing it was novel~\cite{sea2016}, thus, he apologizes to the academic and scientific community for such disregard.
-Further information about the algorithms of~\cite{gg-66} and~\cite{sea2016} can be found in Section~\ref{sec:dp_algs}.
+%In~\cite{gg-66}, the one-dimensional and two-dimensional knapsack problems related to BPP and CSP were discussed.
+%The author of this thesis reinvented one algorithm from~\cite{gg-66} and published a paper about it, believing it was novel~\cite{sea2016}, thus, he apologizes to the academic and scientific community for such disregard.
+%Further information about the algorithms of~\cite{gg-66} and~\cite{sea2016} can be found in Section~\ref{sec:dp_algs}.
 A small improvement over the algorithm of~\cite{gg-66} was proposed in~\cite{green_improv}.
 The author implemented the improved algorithm and its results can be seen in Section~\ref{sec:pya_exp}.
-
-The papers~\cite{cabot} and~\cite{turnpike} were published shortly after.
-Both papers are behind a paywall and we did not have access to them.
-However, the algorithm from~\cite{cabot} was compared indirectly by~\cite{mtu1} (that will be discussed in the followig pages).
-The comparison showed that the algorithm from~\cite{cabot} was dominated by the algorithm proposed in~\cite{mtu1}.
-In~\cite{green_improv}, it is implied that the proposed algorithm is an improvement over the algorithm from~\cite{turnpike}.
-However, the author of this thesis believes that it would be interesting to implement and execute these algorithms on recent datasets.
-In~\cite{mtu1}, empirical evidence was presented, but they used datasets considered to be small according to current standards.
-They also used an items distribution that we have some reservations about (see Section~\ref{sec:martello_uncorrelated}). % TODO: probably a problem pointed out in Ritt's review
-In~\cite{green_improv}, the claims are backed up by theoretical reasoning, nevertheless empirical evidence shown in Section~\ref{sec:pya_exp} revealed that the improvement had some unpredicted behavior over some instance datasets.
-%The author thinks that revisiting such abandoned algorithms would be interesting, but it wasn't a priority in this work.
-
-%This generated distortions and abandoned paradigms. The whole shift from dynamic programming methods to B\&B methods can be associated with the tests being made over ever-increasing instances; randomly generated with little or some correlation between profits and weights; and the use of naive dynamic programs; the shift of PYAsUKP to revisit dynamic programming can easily be correlated with the evolution of the artificial instances generated to be difficult to solve by B\&B while small (on capacity and number of items); the DP methods began to shine again, as the instances had small dimensions and a structure that made them hard to solve by B\&B but not so much by a good (non-naive) DP algorithm. The UKP5 is only the last part of this history.
-
-%The paper ``A Finite Renewal Algorithm for the Knapsack and Turnpike Models'' and http://pubsonline.informs.org/doi/abs/10.1287/opre.18.2.306 were behind a paywall and the paper ``A better ...'' said to have a better algorithm anyway. 
-
-%B\&B methods appear, and begin to claim that DP isn't efficient, they don't compare with the DP methods, only between each other, using some distributions and without motivation or real-world instances
 
 % MTU1 and MTU2 papers:
 In the 1970's, there was a shift of attention from the DP approach to the B\&B approach.
@@ -54,11 +30,6 @@ However, the instances were too small to draw strong conclusions, and the relati
 The G.G. algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
 This trend could indicate that for big instances, the G.G. algorithm would have better times than MTU1 (e.g. the G.G. algorithm could have a costly initialization process but a better average-case asymptotic complexity).
 
-%The MTU1 paper~\cite{gen_uni_knap_prob} also makes an indirect comparison with Cabot's B\&B algorithm. The MTU1 paper uses the dataset described in Cabot's paper~\cite{cabot}, and arrives at the conclusion Cabot's algorithm is clearly dominated by MTU1. The instance dimensions are only a little different to the ones used in their experiment described above (number of items up to 80, only uncorrelated distribution).
-
-The experiments described above were used by the authors on another paper to state that ``The most efficient algorithms for the exact solution of the UKP [...] consist of two main steps: Step 1. Sort the item types according to (5). Step 2. Find the optimal solution through branch-and-bound.''~\cite{mtu2}. This comment established B\&B as most efficient approach for the UKP.
-The paper introduced the MTU2 algorithm (and the author will refer to it as the `MTU2 paper').
-
 The MTU2 algorithm was designed for large instances (up to 250,000 items).
 Only sorting the items list was already computationally expensive for the period, and the solutions often involved only the most efficient items.
 The MTU2 main feature was grouping and sorting only the~\(k = max(100, \frac{n}{100})\) most efficient items, and calling MTU1 over them.
@@ -69,7 +40,6 @@ After this, the~\(k\) most efficient items outside the tentative core problem we
 
 The algorithms comparison included only MTU1 and MTU2.
 The datasets used in the paper were large, but artificial and abundant in dominated items.
-A more detailed analysis of one of the datasets and the experiment setting is available in Section~\ref{sec:martello_uncorrelated}.
 The MTU2 was clearly the best algorithm for the chosen datasets.
 
 MTU2 was adopted by the subsequent works as the baseline for testing new algorithms for the UKP.
@@ -108,6 +78,7 @@ The experiments are then remade using the same distributions with larger coeffic
 MTU2 has integer overflow problems and is left out of the comparison.
 Between EDUK and EDUK2, EDUK2 has the best results, as expected. 
 
+% TODO: summarize paragraph below in one or two lines
 Both~\cite{eduk} and~\cite{pya} cite~\cite{babayev}, which presents an algorithm for solving the UKP using the Consistency Approach (CA).
 The algorithm described in~\cite{babayev} was tested against MTU2 and had better times, but the instances used in the experiment make it difficult to have an idea of what would be its performance using more recent datasets (see Section~\ref{sec:babayev_uncorrelated} for further discussion).
 The CA was already discussed in~\cite{on_equivalent_greenberg}.
@@ -115,29 +86,5 @@ However, the algorithm proposed in~\cite{babayev} considered performance as a pr
 As the authors of~\cite{eduk} and~\cite{pya}, we tried to obtain a copy of the code from the authors of~\cite{babayev}, but did not obtain success.
 The author of this thesis suggests the implementation and comparison of this algorithm as a future work.
 
-Before ending this literature review, we would like to discuss the chapters about the UKP in the following textbooks:~\cite{tchu} and~\cite{garfinkel}.
-Those textbooks are especially relevant because they are cited by many of the papers presented at this section.
-The chapter about the UKP in~\cite[p.~311]{tchu} has a good introduction about the problem, the simplest DP method for solving it, and the basics of the periodicity.
-
-The chapter about the UKP in~\cite[p.~214]{garfinkel} has an extensive bibliographical review of the works about the UKP that predates it (1972), which is very relevant as the name `UKP' was only established some years later.
-%The chapter also discusses in depth many of the approaches used to solve the UKP in that period, yet making heavy use of mathematical notation.
-In Section~\ref{sec:gg_algs}, we discuss a limitation of the review proposed in that chapter.
-%In the Section 6.4 of the book, a DP algorithm is presented as the last of a series of improvements over the naive DP algorithm. However, if we check the chapter notes, there's the comment ``6.4: The recursion of this section is based on Gilmore and Gomory (1966). See Exercise 21 for a variation that will be more efficient for some data sets.''. The algorithm presented in section 6.4 was a version of the algorithm in~\cite{gg-66} with \emph{some} of its main optimizations removed, and in exercise 21 is expected of the reader to recreate \emph{one} of those optimizations based in hints given at the exercise. The author of this thesis believes that this fact can have been unnoticed by previous authors that cited the work. The book didn't featured the exercises' answers. % TODO XXX COPY THIS PARAGRAPH TO ALGORITHMS SECTION
-
-% A LITTLE OF CSP HISTORY TOO
-%\section{Cutting Stock}
-
-% BLOCKQUOTE BELOW
 % This corresponds to widely-used practices and general beliefs expressed in the literature. Usually, in the context of an LP- based branch-and-bound algorithm, where the LP relaxation is solved using column generation, cutting planes are carefully selected in order to avoid the destruction of the structure of the pricing problem. This viewpoint is shared by numerous authors. Barnhart, Hane, and Vance [BHV00], for example, mention as one of the main contributions of their branch-and-price-and-cut algorithm ``a pricing problem that does not change even as cuts are added, and similarly, a separation algorithm that does not change even as columns are added.'' (BELOV, page 3)
 
-%About the pricing problem with cuts. ``It is much more difficult than the linear knapsack problem for column generation arising when no cuts are added in the LP.'' (BELOV, page 26)
-
-% The paragraph below is only about 2D-2CP?
-%``The general-purpose cuts considered in this work make the pricing problem extremely complicated and much implementation effort is required. The question arises, whether any other classes of cuts, which do not complicate the pricing problem, e.g., cover inequalities in 2D-2CP, can provide a comparable contribution.'' (p.~46)
-
-% maybe this goes in another section
-%	timeline: DP -> huge random instances -> B\&B is better (no empiric evidence) -> instances that are hard for B\&B (linear distribution) -> PYAsUKP is better than B\&B in instances designed to be hard to solve by it (in fact any DP non-naive DP solution would have results better than B\&B methods only, like MTU1 and MTU2). also, using MTU2 instead of MTU1 shows a lack of understanding of the methods. MTU2 was developed for very large random instances, not for relatively small and hard (distribution-wise) instances
-
-
-% MAYBE ADD
-% The subject that I (Henrique Becker) am studying (at the year of 2015/2016) is the exact resolution of the UKP (unbounded knapsack problem) with the objective of solving the subproblems generated by the column generation approach of solving BPP/CSP (Bin Packing Problem and Cutting Stock Problem). The paper "An Improved Knapsack Solver for Column Generation" (2013, Klaus Jansen and Stefan Kraft) seemed (by the title) to be relevant to my studies. However, the paper presents a variant of the UKP, the UKPIP (the Unbounded Knapsack Problems with Inversely Proportional Profits) that's a subproblem of the Variable-Sized Bin Packing (VBP) that's a generalization of the BPP when there's the possibility of choosing between many bin sizes (on the classical BPP there's one fixed bin size for instance). The UKIPIP is a generalization of the UKP, in the sense that it allows for choosing between many knapsack sizes, and when restricted to only one knapsack size it's equivalent to the UKP. Yet, when there's many knapsack sizes to choose from, the same solution in different knapsacks will yield a diferent profit value, as the profit value of the items is scaled by the knapsack size (the smaller the knapsack size, the bigger the profit value for the same solution); and the solution is a multiset of items and the one knapsack choosen to store these items. The paper seems to focus on approximation methods to solve the UKPIP and the other two variants of it (the bounded one, BKPIP and the 0-1 one, 0-1 KPIP). So the subject of the paper (approximation algorithms for a variant of the UKP as subproblem of a variant of the BPP) is outside our area of interest (exact algorithms for the classical UKP as a subproblem of the classical BPP).

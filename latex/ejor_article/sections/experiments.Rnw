@@ -142,8 +142,9 @@ csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
 csv_no_na_order$filename <- factor(csv_no_na_order$filename,
                                    levels = unique(csv_no_na_order$filename))
 
+csv_no_na_order$algorithm <- gsub('ordered_step_off', 'O.S.', csv_no_na_order$algorithm)
+csv_no_na_order$algorithm <- gsub('terminating_step_off', 'T.S.', csv_no_na_order$algorithm)
 csv_no_na_order$algorithm <- gsub('pyasukp', 'EDUK2', csv_no_na_order$algorithm)
-csv_no_na_order$algorithm <- gsub('ukp5', 'UKP5', csv_no_na_order$algorithm)
 csv_no_na_order$algorithm <- gsub('mgreendp', 'MGREENDP', csv_no_na_order$algorithm)
 csv_no_na_order$type <- fix_names(csv_no_na_order$type)
 ggplot(csv_no_na_order,

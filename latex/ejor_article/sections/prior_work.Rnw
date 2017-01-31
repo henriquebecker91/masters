@@ -1,6 +1,12 @@
 \section{Algorithms from the literature}
 \label{sec:prior_work}
 
+
+
+% BELOW HERE IS THE OLD MATERIAL
+
+
+
 This literature review starts with~\cite{gg-61}, when the \emph{column generation} approach was proposed.
 % TODO: put the phrase from introduction here
 %The main utility of the column generation approach was to avoid the existence of an exponential number of variables when solving the tightest linear programming model of BPP and CSP.
@@ -14,7 +20,7 @@ This literature review starts with~\cite{gg-61}, when the \emph{column generatio
 %The author of this thesis reinvented one algorithm from~\cite{gg-66} and published a paper about it, believing it was novel~\cite{sea2016}, thus, he apologizes to the academic and scientific community for such disregard.
 %Further information about the algorithms of~\cite{gg-66} and~\cite{sea2016} can be found in Section~\ref{sec:dp_algs}.
 A small improvement over the algorithm of~\cite{gg-66} was proposed in~\cite{green_improv}.
-The author implemented the improved algorithm and its results can be seen in Section~\ref{sec:pya_exp}.
+%The author implemented the improved algorithm and its results can be seen in Section~\ref{sec:pya_exp}.
 
 % MTU1 and MTU2 papers:
 In the 1970's, there was a shift of attention from the DP approach to the B\&B approach.

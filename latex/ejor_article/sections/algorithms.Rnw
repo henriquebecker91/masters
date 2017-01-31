@@ -1,17 +1,9 @@
-%\chapter{Approaches and algorithms}
-%\label{sec:app_and_alg}
-
 % TODO: remove the citations?
-Two approaches are often used for solving UKP: dynamic programming (DP)~\cite{eduk},~\cite[p. 214]{garfinkel},~\cite[p. 311]{tchu} and branch and bound (B\&B)~\cite{mtu2}. 
-%The DP approach has a stable pseudo-polynomial time algorithm linear on the capacity and number of items. 
-%The B\&B approach can be less stable. 
-%It can be faster than DP on instances with some characteristics, such as when the remainder of the division between the weight of the best item by the capacity is small; or the items have a big efficiency variance. Nonetheless, B\&B has always the risk of an exponential time worst case.
+%Two approaches are often used for to solve UKPs, they are dynamic programming (DP)~\cite{eduk},~\cite[p. 214]{garfinkel},~\cite[p. 311]{tchu} and branch and bound (B\&B)~\cite{mtu2}. 
+Two approaches are often used for to solve UKPs, they are dynamic programming (DP) and branch and bound (B\&B). 
+The DP approach worst-case time complexity is~\(O(nc)\) (pseudo-polynomial).
+%The same DP algorithm often has similar run times for instances with similar size (i.e. \(n\) and \(c\)) and ITEM DISTRIBUTION WAS NOT EXPLAINED.
 
-%\section{Dynamic Programming}
-%\label{sec:dp_algs}
-
-The Dynamic Programming (DP) approach is the oldest one found in the literature review (Section~\ref{sec:prior_work}).
-Its worst-case time complexity is~\(O(nc)\) (pseudo-polynomial).
 The DP approach can be considered stable, or predictable, compared to other approaches.
 Stable in the sense that its run time variation when solving many instances with the same characteristics (i.e.~\(n\),~\(c\) and items distribution) can be lower than other approaches. 
 Predictable in the sense that it is easier to predict a reasonable time interval for solving an instance based in the characteristics just mentioned, than it is with other approaches.
@@ -172,41 +164,28 @@ A new lower bound is computed for each solution that was not removed by the proc
 The lower bound consists in filling the remaining capacity with a greedy algorithm.
 If this new lower bound is better than the global lower bound, it replaces it. 
 
-%SKIP DIDI
-%Basically eduk, but with a B\&B pre-phase that can help with bounds computation
 \end{comment}
-
-%\section{Consistency Approach}
-
-%The Consistency Approach (CA) consists in combining both the objective function (i.e.~\(maximize~p_i x_i\)) and the UKP only constraint (i.e.~\(w_i x_i \leq c\)) in a single Diophantine equation\footnote{``A Diophantine equation is an equation in which only integer solutions are allowed.''~\cite{diophantine}.
-%In other words, an equation where the values of the variables/unknowns are restricted to the integer numbers.} (\(\alpha_i x_i = \beta\), where~\(\alpha_i\) are coefficients computed for each item, and~\(\beta\) is the analogue of an optimal solution upper bound).
-%The combination procedure preserves the set of valid solutions, consequently, an optimal solution for the UKP can be sought by testing values for the equation variables/unknowns until the equation holds true.
-%Such variables are often the quantity of each item in a solution (\(x_i\)) (on one side of the equation) and a tentative value derived from the optimal solution upper bound (\(\beta\)) (on the other side of the equation).
-
-%\subsection{GREENDP1}
 
 \subsection{Algorithms not included}
 
-In this section, we discuss some algorithms that we are aware of the existence but are not included in our experiments.
-
-The papers~\cite{cabot} and~\cite{turnpike} proposed algorithms for the UKP, but they are not included in our experiments.
-We did not have access to these papers, as both are behind a paywall.
-Moreover, both algorithms have comparison experiments described in the literature that show them to be dominated by algorithms included in our experiments\footnote{In \cite{mtu1}~it is shown that MTU1 dominates the algorithm from~\cite{cabot}, and in \cite{green_improv}~it is implied that GREENDP is an improved version of the algorithm from~\cite{turnpike}.}.
-
-Two algorithms for the UKP are proposed in~\cite{on_equivalent_greenberg}.
-The first algorithm could not be executed over instances of recent datasets without exceeding our time limit.
-The second algorithm does not work for all UKP instances.
-We choose to not include both algorithms in our experiments\footnote{Readers who are interested in those algorithms can access our implementations made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}.
+In this section, we explain why we did not include some algorithms in our comparison.
 
 % TODO: DECIDE IF THE ORDERED AND THE TERMINATING WILL BE SHOWN OR ONLY THE TERMINATING
 % TODO: JUSTIFY WHY ONLY THE ORDERED/TERMINATING WERE SHOWN (NOT THE PERIODIC)
 % ex: the terminating step-off add O(n + c) operations in exchange for the possibility of removing O(c) operations
 An examination of the naïve DP algorithm for the UKP~\cite[p.~311]{tchu} and its improved version presented in~\cite[p.~221]{garfinkel} shows that both algorithms are dominated by the ordered step-off algorithm presented in \cite[p.~15]{gg-66}.
+A B\&B algorithm was proposed by the authors of the ordered step-off before, in~\cite{gg-63}, we believe that the B\&B algorithm is superseeded by the ordered step-off algorithm.
 Also, the UKP5 algorithm proposed in \cite{sea2016} was found to be equivalent to the ordered step-off.
-Since the experiments presented in this paper already include the ordered step-off, the other three algorithms were not included.
+Since the experiments presented in this paper already include the ordered step-off, the other four algorithms mentioned are not included.
 
-% TODO: consider reworking this phrase
-A B\&B algorithm proposed in~\cite{gg-63} was disregarded because in~\cite{gg-66} the same authors only presented DP algorithms as efficient algorithms for solving the UKP. 
+Two algorithms for the UKP are proposed in~\cite{on_equivalent_greenberg}.
+Our implementation of the first algorithm\footnote{Readers who are interested in those algorithms can access our implementations made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.} exceeded our time limit every time we tried to execute it over instances of recent datasets.
+The second algorithm does not work for all UKP instances.
+Both algorithms were not included in our experiments.
+
+The papers~\cite{cabot} and~\cite{turnpike} proposed algorithms for the UKP, but we did not have access to them, as both are behind a paywall.
+Moreover, both algorithms have experiments in the literature suggesting that they are dominated by algorithms included in our experiments\footnote{In \cite{mtu1}~it is shown that MTU1 dominates the algorithm from~\cite{cabot}, and in~\cite{green_improv} it is implied that GREENDP is an improved version of the algorithm from~\cite{turnpike}.}.
+
 We did not obtain access to the code of the algorithm proposed in~\cite{babayev} and we had difficulties trying to implement it.
 
 An instance of the UKP can be converted in an instance of the BKP by adding a constraint \(x_i \leq \floor{\frac{c}{w_i}}\) for each item \(i\).

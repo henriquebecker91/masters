@@ -1,5 +1,9 @@
 \documentclass{elsarticle}
 
+<<silence_warning,echo=FALSE>>=
+opts_chunk$set(comment = NA, message = FALSE, warning = FALSE)
+@
+
 % Use unicode
 \usepackage[utf8]{inputenc} % pacote para acentuação
 
@@ -18,7 +22,6 @@
 \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \usepackage{graphicx}           % pacote para importar figuras
-\usepackage{Sweave}
 \usepackage{tikz}
 \newcommand{\drawvvector}[5]{
 	\edef \origin {#1}
@@ -122,12 +125,12 @@ Amsterdam, Netherlands}
 % to make latex see the pdfs created by Sweave
 \graphicspath{{sections/}}
 
-\include*{sections/introduction}
-\include*{sections/instance_classes}
-\include*{sections/prior_work}
-\include*{sections/algorithms}
-%\include*{sections/experiments}
-%\include*{sections/conclusions}
+\Sexpr{knit_child('sections/introduction.Rnw')}
+\Sexpr{knit_child('sections/instance_classes.Rnw')}
+\Sexpr{knit_child('sections/prior_work.Rnw')}
+\Sexpr{knit_child('sections/algorithms.Rnw')}
+\Sexpr{knit_child('sections/experiments.Rnw')}
+\Sexpr{knit_child('sections/conclusions.Rnw')}
 
 \bibliography{biblio}
 \bibliographystyle{elsarticle-harv}

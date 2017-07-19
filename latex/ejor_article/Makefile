@@ -1,5 +1,5 @@
 SECDIR = sections
-_SECTIONS = introduction.tex prior_work.tex algorithms.tex instance_classes.tex experiments.tex conclusions.tex appendix.tex
+_SECTIONS = introduction.Rnw prior_work.Rnw algorithms.Rnw instance_classes.Rnw experiments.Rnw conclusions.Rnw appendix.Rnw
 SECTIONS = $(patsubst %,$(SECDIR)/%,$(_SECTIONS))
 
 DATADIR = data
@@ -8,19 +8,14 @@ DATA = $(patsubst %,$(DATADIR)/%,$(_DATA))
 
 all: ejor_ukp_hb_lsb.pdf
 
-ejor_ukp_hb_lsb.pdf: skeleton.tex $(SECTIONS) Makefile biblio.bib
+ejor_ukp_hb_lsb.pdf: skeleton.Rnw $(SECTIONS) Makefile biblio.bib
+	Rscript -e "library(knitr); knit(basename('skeleton.Rnw'))"
 	pdflatex skeleton.tex /dev/null
 	bibtex skeleton.aux > /dev/null
 	pdflatex skeleton.tex > /dev/null
 	pdflatex skeleton.tex > /dev/null
+	mv skeleton.pdf ejor_ukp_hb_lsb.pdf
 
-$(SECDIR)/%.tex: $(SECDIR)/%.Rnw $(DATA) Makefile
-	cd $(SECDIR) && R CMD Sweave --encoding=utf8 `basename $<`
-
-cleanaux: Makefile
-	rm -rf *.log *.aux *.toc *.lof *.out *.bbl *.lot *.blg
-
-clean: cleanaux
-	rm -rf chapters/*.aux chapters/*.pdf chapters/*.tex
-	rm -rf *.pdf
+clean: Makefile
+	rm -rf ejor_ukp_hb_lsb.pdf skeleton.tex *.log *.aux *.toc *.lof *.out *.bbl *.lot *.blg *.spl figure
 

@@ -2,7 +2,7 @@
 
 <<setup,echo=F>>=
 library(xtable)
-library(statsr)
+#library(statsr)
 library(dplyr)
 
 get_n <- function(fname) {
@@ -26,7 +26,7 @@ get_alpha <- function(fname) {
 }
 @
 
-<<pya_table,echo=false>>=
+<<pya_ukp5_table,echo=FALSE>>=
 # THIS IS THE SOURCE FOR THE VALUES IN THE TABLE BELOW,
 # THEY WERE COPIED BY HAND BY THE AUTHOR USING RSTUDIO
 fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
@@ -134,7 +134,7 @@ saw <- table_for_dist("saw")
 
 % MTUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
 
-<<pya_table,echo=false>>=
+<<pya_mtu_table,echo=FALSE>>=
 # THIS IS THE SOURCE FOR THE VALUES IN THE TABLE BELOW,
 # THEY WERE COPIED BY HAND BY THE AUTHOR USING RSTUDIO
 slow <- read.csv("../data/mtu_impl_desktop_uc1.csv", sep = ";")
@@ -235,7 +235,7 @@ saw <- table_for_dist("saw")
 \end{tabular}
 \end{table}
 
-<<breq_table,echo=false,results=tex>>=
+<<breq_table,echo=FALSE,results='asis'>>=
 breq <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
 breq$X <- NULL
 
@@ -263,7 +263,7 @@ print(lt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, a
 \iffalse
 
 \begin{landscape}
-<<cut_table,echo=false,results=tex>>=
+<<cut_table,echo=FALSE,results='asis'>>=
 library(xtable)
 library(dplyr)
 

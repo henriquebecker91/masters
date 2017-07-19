@@ -1,4 +1,4 @@
-<<setup,results=hid,echo=false>>=
+<<setup_instance_classes,results='hide',echo=FALSE>>=
 library(ggplot2)
 @
 

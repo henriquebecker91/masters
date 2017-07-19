@@ -1,6 +1,6 @@
-<<setup,echo=false>>=
+<<setup_experiments,echo=FALSE>>=
 library(ggplot2)
-library(statsr)
+#library(statsr)
 library(dplyr)
 library(xtable)
 library(gridExtra)
@@ -125,7 +125,7 @@ The dataset used in this experiment is the same used in \cite{sea2016}, which is
 \begin{figure}[h]
 \caption{Benchmark using PYAsUKP dataset; the UKP5, GREENDP and EDUK2 algorithms; and no timeout.}
 \begin{center}
-<<pya_fast_fig,fig=true,echo=false>>=
+<<pya_fast_fig,echo=FALSE>>=
 csv_no_na <- fast[complete.cases(fast), ]
 csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
   factor(strsplit(as.character(f), "_")[[1]][1],
@@ -287,7 +287,7 @@ Executing the four B\&B codes over the reduced PYAsUKP dataset suffices to show 
 \begin{figure}[h]
 \caption{Comparison between MTU1 and MTU2, C++ and Fortran implementations.}
 \begin{center}
-<<mtu_comp,fig=true,echo=false>>=
+<<mtu_comp,echo=FALSE>>=
 mtu$internal_time <- sapply(mtu$internal_time, function(x) if (is.na(x)) 1000 else x)
 
 mtu1 <- filter(mtu, algorithm == "cpp-mtu1_desktop_uc1" | algorithm == "fmtu1_desktop_uc1") # only mtu1
@@ -323,7 +323,7 @@ The results confirm our hypothesis that this distribution would be hard to solve
 \begin{figure}[h]
 \caption{Benchmark with the 128-16 Standard BREQ instances.}
 \begin{center}
-<<breq,fig=true,echo=false>>=
+<<breq,echo=FALSE>>=
 csv_no_na <- breq_csv
 #csv_no_na[is.na(csv_no_na$internal_time),]$internal_time <- 1000
 csv_no_na$n <- sapply(csv_no_na$filename,
@@ -465,7 +465,7 @@ The time taken by sorting, conversion and remapping procedures is accounted in t
 \begin{figure}[h]
 \caption{Total time used solving the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<total_time,fig=true,echo=false>>=
+<<total_time,echo=FALSE>>=
 master_time <- csp_csv
 #csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
 master_time$tt <- master_time$hex_sum_knapsack_time + master_time$hex_sum_master_prob_time
@@ -503,7 +503,7 @@ If each relaxation takes more than couple of seconds to solve, then solving the 
 \begin{figure}[h]
 \caption{Total time used solving pricing subproblems (UKP) in the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<knapsack_time,fig=true,echo=false>>=
+<<knapsack_time,echo=FALSE>>=
 # Note that the points at y = 600 were introduced to allow
 # for the visualization of the runs that resulted in timeout.
 # Also, note that after the visible mtu1 point closest to the top right
@@ -556,7 +556,7 @@ Third, it seems that executing all computation using integers is slight faster t
 \begin{figure}[h]
 \caption{Percentage of time taken by solving pricing subproblems (UKP) in the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<cutstock_master_knap_corr,fig=true,echo=false>>=
+<<cutstock_master_knap_corr,echo=FALSE>>=
 corr_time <- csp_csv#[complete.cases(csp_csv),]
 corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
 corr_time$tt <- corr_time$hex_sum_knapsack_time + corr_time$hex_sum_master_prob_time
@@ -593,7 +593,7 @@ However, the reason for the growth in the total time spent to solve the most tim
 \begin{figure}[h]
 \caption{Total time used solving the master problem in the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<master_time,fig=true,echo=false>>=
+<<master_time,echo=FALSE>>=
 master_time <- csp_csv
 master_time[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
 master_time[is.na(csp_csv$hex_sum_master_prob_time), ]$hex_sum_master_prob_time <- 600
@@ -629,7 +629,7 @@ This is a topic that will be explored in the following sections.
 \begin{figure}[h]
 \caption{Quantity of pricing subproblems each method solved, relative to the method that solved the greatest amount for the same instance (in \%).}
 \begin{center}
-<<relative_iter_count,fig=true,echo=false>>=
+<<relative_iter_count,echo=FALSE>>=
 csv_no_na <- csp_csv[complete.cases(csp_csv),]
 csv_no_na <- select(csv_no_na, filename, algorithm, total_iter)
 iter_t <- csv_no_na %>%
@@ -703,7 +703,7 @@ It is interesting that such small variations of the same algorithm can yield sig
 \begin{figure}[h]
 \caption{For the four UKP5 variants, the relative difference between the number of pricing subproblems solved in the same instance.}
 \begin{center}
-<<comp_num_iter,fig=true,echo=false>>=
+<<comp_num_iter,echo=FALSE>>=
 t1 <- compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock')
   #geom_point() + ggtitle('UKP5 Integer\n(sorted by efficiency and not sorted')
 t1$type <- 'Integer (sort by efficiency vs no sort)'
@@ -830,7 +830,7 @@ The author believes that the point made in~\cite{sea2016} still stands, as the e
 \begin{figure}[h]
 \caption{Comparison of the mean times of UKP5 and EDUK2 when executed in two diferent computers, in parallel and in serial mode.}
 \begin{center}
-<<times_env_infl,fig=true,echo=false>>=
+<<times_env_infl,echo=FALSE>>=
 env_file_mean_times <- env_data %>% 
   select(algorithm, computer, mode, filename, internal_time) %>% 
   group_by(algorithm, computer, mode, filename) %>% 
@@ -895,7 +895,7 @@ In fact, the parallel execution seems to benefit the EDUK2 numbers against UKP5 
 If we focused in the \verb+desktop+ setting, we would see that EDUK2 was benefited too, while to a lesser degree.
 In the \verb+desktop+ setting, the EDUK2 Parallel TT is 15.62 times greater than the UKP5 Parallel TT; and the EDUK2 Serial TT is 16.50 times greater than the UKP5 Serial TT.
 
-<<env_infl_nums,echo=false,results=hide>>=
+<<env_infl_nums,echo=FALSE,results='hide'>>=
 # Used to get the values of the above paragraph.
 ukp5_par <- filter(env_data, mode == 'parallel' & algorithm == 'ukp5' & computer == 'notebook')
 pya_par <- filter(env_data, mode == 'parallel' & algorithm == 'pyasukpt' & computer == 'notebook')
@@ -925,7 +925,7 @@ sum(pya_par$internal_time) / sum(ukp5_par$internal_time)
 \begin{figure}[h]
 \caption{Parallel and Serial Runs Standard Deviation}
 \begin{center}
-<<sd_env_infl,fig=true,echo=false>>=
+<<sd_env_infl,echo=FALSE>>=
 env_data$algorithm <- gsub('pyasukpt', 'eduk2', env_data$algorithm)
 serial_big_sd <- filter(env_data, mode == "serial") %>%
                  group_by(computer, algorithm, filename) %>%

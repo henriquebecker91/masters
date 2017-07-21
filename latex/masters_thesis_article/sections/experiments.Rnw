@@ -1,10 +1,20 @@
 <<setup_experiments,echo=FALSE>>=
 library(ggplot2)
 #library(statsr)
-library(dplyr)
-library(xtable)
 library(gridExtra)
 library(stringi)
+library(reshape2) # for dcast, http://seananderson.ca/2013/10/19/reshape.html
+library(dplyr) # for select, group_by, summarise, %>%, etc..
+library(xtable) # for xtable
+
+rr_get_n <- function(fname) {
+  as.numeric(gsub(".*_n([1-9][0-9]+)-.*", "\\1", fname))
+}
+
+rr_csv <- read.csv("../data/realistic_random.csv", sep = ";")
+# the duration of runs killed by timeout will be the timeout
+rr_csv$internal_time[is.na(rr_csv$internal_time)] <- 1800
+rr_csv$n <- sapply(rr_csv$filename, rr_get_n)
 
 csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
 csp_csv$X <- NULL
@@ -110,6 +120,60 @@ The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with the flags suggested by the
 %All C++ code was compiled with gcc (g++) version 5.3.0 (the \emph{-O3 -std=c++11} flags were enabled).
 
 % Two other smaller experiments were relevant to those and are described in the next two subsections. The first shows that our implementation of MTU1 and MTU2 (written in C++) are in par with the original ones (written in Fortran); we will use our implementation in the remaining of the experiments. The second shows that there can be considerable time difference when the runs of an experiment are executed in parallel (even one per core, and with the core isolated from other processes) instead one at time. 
+
+\section{Realistic Random Dataset}
+
+\begin{figure}[h]
+\caption{TODO: write caption.}
+\begin{center}
+<<realistic_random_figure,echo=FALSE>>=
+# I thought of putting one of the legends in an unused area of the plot and
+# another below the plot, but separating legends with ggplot2 needs a hack:
+# https://stackoverflow.com/questions/13143894/how-do-i-position-two-legends-independently-in-ggplot
+# which is too much effort for a little gain.
+ggplot(rr_csv,
+       aes(x = n * (0.80 + 0.50*(as.numeric(algorithm) - 1)/6),
+           y = internal_time,
+           color = algorithm,
+           shape = algorithm)) + 
+  #geom_jitter() +
+  #stat_bin2d(binwidth = 0.25, geom="text", aes(label=..count..), position = position_dodge(0.7)) +
+  #scale_fill_gradient(guide = FALSE) + # remove count legend
+  geom_point() + geom_count() +
+  scale_size_area(breaks = c(2, 5, 8),
+                  guide = guide_legend(title = "# of points",
+                                       title.position = 'top',
+                                       direction = 'horizontal',
+                                       title.hjust = 0.5)) +
+  scale_y_continuous(trans = "log10",
+                     breaks = c(10^-3, 10^-2, 10^-1, 1, 60, 600, 1800),
+                     labels = c('0.001', '0.01', '0.1', '1', '60', '600', '1800')) +
+  scale_x_continuous(trans = "log2",
+                     breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15,
+                                2^16, 2^17)) +
+  scale_colour_manual(name = "Algorithm",
+                      labels = c('cpp-mtu1', 'cpp-mtu2', 'eduk', 'eduk2', 'ordered_step_off', 'terminating_step_off', 'mgreendp'),
+                      values = c('black', 'darkgrey', 'black', 'darkgrey', 'black', 'darkgrey', 'black')) +   
+  scale_shape_manual(name = "Algorithm",
+                     labels = c('cpp-mtu1', 'cpp-mtu2', 'eduk', 'eduk2', 'ordered_step_off', 'terminating_step_off', 'mgreendp'),
+                     values = c(16, 16, 17, 17, 15, 15, 4)) +
+  ylab('Time to solve (seconds)') +
+  xlab('Instance size (number of items)') +
+  theme(legend.position = 'bottom')
+#ggsave('realistic_random.pdf', width = 0.80*210, height = 0.5*297, unit = 'mm')
+@
+\end{center}
+%\legend{Source: the author.}
+\label{fig:realistic_random}
+\end{figure}
+
+<<realistic_random_table,echo=FALSE,results='asis'>>=
+rr_t <- select(rr_csv, algorithm, n, internal_time)
+rr_t <- group_by(rr_t, algorithm, n) %>% summarise(time = mean(internal_time))
+rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
+
+xtable(rr_t)
+@
 
 \section{Solving the PYAsUKP dataset}
 \label{sec:pya_exp}

@@ -123,14 +123,15 @@ Amsterdam, Netherlands}
 %\tableofcontents
 
 % to make latex see the pdfs created by Sweave
-\graphicspath{{sections/}}
+%\graphicspath{{sections/}}
 
 \Sexpr{knit_child('sections/introduction.Rnw')}
-\Sexpr{knit_child('sections/instance_classes.Rnw')}
 \Sexpr{knit_child('sections/prior_work.Rnw')}
+\Sexpr{knit_child('sections/instance_classes.Rnw')}
 \Sexpr{knit_child('sections/algorithms.Rnw')}
 \Sexpr{knit_child('sections/experiments.Rnw')}
-\Sexpr{knit_child('sections/conclusions.Rnw')}
+%\Sexpr{knit_child('sections/conclusions.Rnw')}
+%\Sexpr{knit_child('sections/appendix.Rnw')}
 
 \bibliography{biblio}
 \bibliographystyle{elsarticle-harv}

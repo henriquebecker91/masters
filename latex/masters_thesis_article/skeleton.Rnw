@@ -1,7 +1,19 @@
 \documentclass{elsarticle}
 
-<<silence_warning,echo=FALSE>>=
-opts_chunk$set(comment = NA, message = FALSE, warning = FALSE)
+% can't be cached because it sets the global options that can't be cached
+<<setup_global_options, cache = FALSE, echo = FALSE, message = FALSE>>=
+library(knitr)
+# global chunk options
+opts_chunk$set(cache = TRUE, autodep = TRUE)
+# comment = NA don't set no 'comments' but set the commen symbol to none
+opts_chunk$set(echo = FALSE, comment = NA, message = FALSE, warning = FALSE)
+
+library(ggplot2) # used for all plotting
+library(gridExtra) # TODO: check if yet used
+library(stringi) # TODO: check if yet used
+library(reshape2) # for dcast, http://seananderson.ca/2013/10/19/reshape.html
+library(dplyr) # for select, group_by, summarise, %>%, etc..
+library(xtable) # for xtable
 @
 
 % Use unicode

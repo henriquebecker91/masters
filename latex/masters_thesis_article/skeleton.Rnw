@@ -9,7 +9,7 @@ opts_chunk$set(cache = TRUE, autodep = TRUE)
 opts_chunk$set(echo = FALSE, comment = NA, message = FALSE, warning = FALSE)
 
 library(ggplot2) # used for all plotting
-library(gridExtra) # TODO: check if yet used
+library(gridExtra) # used for MTU plot (TODO: check if can be replaced by knitr)
 library(stringi) # TODO: check if yet used
 library(reshape2) # for dcast, http://seananderson.ca/2013/10/19/reshape.html
 library(dplyr) # for select, group_by, summarise, %>%, etc..

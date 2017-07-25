@@ -52,7 +52,7 @@ rr_get_n <- function(fname) {
 rr_csv <- read.csv("../data/realistic_random.csv", sep = ";")
 # the duration of runs killed by timeout will be the timeout
 rr_csv$internal_time[is.na(rr_csv$internal_time)] <- 1800
-rr_csv$n <- sapply(rr_csv$filename, rr_get_n)
+rr_csv$n <- rr_get_n(rr_csv$filename)
 rr_csv$algorithm <- my_relevel(rr_csv$algorithm)
 @
 
@@ -64,24 +64,43 @@ breq_get_n <- function(fname) {
 breq_csv <- read.csv("../data/128_16_std_breqd.csv", sep = ";")
 # the duration of runs killed by timeout will be the timeout
 breq_csv$internal_time[is.na(breq_csv$internal_time)] <- 1800
-breq_csv$n <- sapply(breq_csv$filename, breq_get_n)
+breq_csv$n <- breq_get_n(breq_csv$filename)
 breq_csv$algorithm <- my_relevel(breq_csv$algorithm)
 @
 
-<<setup_experiments,echo=FALSE>>=
+<<mtu_shared>>=
+mtu_csv <- read.csv("../data/mtus_pya.csv", sep = ";")
+mtu_csv$internal_time[is.na(mtu_csv$internal_time)] <- 1800
+@
+
+<<fast_shared>>=
+fast_csv <- read.csv("../data/pya_ukp5.csv", sep = ";")
+fast_csv$X <- NULL # necessary for complete.cases to work
+@
+
+<<env_shared>>=
+env_data <- read.csv("../data/env_influence.csv", sep = ";")
+env_data$X <- NULL
+@
+
+<<to_rework_shared>>=
+fix_names <- function(x) {
+  x <- gsub('all', 'ALL', x)
+  x <- gsub('ss2', 'S.S.', x)
+  x <- gsub('saw', 'SAW', x)
+  x <- gsub('nsds2', 'P.P.', x)
+  x <- gsub('sc', 'S.C.', x)
+  x <- gsub('hi', 'W.C.D.', x)
+  x
+}
+@
+
+<<csp_shared>>=
 csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
 csp_csv$X <- NULL
 # forgot to add sort_time to knapsack time in the chart generation codes, now
 # changing it here to avoid changing many places
 csp_csv <- mutate(csp_csv, hex_sum_knapsack_time = hex_sum_knapsack_time + hex_sum_sort_time)
-fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
-fast$X <- NULL
-slow <- read.csv("../data/mtus.csv", sep = ";")
-slow$X <- NULL
-mtu <- read.csv("../data/mtu_impl_desktop_uc1.csv", sep = ";")
-mtu$X <- NULL
-env_data <- read.csv("../data/env_influence.csv", sep = ";")
-env_data$X <- NULL
 
 compare_num_iter <- function(csv, first_m, second_m) {
   first_t <- csv %>% select(filename, algorithm, total_iter) %>%
@@ -100,39 +119,6 @@ compare_num_iter <- function(csv, first_m, second_m) {
 #               first_m, "\nrelative to", second_m,
 #               '(in %)')) +
 #    xlab("Instance index when ordered by the value at axis y")
-}
-
-ukp_time_comp_plot <- function (data, legend) {
-  data <- select(data, algorithm, filename, internal_time)
-  data$algorithm <- sapply(data$algorithm, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
-  data$language <- data$algorithm
-  data$language <- sapply(data$language, (function (f) { gsub("cpp-mtu[12]", "C++", f) }))
-  data$language <- sapply(data$language, (function (f) { gsub("fmtu[12]", "Fortran", f) }))
-  data$language <- factor(data$language, levels = c('C++', 'Fortran'))
-  data$algorithm <- sapply(data$algorithm, (function (f) { gsub(".*1", "MTU1", f) }))
-  data$algorithm <- sapply(data$algorithm, (function (f) { gsub(".*2", "MTU2", f) }))
-  data$algorithm <- factor(data$algorithm, levels = c('MTU1', 'MTU2'))
-  data <- data %>% group_by(filename) %>% mutate(fname_mean_time = mean(internal_time)) %>% arrange(fname_mean_time)
-  data$filename <- factor(data$filename, levels = unique(data$filename))
-  p <- ggplot(data, aes(x = as.numeric(filename), y = internal_time, color = language)) 
-  p <- p + geom_point() + scale_y_continuous(
-    trans = 'log10', limits = c(0.001, 1000),
-    breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
-    labels = c('0.001', '0.01', '0.1', '1', '10', '100', '1000')
-  ) 
-  p <- p + xlab("Instances sorted by mean time to solve\n(mean between algorithms) ")
-  p <- p + ylab("Time to solve\n(seconds, log10 scale)")
-  p <- p + theme(legend.position = legend)
-}
-
-fix_names <- function(x) {
-  x <- gsub('all', 'ALL', x)
-  x <- gsub('ss2', 'S.S.', x)
-  x <- gsub('saw', 'SAW', x)
-  x <- gsub('nsds2', 'P.P.', x)
-  x <- gsub('sc', 'S.C.', x)
-  x <- gsub('hi', 'W.C.D.', x)
-  x
 }
 @
 
@@ -177,7 +163,7 @@ The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with the flags suggested by the
 \begin{figure}[h]
 \caption{TODO: write caption.}
 \begin{center}
-<<realistic_random_figure,echo=FALSE>>=
+<<realistic_random_figure>>=
 gen_graph_all_alg_discrete_x(rr_csv) +
 scale_x_continuous(trans = "log2",
                    breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17))
@@ -187,7 +173,7 @@ scale_x_continuous(trans = "log2",
 \label{fig:realistic_random}
 \end{figure}
 
-<<realistic_random_table,echo=FALSE,results='asis'>>=
+<<realistic_random_table,results='asis'>>=
 rr_t <- select(rr_csv, algorithm, n, internal_time)
 rr_t <- group_by(rr_t, algorithm, n) %>% summarise(time = mean(internal_time))
 rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
@@ -209,43 +195,47 @@ The dataset used in this experiment is the same used in \cite{sea2016}, which is
 \begin{figure}[h]
 \caption{Benchmark using PYAsUKP dataset; the UKP5, GREENDP and EDUK2 algorithms; and no timeout.}
 \begin{center}
-<<pya_fast_fig,echo=FALSE>>=
-csv_no_na <- fast[complete.cases(fast), ]
-csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
-  factor(strsplit(as.character(f), "_")[[1]][1],
-         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-}))
-csv_no_na_mean <- csv_no_na %>%
-  group_by(filename) %>%
-  mutate(mean_methods_time = mean(internal_time))
-#csv_no_na$n <- sapply(csv_no_na$filename, (function (f) { as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))}))
-dt_copy <- csv_no_na_mean
-dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
-  arrange(mean_methods_time)
-csv_no_na_order$filename <- factor(csv_no_na_order$filename,
-                                   levels = unique(csv_no_na_order$filename))
+<<pya_fast_fig>>=
+fast_plot <- function(t) {
+  inst_types <- c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2')
 
-csv_no_na_order$algorithm <- gsub('ordered_step_off', 'O.S.', csv_no_na_order$algorithm)
-csv_no_na_order$algorithm <- gsub('terminating_step_off', 'T.S.', csv_no_na_order$algorithm)
-csv_no_na_order$algorithm <- gsub('pyasukp', 'EDUK2', csv_no_na_order$algorithm)
-csv_no_na_order$algorithm <- gsub('mgreendp', 'MGREENDP', csv_no_na_order$algorithm)
-csv_no_na_order$type <- fix_names(csv_no_na_order$type)
-ggplot(csv_no_na_order,
-       aes(x = as.numeric(filename),
-           y = internal_time,
-           color = algorithm)) + 
-  geom_point() +
-  scale_y_continuous(trans = 'log10', limits = c(0.001, 1000),
-                     breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
-                     labels = c('0.001', '0.01', '0.1', '1', '10',
-                                '100', '1000')) +
-#  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
-  ylab('Time to solve (seconds, log10 scale)') +
-  xlab('Instance index when sorted by average time to solve\n(average between the methods)') +
-  #scale_colour_grey() +
-  #theme_bw() +
-  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+  data <- t[complete.cases(t), ]
+  data$type <- sapply(data$filename, (function (f) {strsplit(as.character(f), "_")[[1]][1] }))
+  data$type <- factor(data$type, levels = inst_types)
+
+  data <- group_by(data, filename) %>%
+    mutate(mean_methods_time = mean(internal_time))
+
+  data_copy <- data
+  data$type <- factor('all', levels = inst_types)
+
+  data <- rbind(data, data_copy) %>% arrange(mean_methods_time)
+  data$filename <- factor(data$filename,
+        levels = unique(data$filename))
+
+  data$algorithm <- gsub('ordered_step_off', 'O.S.', data$algorithm)
+  data$algorithm <- gsub('terminating_step_off', 'T.S.', data$algorithm)
+  data$algorithm <- gsub('pyasukp', 'EDUK2', data$algorithm)
+  data$algorithm <- gsub('mgreendp', 'MGREENDP', data$algorithm)
+  data$type <- fix_names(data$type)
+
+  ggplot(data,
+         aes(x = as.numeric(filename),
+       y = internal_time,
+       color = algorithm)) + 
+    geom_point() +
+    scale_y_continuous(trans = 'log10',
+           breaks = c(0.001, 0.01, 0.1, 1, 10, 60, 600, 1800),
+           labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800')) + 
+  #  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
+    ylab('Time to solve (seconds, log10 scale)') +
+    xlab('Instance index when sorted by average time to solve\n(average between the methods)') +
+    #scale_colour_grey() +
+    #theme_bw() +
+    theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+}
+
+fast_plot(fast_csv)
 @
 \end{center}
 %\legend{Source: the author.}
@@ -305,44 +295,6 @@ It should also be noted that MGREENDP needs a workaround to work with distributi
 %Consequenly, the author of this thesis believes that the choice between using UKP5 or MGREENDP should be based on the distribution that needs to be solved.
 %The author of this thesis would like to remind that those distributions are artificially generated, and do not model any real-world instances (that the author is aware of), and consequently any conclusions have limited utility.
 
-%\begin{figure}[h]
-%\caption{Benchmark with slow methods (10\% of the instances, 600s timeout)}
-%\begin{center}
-%<<pya_slow_fig,fig=true,echo=false>>=
-%csv_no_na <- slow
-%csv_no_na[is.na(slow$internal_time), ]$internal_time <- 600
-%csv_no_na$type <- sapply(csv_no_na$filename, (function (f) {
-%  factor(strsplit(as.character(f), "_")[[1]][1],
-%         levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-%}))
-%csv_no_na_mean <- csv_no_na %>%
-%  group_by(filename) %>%
-%  mutate(mean_methods_time = mean(internal_time))
-%dt_copy <- csv_no_na_mean
-%dt_copy$type <- factor('all', levels = c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2'))
-%csv_no_na_order <- rbind(csv_no_na_mean, dt_copy) %>%
-%  arrange(mean_methods_time)
-%csv_no_na_order$filename <- factor(csv_no_na_order$filename,
-%                                   levels = unique(csv_no_na_order$filename))
-%
-%ggplot(csv_no_na_order,
-%       aes(x = as.numeric(filename),
-%           y = internal_time,
-%           color = algorithm)) + 
-%  geom_point() +
-%  scale_y_continuous(trans = 'log10', limits = c(0.001, 600),
-%                     breaks = c(0.001, 0.01, 0.1, 1, 6, 60, 600),
-%                     labels = c('0.001', '0.01', '0.1', '1', '6', '60', '600')) +
-%#  ggtitle('Benchmark with 454 (10%) of the PYAsUKP instances') +
-%  ylab('Time to solve (seconds, logarithmic)') +
-%  xlab('Instance index when ordered by average time to solve') +
-%  theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
-%@
-%\end{center}
-%\legend{Source: the author.}
-%\label{fig:pya_slow}
-%\end{figure}
-
 % TODO: MAYBE MAKE THIS A SUBSECTION OF THE PREVIOUS SECTION?
 \subsection{MTU1 and MTU2 (C++ and Fortran)}
 \label{sec:mtu_exp}
@@ -371,11 +323,45 @@ Executing the four B\&B codes over the reduced PYAsUKP dataset suffices to show 
 \begin{figure}[h]
 \caption{Comparison between MTU1 and MTU2, C++ and Fortran implementations.}
 \begin{center}
-<<mtu_comp,echo=FALSE>>=
-mtu$internal_time <- sapply(mtu$internal_time, function(x) if (is.na(x)) 1000 else x)
+<<mtu_comp>>=
+ukp_time_comp_plot <- function (data, legend) {
+  # select columns necessary to the plot, and divide information
+  # given in algorithm column in two columns: language and algorithm
+  data <- select(data, algorithm, filename, internal_time)
+  data$language <- gsub("cpp-mtu[12]", "C++", data$algorithm)
+  data$language <- gsub("fmtu[12]", "Fortran", data$language)
+  data$language <- factor(data$language, levels = c('C++', 'Fortran'))
+  data$algorithm <- gsub(".*1", "MTU1", data$algorithm)
+  data$algorithm <- gsub(".*2", "MTU2", data$algorithm)
+  data$algorithm <- factor(data$algorithm, levels = c('MTU1', 'MTU2'))
 
-mtu1 <- filter(mtu, algorithm == "cpp-mtu1_desktop_uc1" | algorithm == "fmtu1_desktop_uc1") # only mtu1
-mtu2 <- filter(mtu, algorithm == "cpp-mtu2_desktop_uc1" | algorithm == "fmtu2_desktop_uc1") # only mtu2
+  # compute the mean of the internal_time (for the same filename but
+  # with distinct algorithms), and sort the rows by this mean
+  data <- group_by(data, filename) %>%
+          mutate(fname_mean_time = mean(internal_time)) %>%
+	  arrange(fname_mean_time)
+  # make filename a factor so as.numeric of a filename will give its position
+  # in the ordering described above
+  data$filename <- factor(data$filename, levels = unique(data$filename))
+  # plot the graph, no change in data
+  p <- ggplot(data,
+              aes(x = as.numeric(filename),
+	          y = internal_time,
+		  color = language)) +
+    geom_point() +
+    scale_colour_manual(values = c('C++' = 'black', 'Fortran' = 'darkgrey')) +
+    scale_y_continuous(trans = 'log10',
+                       breaks = c(0.001, 0.01, 0.1, 1, 10, 60, 600, 1800),
+                       labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800')) + 
+    xlab("Instances sorted by mean time to solve\n(mean between implementations) ") +
+    ylab("Time to solve\n(seconds, log10 scale)") +
+    theme(legend.position = legend)
+
+  return(p)
+}
+
+mtu1 <- filter(mtu_csv, algorithm == "cpp-mtu1" | algorithm == "fmtu1") # only mtu1
+mtu2 <- filter(mtu_csv, algorithm == "cpp-mtu2" | algorithm == "fmtu2") # only mtu2
 
 p1 <- ukp_time_comp_plot(mtu1, 'bottom') + ggtitle("MTU1 (Fortran vs C++)")
 p2 <- ukp_time_comp_plot(mtu2, 'bottom') + ggtitle("MTU2 (Fortran vs C++)")
@@ -407,7 +393,7 @@ The results confirm our hypothesis that this distribution would be hard to solve
 \begin{figure}[h]
 \caption{Benchmark with the 128-16 Standard BREQ instances.}
 \begin{center}
-<<breq_figure,echo=FALSE>>=
+<<breq_figure>>=
 gen_graph_all_alg_discrete_x(breq_csv) +
 scale_x_continuous(trans = "log2",
                    breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
@@ -418,7 +404,7 @@ scale_x_continuous(trans = "log2",
 \label{fig:breq}
 \end{figure}
 
-<<breq_table,echo=FALSE,results='asis'>>=
+<<breq_table, results='asis'>>=
 breq_t <- select(breq_csv, algorithm, n, internal_time)
 breq_t <- group_by(breq_t, algorithm, n) %>% summarise(time = mean(internal_time))
 breq_t <- dcast(breq_t, algorithm ~ n, value.var = "time")
@@ -469,7 +455,7 @@ The weak solution dominance used by UKP5 does not completely avoid this problem,
 
 %The algorithms described at~\cite{TheUnboundedKnapsackProblem-T.C.HU.pdf} were not implemented and tested because of time reasons. However, we can see, by the algorithms assimptotic worst case complexity (\(O(n v_1 w_1)\) and~\(O(n w_i)\)), that they 
 
-%<<<<label=breq_table,echo=FALSE,results=tex>>=
+%<<<<label=breq_table,results=tex>>=
 %library(plyr)
 %
 %breq_csv_s <- breq_csv[complete.cases(breq_csv), ]
@@ -539,10 +525,11 @@ The time taken by sorting, conversion and remapping procedures is accounted in t
 %Add graphs created to the dissertation. Say that ending at 80\% iterations of the more iterations method do not mean the code was 25\% faster as the knapsack times are not uniform. If the divergence occurs close to the end and is significant (if the difference occured at iteration x, and x is about 80\% of the iterations of the method with the greatest number of iterations, and the less iterations method ended doing 90\% of the more iterations method, those 10\% were composed entirely of instances significantly harder than the first ones (that were equal). This effect was not studied extensively because of time and scope reasons.
 %The graph of iterations shown by the optimal solutions given by the cplex knapsack solver seems to result in a smaller number of iterations. It's expected that the UKP5 versions will vary between 0.2 and -0.2 from the mean (about 0 to 45\% relative to each other) as we have examinated this behavior before. This do not see to be a B\&B approach effect as MTU1 do not behave the same way. The author hypothesis is that the UKP5's idiosyncrasy of returning always one of the smallest optimal solutions can be unfavoreable to its relationship with the master model. The gap between an optimal solution weight and the knapsack capacity is interpreted as a roll's waste at the master problem. 
 
+\begin{comment}
 \begin{figure}[h]
 \caption{Total time used solving the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<total_time,echo=FALSE>>=
+<<total_time, eval = FALSE>>=
 master_time <- csp_csv
 #csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
 master_time$tt <- master_time$hex_sum_knapsack_time + master_time$hex_sum_master_prob_time
@@ -568,6 +555,7 @@ ggplot(master_time,
 %\legend{Source: the author.}
 \label{fig:csp_total_time}
 \end{figure}
+\end{comment}
 
 Let us examine Figure~\ref{fig:csp_total_time}.
 To simplify visualization, in the instances that CPLEX and MTU1 ended in timeout, these two methods are plotted as having used exactly 600 seconds.
@@ -580,7 +568,7 @@ If each relaxation takes more than couple of seconds to solve, then solving the 
 \begin{figure}[h]
 \caption{Total time used solving pricing subproblems (UKP) in the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<knapsack_time,echo=FALSE>>=
+<<knapsack_time>>=
 # Note that the points at y = 600 were introduced to allow
 # for the visualization of the runs that resulted in timeout.
 # Also, note that after the visible mtu1 point closest to the top right
@@ -589,7 +577,7 @@ If each relaxation takes more than couple of seconds to solve, then solving the 
 # advantage of the methods that sort the array by efficiency over the ones
 # who does not.
 csv_no_na <- csp_csv
-csv_no_na[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
+csv_no_na[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 1800
 #csv_no_na <- csv[!is.na(csv$hex_sum_knapsack_time), ]
 csv_no_na_order <- csv_no_na %>% group_by(filename) %>% mutate(mean_methods_time = mean(hex_sum_knapsack_time)) %>% arrange(mean_methods_time)
 csv_no_na_order$filename <- factor(csv_no_na_order$filename, levels = unique(csv_no_na_order$filename))
@@ -600,11 +588,9 @@ ggplot(csv_no_na_order,
   xlab('Instance index when sorted by the\nmean time methods spent solving pricing subproblems') +
   ylab('Total time (seconds, log10 scale)') +
   geom_point() +
-  scale_y_continuous(
-    trans = 'log10', limits = c(0.0001, 1000),
-    breaks = c(0.001, 0.01, 0.1, 1, 10, 100, 1000),
-    labels = c('0.001', '0.01', '0.1', '1', '10', '100', '1000')
-  ) +
+  scale_y_continuous(trans = "log10",
+	             breaks = c(10^-3, 10^-2, 10^-1, 1, 60, 600, 1800),
+	             labels = c('0.001', '0.01', '0.1', '1', '60', '600', '1800')) +
   theme(legend.position = 'bottom')
 @
 \end{center}
@@ -630,10 +616,11 @@ When the items were kept sorted by increasing weight, UKP5 was up to two times f
 Keeping the items sorted by increasing weight seems to be the best choice for such instances.
 Third, it seems that executing all computation using integers is slight faster than using floating point profit values, but the difference is barely noticeable.
 
+\begin{comment}
 \begin{figure}[h]
 \caption{Percentage of time taken by solving pricing subproblems (UKP) in the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<cutstock_master_knap_corr,echo=FALSE>>=
+<<cutstock_master_knap_corr, eval = FALSE>>=
 corr_time <- csp_csv#[complete.cases(csp_csv),]
 corr_time$relative_time <- corr_time$hex_sum_knapsack_time / (corr_time$hex_sum_master_prob_time + corr_time$hex_sum_knapsack_time)
 corr_time$tt <- corr_time$hex_sum_knapsack_time + corr_time$hex_sum_master_prob_time
@@ -653,6 +640,7 @@ ggplot(corr_time,
 %\legend{Source: the author.}
 \label{fig:percentage_knap_subproblem}
 \end{figure}
+\end{comment}
 
 %The first two figures 
 Figures \ref{fig:csp_total_time} and \ref{fig:csp_knapsack_time} can give the erroneous impression that solving the pricing subproblems was where the majority of the solving time was spent.
@@ -667,10 +655,11 @@ This is not to say that, in such time-consuming instances, the pricing subproble
 In Figure~\ref{fig:percentage_knap_subproblem}, where~\(x > 550\), we can see that there is a rise of the relative time taken to solve the pricing subproblem instances with UKP5.
 However, the reason for the growth in the total time spent to solve the most time-consuming instances was that many cutting patterns had to be added to the master problem before it could not be improved anymore; what results in more iterations and, consequently, more instances of the pricing subproblem and master problem solved.
 
+\begin{comment}
 \begin{figure}[h]
 \caption{Total time used solving the master problem in the continuous relaxation of the BPP/CSP.}
 \begin{center}
-<<master_time,echo=FALSE>>=
+<<master_time, eval = FALSE>>=
 master_time <- csp_csv
 master_time[is.na(csp_csv$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 600
 master_time[is.na(csp_csv$hex_sum_master_prob_time), ]$hex_sum_master_prob_time <- 600
@@ -695,6 +684,7 @@ ggplot(master_time,
 %\legend{Source: the author.}
 \label{fig:master_time}
 \end{figure}
+\end{comment}
 
 Finally, Figure~\ref{fig:master_time} shows that the time taken by solving the master model is dependent on the instance itself, and not so much on the method used to solve the pricing subproblems.
 Yet, we can see that using CPLEX to solve the pricing subproblems seems to make solving the master problem slightly easier.
@@ -703,10 +693,11 @@ This is a topic that will be explored in the following sections.
 
 \subsection{The differences in the number of pricing subproblems solved}
 
+\begin{comment}
 \begin{figure}[h]
 \caption{Quantity of pricing subproblems each method solved, relative to the method that solved the greatest amount for the same instance (in \%).}
 \begin{center}
-<<relative_iter_count,echo=FALSE>>=
+<<relative_iter_count, eval = FALSE>>=
 csv_no_na <- csp_csv[complete.cases(csp_csv),]
 csv_no_na <- select(csv_no_na, filename, algorithm, total_iter)
 iter_t <- csv_no_na %>%
@@ -729,6 +720,7 @@ ggplot(iter_t,
 %\legend{Source: the author.}
 \label{fig:relative_iter_count}
 \end{figure}
+\end{comment}
 
 In Figure~\ref{fig:relative_iter_count}, it is possible to see that the methods solved different numbers of pricing subproblems for the same instance.
 The author used a constant for the CPLEX seeds of the master problem solver and the method that used CPLEX as the knapsack solver (cplex\_cutstock).
@@ -777,10 +769,11 @@ In Figure~\ref{fig:comp_num_iter}, we can see the relative difference in the num
 The two traits are: the type used for the profit values (floating point or integer); and if the items were sorted by efficiency or not.
 It is interesting that such small variations of the same algorithm can yield significant differences to the numbers of pricing subproblems generated. 
 
+\begin{comment}
 \begin{figure}[h]
 \caption{For the four UKP5 variants, the relative difference between the number of pricing subproblems solved in the same instance.}
 \begin{center}
-<<comp_num_iter,echo=FALSE>>=
+<<comp_num_iter, eval = FALSE>>=
 t1 <- compare_num_iter(csp_csv, 'ukp5_int_cutstock', 'ukp5_int_ns_cutstock')
   #geom_point() + ggtitle('UKP5 Integer\n(sorted by efficiency and not sorted')
 t1$type <- 'Integer (sort by efficiency vs no sort)'
@@ -807,6 +800,7 @@ ggplot(t,
 %\legend{Source: the author.}
 \label{fig:comp_num_iter}
 \end{figure}
+\end{comment}
 
 All four charts show that some instances were solved in the same number of iterations between the two variants compared; those instances form a horizontal line at~\(y = 0\).
 The two variants with less difference in the number of iterations are the two integer variants with different sort methods (top right chart).
@@ -904,10 +898,11 @@ The author believes that the point made in~\cite{sea2016} still stands, as the e
 
 %Finally, we can see that the instance type is tied to the algorithm used and the standard deviation of their times. The author believes that the distribution of the items size (that changes how farther will be the memory positions accessed by UKP5 sequentially) and profit (that ) have a big impact on the standard deviation, as they will effect the cache misses.
 
+\begin{comment}
 \begin{figure}[h]
 \caption{Comparison of the mean times of UKP5 and EDUK2 when executed in two diferent computers, in parallel and in serial mode.}
 \begin{center}
-<<times_env_infl,echo=FALSE>>=
+<<times_env_infl, eval = FALSE>>=
 env_file_mean_times <- env_data %>% 
   select(algorithm, computer, mode, filename, internal_time) %>% 
   group_by(algorithm, computer, mode, filename) %>% 
@@ -948,6 +943,7 @@ ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) +
 %\legend{Source: the author.}
 \label{fig:mean_time_env_infl}
 \end{figure}
+\end{comment}
 
 % The lack of logarithmic scale at the x axis of Figure~\ref{fig:mean_time_env_infl} flatten the UKP5 data points, but gives us a clear view of how UKP5 can be benefited in an experiment that makes multiple runs in parallel and compares PYAsUKP and UKP5. The execution of runs in parallel seems to affect UKP5 far more than PYAsUKP, as it has much more points distant from~\(y \approx 1\) (where serial and parallel runs have similar mean times) than PYAsUKP, and only UKP5 has a significative share of points over~\(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time).
 
@@ -972,7 +968,8 @@ In fact, the parallel execution seems to benefit the EDUK2 numbers against UKP5 
 If we focused in the \verb+desktop+ setting, we would see that EDUK2 was benefited too, while to a lesser degree.
 In the \verb+desktop+ setting, the EDUK2 Parallel TT is 15.62 times greater than the UKP5 Parallel TT; and the EDUK2 Serial TT is 16.50 times greater than the UKP5 Serial TT.
 
-<<env_infl_nums,echo=FALSE,results='hide'>>=
+\begin{comment}
+<<env_infl_nums,results='hide', eval = FALSE>>=
 # Used to get the values of the above paragraph.
 ukp5_par <- filter(env_data, mode == 'parallel' & algorithm == 'ukp5' & computer == 'notebook')
 pya_par <- filter(env_data, mode == 'parallel' & algorithm == 'pyasukpt' & computer == 'notebook')
@@ -998,11 +995,13 @@ sum(pya_par$internal_time) - sum(pya_ser$internal_time)
 sum(pya_ser$internal_time) / sum(ukp5_ser$internal_time)
 sum(pya_par$internal_time) / sum(ukp5_par$internal_time)
 @
+\end{comment}
 
+\begin{comment}
 \begin{figure}[h]
 \caption{Parallel and Serial Runs Standard Deviation}
 \begin{center}
-<<sd_env_infl,echo=FALSE>>=
+<<sd_env_infl, eval = FALSE>>=
 env_data$algorithm <- gsub('pyasukpt', 'eduk2', env_data$algorithm)
 serial_big_sd <- filter(env_data, mode == "serial") %>%
                  group_by(computer, algorithm, filename) %>%
@@ -1030,6 +1029,7 @@ ggplot(data = com_sd,
 %\legend{Source: the author.}
 \label{fig:sd_env_infl}
 \end{figure}
+\end{comment}
 
 Figure~\ref{fig:sd_env_infl} presents the Standard Deviation (SD) values computed over each ten runs for the same algorithm, computer, mode and instance.
 The author will not draw many conclusions from this data, as SD values with different means are not directly comparable.

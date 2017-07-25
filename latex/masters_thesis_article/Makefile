@@ -17,5 +17,5 @@ ejor_ukp_hb_lsb.pdf: skeleton.Rnw $(SECTIONS) Makefile biblio.bib
 	mv skeleton.pdf ejor_ukp_hb_lsb.pdf
 
 clean: Makefile
-	rm -rf ejor_ukp_hb_lsb.pdf skeleton.tex *.log *.aux *.toc *.lof *.out *.bbl *.lot *.blg *.spl figure
+	rm -rf ejor_ukp_hb_lsb.pdf skeleton.tex *.log *.aux *.toc *.lof *.out *.bbl *.lot *.blg *.spl figure cache
 

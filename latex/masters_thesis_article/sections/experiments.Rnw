@@ -5,6 +5,15 @@ my_relevel <- function(f) {
 
 # used by rr and breq
 gen_graph_all_alg_discrete_x <- function(csv) {
+  alg_labels <- c(
+    'cpp-mtu1'             = 'MTU1 (C++)',
+    'cpp-mtu2'             = 'MTU2 (C++)',
+    'eduk'                 = 'EDUK',
+    'eduk2'                = 'EDUK2',
+    'ordered_step_off'     = 'Ordered Step-Off',
+    'terminating_step_off' = 'Terminating Step-Off',
+    'mgreendp'             = 'MGREENDP'
+  )
   # I thought of putting one of the legends in an unused area of the plot and
   # another below the plot, but separating legends with ggplot2 needs a hack:
   # https://stackoverflow.com/questions/13143894/how-do-i-position-two-legends-independently-in-ggplot
@@ -29,15 +38,16 @@ gen_graph_all_alg_discrete_x <- function(csv) {
                                          direction = 'horizontal',
                                          title.hjust = 0.5)) +
     scale_y_continuous(trans = "log10",
-                       breaks = c(10^-3, 10^-2, 10^-1, 1, 60, 600, 1800),
-                       labels = c('0.001', '0.01', '0.1', '1', '60', '600', '1800')) +
+                       breaks = c(10^-3, 10^-2, 10^-1, 1, 10, 60, 600, 1800),
+                       labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800')) +
     scale_colour_manual(name = "Algorithm",
+                       labels = alg_labels,
                        values = c('cpp-mtu1' = 'black', 'cpp-mtu2' = 'darkgrey', 'eduk' = 'black', 'eduk2' = 'darkgrey', 'ordered_step_off' = 'black', 'terminating_step_off' = 'darkgrey', 'mgreendp' = 'black')) +
     scale_shape_manual(name = "Algorithm",
-                       #labels = c('cpp-mtu1' = 'cpp-mtu1', 'cpp-mtu2' = 'cpp-mtu2', 'eduk' = 'eduk', 'eduk2' = 'eduk2', 'ordered_step_off' = 'ordered_step_off', 'terminating_step_off' = 'terminating_step_off', 'mgreendp' = 'mgreendp'),
+                       labels = alg_labels,
                        values = c('cpp-mtu1' = 16, 'cpp-mtu2' = 16, 'eduk' = 17, 'eduk2' = 17, 'ordered_step_off' = 15, 'terminating_step_off' = 15, 'mgreendp' = 4)) +
-    ylab('Time to solve (seconds)') +
-    xlab('Instance size (number of items)') +
+    ylab('Time to solve (seconds, log10 scale)') +
+    xlab('Instance size (number of items, log2 scale)') +
     theme(legend.position = 'bottom')
   #ggsave('realistic_random.pdf', width = 0.80*210, height = 0.5*297, unit = 'mm')
   return(p);
@@ -96,30 +106,15 @@ fix_names <- function(x) {
 @
 
 <<csp_shared>>=
-csp_csv <- read.csv("../data/cutstock_knap_solvers.csv", sep = ";")
+csp_csv <- read.csv("../data/csp_6195.csv", sep = ";")
 csp_csv$X <- NULL
+csp_csv$dataset <- gsub('(.*)/.*', '\\1', csp_csv$filename)
+csp_csv$dataset <- gsub('Randomly_Generated', 'Random', csp_csv$dataset)
+csp_csv$dataset <- gsub('ANI_AI', 'ANI AI', csp_csv$dataset)
+csp_csv$dataset <- factor(csp_csv$dataset)
 # forgot to add sort_time to knapsack time in the chart generation codes, now
 # changing it here to avoid changing many places
-csp_csv <- mutate(csp_csv, hex_sum_knapsack_time = hex_sum_knapsack_time + hex_sum_sort_time)
-
-compare_num_iter <- function(csv, first_m, second_m) {
-  first_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == first_m) %>% arrange(filename)
-  second_t <- csv %>% select(filename, algorithm, total_iter) %>%
-    filter(algorithm == second_m) %>% arrange(filename)
-  first_t$diff <- first_t$total_iter - second_t$total_iter
-  first_t$norm_diff <- first_t$diff / second_t$total_iter
-  first_t <- first_t %>% arrange(norm_diff)
-  first_t$order <- 1:length(first_t$norm_diff)
-  first_t
-#  ggplot(first_t,
-#         aes(x = as.numeric(filename),
-#             y = norm_diff*100)) +
-#    ylab(paste('Deviation of the number of iterations of',
-#               first_m, "\nrelative to", second_m,
-#               '(in %)')) +
-#    xlab("Instance index when ordered by the value at axis y")
-}
+csp_csv$pricing_total_time <- csp_csv$hex_sum_knapsack_time + csp_csv$hex_sum_sort_time
 @
 
 \chapter{Experiments and Analyses}
@@ -158,12 +153,12 @@ The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with the flags suggested by the
 
 % Two other smaller experiments were relevant to those and are described in the next two subsections. The first shows that our implementation of MTU1 and MTU2 (written in C++) are in par with the original ones (written in Fortran); we will use our implementation in the remaining of the experiments. The second shows that there can be considerable time difference when the runs of an experiment are executed in parallel (even one per core, and with the core isolated from other processes) instead one at time. 
 
-\section{Realistic Random Dataset}
+\subsection{Realistic Random Dataset}
 
 \begin{figure}[h]
-\caption{TODO: write caption.}
+\caption{Solving times for 7 selected algorithms over each one of the 80 instances from the realistic random dataset. The time limit was of half an hour (1800 seconds), runs that exceeded the time limit are ploted as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
-<<realistic_random_figure>>=
+<<realistic_random_figure, fig.height = 5>>=
 gen_graph_all_alg_discrete_x(rr_csv) +
 scale_x_continuous(trans = "log2",
                    breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17))
@@ -173,7 +168,14 @@ scale_x_continuous(trans = "log2",
 \label{fig:realistic_random}
 \end{figure}
 
-<<realistic_random_table,results='asis'>>=
+The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
+The solving time of both step-off algorithms and MGREENDP become almost identical as the size of the input grow. % TODO: consider removing the three and presenting only one of them
+EDUK solving times are similar to the three above cited algorithms but, as the instance size grow, its times shift for worse. 
+EDUK2 has many solving times that are similar to the EDUK ones but, for some instances in each size group, its B\&B phase solves the instance or helps to considerably reduce the instance size; in the three largest instance size groups, EDUK2 has the smallest solving times for that instances.
+The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
+MTU1 and MTU2 have the smallest solving times for the smallest instances but, as the instance size (and \(w_{min}\) grows), the number of instances that need orders of magnitude more time to solve than the other algorithms grow.
+
+<<realistic_random_table, results='asis'>>=
 rr_t <- select(rr_csv, algorithm, n, internal_time)
 rr_t <- group_by(rr_t, algorithm, n) %>% summarise(time = mean(internal_time))
 rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
@@ -564,6 +566,57 @@ Two facts should be immediately obvious: 1\textsuperscript{st}) using CPLEX to s
 The second fact is not so surprising considering that the original dataset from \cite{survey2014}\footnote{The dataset used in this section was described in Section \ref{sec:csp_ukp_inst}. It is composed of 10\% of the instances used in \cite{survey2014}, some gathered from datasets of the literature and some proposed in the just cited work.} included many old datasets, as it tried to be extensive; also, solving the continuous relaxation of a CSP instance takes considerably less effort than solving the problem itself.
 To solve a CSP instance, a B\&B algorithm needs to solve the instance continuous relaxation multiple times.
 If each relaxation takes more than couple of seconds to solve, then solving the original CSP instance can become impracticable.
+
+\begin{table}
+\caption{TODO: add caption.}
+<<csp_table, results='asis'>>=
+na_mean <- function(x) {
+  base::mean(x, na.rm = T)
+}
+
+count_na <- function(x) {
+  base::sum(is.na(x))
+}
+
+# Simple Format Float Significant Cases (and by simple I mean: without
+# resorting to scientific notation)
+sffsc <- function(digits, x, ...) {
+  sprintf(paste0('%.', digits, 'f'), x, ...)
+}
+
+table_rows_csp <- function(t) {
+  latex(
+    tabular(
+      dataset ~
+        na_mean*#Justify('r')*
+          (Format(sffsc(2))*pricing_total_time + Format(digits=1)*(pricing_total_time/total_iter) + Format(sffsc(2))*hex_sum_master_prob_time + total_iter) +
+        (n = 1) + count_na*total_iter,
+      data = t
+    ),
+    mathmode = F,
+    options = list(latexrightpad = F, latexleftpad = F, doBegin = F, doHeader = F, doFooter = F, doEnd = F)
+  )
+}
+
+num_columns <- 7
+#cat('\\begin{tabu} to \\linewidth { L{1} R{1} R{1} R{1} R{1} C{1} C{1} }\n')
+cat('\\begin{tabu} to \\linewidth { lrrrrcc }\n')
+cat('Dataset & \\makecell{Pricing\\\\Time} & \\makecell{Pricing\\\\Time\\\\Per\\\\Subproblem} & \\makecell{Master\\\\Time} & Subproblems & N & Finished\\\\\\\\')
+#cat('\\hline\n')
+cat("\\multicolumn{", num_columns, "}{c}{MTU1}\\\\\n", sep = '')
+#cat('\\hline\n')
+table_rows_csp(filter(csp_csv, algorithm == 'mtu1_cutstock'))
+#cat('\\hline\n')
+cat("\\multicolumn{", num_columns, "}{c}{CPLEX}\\\\\n", sep = '')
+#cat('\\hline\n')
+table_rows_csp(filter(csp_csv, algorithm == 'cplex_cutstock'))
+#cat('\\hline\n')
+cat("\\multicolumn{", num_columns, "}{c}{Ordered Step-off (integer, no sort)}\\\\\n", sep = '')
+#cat('\\hline\n')
+table_rows_csp(filter(csp_csv, algorithm == 'ordso_int_ns'))
+cat('\\end{tabu}\n')
+@
+\end{table}
 
 \begin{figure}[h]
 \caption{Total time used solving pricing subproblems (UKP) in the continuous relaxation of the BPP/CSP.}

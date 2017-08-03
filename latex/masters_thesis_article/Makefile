@@ -1,14 +1,15 @@
 SECDIR = sections
-_SECTIONS = introduction.Rnw prior_work.Rnw algorithms.Rnw instance_classes.Rnw experiments.Rnw conclusions.Rnw appendix.Rnw
+_SECTIONS = introduction.Rnw methods.Rnw experiments.Rnw conclusions.Rnw appendix.Rnw
 SECTIONS = $(patsubst %,$(SECDIR)/%,$(_SECTIONS))
 
 DATADIR = data
-_DATA = 128_16_std_breqd_all.csv cutstock_knap_solvers.csv mtus.csv pya_ukp5.csv
+
+_DATA = 128_16_std_breqd.csv csp_6195.csv mtus_pya.csv pya_ukp5.csv realistic_random.csv
 DATA = $(patsubst %,$(DATADIR)/%,$(_DATA))
 
 all: ejor_ukp_hb_lsb.pdf
 
-ejor_ukp_hb_lsb.pdf: skeleton.Rnw $(SECTIONS) Makefile biblio.bib
+ejor_ukp_hb_lsb.pdf: skeleton.Rnw $(SECTIONS) $(DATA) Makefile biblio.bib
 	Rscript -e "library(knitr); knit(basename('skeleton.Rnw'))"
 	pdflatex skeleton.tex /dev/null
 	bibtex skeleton.aux > /dev/null

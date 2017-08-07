@@ -117,7 +117,7 @@ csp_csv$dataset <- factor(csp_csv$dataset)
 csp_csv$pricing_total_time <- csp_csv$hex_sum_knapsack_time + csp_csv$hex_sum_sort_time
 @
 
-\chapter{Experiments and Analyses}
+\section{Experiments and Analyses}
 \label{sec:exp_and_res}
 
 In this chapter, five experiments are presented and their results analyzed.
@@ -138,13 +138,13 @@ The fifth and last experiment addresses some concerns raised by the comments of 
 The concerns are related to the effects of the shared memory cache in the comparison of the algorithms run times, when more than one run is executed at the same time.
 The results of this experiment justify the setup used in the four previous experiments (i.e. serial runs).
 
-\section{Setup of the first four experiments}
+\subsection{Setup of the first four experiments}
 
 The experiments were run using a computer with the following characteristics: the CPU was an Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz; there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where only L3 is shared between cores).
 The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
 Three of the four cores were isolated using the \emph{isolcpus} kernel flag (the non-isolated core was left to run the operating system). 
 The \emph{taskset} utility was used to execute runs in one of the isolated cores.
-All runs were executed in serial order (i.e. two algorithm executions did not coexisted), this choice was made for reasons explained in Section \ref{sec:serial_parallel_exp}.
+All runs were executed in serial order (i.e. two algorithm executions did not coexisted), as the authors found that parallel executions on isolated cores has considerable effect in the run times\cite[p.~87]{ukp_hb_mastersthesis}.
 C++ code was compiled with GCC and the \emph{-O3 -std=c++11} flags enabled.
 The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with the flags suggested by the authors of the code for maximum performance.
 % SEE ABOUT SWAP AND THE MEMORY USE SPECIALLY FOR MGREENDP1
@@ -183,7 +183,7 @@ rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
 xtable(rr_t)
 @
 
-\section{Solving the PYAsUKP dataset}
+\subsection{Solving the PYAsUKP dataset}
 \label{sec:pya_exp}
 
 The first experiment is an updated version of the experiment first presented in~\cite{sea2016}, which consisted in the execution of UKP5 and EDUK2 over the PYAsUKP dataset.
@@ -386,7 +386,7 @@ The Fortran implementation does not seem to work well with this characteristic o
 We have chosen to use the C++ implementation in our experiments.
 The reasons are: the C++ implementation can read the same format used by PYAsUKP (and the other algorithms); with the exception of PYAsUKP (which uses OCaml) all other methods use C++ and the same structures; choosing the Fortran implementation would considerably harm MTU2 run times for something that seems to be a minor implementation detail.
 
-\section{Solving the BREQ 128-16 Standard Benchmark}
+\subsection{Solving the BREQ 128-16 Standard Benchmark}
 \label{sec:breq_exp}
 
 We have run eight algorithms over the BREQ 128-16 Standard Benchmark (proposed in Section~\ref{sec:breq_inst}).
@@ -475,7 +475,7 @@ The weak solution dominance used by UKP5 does not completely avoid this problem,
 %xtable(breq_csv_s)
 %@
 
-\section{Solving pricing subproblems from BPP/CSP}
+\subsection{Solving pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}
 
 The experiment described in this section is different from the previous experiments. % TODO: Ritt mandou cortar, reformular
@@ -892,205 +892,4 @@ The author tried to integrate EDUK and EDUK2 (which are written in OCaml) to the
 The author could have saved the knapsack instances generated when solving the CSP problem with other algorithm, and solved them using the PYAsUKP executable.
 This was not done because many knapsacks are small and solved very fast, and in these cases the PYAsUKP timing reports zero or inaccurate values.
 Also, the solutions returned by PYAsUKP should affect the next knapsacks generated (what cannot happen in such setting), so the comparison would be unfair.
-
-\section{The effects of parallel execution}
-\label{sec:serial_parallel_exp}
-
-After the publication of~\cite{sea2016}, the author realized that run times were affected by the execution of multiple runs in parallel, \emph{even if each run was being executed in an exclusive/isolated core}.
-The author credits this effect to the fact that the L3 memory cache is often shared between cores.
-Some experiments were performed to discern the magnitude of this effect.
-
-For the rest of this section, the author will differ between runs that executed in parallel and runs that executed one-at-time (serially).
-It is important to note that the times compared are the wall-clock time of the algorithm execution (without the instance reading, or output printing) in: 1) a run that executes in an isolated core (with no other process in the same core), with one of the other cores running the operating system, and two of the remaining cores isolated and executing one run too (i.e. parallel runs); 2) a run that executes in an isolated core (with no other process in the same core), with one of the other cores running the operating system, and the remaining cores isolated and free (i.e. serial runs).
-
-\subsection{Setup}
-
-The setup of this experiment is different than the previous experiments.
-The experiment is repeated in two distinct computers;
-this was necessary to observe the impact of different CPUs (what include different amounts of shared cache).
-Only the UKP5 and the EDUK2 were used; both algorithms were present in the original comparison~\cite{sea2016}, and both algorithms are relatively fast (a practical concern). 
-%some algorithms will be more affected other less, but if some are strongly affected, this is sufficient evidence for running all algorithms serially.
-%Also, ...
-
-The two computer settings will be referred to as \verb+notebook+ and \verb+desktop+.
-The \verb+notebook+ setting is the same used in~\cite{sea2016}.
-The \verb+notebook+ configurations included: Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7-4700HQ CPU @ 2.40GHz; there were 8GiB RAM available (\(2 \times\) DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (L1d: 32K and L1i: 32K, L2: 256K, L3: 6144K, only the L3 is shared between cores).
-The CPU had Intel\textsuperscript{\textregistered} HyperThreading, where 4 physical cores simulate 8 virtual cores.
-This technology was disabled for the tests.
-The \verb+desktop+ configurations included: Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7 5820k @ 3.3GHZ; there were 16GiB RAM available (\(2 \times\) Crucial Ballistix Sport DDR4 SDRAM 2400 MHz) and three levels of cache (L1i: 32K and L1d: 32K, L2: 256K, L3: 15MiB, only the L3 is shared between cores).
-This CPU also had Intel\textsuperscript{\textregistered} HyperThreading, where 6 physical cores simulate 12 virtual cores.
-This technology was also disabled for the tests in this CPU.
-
-%The attentive reader will perceive
-The computers settings have different amounts of cores (four for \verb+notebook+ and six for \verb+desktop+).
-During the experiments, in both computers, one core was left to run the operating system and three cores were isolated.
-In the parallel runs, the three isolated cores were used and, in the serial runs, only one isolated core was used.
-The author believes this choice made the comparison fairer.
-
-To allow the computation of the standard deviation, the experiments consist in ten runs for each combination of solver (UKP5 and EDUK2), computer (\verb+notebook+ and \verb+desktop+), instance (the 454 of the reduced PYAsUKP benchmark, see Section~\ref{sec:pya_dat_red_pya_dat}), and mode (parallel or serial).
-For the same computer, all runs of one algorithm were finished before starting the first run of the other algorithm.
-This is especially important for the parallel runs, as this means that each algorithm only competed for cache with other runs of the same algorithm.
-For the same computer, algorithm, and mode, the order of the instances was randomly chosen.
-
-\subsection{Experiment}
-
-The experiment has shown that the mean time of multiple runs of the same algorithm in the same computer vary considerably if they are executed in parallel or serially; how much they vary depends on the specific algorithm and computer.
-
-The author does not intend to do an in-depth analysis, but only to show that the difference exists and can be significant.
-The experiments described in all the other sections of this chapter were executed serially to avoid this noise.
-The already mentioned referee of~\cite{sea2016}, questioned if the faster memory access could have benefited UKP5 over EDUK2.
-This experiment is also an answer to that question.
-The experiment setting in~\cite{sea2016} corresponds to parallel runs over the \verb+notebook+ computer.
-The author believes that the point made in~\cite{sea2016} still stands, as the effect found over the algorithms run times would not render a different analysis.
-
-% WE WERE COMPARING SD OF DIFFERENT MEANS DIRECTLY, THIS WAS VERY VERY STUPID
-% REMOVING THE WHOLE SECTION
-%The first we can see at Figure~\ref{fig:sd_env_infl} is that the standard deviation of the parallels runs is significantly greater than the ones from the serial runs (note that the axis are not fixed scale). The runs in parallel mode were executed in random order and each of the ten runs with the same setting, will have probably competed for cache with different runs; this explains the SD difference between parallel and serial.
-
-%The SD of UKP5 is much smaller than the one of PYAsUKP (independent of mode or computer), but this is only a effect from the UKP5 times being smaller (SD vary with scale). The desktop setting shows considerably less SD over the serial runs (in contrast to the notebook setting); what can be explained by the fact the L1 cache (that is not shared between cores) is bigger in the desktop than the notebook computer (bigger L2 and L3 caches also help). The desktop setting also shows considerably less SD for the parallel runs, however the instances with the biggest SD seems to be less affected by this effect than the others.
-
-%Finally, we can see that the instance type is tied to the algorithm used and the standard deviation of their times. The author believes that the distribution of the items size (that changes how farther will be the memory positions accessed by UKP5 sequentially) and profit (that ) have a big impact on the standard deviation, as they will effect the cache misses.
-
-\begin{comment}
-\begin{figure}[h]
-\caption{Comparison of the mean times of UKP5 and EDUK2 when executed in two diferent computers, in parallel and in serial mode.}
-\begin{center}
-<<times_env_infl, eval = FALSE>>=
-env_file_mean_times <- env_data %>% 
-  select(algorithm, computer, mode, filename, internal_time) %>% 
-  group_by(algorithm, computer, mode, filename) %>% 
-  summarise(mean_time = mean(internal_time))
-
-env_file_mean_times$algorithm <- gsub('pyasukpt', 'eduk2', env_file_mean_times$algorithm)
-create_facet <- function(env_file_mean_times, alg_name, com_name) {
-  serial <- filter(env_file_mean_times, mode == "serial" &
-                     algorithm == alg_name &
-                     computer == com_name) %>% arrange(filename)
-  parallel <- filter(env_file_mean_times, mode == "parallel" &
-                       algorithm == alg_name &
-                       computer == com_name) %>% arrange(filename)
-  ratio_parallel_serial <- data.frame(filename = serial$filename,
-                                      algorithm = serial$algorithm,
-                                      computer = serial$computer,
-                                      serial_time = serial$mean_time,
-                                      parallel_time = parallel$mean_time) %>% 
-    mutate(ratio = parallel_time/serial_time)
-  ratio_parallel_serial
-}
-
-t1 <- create_facet(env_file_mean_times, "ukp5", "notebook")
-t2 <- create_facet(env_file_mean_times, "ukp5", "desktop")
-t3 <- create_facet(env_file_mean_times, "eduk2", "notebook")
-t4 <- create_facet(env_file_mean_times, "eduk2", "desktop")
-t <- rbind(t1, t2, t3, t4)
-t$inst_class <- sapply(t$filename, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
-t$env <- paste(t$algorithm, t$computer, sep = '_')
-t$inst_class <- fix_names(t$inst_class)
-ggplot(t, aes(x = serial_time, y = ratio, color = inst_class)) +
-  xlab('Mean time of the serial runs (seconds, log10 scale)') +
-  ylab('mean parallel time / mean serial time\n(same algorithm, computer, and instance)') +
-  geom_point() + theme(legend.position = 'bottom') + theme(legend.title = element_blank()) + facet_wrap(~ env) +
-  scale_x_continuous(trans = 'log10', breaks = c(0.1, 10, 100))
-@
-\end{center}
-%\legend{Source: the author.}
-\label{fig:mean_time_env_infl}
-\end{figure}
-\end{comment}
-
-% The lack of logarithmic scale at the x axis of Figure~\ref{fig:mean_time_env_infl} flatten the UKP5 data points, but gives us a clear view of how UKP5 can be benefited in an experiment that makes multiple runs in parallel and compares PYAsUKP and UKP5. The execution of runs in parallel seems to affect UKP5 far more than PYAsUKP, as it has much more points distant from~\(y \approx 1\) (where serial and parallel runs have similar mean times) than PYAsUKP, and only UKP5 has a significative share of points over~\(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time).
-
-% However, all UKP5 runs use little time (clearly less than 25 seconds) where many of the PYAsUKP runs have times between 25 and 300 (or 200) seconds. Even more, the PYAsUKP runs that take more time are also the more affected by the parallel execution; the author hypothesize that they take more time because the instance is harder, and use more memory for the same reason, this way they end up using more than the L1 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable). The result is that more time is added to the PYAsUKP total time because of this effect than time is added to the UKP5 total time, making the comparison unfair to PYAsUKP (this is, unless we are interested on how the algorithms behave in a parallel setting).
-
-Let us examine Figure~\ref{fig:mean_time_env_infl}.
-The execution of runs in parallel seems to affect UKP5 far more than EDUK2, as it has much more points distant from~\(y \approx 1\) (where serial and parallel runs have similar mean times) than EDUK2, and only UKP5 has a significative share of points over~\(y = 2\) (where the mean times of the parallel runs are more than two times the serial mean time).
-The author believes that the reasons for UKP5 being more affected by cache sharing are the greater use of memory (about~\(2 \times (c - w_{min} + w_{max})\)); the initialization of such arrays; and accessing many diferent memory regions in sequence (at each iteration of the outer loop, up to~\(n\) array positions in a range of size up to~\(w_{max}\) are accessed in an arbitrary order).
-
-While UKP5 seems to be more affected by running in parallel, one could point out that all UKP5 runs use little time (less than 10 seconds when serially and, consequently, no more than thirty when in parallel), where many of the EDUK2 runs have times between 10 and 100 seconds (serially), with some up to 300 seconds.
-Besides that, the EDUK2 runs that take more time are also the more affected by the parallel execution.
-The author hypothesizes that these runs take more time because the instance is harder, and use more memory for the same reason.
-This way, these runs end up using more than the L1/L2 cache and being more strongly affected by this effect (the instance `hardness' acts as a confounding variable, the same effect happens to UKP5).
-The result would be that more time is added to the EDUK2 total time because of this effect than time is added to the UKP5 total time (in absolute numbers), making the comparison unfair to EDUK2.% (unless we are interested on how the algorithms behave in a parallel setting).
-
-Let us closely examine the values for the \verb+notebook+ setting, as this was the one used at the~\cite{sea2016}.
-We will refer to UKP5 (or EDUK2) Parallel (or Serial) Total time (or TT, for short) as the sum of the run times of all the runs of that algorithm in that mode and, for now, only in the \verb+notebook+ setting.
-The UKP5 Parallel TT is 2.03 times greater than UKP5 Serial TT, while EDUK2 Parallel TT is only 1.60 times greater than the EDUK2 Serial TT.
-However, this means about 8252 extra seconds for UKP5 Parallel TT (compared to the serial time) and about 74180 extra seconds for EDUK2 Parallel TT (compared to the serial time).
-We will see that this considerable absolute difference does not end up benefiting UKP5 in the analysis, as the EDUK2 Serial TT is about 15.33 times greater than the UKP5 Serial TT, but the EDUK2 Parallel TT is about 12.10 times bigger than UKP5 Parallel TT.
-In fact, the parallel execution seems to benefit the EDUK2 numbers against UKP5 while not by much.
-If we focused in the \verb+desktop+ setting, we would see that EDUK2 was benefited too, while to a lesser degree.
-In the \verb+desktop+ setting, the EDUK2 Parallel TT is 15.62 times greater than the UKP5 Parallel TT; and the EDUK2 Serial TT is 16.50 times greater than the UKP5 Serial TT.
-
-\begin{comment}
-<<env_infl_nums,results='hide', eval = FALSE>>=
-# Used to get the values of the above paragraph.
-ukp5_par <- filter(env_data, mode == 'parallel' & algorithm == 'ukp5' & computer == 'notebook')
-pya_par <- filter(env_data, mode == 'parallel' & algorithm == 'pyasukpt' & computer == 'notebook')
-ukp5_ser <- filter(env_data, mode == 'serial' & algorithm == 'ukp5' & computer == 'notebook')
-pya_ser <- filter(env_data, mode == 'serial' & algorithm == 'pyasukpt' & computer == 'notebook')
-
-sum(ukp5_par$internal_time) / sum(ukp5_ser$internal_time)
-sum(ukp5_par$internal_time) - sum(ukp5_ser$internal_time)
-sum(pya_par$internal_time) / sum(pya_ser$internal_time)
-sum(pya_par$internal_time) - sum(pya_ser$internal_time)
-sum(pya_ser$internal_time) / sum(ukp5_ser$internal_time)
-sum(pya_par$internal_time) / sum(ukp5_par$internal_time)
-
-ukp5_par <- filter(env_data, mode == 'parallel' & algorithm == 'ukp5' & computer == 'desktop')
-pya_par <- filter(env_data, mode == 'parallel' & algorithm == 'pyasukpt' & computer == 'desktop')
-ukp5_ser <- filter(env_data, mode == 'serial' & algorithm == 'ukp5' & computer == 'desktop')
-pya_ser <- filter(env_data, mode == 'serial' & algorithm == 'pyasukpt' & computer == 'desktop')
-
-sum(ukp5_par$internal_time) / sum(ukp5_ser$internal_time)
-sum(ukp5_par$internal_time) - sum(ukp5_ser$internal_time)
-sum(pya_par$internal_time) / sum(pya_ser$internal_time)
-sum(pya_par$internal_time) - sum(pya_ser$internal_time)
-sum(pya_ser$internal_time) / sum(ukp5_ser$internal_time)
-sum(pya_par$internal_time) / sum(ukp5_par$internal_time)
-@
-\end{comment}
-
-\begin{comment}
-\begin{figure}[h]
-\caption{Parallel and Serial Runs Standard Deviation}
-\begin{center}
-<<sd_env_infl, eval = FALSE>>=
-env_data$algorithm <- gsub('pyasukpt', 'eduk2', env_data$algorithm)
-serial_big_sd <- filter(env_data, mode == "serial") %>%
-                 group_by(computer, algorithm, filename) %>%
-                 summarise(internal_time_sd = sd(internal_time)) %>%
-                 arrange(computer, algorithm, filename)
-parallel_big_sd <- filter(env_data, mode == "parallel") %>%
-                   group_by(computer, algorithm, filename) %>%
-                   summarise(internal_time_sd = sd(internal_time)) %>%
-                   arrange(computer, algorithm, filename)
-com_sd <- data.frame(filename = serial_big_sd$filename,
-                     serial_sd = serial_big_sd$internal_time_sd,
-                     parallel_sd = parallel_big_sd$internal_time_sd,
-                     algorithm = serial_big_sd$algorithm,
-                     computer = serial_big_sd$computer)
-
-com_sd$inst_class <- sapply(com_sd$filename, (function (f) { factor(strsplit(as.character(f), "_")[[1]][1])}))
-com_sd$env = paste(com_sd$algorithm, com_sd$computer, sep = '_')
-
-com_sd$inst_class <- fix_names(com_sd$inst_class)
-ggplot(data = com_sd,
-       aes(x = serial_sd, y = parallel_sd, color = inst_class)) +
-       geom_point() + facet_wrap(~ env, scales = 'free')
-@
-\end{center}
-%\legend{Source: the author.}
-\label{fig:sd_env_infl}
-\end{figure}
-\end{comment}
-
-Figure~\ref{fig:sd_env_infl} presents the Standard Deviation (SD) values computed over each ten runs for the same algorithm, computer, mode and instance.
-The author will not draw many conclusions from this data, as SD values with different means are not directly comparable.
-However, it is interesting to point out that, in general, the runs in the serial mode, and/or the \verb+desktop+ setting, have a much smaller SD than the ones in parallel mode, and/or the \verb+notebook+ setting (either because of the serial/\verb+desktop+ run times are smaller, or because the algorithms do not compete for cache).
-% TODO: is smaller the right word in the phrase above?
-%As the variation is very small in a serial/desktop setting, and a similar setting is used for the remaining experiments, the author found no problem in executing only one run for combination of instance and algorithm in the rest of the experiments.
-
-The author belives this superficial analysis is sufficient to convince the reader that there is a significant difference in running such experiments serially or in parallel.
-If some real-world application of the UKP needs to solve multiple knapsacks in parallel, algorithms that use less memory (or with better locality of reference) can be prefered not only to avoid swapping, but because they will affect each others times less.
-As this is not the case here, and as the CSP (the real-world application of the UKP covered in this chapter) specifically solves multiple knapsacks serially, all experiments of this chapter consisted of serially executed runs, with only one run over each combination of algorithm and instance.
 

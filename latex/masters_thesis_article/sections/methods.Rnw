@@ -1,291 +1,64 @@
 \section{Methods}
 
-\subsection{Prior Work}
+an experimental study of the UKP
 
-\subsubsection{Algorithms from the literature}
+mainly consists of the execution os algorithms over datasets.
+in this section, the algorithms and datasets are briefly presented
 
-This literature review starts with~\cite{gg-61}, when the \emph{column generation} approach was proposed.
-% TODO: put the phrase from introduction here
-%The main utility of the column generation approach was to avoid the existence of an exponential number of variables when solving the tightest linear programming model of BPP and CSP.
-%The relationship between the UKP and the BPP/CSP was already briefly described at Section~\ref{sec:motivation}, and its technical details will be described at Section~\ref{sec:csp_ukp_inst}.
-%The UKP is not solved, it is only said that ``the auxiliary problem will be of the integer programming variety, but of such a special type (the `knapsack' type) that it is solvable by several methods''~\cite[p.~2]{gg-61}.
-%Two years later, in~\cite{gg-63}, the authors proposed a specific algorithm for the UKP, and experiments solving BPP and CSP instances were executed.
-%Some findings of this experiments will be discussed in Sections~\ref{sec:csp_ukp_inst} and~\ref{sec:csp_experiments}.
+all algorithms are taken from the literature; one receive small improvements
 
-%In this paper, the algorithm for UKP that was first described at~\cite{gg-63} is discussed more profoundly.
-%In~\cite{gg-66}, the one-dimensional and two-dimensional knapsack problems related to BPP and CSP were discussed.
-%The author of this thesis reinvented one algorithm from~\cite{gg-66} and published a paper about it, believing it was novel~\cite{sea2016}, thus, he apologizes to the academic and scientific community for such disregard.
-%Further information about the algorithms of~\cite{gg-66} and~\cite{sea2016} can be found in Section~\ref{sec:dp_algs}.
-A small improvement over the algorithm of~\cite{gg-66} was proposed in~\cite{green_improv}.
-%The author implemented the improved algorithm and its results can be seen in Section~\ref{sec:pya_exp}.
-
-% MTU1 and MTU2 papers:
-In the 1970's, there was a shift of attention from the DP approach to the B\&B approach.
-The first algorithms using this approach seem to be the Cabot's enumeration method~\cite{cabot} and the MTU1 algorithm~\cite{mtu1}.
-
-MTU1 was proposed in~\cite{mtu1}, with the name of KP1 at the time (we will refer to this paper as the `MTU1 paper'). % old paper of MTU1 %To the author's knowledge, the MTU1 paper was the only paper to present experimental results comparing the B\&B and DP methods, before PYAsUKP paper, in 2009\cite{pya}.
-Unfortunately, by current standards, the instances used in the comparison were very small (which is understandable considering the paper publishing date). 
-The numbers of items used were 25, 50 and 100, for instance; the weights (and profits) had values between 11 and 110 (in the case of the profits, 120); the knapsack capacity was chosen between~\(0.2 \sum_{i \in n}{w_i}\) and~\(\sum_{i \in n}{w_i}\); the distributions used were uncorrelated and weakly correlated (\(p_i = w_i + \alpha\), where~\(\alpha\) was randomly chosen from -10 and 10 following an uniform distribution).
-
-The comparison presented in~\cite{mtu1} was between KP1 (MTU1), the dynamic programming algorithm called `periodic step-off' from~\cite{gg-66}, that we will call G.G. for short, and two B\&B algorithms for the 0-1 KP (for which the UKP instances were transformed in 0-1 KP instances).
-The best results were from MTU1, and the second best from the G.G. algorithm.
-However, the instances were too small to draw strong conclusions, and the relative difference between G.G. and MTU1 average times was not even one order of magnitude apart.
-The G.G. algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
-This trend could indicate that for big instances, the G.G. algorithm would have better times than MTU1 (e.g. the G.G. algorithm could have a costly initialization process but a better average-case asymptotic complexity).
-
-The MTU2 algorithm was designed for large instances (up to 250,000 items).
-Only sorting the items list was already computationally expensive for the period, and the solutions often involved only the most efficient items.
-The MTU2 main feature was grouping and sorting only the~\(k = max(100, \frac{n}{100})\) most efficient items, and calling MTU1 over them.
-The UKP instance consisting of this reduced items list and the original knapsack capacity was called `tentative core problem'.
-If the optimal solution of the tentative core problem was proven to be optimal for the original problem, the algorithm stopped.
-Otherwise, the optimal solution of the tentative core problem was used as a lower bound to remove dominated items.
-After this, the~\(k\) most efficient items outside the tentative core problem were added to it, restarting the process. 
-
-The algorithms comparison included only MTU1 and MTU2.
-The datasets used in the paper were large, but artificial and abundant in dominated items.
-The MTU2 was clearly the best algorithm for the chosen datasets.
-
-MTU2 was adopted by the subsequent works as the baseline for testing new algorithms for the UKP.
-We believe this happened due to many factors, such as: the code of MTU2 was freely available; the algorithm was well and thoroughly explained in Martello and Toth's publications; it presented empirical evidence of dominating other methods and, consequently, comparing with it would remove the necessity of comparing to many other algorithms; the description of MTU2 stated that it was designed for large instances.
-However, MTU2 does not completely dominate MTU1, it simply was better for the chosen instances (that were chosen with the purpose of evidencing this).
-Instances in which the MTU2 needs to repeat the process of adding items to the tentative core problem many times can be more easily solved by MTU1 than by MTU2.
-Unfortunately, the works that followed chose to compare their algorithms only against MTU2.
-
-EDUK (\emph{Efficient Dynamic programming for the Unbounded Knapsack problem}), a novel DP algorithm for the UKP, was proposed in a conference paper~\cite{ukp_new_results} and then presented in a journal paper~\cite{eduk}.
-EDUK is very different from the previous DP algorithms, and its main features are the application of threshold dominance (proposed in the same paper), and the use of a sparse representation of the iteration domain.
-This last feature was implemented by using lazy lists, mainly because EDUK was implemented in the functional language OCaml.
-EDUK is strongly based on the ideas first discussed in~\cite{algo_tech_cut}.
-
-In~\cite{eduk}, the authors criticize the item distributions used in previous papers, especially the uncorrelated distribution.
-The author of this thesis agrees with this criticism, further discussion can be found in Section~\ref{sec:inst_uncorrelated}.
-However, the solution given for this problem were new datasets of artificial instances.
-The new datasets do not have simple dominated items, or small efficient items, as the previous datasets, and one of them does not even have any collective dominated items.
-The change in the choice of items distributions benefits DP methods (and consequently EDUK), which are better suited for such kind of instances.
-When the new datasets are used, the comparison between MTU2 and EDUK shows that the average times of MTU2 are strongly dominated by the ones of EDUK.
-
-The weakly and strongly correlated distributions are also used in \cite{eduk}, but varying the value of~\(w_{min}\).
-For those instances, MTU2 dominates EDUK when the weight of the smallest item is close to one, but MTU2 times grow much faster than EDUK times when~\(w_{min}\) is increased.
-Only one comparison is made against another DP algorithm.
-The DP algorithm used seems to be a na{\"i}ve DP algorithm with a preprocessing phase that removes simple dominance.
-The comparison uses a completely different dataset of small instances, in an effort to take into account real-world applications of the UKP, as the ones provenient from solving BPP and CSP with column generation.
-The average run times in this comparison are smaller than 0.1 seconds, and the difference between the average times of EDUK and the naive DP are about 20\% (with EDUK being faster).
-
-EDUK2 is an improvement of EDUK proposed in~\cite{pya}.
-The main improvement brought up by EDUK2 is the hybridization of EDUK with the B\&B approach.
-A B\&B preprocessing phase was added to EDUK.
-If it solves the instance using less than a parametrized number of nodes, then EDUK is never executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
-The paper also proposes a new bound for a subset of the strongly correlated instances (the SAW instances), which that is the tightest bound known for such instances.
-Comparisons are performed with EDUK and MTU2.
-EDUK2 is clearly the winner, but the average solution times of the methods are few seconds, or less than a second.
-The experiments are then remade using the same distributions with larger coefficients.
-MTU2 has integer overflow problems and is left out of the comparison.
-Between EDUK and EDUK2, EDUK2 has the best results, as expected. 
-
-% TODO: summarize paragraph below in one or two lines
-Both~\cite{eduk} and~\cite{pya} cite~\cite{babayev}, which presents an algorithm for solving the UKP using the Consistency Approach (CA).
-The algorithm described in~\cite{babayev} was tested against MTU2 and had better times, but the instances used in the experiment make it difficult to have an idea of what would be its performance using more recent datasets (see Section~\ref{sec:babayev_uncorrelated} for further discussion).
-The CA was already discussed in~\cite{on_equivalent_greenberg}.
-However, the algorithm proposed in~\cite{babayev} considered performance as a priority, different from previous works that treated applying CA to the UKP as an interesting theoretical problem.
-As the authors of~\cite{eduk} and~\cite{pya}, we tried to obtain a copy of the code from the authors of~\cite{babayev}, but did not obtain success.
-The author of this thesis suggests the implementation and comparison of this algorithm as a future work.
-
-% This corresponds to widely-used practices and general beliefs expressed in the literature. Usually, in the context of an LP- based branch-and-bound algorithm, where the LP relaxation is solved using column generation, cutting planes are carefully selected in order to avoid the destruction of the structure of the pricing problem. This viewpoint is shared by numerous authors. Barnhart, Hane, and Vance [BHV00], for example, mention as one of the main contributions of their branch-and-price-and-cut algorithm ``a pricing problem that does not change even as cuts are added, and similarly, a separation algorithm that does not change even as columns are added.'' (BELOV, page 3)
+all datasets taken from the literature, except for one that is proposed
 
 \subsection{Algorithms}
 
-% TODO: remove the citations?
-%Two approaches are often used for to solve UKPs, they are dynamic programming (DP)~\cite{eduk},~\cite[p. 214]{garfinkel},~\cite[p. 311]{tchu} and branch and bound (B\&B)~\cite{mtu2}. 
-Two approaches are often used for to solve UKPs, they are dynamic programming (DP) and branch and bound (B\&B). 
-The DP approach worst-case time complexity is~\(O(nc)\) (pseudo-polynomial).
-%The same DP algorithm often has similar run times for instances with similar size (i.e. \(n\) and \(c\)) and ITEM DISTRIBUTION WAS NOT EXPLAINED.
+The algorithms used in the experiments can be divided in three main approachs: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (both DP and B\&B).
+The DP approach worst-case time complexity is~\(O(nc)\) (pseudo-polynomial), and the its worst-case space complexity is~\(O(n + c)\).
+The B\&B approach has an exponential worst-case assimptotic complexity (all item combinations that fit the knapsack), the worst-case space complexity of the B\&B algorithms used in the experiments is an optimal \(O(n)\).
+Hybrid approachs often display the same time and space worst-case complexities than the DP approach.
 
-The DP approach can be considered stable, or predictable, compared to other approaches.
-Stable in the sense that its run time variation when solving many instances with the same characteristics (i.e.~\(n\),~\(c\) and items distribution) can be lower than other approaches. 
-Predictable in the sense that it is easier to predict a reasonable time interval for solving an instance based in the characteristics just mentioned, than it is with other approaches.
+The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite{ukp_new_results}\cite{eduk}\cite[p.~223]{book_ukp_2004}.
+EDUK seems to be based on ideas first discussed in~\cite{algo_tech_cut}.
+Before EDUK2 was proposed, it was said that ``[...] EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p.~223]{book_ukp_2004}.
 
-%The DP worst-case space complexity is~\(O(n + c)\), which can be considerably greater than other approaches that do not allocate memory linear to~\(c\).
-%However, the space needed can be reduced by many optimizations.
-%Some of these optimizations are: using a periodicity bound as explained in Section~\ref{sec:periodicity}; using modular arithmetic to reduce~\(c\) to~\(w_{max}\) in at least one array, see~\cite[p.~17]{gg-66}; using binary heaps instead of arrays, as the heap can use less memory than an array of~\(c\) positions if~\(w_{min}\) is sufficiently big.
+EDUK2 is an hybrid DP/B\&B algorithm which improves EDUK with a B\&B preprocessing phase~\cite{pya}.
+If B\&B can solve instance using less than a parametrized number of nodes, then EDUK is never executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
 
-%The DP approach often gives an optimal solution for each capacity smaller than~\(c\).
-%However, some space optimizations can remove such feature.
+The implementation of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml by the creators of EDUK and EDUK2. 
+The authors were given access to this code by Vincent Poirriez in January 11th, 2016 by email\footnote{The code is available at Henrique Becker master's thesis code repository (\url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}).}. The version of the code available at that time in the PYAsUKP official site had bugs\footnote{The EDUK and EDUK2 source was available to download in the following page of PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.}.
 
-\begin{comment}
-\subsubsection{Weak solution dominance}
-\label{sec:ukp5_sol_dom_expl}
+A small improvement over the algorithm of~\cite{gg-66} was proposed in~\cite{green_improv}.
+The author implemented the improved algorithm and its results can be seen in Section~\ref{sec:pya_exp}.
 
-% TODO: ADD THIS SOMEPLACE ELSE
-In this section we will give a more detailed explanation of the workings of the previously cited weak solution dominance.
-We use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\).
-The notation~\(max_{ix}(s)\) has analogue meaning.
-
-When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u\), where~\(t \subset u\), are not generated. 
-If~\(s\) dominates~\(t\), and~\(t \subset u\), and~\(max_{ix}(u - t) \leq min_{ix}(t)\), then~\(u\) is not generated by UKP5. 
-For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by UKP5, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
-Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it will be dominated by a solution~\(u'\) where~\(s \subset u'\) anyway. 
-It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
-
-\subsubsection{Implementation details}
-\label{sec:ukp5_periodicity}
-
-With the purpose of making the initial explanation simpler, we have omitted some steps that are relevant to the algorithm performance, but not essential for assessing its correctness. 
-A complete overview of the omitted steps is presented in this section.
-
-\end{comment}
-
-% TODO: it's necessary to add a implementation details section?:w
-% TODO: add about the efficiency weight ordereing and breaking ties
-% TODO: explain the addition below in the context of the ordered step-off
-%There is an \emph{else if} test at line~\ref{if_new_lower_bound_end}. 
-%If~\(g[y + w_i] = g[y] + p_i\) and \(i < d[y + w_i]\) then~\(d[y] \gets i\). 
-%This may seem unnecessary, as appears to be an optimization of a rare case, where two distinct item multisets have the same weight and profit. 
-%Nonetheless, without this test, UKP5 was about 1800 (one thousand and eight hundreds) times slower on some subset-sum instance datasets.
-
-\subsubsection{EDUK}
-\label{sec:eduk}
-
-The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) is a complex DP algorithm for the UKP, first mentioned in~\cite{ukp_new_results}.
-However, only in~\cite{eduk} the algorithm essentials were described for the first time.
-The author of this thesis, however, is partial to the algorithm description to be found in~\cite[p.~223]{book_ukp_2004}.
-
-Before EDUK2 was proposed, EDUK was considered by some the state-of-the-art DP algorithm for the UKP.
-An example is the comment in~\cite[p.~]{book_ukp_2004}: ``[...] EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''.
-
-A version of the original code of the EDUK and EDUK2 algorithms is available here\footnote{PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}}.
-Unfortunately, this version is not stable and has some bugs.
-Consequently, the author of this thesis recommends the use of the version available here\footnote{The repository of this master's thesis: \url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}.}.
-We were given access to the latter version by Vincent Poirriez in January 11th, 2016.
-
-\begin{comment}
-The EDUK algorithm sorts the item list in increasing weight order, differently from the majority of the algorithms for the UKP that use the non-increasing efficiency order.
-
-The sparse representation of the iteration domain is achieved by using lazy lists (a functional programming concept) instead of an array of size~\(c\) (or more) to store the solutions.
-Consequently, the memory use is less dependent of~\(c\) and~\(w_{max}\) than other DP algorithms.
-In~\cite{algo_tech_cut}, where the sparse representation idea was first presented, the solutions are represented as pairs of weight and profit value, as the solution was a pseudo-item (i.e. a set of items that can be treated as it was a single item).
-For example, a solution~\(s\) consisting of the items~\(i\) and~\(j\) is represented by the following pair:~\((w_i + w_j, p_i + p_j)\).
-Adding an item to a solution is equivalent to adding the weight and profit values of a pair to another.
-For some instances, especially the ones with big~\(w_{min}\) and~\(c\) values, this sparse representation allows for saving time and memory.
-In UKP5, for example, the algorithm allocates memory, initializes, and iterates over many capacities~\(y\) that are accessed and then skipped immediately because a solution~\(s\) with~\(w_s = y\) does not exist.
-In EDUK, such skipped capacities are never explicitly enumerated to begin with, and no memory is allocated for them, or time used iterating over them. 
-A similar effect could be obtained in UKP5 by using a \verb+std::map+ instead of an \verb+std::vector+ for the data structures~\(g\) and~\(d\) .
-\end{comment}
-
-\subsubsection{Branch-and-Bound}
-
-% TODO: unify with comment in the prior work
-The B\&B approach was established in the seventies as the most efficient approach for solving the UKP, what is greatly a consequence of the datasets, items distributions, and generation parameters used at the time.
-The author of this thesis believes that this claim was first made in~\cite{mtu2}, and then other papers as~\cite{babayev} began repeating it.
-The fact that only the code for MTU1 and MTU2 was readily available also did not help the situation, as some began to claim that MTU2 was the \emph{de facto} standard algorithm for the UKP, see~\cite{ukp_new_results}.
-
-The time taken by a B\&B algorithm over an instance of the UKP can be hard to predict, and is not very dependent on the magnitude of~\(n\) and~\(c\), but more dependent on the item distribution.
-In the worst case, a B\&B algorithm cannot eliminate a significant portion of the search space by the use of bounds and then, consequently, it needs to examine all search space.
-In the case of the UKP, the search space is clearly combinatorial (all possible items combinations that fit the knapsack), so the worst-case of an B\&B approach for the UKP can be exponential.
-
-The B\&B algorithms for the UKP often are not affected by the magnitude of~\(c\), however they can be affect by how close~\(c\) is from a capacity that can be entirely filled by copies of the best item.
-The B\&B algorithms for the UKP will often solve the problem instantly if~\(c~mod~w_b\) is small, because the greedy heuristic lower bound will probably be optimal, and will exclude the remaining search space easily.
-
-The fact that this approach is not significantly affected by huge values of~\(n\) and~\(c\), and more by the distribution used, makes it clear why it was considered the best approach in the seventies.
-The datasets used back then had large~\(n\) and~\(c\) values, and items distributions that made easy to exclude large portions of the search space with the greedy lower bound solution (the uncorrelated distribution is the perfect example).
-
-\subsubsection{MTU1}
-\label{sec:mtu1}
-
-The MTU1 algorithm is a B\&B algorithm for the UKP that avoids the explicit unfolding of the typical B\&B tree~\cite{mtu1}.
-The implicit tree used by MTU1 is described in what follows, as this makes the algorithm easier to visualize and understand.
-The MTU1 sorts the items in non-increasing efficiency order before beginning.
-Such ordering is needed to assure the correctness of the bounds and, consequently, of the algorithm itself.
-%In the algorithms description, it is to be assumed that the items are ordered in the mentioned order
-%MTU1 begins by creating a lower bound solution using a greedy heuristic procedure.
-As the nodes/solutions are visited in a systematic order, for any given node/solution, it is possible to know what part of the `search space'/tree was already visited or skipped, and what part has not yet been explored.
-Consequently, the tree does not need to be enumerated explicitly, the current node/solution is sufficient to know which solutions should be tried next.
-
-\subsubsection{MTU2}
-\label{sec:mtu2}
-
-The MTU2 algorithm was first proposed in~\cite{mtu2}.
-The objective of MTU2 is to improve MTU1 run time when it is used in very large instances (e.g. up to 250,000 items).
-MTU2 calls MTU1 internally to solve the UKP: it can be seen as a wrapper around MTU1 that avoids unnecessary computational effort.
-The two main factors that motivated the creation of MTU2 were: 1) for the majority of the instances used in the period\footnote{For an example, one of the datasets of the paper that introduced MTU2 was analyzed in Section~\ref{sec:martello_uncorrelated}.}, an optimal solution is composed of the most efficient items; 2) for some of those instances, sorting the entire items list was more expensive than solving the instance with MTU1.
-
-% TODO: ADD ONLY THE NEEDED TO GIVE THE READER THE NOTION THAT MTU2 IS AN WRAPPER OF MTU1
-
-\subsubsection{Hybrid (DP and B\&B)}
-
-As expected, some algorithms try to combine the best of two most popular approaches (DP and B\&B) for better results.
-
-%\subsection{GREENDP}
+MTU1 is a depth-first B\&B algorithm for the UKP with worst-case space complexity \(O(n)\)\cite{mtu1}.
+The MTU2 algorithm calls MTU1 over increasing fractions of the items list in an effort to avoid considering all items\cite{mtu2}.
+The original implementations of MTU1 and MTU2 available in CONTINUE HERE
 
 The algorithm presented in~\cite{green_improv} is an improvement on the ordered step-off from~\cite{gg-66}.
-It is very similar to UKP5.
 The author does not know if it could be defined as a hybrid, but a good definition for it would be a `DP algorithm with bounds'.
-The algorithm was not named in the paper and will be called GREENDP for the rest of the thesis.
-The implementation of the GREENDP made by the author of this thesis, and used in the experiments (Section \ref{sec:exp_and_res}), will be called MGREENDP (Modernized GREENDP, in the sense that the algorithm now uses loops instead of the \verb+goto+ directive). 
-
+The algorithm was not named in the paper, it will be referred as GREENDP in this work.
+The implementation of GREENDP used in the experiments will be referred as MGREENDP.
 The GREENDP algorithm consists in solving the UKP by using the ordered step-off algorithm, but without using the best item in the DP, and with interruptions at each~\(w_b\) capacity positions, for checking if the DP can be stopped and the remaining capacity filled with copies of the best item.
-\begin{comment}
-In those interruptions, two bounds are computed.
-A lower bound for solutions using the best item is computed by combining the current best solution of the DP with as many copies of the best item as possible.
-An upper bound for solutions not using the best item is computed by combining the current best solution of the DP with a pseudo-item that would fill the entire capacity gap and has the same efficiency as the second best item (it could also be seen as solving a continuous relaxation of the UKP without the best item, and only for the remaining capacity).
-If the algorithm discovers that the lower bound with the best item is better than the upper bound without the best item, then the lower bound solution is optimal and the DP can be stopped.
-
-This approach using bounds is fundamentally different from the periodicity check used by UKP5 (or the periodicity check used by the `terminating step-off').
-For example, the use of bounds save computational time of GREENDP when it is used to solve BREQ instances, the periodicity check do not save computational time of UKP5 when it is used to solve the same instances (see experiments of the Section~\ref{sec:breq_exp}).
-However this seems to have an impact on other families of instances (see experiments of the Section~\ref{sec:pya_exp}).
-\end{comment}
-
 The bound computed by GREENDP does not work if two or more items share the greatest efficiency.
 Without the bound computation, the GREENDP is the same as the ordered step-off.
 
-\subsubsection{EDUK2}
-
-The EDUK2 algorithm was proposed in~\cite{pya}, and it is an hybridization of EDUK (a DP algorithm) and MTU2 (a B\&B algorithm).
-\begin{comment}
-The author of this thesis gives here a quick overview of the hybridization, but more details can be found in the paper above mentioned.
-Just as with EDUK, the author does not claim to fully comprehend the EDUK2 internals, and only summarizes what is said in the original paper.
-The author recommends reading Sections~\ref{sec:eduk} (EDUK) and~\ref{sec:mtu2} (MTU2) before the explanation below, as it is strongly based in both algorithms.
-The comments made about EDUK code in its own section also apply to EDUK2.
-
-The description of the changes in EDUK caused by the hybridization follows.
-The~\(k = min(n, max(100, \frac{n}{100}))\) most efficient items are gathered in a tentative core problem.
-A B\&B algorithm ``similar to the one in MTU1''\footnote{Quoted from \cite{pya}.} tries to solve the tentative core problem.
-This B\&B algorithm has the possibility of choosing among three bound formulas, and stops after exploring~\(B = 10,000\) nodes (of the implicit enumeration tree).
-If the B\&B algorithm returns a solution with value equal to an upper bound for the whole instance, then the DP algorithm never executes.
-Otherwise, the solution given by the B\&B algorithm is used as a global lower bound in the hybridized EDUK algorithm.
-The hybridized EDUK algorithm works like EDUK would do, with the addition of an extra phase between the slices.
-The extra phase uses the lower bound to eliminate items \emph{and solutions for lesser capacities} from the algorithm.
-This phase is very similar to a phase of MTU2: an upper bound is computed for solutions using one copy of the respective item (a solution~\(s\) can be treated as a pseudo-item (\(w_s, p_s\))).
-If this upper bound is equal to or smaller than the global lower bound, then the item (or solution) is abandoned by the algorithm.
-A new lower bound is computed for each solution that was not removed by the process described above.
-The lower bound consists in filling the remaining capacity with a greedy algorithm.
-If this new lower bound is better than the global lower bound, it replaces it. 
-
-\end{comment}
-
 \subsubsection{Algorithms not included}
-
-In this section, we explain why we did not include some algorithms in our comparison.
 
 % TODO: DECIDE IF THE ORDERED AND THE TERMINATING WILL BE SHOWN OR ONLY THE TERMINATING
 % TODO: JUSTIFY WHY ONLY THE ORDERED/TERMINATING WERE SHOWN (NOT THE PERIODIC)
 % ex: the terminating step-off add O(n + c) operations in exchange for the possibility of removing O(c) operations
-An examination of the naïve DP algorithm for the UKP~\cite[p.~311]{tchu} and its improved version presented in~\cite[p.~221]{garfinkel} shows that both algorithms are dominated by the ordered step-off algorithm presented in \cite[p.~15]{gg-66}.
-A B\&B algorithm was proposed by the authors of the ordered step-off before, in~\cite{gg-63}, we believe that the B\&B algorithm is superseeded by the ordered step-off algorithm.
-Also, the UKP5 algorithm proposed in \cite{sea2016} was found to be equivalent to the ordered step-off.
-Since the experiments presented in this paper already include the ordered step-off, the other four algorithms mentioned are not included.
+Many algorithms mentioned in the literature were not used in the experiments.
+Such algorithms are mentioned below, and reasons for not including them are given.
 
-Two algorithms for the UKP are proposed in~\cite{on_equivalent_greenberg}.
-Our implementation of the first algorithm\footnote{Readers who are interested in those algorithms can access our implementations made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.} exceeded our time limit every time we tried to execute it over instances of recent datasets.
-The second algorithm does not work for all UKP instances.
-Both algorithms were not included in our experiments.
+The authors believe that both the naïve DP algorithm for the UKP\cite[p.~311]{tchu} and an improved version of it presented in~\cite[p.~221]{garfinkel} are dominated by the ordered step-off algorithm presented in \cite[p.~15]{gg-66}.
+In \cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which is found to be dominated by MTU1; also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of the ordered step-off.
+The UKP5 algorithm proposed in~\cite{sea2016} was found to be equivalent to the ordered step-off\footnote{The authors of this article reinvented one algorithm from~\cite{gg-66} and published a paper about it while believing it was novel~\cite{sea2016}. The authors would like to apologize to the academic and scientific community for such disregard.}
 
-The papers~\cite{cabot} and~\cite{turnpike} proposed algorithms for the UKP, but we did not have access to them, as both are behind a paywall.
-Moreover, both algorithms have experiments in the literature suggesting that they are dominated by algorithms included in our experiments\footnote{In \cite{mtu1}~it is shown that MTU1 dominates the algorithm from~\cite{cabot}, and in~\cite{green_improv} it is implied that GREENDP is an improved version of the algorithm from~\cite{turnpike}.}.
+The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded every time limit, the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}.
 
-We did not obtain access to the code of the algorithm proposed in~\cite{babayev} and we had difficulties trying to implement it.
-
-An instance of the UKP can be converted in an instance of the BKP by adding a constraint \(x_i \leq \floor{\frac{c}{w_i}}\) for each item \(i\).
-Such conversion would allow us to add BKP algorithms to the comparison.
-Nevertheless, we decided against adding them, since UKP algorithms are BKP algorithms fine-tuned for UKP instances and there exists evidence in the literature that BKP algorithms perform worse than UKP algorithms in UKP instances~\cite{mtu1}.
+Both~\cite{cabot} and~\cite{turnpike} are behind a paywall, and algorithms described in other papers seem to superseed them\footnote{In~\cite{mtu1}, it is shown that MTU1 dominates the algorithm from~\cite{cabot}, and in~\cite{green_improv} it is implied that GREENDP is an improved version of the algorithm from~\cite{turnpike}.}.
+The authors could not obtain the code of the algorithm proposed in~\cite{babayev} and had difficulties trying to implement it.
+UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms over converted UKP instances\cite{mtu1}, so BKP and 0-1 KP algorithms were not included.
+% TODO: check if BKP and 0-1 KP were written expanded before phrase above
 
 \subsection{Instance datasets}
 

@@ -326,7 +326,7 @@ Executing the four B\&B codes over the reduced PYAsUKP dataset suffices to show 
 \caption{Comparison between MTU1 and MTU2, C++ and Fortran implementations.}
 \begin{center}
 <<mtu_comp>>=
-ukp_time_comp_plot <- function (data, legend) {
+ukp_time_comp_plot <- function (data) {
   # select columns necessary to the plot, and divide information
   # given in algorithm column in two columns: language and algorithm
   data <- select(data, algorithm, filename, internal_time)
@@ -350,24 +350,22 @@ ukp_time_comp_plot <- function (data, legend) {
               aes(x = as.numeric(filename),
 	          y = internal_time,
 		  color = language)) +
-    geom_point() +
+    geom_point(shape = 3) +
+    scale_shape_identity() +
     scale_colour_manual(values = c('C++' = 'black', 'Fortran' = 'darkgrey')) +
     scale_y_continuous(trans = 'log10',
                        breaks = c(0.001, 0.01, 0.1, 1, 10, 60, 600, 1800),
                        labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800')) + 
-    xlab("Instances sorted by mean time to solve\n(mean between implementations) ") +
     ylab("Time to solve\n(seconds, log10 scale)") +
-    theme(legend.position = legend)
+    xlab("Instances sorted by mean time to solve\n(mean between the four implementations) ") +
+    theme(legend.position = 'bottom') +
+    facet_wrap(~ algorithm, ncol = 1)
+    
 
   return(p)
 }
 
-mtu1 <- filter(mtu_csv, algorithm == "cpp-mtu1" | algorithm == "fmtu1") # only mtu1
-mtu2 <- filter(mtu_csv, algorithm == "cpp-mtu2" | algorithm == "fmtu2") # only mtu2
-
-p1 <- ukp_time_comp_plot(mtu1, 'bottom') + ggtitle("MTU1 (Fortran vs C++)")
-p2 <- ukp_time_comp_plot(mtu2, 'bottom') + ggtitle("MTU2 (Fortran vs C++)")
-grid.arrange(p1, p2)
+ukp_time_comp_plot(mtu_csv)
 @
 \end{center}
 %\legend{Source: the author.}
@@ -588,9 +586,9 @@ table_rows_csp <- function(t) {
   latex(
     tabular(
       dataset ~
+	(n = 1) + count_na*total_iter +
         na_mean*#Justify('r')*
-          (Format(sffsc(2))*pricing_total_time + Format(digits=1)*(pricing_total_time/total_iter) + Format(sffsc(2))*hex_sum_master_prob_time + total_iter) +
-        (n = 1) + count_na*total_iter,
+          (Format(sffsc(2))*hex_sum_master_prob_time + Format(sffsc(2))*pricing_total_time + total_iter + Format(digits=1)*(pricing_total_time/total_iter)),
       data = t
     ),
     mathmode = F,
@@ -601,7 +599,7 @@ table_rows_csp <- function(t) {
 num_columns <- 7
 #cat('\\begin{tabu} to \\linewidth { L{1} R{1} R{1} R{1} R{1} C{1} C{1} }\n')
 cat('\\begin{tabu} to \\linewidth { lrrrrcc }\n')
-cat('Dataset & \\makecell{Pricing\\\\Time} & \\makecell{Pricing\\\\Time\\\\Per\\\\Subproblem} & \\makecell{Master\\\\Time} & Subproblems & N & Finished\\\\\\\\')
+cat('Dataset  & N & finished & \\makecell{Master\\\\time} & \\makecell{Total\\\\pricing\\\\time} & \\makecell{Average\\\\number of\\\\sub-problems} & \\makecell{Pricing\\\\time\\\\per\\\\subproblem}\\\\\\\\')
 #cat('\\hline\n')
 cat("\\multicolumn{", num_columns, "}{c}{MTU1}\\\\\n", sep = '')
 #cat('\\hline\n')

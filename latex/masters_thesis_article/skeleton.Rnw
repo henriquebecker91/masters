@@ -63,8 +63,8 @@ library(tables) # for latex and tabular
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
-%\usepackage{longtable}
-%\usepackage{pdflscape}
+\usepackage{longtable}
+\usepackage{pdflscape}
 \usepackage{tabu} % the latex wikibook su
 \usepackage{array} % for common commands inside \newcolumntype
 \usepackage{makecell} % for makecell, that allows libreaks in cells
@@ -151,8 +151,8 @@ Amsterdam, Netherlands}
 \Sexpr{knit_child('sections/introduction.Rnw')}
 \Sexpr{knit_child('sections/methods.Rnw')}
 \Sexpr{knit_child('sections/experiments.Rnw')}
-%\Sexpr{knit_child('sections/conclusions.Rnw')}
-%\Sexpr{knit_child('sections/appendix.Rnw')}
+\Sexpr{knit_child('sections/conclusions.Rnw')}
+\Sexpr{knit_child('sections/appendix.Rnw')}
 
 \bibliography{biblio}
 \bibliographystyle{elsarticle-harv}

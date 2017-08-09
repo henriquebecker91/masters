@@ -61,21 +61,7 @@ The unfolding of the events can be summarized as:
 It is worth mentioning that, taking into account the historical context, the choices made by previous researchers were sound and reasonable.
 Despite this, an efficient DP algorithm was ignored for decades when it was relevant for the comparisons and experiments realized.
 
-This leads to another conclusion: \emph{the bibliographical research is important, and should be followed by a reevaluation of the evidence chain.}
-The author first reinvented an old DP algorithm, published a paper about how it surpassed the state-of-the-art, and then discovered that his bibliographical research was faulty.
-While the author does not intend to justify this overlook, it is important to note that, in the context, reading papers about algorithms from fifty years ago, and implementing them to compare with a recent state-of-the-art algorithm did not seem to be as a good use of time, as they were already compared and discarded by works of the same period.
-If the author did not end up accidentally reinventing the algorithm, and then recognizing it in an old paper, it is possible that the \emph{terminating/ordered step-off} would remain ignored.
-A possibility that can only be considered more worrying by the fact that the algorithm pseudocode is available in \cite{gg-66}, a paper that is cited by many of the works mentioned above.
-Implementing (or obtaining) all algorithms already proposed for a problem clearly is not a viable strategy.
-However, this work shows that the context of one experiment that concludes that an algorithm is dominated by other has to be critically evaluated.
-% TODO: reformular a frase acima
-
-Also, \emph{papers and experiments do not always provide all relevant context.}
-One example of context that is not always provided, or given much attention, is if the runs were executed in parallel, or not.
-The experiments from Section \ref{sec:serial_parallel_exp} show a significant difference between performing an experiment with runs in parallel, or serially.
-The magnitude of the difference vary with the specific algorithm, computer and dataset.
-In one of the computer settings, the average run times of UKP5 when executed in parallel were about the double of the average serial run times.
-In an indirect comparison between results presented by different papers, this detail could lead to a method being considered significantly faster than other only because one author executed serial runs and the other parallel runs.
+\emph{the bibliographical research is important, and should be followed by a reevaluation of the evidence chain.}
 
 \section{UKP-specific knowledge contributions}
 
@@ -138,45 +124,15 @@ While the following quote was written in the context of the 0-1 KP, the author f
 %However, in \cite{gg-66}, the same authors only presented DP methods for solving the UKP.
 %The author of this thesis did not contact Gilmore and Gomory and can only speculate if they reached the same conclusions.
 
-The last three contributions are thoroughly discussed in the context of the experiments that originated them (for the fourth and sixth contributions see Section \ref{sec:csp_experiments}, and for the fifth, Section \ref{sec:serial_parallel_exp}).
-The fourth contribution is specially important to a researcher testing an algorithm that needs to solve unbounded knapsack pricing problems.
-Minor changes in the operation of the UKP solver, as the order it receives the items, can change the exact optimal solution returned, and consequently the number of pricing problems generated and the whole algorithm run time.
-Such chaotic behaviour can lull an experimenter into believing that irrelevant changes have some deeper meaning, or add noise to relevant changes.
-The same can be said about executing memory intensive algorithms in serial, or parallel (fifth contribution).
-The sixth and last contribution, while corroborated by the vast majority of the runs, maybe has contributed to our only outlier, and needs further validation.
-
-\section{Technological UKP-specific contributions}
-
-An outline of the UKP-specific technological contributions follows.
-
-\begin{itemize}
-\item The only known implementations of the GREENDP and GREENDP1 algorithms, modernized to use loops.
-\item The UKP5 implementation, that can be seen as a variant of the terminating step-off.
-\item New implementations for MTU1 and MTU2. Such implementations are coded in C++11 (instead of Fortran77) and use generic templates. Both implementations are slight faster than the respective Fortran77 implementations, and the MTU2 C++ implementation does not have the problem with the subset-sum instances presented by the Fortran77 implementation.
-\item A copy\footnote{Available at: \url{https://drive.google.com/open?id=0B30vAxj_5eaFSUNHQk53NmFXbkE}} of the exact PYAsUKP benchmark used, and scripts\footnote{Available at: \url{https://github.com/henriquebecker91/masters/tree/f5bbabf47d6852816615315c8839d3f74013af5f/codes/sh/pyasukp_paper_bench}. Note that a PYAsUKP binary compiled from the version in \url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz} has to be in the executable path to the scripts work.} to generate it (based on PYAsUKP).
-\item The BREQ 128-16 Standard Benchmark, which is a new dataset.
-\end{itemize}
-
-The author will not discuss such technical contributions as they are only a byproduct of the research.
-The author does not suggests that the BREQ 128-16 Standard Benchmark should be used for new experiments comparing algorithms for the UKP.
-The dataset can yet be used to study the behaviour of new solving approaches, maybe giving some insight about the approach inner workings.
-%``If the operations research profession is to be successful, it is because it helps solve real problems, not imagined problems.''~\cite[p.~7]{portable_rng}.
-
 \section{Future work}
 \label{sec:future_works}
 
-Unfortunately, many questions could not be answered in the scope of this thesis.
-The author selected and listed some of such questions in this section.
-
 \begin{itemize}
-\item Which other real-world problems have the UKP as a pricing subproblem? Are there real-world problems that can be modelled as the UKP? Would instances of those problems be easy for the current state-of-the-art algorithm?
 \item How similar are the datasets of the UKP and the BPP/CSP presented in the literature to the ones existent in the real-world?
 \item Do the instances found in the real-world benefit some approaches over others?
-\item Would a hybrid algorithm based on the UKP5/`terminating step-off' and MTU2 would present the same level of improvement that EDUK2 has over EDUK?
-\item Regarding the many times mentioned but never reimplemented CA algorithm from \cite{babayev}: what would be its performance in real-world instances? Or, at least, in the most recent benchmark datasets?
+\item Would a hybrid algorithm based on the `terminating step-off' and MTU2 present the same level of improvement that EDUK2 has over EDUK?
+\item What would be the pratical performance of an implementation of the algorithm described in \cite{babayev}?
 \item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e. optimal solution)?
-\item How often do pricing subproblems have multiple optimal solutions? How many of these optimal solutions are cut down because of dominance?
-\item How would an optimized C++ implementation of EDUK(2) perform? How would EDUK(2) perform over real-world instances?
 \item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, and/or the same BPP/CSP instance? Is it possible that they converge to a specific distribution at each iteration of the column generation?
 \end{itemize}
 

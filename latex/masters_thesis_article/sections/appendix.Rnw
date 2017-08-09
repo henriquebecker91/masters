@@ -137,7 +137,7 @@ saw <- table_for_dist("saw")
 <<pya_mtu_table,echo=FALSE>>=
 # THIS IS THE SOURCE FOR THE VALUES IN THE TABLE BELOW,
 # THEY WERE COPIED BY HAND BY THE AUTHOR USING RSTUDIO
-slow <- read.csv("../data/mtu_impl_desktop_uc1.csv", sep = ";")
+slow <- read.csv("../data/mtus_pya.csv", sep = ";")
 slow$X <- NULL
 
 t <- slow %>% mutate(dist = get_dist(filename)) %>% mutate(n = get_n(filename))
@@ -235,8 +235,8 @@ saw <- table_for_dist("saw")
 \end{tabular}
 \end{table}
 
-<<breq_table,echo=FALSE,results='asis'>>=
-breq <- read.csv("../data/128_16_std_breqd_all.csv", sep = ";")
+<<breq_table_appendix,echo=FALSE,results='asis'>>=
+breq <- read.csv("../data/128_16_std_breqd.csv", sep = ";")
 breq$X <- NULL
 
 get_n <- function(fname) {

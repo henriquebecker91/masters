@@ -1,5 +1,3 @@
-\chapter{Conclusions and future work}
-
 \section{Conclusions}
 
 The author believes that the major contribution of this thesis is the critical review of the UKP literature, which is summarized in the following subsection.
@@ -70,12 +68,12 @@ An outline of the UKP-specific knowledge contributions follows. It is ordered by
 \item The knowledge that an old DP algorithm outperforms a state-of-the-art hybrid algorithm, in the most recent benchmark dataset.
 \item The concept of solution dominance, and its implications for periodicity bounds and the four previously established dominance relations.
 \item Evidence that the B\&B approach worst-case can arise when solving pricing subproblems of BPP/CSP.
-\item Evidence that variations in the optimal solution returned by the pricing problem solver can have a strong effect in the number of pricing problems generated.
-\item Evidence that UKP algorithms that are memory intensive should be executed serially for comparison.
+%\item Evidence that variations in the optimal solution returned by the pricing problem solver can have a strong effect in the number of pricing problems generated.
+%\item Evidence that UKP algorithms that are memory intensive should be executed serially for comparison.
 \item Evidence that converting the pricing problem profit values to large integers do not cause significant loss.
 \end{enumerate}
 
-The author believes that the first contribution is already well exposed, either in Section \ref{sec:pya_exp}, or in \cite{sea2016}.%, and there's nothing to add to its discussion.
+The author believes that the first contribution is already well exposed, either in Section \ref{sec:pya_exp}, or in \cite{sea2016}.
 The technical details of the second contribution (i.e. the concept of solution dominance) were already discussed (see Section \ref{sec:ukp5_sol_dom_expl}), but not how it impacts the previous techniques described in the literature.
 The weak solution dominance reduces the further improvement that can be found by applying the four dominance relations and/or periodicity bounds in the same algorithm.
 The weak solution dominance and the four dominance relations are two different ways of dealing with the same task.
@@ -106,23 +104,7 @@ The evidence that constitutes the third knowledge contribution can be found in S
 In the majority of the instances, the time spent by both the B\&B and DP approaches when solving pricing problems was significantly smaller than the times solving the master problems of the same instance.
 Nevertheless, for some instances, the B\&B approach has presented its worst-case behavior and, in these instances, more time was spent solving pricing subproblems then solving the master problem.
 
-For a single example, we will focus on instance 201\_2500\_DI\_11.txt, for which MTU1\_CUTSTOCK ended in timeout.
-The pricing problems generated when solving such instance have \(n < 200\) and \(c = 2472\).
-Before timeout, MTU1 solved about 700 of those pricing problems in much less than a millisecond each.
-However, there was also a few pricing problems that took ten seconds or more to solve; run times like: 10, 12, 13, 13, 26, 32, 49, 54, and 351 seconds.
-All instances shared the same \(n\), \(c\) and the same items weights, the only difference between them is the profit values.
-Such behaviour corroborates with what was said about B\&B algorithms being strongly affected by the items distribution, and less by \(n\) and \(c\).
-
-It is worth mentioning that almost all instances that ended in timeout are artificial instances created to be hard to solve.
-Such instances were proposed in \cite{survey2014}.
-Unfortunately, the author of this thesis did not have the time to gather CSP problems from industrial sources, and the experimentation had to stop at the literature instances.
-Consequently, we cannot state that B\&B algorithms are not viable for solving pricing problems, only that there is evidence that the B\&B worst-case can arise in such circumstances.
-
 While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
-
-%In \cite{gg-63}, an B\&B algorithm was used for solving pricing subproblems, it's said that DP used too much time and had to be abandoned.
-%However, in \cite{gg-66}, the same authors only presented DP methods for solving the UKP.
-%The author of this thesis did not contact Gilmore and Gomory and can only speculate if they reached the same conclusions.
 
 \section{Future work}
 \label{sec:future_works}

@@ -120,24 +120,16 @@ csp_csv$pricing_total_time <- csp_csv$hex_sum_knapsack_time + csp_csv$hex_sum_so
 \section{Experiments and Analyses}
 \label{sec:exp_and_res}
 
-Four experiments are presented in this section.
-The first experiment is an updated version of the experiment first presented in~\cite{sea2016}, which consisted in the execution of UKP5 and EDUK2 over the PYAsUKP dataset (see Section~\ref{sec:pya_inst}).
-The differences of the experiment presented here are: GREENDP is considered, UKP5 is replaced by an improved ordered step-off, all runs are serially executed.
-The dataset used is exactly the same.
-
-The second experiment consists in the execution of MTU1 (Fortran), MTU1 (C++), MTU2 (Fortran), and MTU2 (C++) over the reduced PYAsUKP dataset (see Section~\ref{sec:pya_dat_red_pya_dat}).
-
-The third experiment ????? BREQ 128-16 Standard Benchmark.
-
-The fourth experiment execute MTU1 (C++), CPLEX, and four variants of the UKP5 to solve the pricing subproblem described in Section~\ref{sec:csp_ukp_inst}.
+The experiments are split into five subsections.
+Each section address one dataset and the results of running some selected algorithms over them.
 
 \subsection{Setup of the experiments}
 
-The experiments were run using a computer with the following characteristics: the CPU was an Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz; there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where only L3 is shared between cores).
+All experiments were run using a computer with the following characteristics: the CPU was an Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz; there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where only L3 is shared between cores).
 The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
 Three of the four cores were isolated using the \emph{isolcpus} kernel flag (the non-isolated core was left to run the operating system). 
 The \emph{taskset} utility was used to execute runs in one of the isolated cores.
-All runs were executed in serial order (i.e. two algorithm executions did not coexisted), as the authors found that parallel executions on isolated cores has considerable effect in the run times\cite[p.~87]{ukp_hb_mastersthesis}.
+All runs were executed in serial order (i.e. two algorithm executions did not coexist), as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
 C++ code was compiled with GCC and the \emph{-O3 -std=c++11} flags enabled.
 The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with the flags suggested by the authors of the code for maximum performance.
 
@@ -168,19 +160,39 @@ rr_t <- select(rr_csv, algorithm, n, internal_time)
 rr_t <- group_by(rr_t, algorithm, n) %>% summarise(time = mean(internal_time))
 rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
 
-xtable(rr_t)
+alg_labels <- c(
+  'cpp-mtu1'             = 'MTU1',
+  'cpp-mtu2'             = 'MTU2',
+  'eduk'                 = 'EDUK',
+  'eduk2'                = 'EDUK2',
+  'ordered_step_off'     = 'Ord. S.',
+  'terminating_step_off' = 'Term. S.',
+  'mgreendp'             = 'GREENDP'
+)
+
+rr_t$algorithm <- sapply(rr_t$algorithm, function(x) alg_labels[x])
+rr_xt <- xtable(rr_t)
+caption(rr_xt) <- paste0("Mean time to solve the 80 instances from the ",
+  "realistic random dataset with each of seven selected algorithms. ",
+  "Runs that exceeded the 1800 seconds timeout counted as taking ",
+  "1800 seconds (only affecs MTU1 and MTU2). Each column display the mean ",
+  "time to solve the ten instances with the same \\(n\\) value.")
+
+print(rr_xt, 
+  include.rownames = F,
+  scalebox = 0.91
+)
 @
 
-\subsection{Solving the PYAsUKP dataset}
+\subsection{PYAsUKP dataset}
 \label{sec:pya_exp}
 
-% TODO: duplicated with paragraphs in the beggining of the section, decide what to keep and how
-The first experiment is an updated version of the experiment first presented in~\cite{sea2016}, which consisted in the execution of UKP5 and EDUK2 over the PYAsUKP dataset.
-The experiment presented in this article includes one extra algorithm (GREENDP), and does not execute any runs in parallel.
-The dataset used in this experiment is the same used in \cite{sea2016}, which is presented in Section~\ref{sec:pya_inst}).
+The experiment presented in this section is an updated version of the experiment first presented in~\cite{sea2016}.
+In this version GREENDP is considered, UKP5 is replaced by the terminating step-off, and all runs were executed serially.
+The exact same 4540 instances were used.
 
-\begin{figure}[h]
-\caption{Benchmark using PYAsUKP dataset; the UKP5, GREENDP and EDUK2 algorithms; and no timeout.}
+\begin{figure}[H]
+\caption{Benchmark using PYAsUKP dataset; the Terminating Step-off, GREENDP and EDUK2 algorithms; no timeout.}
 \begin{center}
 <<pya_fast_fig>>=
 fast_plot <- function(t) {
@@ -190,6 +202,7 @@ fast_plot <- function(t) {
   data$type <- sapply(data$filename, (function (f) {strsplit(as.character(f), "_")[[1]][1] }))
   data$type <- factor(data$type, levels = inst_types)
 
+  data <- filter(data, algorithm != 'ordered_step_off')
   data <- group_by(data, filename) %>%
     mutate(mean_methods_time = mean(internal_time))
 
@@ -200,16 +213,18 @@ fast_plot <- function(t) {
   data$filename <- factor(data$filename,
         levels = unique(data$filename))
 
-  data$algorithm <- gsub('ordered_step_off', 'O.S.', data$algorithm)
+  #data$algorithm <- gsub('ordered_step_off', 'O.S.', data$algorithm)
   data$algorithm <- gsub('terminating_step_off', 'T.S.', data$algorithm)
   data$algorithm <- gsub('pyasukp', 'EDUK2', data$algorithm)
   data$algorithm <- gsub('mgreendp', 'MGREENDP', data$algorithm)
   data$type <- fix_names(data$type)
+  shape_conv <- c('T.S.' = 15, 'EDUK2' = 16, 'MGREENDP' = 17)
 
   ggplot(data,
          aes(x = as.numeric(filename),
        y = internal_time,
-       color = algorithm)) + 
+       color = algorithm,
+       shape = algorithm)) + 
     geom_point() +
     scale_y_continuous(trans = 'log10',
            breaks = c(0.001, 0.01, 0.1, 1, 10, 60, 600, 1800),
@@ -217,7 +232,8 @@ fast_plot <- function(t) {
   #  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
     ylab('Time to solve (seconds, log10 scale)') +
     xlab('Instance index when sorted by average time to solve\n(average between the methods)') +
-    #scale_colour_grey() +
+    scale_colour_grey() +
+    scale_shape_manual(name = "algorithm", values = shape_conv) + 
     #theme_bw() +
     theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
 }
@@ -229,10 +245,9 @@ fast_plot(fast_csv)
 \label{fig:pya_fast}
 \end{figure}
 
-In Figure \ref{fig:pya_fast}), the subset-sum (S.S.) plot does not show the run times of the MGREENDP algorithm.
-This happens because it fails automatically over instances where the two most efficient items have the same efficiency (what always happens at subset-sum instances).
-We could fix this problem, but this would disable MGREENDP bounds check (which it is its main feature) and make the algorithm even more similar to UKP5.
-So we opted for not running MGREENDP over those instances.
+The subset-sum (S.S.) plot in \autoref{fig:pya_fast} does not show the run times of the MGREENDP algorithm.
+MGREENDP bound computation does not work if the two most efficient items of an instance have the same efficiency (what always happens at subset-sum instances).
+MGREENDP without its bound computation is very similar to the terminating/ordered step-offs, and so the authors found to be redundant to execute it over S.S. instances.
 
 Figure~\ref{fig:pya_fast} shows that, except for Strong Correlated (S.C.) and S.S., the run times of the EDKU2 runs often show two main trends.
 The first trend starts at the left of the x axis and covers UKP5 and MGREENDP (i.e. no run of UKP5 or MGREENDP has a run time above this trend).
@@ -279,34 +294,27 @@ PYAsUKP solves some instances in less time than UKP5 and MGREENDP, but it takes 
 For some distributions, UKP5 takes slight more time than MGREENDP; for other distributions, MGREENDP takes considerably more time than UKP5.
 It should also be noted that MGREENDP needs a workaround to work with distributions that allow the highest efficiency to be shared by many items.
 %Consequenly, the author of this thesis believes that the choice between using UKP5 or MGREENDP should be based on the distribution that needs to be solved.
-%The author of this thesis would like to remind that those distributions are artificially generated, and do not model any real-world instances (that the author is aware of), and consequently any conclusions have limited utility.
 
-% TODO: MAYBE MAKE THIS A SUBSECTION OF THE PREVIOUS SECTION?
 \subsection{MTU1 and MTU2 (C++ and Fortran)}
 \label{sec:mtu_exp}
 
-%As the algorithms do not make a heavy memory use (and has good locality of reference), five isolated cores of the computer were used in parallel for running the experiment. The computer setup was: XXX.
-This subsection serves two purposes.
-The first purpose is to show that the implementations of MTU1 and MTU2 written by the author of this thesis, in C++, are on par with the original ones, written in Fortran77, and therefore the C++ implementations can be used in the remaining experiments.
-The second purpose is to complement the comparison presented in last section by showing that both algorithms (independent of the implementation) are not competitive with UKP5, MGREENDP, and EDUK2 when executed over the PYAsUKP dataset. % TODO: TERRIBLY WRITTEN, competitive is wrongly used
+This experiment was performed with the reduced PYAsUKP benchmark (see Section~\ref{sec:pya_dat_red_pya_dat}).
+% TODO: put this below in methods?
+The Fortran codes used were the original implementation with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. 
 
-The Fortran codes used were not exactly the original MTU codes.
-The only difference to the original code was that any 32 bits integers or float variables/parameters were replaced by their 64 bits counterparts. 
+The C++ and Fortran77 implementations of the MTU1 algorithm have no significant differences.
 
-The two implementations of the MTU1 algorithm have no significant differences (besides the programming language).
-The only significant difference between the MTU2 implementations was the algorithm used to partially sort the items array.
+The MTU2 implementations differed in the algorithm used to partially sort the items.
 The original algorithm described in~\cite{mtu2} did not specify the exact method for performing this partial sorting.
-The original implementation used a complex algorithm developed by one of the authors of MTU2 in~\cite{partial_sort_martello} to find the k\textsuperscript{th} most efficient item in an unsorted array (and then sort).
-Our implementation uses the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+.
-Our implementation also checks if the entire vector is sorted before starting to execute the partial sorts, and it sorts by non-increasing efficiency and if tied by non-decreasing weight.
-The author of this thesis has made available the exact codes used in the experiment and the version of the compiler used\footnote{The exact version of the code used for compilation is available in \url{https://github.com/henriquebecker91/masters/tree/42ecda29905c0ab56c03b7254b52bb06e67ab8d7}. The code was compiled using the available Makefiles, and both the gcc and gcc-fortran versions were the 6.1.1 (2016-06-02). The Makefile pass the \emph{-O3} flag for both gcc and gcc-fortran. The Fortran implementation reads the same instances from a simplified format, which preserves the order of the instance item list. The binary ukp2sukp.out (codes/cpp) was used to convert from one format to the other.}.
+The original Fortran77 implementation uses a complex algorithm developed by one of the authors of MTU2 in~\cite{partial_sort_martello} to find the k\textsuperscript{th} most efficient item in an unsorted array (and then sort).
+The C++ implementation uses the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+.
+The C++ implementation also checks if the entire vector is sorted before starting to execute the partial sorts, and it sorts by non-increasing efficiency and if tied by non-decreasing weight.
+The Fortran77 implementation only sorted by efficiency.
+% TODO: add this in the appendix, or in methods
+%The author of this thesis has made available the exact codes used in the experiment and the version of the compiler used\footnote{The exact version of the code used for compilation is available in \url{https://github.com/henriquebecker91/masters/tree/42ecda29905c0ab56c03b7254b52bb06e67ab8d7}. The code was compiled using the available Makefiles, and both the gcc and gcc-fortran versions were the 6.1.1 (2016-06-02). The Makefile pass the \emph{-O3} flag for both gcc and gcc-fortran. The Fortran implementation reads the same instances from a simplified format, which preserves the order of the instance item list. The binary ukp2sukp.out (codes/cpp) was used to convert from one format to the other.}.
 
-The test was performed with the reduced PYAsUKP benchmark (see Section~\ref{sec:pya_dat_red_pya_dat}).
-The author tried to execute the four B\&B algorithms over the entire PYAsUKP dataset, but many runs were ended by timeout (run time greater than 1000 seconds), and executing the four B\&B codes over the 4540 instances would take time from more relevant experiments.
-Executing the four B\&B codes over the reduced PYAsUKP dataset suffices to show that they cannot compete with UKP5, MGREENDP, and EDUK2 (compared in Section \ref{sec:pya_exp}) if they were executed over the entire PYAsUKP dataset.
 
-\vspace{0.25cm}
-\begin{figure}[h]
+\begin{figure}[H]
 \caption{Comparison between MTU1 and MTU2, C++ and Fortran implementations.}
 \begin{center}
 <<mtu_comp>>=
@@ -356,23 +364,24 @@ ukp_time_comp_plot(mtu_csv)
 \label{fig:mtu}
 \end{figure}
 
-We can see that the MTU1 implementations had a very small variation, with the C++ version being slightly faster.
+The MTU1 implementations had a very small variation, with the C++ version being slightly faster.
 The MTU2 implementation had a bigger variation.
-We do believe that this variation is caused by the small difference in ordering and the difference of sorting algorithms.
+The authors believe that this variation was caused by the difference of sorting algorithms and items ordering.
 
-There is a trend between the values 180 and 230 of the x axis (CPP-MTU2).
-This trend is composed by the subset-sum instances.
-The subset-sum instances are always naturally sorted by efficiency as their efficiency is the same for all items (the weight and profit are equal).
-The instance when generated by PYAsUKP is also sorted by non-decreasing item weight, what makes it perfectly sorted for our C++ implementation.
+There is a trend between the values 180 and 230 of the x axis (MTU2 C++).
+This trend consists of subset-sum instances.
+The subset-sum instances are always naturally sorted by efficiency as all items share the same efficiency.
+The instances generated by PYAsUKP are also sorted by non-decreasing item weight, what makes them perfectly sorted to the C++ implementation.
 The Fortran implementation does not seem to work well with this characteristic of the subset-sum instances.
-We have chosen to use the C++ implementation in our experiments.
-The reasons are: the C++ implementation can read the same format used by PYAsUKP (and the other algorithms); with the exception of PYAsUKP (which uses OCaml) all other methods use C++ and the same structures; choosing the Fortran implementation would considerably harm MTU2 run times for something that seems to be a minor implementation detail.
+Only the C++ implementations are used in the rest of the experiments.
+The rationale follows: the C++ implementation can read the same format used by PYAsUKP (and the other algorithms); with the exception of PYAsUKP (which uses OCaml) all other methods use C++ and the same data structures; choosing the Fortran77 implementation would considerably harm MTU2 run times for something that seems to be a minor implementation detail.
 
-\subsection{Solving the BREQ 128-16 Standard Benchmark}
+\subsection{BREQ 128-16 Standard Benchmark}
 \label{sec:breq_exp}
 
-We have run eight algorithms over the BREQ 128-16 Standard Benchmark (proposed in Section~\ref{sec:breq_inst}).
-The results confirm our hypothesis that this distribution would be hard to solve by DP algorithms and easy to solve by B\&B algorithms.
+
+BREQ 128-16 Standard Benchmark
+The results confirm the hypothesis that this distribution would be hard to solve by DP algorithms and easy to solve by B\&B algorithms.
 
 \begin{figure}[h]
 \caption{Benchmark with the 128-16 Standard BREQ instances.}
@@ -415,10 +424,6 @@ No knapsack capacity from an instance was reduced by the use of the~\(y^*\) boun
 The UKP5\_SBW sorted the items by increasing weight and had these two optimizations disabled.
 The benchmark instance files had the items in random order, so both algorithms used a small and similar time ordering the items\footnote{It is interesting to note that, except for the small items that have profit rounding problems, in BREQ instances, the increasing efficiency order is the increasing weight order.}.
 
-The UKP5\_SBW times had a much smaller variation than the UKP5 for the same instance size, which can be attributed to the change in ordering (as the two previously cited optimizations had only wasted time with overhead).
-The decreasing efficiency ordering helped UKP5 to be faster than UKP5\_SBW in some cases, and turned it slower in others, what does not give us a clear winner.
-
-%The author does not know if it could be called a hybrid algorithm, as the only characteristic taken from B\&B is the bound computation.Finally, MGREENDP showed an interesting behaviour.
 The MGREENDP is a modern implementation in C++, made by the author, of an algorithm made by Harold Greenberg.
 The algorithm of Harold Greenberg (that was not named in the original paper) was an adaptation of the \emph{ordered step-off} algorithm from Gilmore and Gomory.
 This algorithm periodically computes bounds (similar to the ones used by the B\&B approach) to check if it can stop the DP computation and fill any remaining capacity with copies of the best item.
@@ -438,24 +443,6 @@ The weak solution dominance used by UKP5 does not completely avoid this problem,
 %In other words, almost all subproblem solutions are useless, and UKP5's solution dominance helps to generate less of them.
 
 %The algorithms described at~\cite{TheUnboundedKnapsackProblem-T.C.HU.pdf} were not implemented and tested because of time reasons. However, we can see, by the algorithms assimptotic worst case complexity (\(O(n v_1 w_1)\) and~\(O(n w_i)\)), that they 
-
-%<<<<label=breq_table,results=tex>>=
-%library(plyr)
-%
-%breq_csv_s <- breq_csv[complete.cases(breq_csv), ]
-%breq_csv_s$n <- sapply(breq_csv_s$filename, (function (f) {
-%  as.numeric(gsub("n", "", strsplit(as.character(f), "-")[[1]][2]))
-%}))
-%breq_csv_s <- ddply(breq_csv_s, c('algorithm', 'n'), summarise,
-%  ns    = length(n),
-%  avg   = mean(internal_time),
-%  min   = min(internal_time),
-%  max   = max(internal_time),
-%  sd    = sd(internal_time)
-%)
-%
-%xtable(breq_csv_s)
-%@
 
 \subsection{Solving pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}

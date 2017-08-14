@@ -129,60 +129,9 @@ All experiments were run using a computer with the following characteristics: th
 The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
 Three of the four cores were isolated using the \emph{isolcpus} kernel flag (the non-isolated core was left to run the operating system). 
 The \emph{taskset} utility was used to execute runs in one of the isolated cores.
-All runs were executed in serial order (i.e. two algorithm executions did not coexist), as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
+All runs were executed in serial order (i.e. two runs did not coexist), as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
 C++ code was compiled with GCC and the \emph{-O3 -std=c++11} flags enabled.
 The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with the flags suggested by the authors of the code for maximum performance.
-
-\subsection{Realistic Random Dataset}
-
-\begin{figure}[h]
-\caption{Solving times for 7 selected algorithms over each one of the 80 instances from the realistic random dataset. The time limit was of half an hour (1800 seconds), runs that exceeded the time limit are ploted as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
-\begin{center}
-<<realistic_random_figure, fig.height = 5>>=
-gen_graph_all_alg_discrete_x(rr_csv) +
-scale_x_continuous(trans = "log2",
-                   breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17))
-@
-\end{center}
-%\legend{Source: the author.}
-\label{fig:realistic_random}
-\end{figure}
-
-The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
-The solving time of both step-off algorithms and MGREENDP become almost identical as the size of the input grow. % TODO: consider removing the three and presenting only one of them
-EDUK solving times are similar to the three above cited algorithms but, as the instance size grow, its times shift for worse. 
-EDUK2 has many solving times that are similar to the EDUK ones but, for some instances in each size group, its B\&B phase solves the instance or helps to considerably reduce the instance size; in the three largest instance size groups, EDUK2 has the smallest solving times for that instances.
-The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
-MTU1 and MTU2 have the smallest solving times for the smallest instances but, as the instance size (and \(w_{min}\) grows), the number of instances that need orders of magnitude more time to solve than the other algorithms grow.
-
-<<realistic_random_table, results='asis'>>=
-rr_t <- select(rr_csv, algorithm, n, internal_time)
-rr_t <- group_by(rr_t, algorithm, n) %>% summarise(time = mean(internal_time))
-rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
-
-alg_labels <- c(
-  'cpp-mtu1'             = 'MTU1',
-  'cpp-mtu2'             = 'MTU2',
-  'eduk'                 = 'EDUK',
-  'eduk2'                = 'EDUK2',
-  'ordered_step_off'     = 'Ord. S.',
-  'terminating_step_off' = 'Term. S.',
-  'mgreendp'             = 'GREENDP'
-)
-
-rr_t$algorithm <- sapply(rr_t$algorithm, function(x) alg_labels[x])
-rr_xt <- xtable(rr_t)
-caption(rr_xt) <- paste0("Mean time to solve the 80 instances from the ",
-  "realistic random dataset with each of seven selected algorithms. ",
-  "Runs that exceeded the 1800 seconds timeout counted as taking ",
-  "1800 seconds (only affecs MTU1 and MTU2). Each column display the mean ",
-  "time to solve the ten instances with the same \\(n\\) value.")
-
-print(rr_xt, 
-  include.rownames = F,
-  scalebox = 0.91
-)
-@
 
 \subsection{PYAsUKP dataset}
 \label{sec:pya_exp}
@@ -317,7 +266,7 @@ The Fortran77 implementation only sorted by efficiency.
 \begin{figure}[H]
 \caption{Comparison between MTU1 and MTU2, C++ and Fortran implementations.}
 \begin{center}
-<<mtu_comp>>=
+<<mtu_comp, fig.height=5.5>>=
 ukp_time_comp_plot <- function (data) {
   # select columns necessary to the plot, and divide information
   # given in algorithm column in two columns: language and algorithm
@@ -379,14 +328,13 @@ The rationale follows: the C++ implementation can read the same format used by P
 \subsection{BREQ 128-16 Standard Benchmark}
 \label{sec:breq_exp}
 
-
 BREQ 128-16 Standard Benchmark
 The results confirm the hypothesis that this distribution would be hard to solve by DP algorithms and easy to solve by B\&B algorithms.
 
 \begin{figure}[h]
 \caption{Benchmark with the 128-16 Standard BREQ instances.}
 \begin{center}
-<<breq_figure>>=
+<<breq_figure, fig.height=5>>=
 gen_graph_all_alg_discrete_x(breq_csv) +
 scale_x_continuous(trans = "log2",
                    breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
@@ -397,13 +345,14 @@ scale_x_continuous(trans = "log2",
 \label{fig:breq}
 \end{figure}
 
-<<breq_table, results='asis'>>=
-breq_t <- select(breq_csv, algorithm, n, internal_time)
-breq_t <- group_by(breq_t, algorithm, n) %>% summarise(time = mean(internal_time))
-breq_t <- dcast(breq_t, algorithm ~ n, value.var = "time")
+% TODO: check if BREQ table will be kept and then remove this permanently
+%<<breq_table, results='asis'>>=
+%breq_t <- select(breq_csv, algorithm, n, internal_time)
+%breq_t <- group_by(breq_t, algorithm, n) %>% summarise(time = mean(internal_time))
+%breq_t <- dcast(breq_t, algorithm ~ n, value.var = "time")
 
-xtable(breq_t)
-@
+%xtable(breq_t)
+%@
 
 Let us examine Figure~\ref{fig:breq}.
 The algorithms form two lines with different slopes, one line with a steep slope and a line with a more gradual slope.
@@ -443,6 +392,58 @@ The weak solution dominance used by UKP5 does not completely avoid this problem,
 %In other words, almost all subproblem solutions are useless, and UKP5's solution dominance helps to generate less of them.
 
 %The algorithms described at~\cite{TheUnboundedKnapsackProblem-T.C.HU.pdf} were not implemented and tested because of time reasons. However, we can see, by the algorithms assimptotic worst case complexity (\(O(n v_1 w_1)\) and~\(O(n w_i)\)), that they 
+
+\subsection{Realistic Random Dataset}
+
+\begin{figure}[h]
+\caption{Solving times for 7 selected algorithms over each one of the 80 instances from the realistic random dataset. The time limit was of half an hour (1800 seconds), runs that exceeded the time limit are ploted as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
+\begin{center}
+<<realistic_random_figure, fig.height = 5>>=
+gen_graph_all_alg_discrete_x(rr_csv) +
+scale_x_continuous(trans = "log2",
+                   breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17))
+@
+\end{center}
+%\legend{Source: the author.}
+\label{fig:realistic_random}
+\end{figure}
+
+The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
+The solving time of both step-off algorithms and MGREENDP become almost identical as the size of the input grow. % TODO: consider removing the three and presenting only one of them
+EDUK solving times are similar to the three above cited algorithms but, as the instance size grow, its times shift for worse. 
+EDUK2 has many solving times that are similar to the EDUK ones but, for some instances in each size group, its B\&B phase solves the instance or helps to considerably reduce the instance size; in the three largest instance size groups, EDUK2 has the smallest solving times for that instances.
+The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
+MTU1 and MTU2 have the smallest solving times for the smallest instances but, as the instance size (and \(w_{min}\) grows), the number of instances that need orders of magnitude more time to solve than the other algorithms grow.
+
+<<realistic_random_table, results='asis'>>=
+rr_t <- select(rr_csv, algorithm, n, internal_time)
+rr_t <- group_by(rr_t, algorithm, n) %>% summarise(time = mean(internal_time))
+rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
+
+alg_labels <- c(
+  'cpp-mtu1'             = 'MTU1',
+  'cpp-mtu2'             = 'MTU2',
+  'eduk'                 = 'EDUK',
+  'eduk2'                = 'EDUK2',
+  'ordered_step_off'     = 'Ord. S.',
+  'terminating_step_off' = 'Term. S.',
+  'mgreendp'             = 'GREENDP'
+)
+
+rr_t$algorithm <- sapply(rr_t$algorithm, function(x) alg_labels[x])
+rr_xt <- xtable(rr_t)
+caption(rr_xt) <- paste0("Mean time to solve the 80 instances from the ",
+  "realistic random dataset with each of seven selected algorithms. ",
+  "Runs that exceeded the 1800 seconds timeout counted as taking ",
+  "1800 seconds (only affecs MTU1 and MTU2). Each column display the mean ",
+  "time to solve the ten instances with the same \\(n\\) value.")
+
+print(rr_xt, 
+  include.rownames = F,
+  scalebox = 0.91
+)
+@
+
 
 \subsection{Solving pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}
@@ -585,15 +586,15 @@ However, the reason for the growth in the total time spent to solve the most tim
 
 except by ANI AI, which had many unfinished runs, the times used by CPLEX doesn't seem to depend on the method being used to solve subproblems
 
-\subsection{The differences in the number of pricing subproblems solved}
+%\subsection{The differences in the number of pricing subproblems solved}
 
-pricing subproblems can have many optimal solutions, and different methods break this tie in different ways.
-The choice of optimal solution will affect the master problem, which will generate a slightly different pricing subproblem.
-This effect cascades and can change the profit values of all next pricing subproblems, and the number of pricing subproblems that are needed to solve (which is the same as the number of iterations, and the number of master problems solved).
+%pricing subproblems can have many optimal solutions, and different methods break this tie in different ways.
+%The choice of optimal solution will affect the master problem, which will generate a slightly different pricing subproblem.
+%This effect cascades and can change the profit values of all next pricing subproblems, and the number of pricing subproblems that are needed to solve (which is the same as the number of iterations, and the number of master problems solved).
 
-CPLEX\_CUTSTOCK stands out by requiring many of the smallest number of iterations.
-The author cannot explain what property the pricing subproblem solutions returned by CPLEX have that creates such a difference.
-the table masks a little this effect because it could be attributed to the instances to the highest count of iterations suffering timeout (and reducing the mean)
+%CPLEX\_CUTSTOCK stands out by requiring many of the smallest number of iterations.
+%The author cannot explain what property the pricing subproblem solutions returned by CPLEX have that creates such a difference.
+%the table masks a little this effect because it could be attributed to the instances to the highest count of iterations suffering timeout (and reducing the mean)
 
 \subsection{The only outlier}
 
@@ -620,18 +621,17 @@ All instances shared the same \(n\), \(c\) and the same items weights, the only 
 Such behaviour corroborates with what was said about B\&B algorithms being strongly affected by the items distribution, and less by \(n\) and \(c\).
 
 It is worth mentioning that almost all instances that ended in timeout are artificial instances created to be hard to solve.
-Such instances were proposed in \cite{survey2014}.
-Unfortunately, the author of this thesis did not have the time to gather CSP problems from industrial sources, and the experimentation had to stop at the literature instances.
-Consequently, we cannot state that B\&B algorithms are not viable for solving pricing problems, only that there is evidence that the B\&B worst-case can arise in such circumstances.
+Such instances were proposed in \cite{survey2014}. % TODO: chech which dataset this was and spell it out
+The authors can not state that B\&B algorithms are not viable for solving pricing problems, only that there is evidence that the B\&B worst-case can arise in such circumstances.
+%Unfortunately, the author of this thesis did not have the time to gather CSP problems from industrial sources, and the experimentation had to stop at the literature instances.
 
 \subsection{Algorithms not used in this experiment}
 \label{sec:csp_alg_not_used}
 
-Some algorithms were available, but were not used in this experiment, those are: GREENDP, MTU2 and EDUK/EDUK2 (PYAsUKP).
-
-GREENDP fails if the two most efficient items share the same efficiency, what often happens for at least one pricing subproblem of a CSP instance.
+The MGREENDP, MTU2 (C++ or Fortran) and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
+MGREENDP fails if the two most efficient items share the same efficiency, what often happens for at least one pricing subproblem of a CSP instance.
 In instances with a small number of items, MTU2 behaves almost the same way that MTU1.
-
-The code of this experiment needs to call the UKP solving methods from inside the C++ code that also solves the CPLEX master model.
-The author tried to integrate EDUK and EDUK2 (which are written in OCaml) to the experiment, using the interface between C/C++ and OCaml, but the examples provided together with the PYAsUKP sources for this kind of integration were not working.
+Finally, the authors' did not succeed in integrating the PYAsUKP code (written in OCaml) with the C++/CPLEX code used in this experiment.
+%The code of this experiment needs to call the UKP solving methods from inside the C++ code that also solves the CPLEX master model.
+%The author tried to integrate EDUK and EDUK2 (which are written in OCaml) to the experiment, using the interface between C/C++ and OCaml, but the examples provided together with the PYAsUKP sources for this kind of integration were not working.
 

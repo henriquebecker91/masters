@@ -64,39 +64,13 @@ library(tables) # for latex and tabular
 
 \usepackage{longtable}
 \usepackage{pdflscape}
-\usepackage{tabu} % the latex wikibook su
+\usepackage{tabu} % the latex wikibook suggest this table over others
 \usepackage{array} % for common commands inside \newcolumntype
 \usepackage{makecell} % for makecell, that allows libreaks in cells
 
-\usepackage{newclude} % for include*{...} remove before final version 
 \usepackage{verbatim} % for \begin{comment} remove before final version
 
-\title{This is a specimen title\tnoteref{t1,t2}}
-\tnotetext[t1]{This document is a collaborative effort.}
-\tnotetext[t2]{The second title footnote which is a longer
-longer than the first one and with an intention to fill
-in up more than one line while formatting.}
-
-\author[rvt]{C.V.~Radhakrishnan\corref{cor1}\fnref{fn1}}
-\ead{cvr@river-valley.com}
-\author[rvt,focal]{K.~Bazargan\fnref{fn2}}
-\ead{kaveh@river-valley.com}
-\author[els]{S.~Pepping\corref{cor2}\fnref{fn1,fn3}}
-\ead[url]{http://www.elsevier.com}
-
-\cortext[cor1]{Corresponding author}
-\cortext[cor2]{Principal corresponding author}
-\fntext[fn1]{This is the specimen author footnote.}
-\fntext[fn2]{Another author footnote, but a little more longer}
-\fntext[fn3]{Yet another author footnote. Indeed you can have any number of author footnotes.}
-
-\address[rvt]{River Valley Technologies, SJP Building,
-Cotton Hills, Trivandrum, Kerala, India 695014}
-\address[focal]{River Valley Technologies, 9, Browns Court,
-Kennford, Exeter, United Kingdom}
-\address[els]{Central Application Management,
-Elsevier, Radarweg 29, 1043 NX\\
-Amsterdam, Netherlands}
+\title{A comparison of unbounded knapsack algorithms}
 
 \begin{document}
 
@@ -105,11 +79,30 @@ Amsterdam, Netherlands}
 \newcolumntype{R}[1]{>{\hsize=#1\hsize\raggedleft\arraybackslash}X}
 \newcolumntype{C}[1]{>{\hsize=#1\hsize\centering\arraybackslash}X}
 
-\maketitle
+\begin{frontmatter}
+\author[ufrgs]{Henrique~Becker\corref{cor1}}
+\ead{hbecker@inf.ufrgs.br}
+\author[ufrgs]{Luciana~S.~Buriol\corref{cor2}}
+\ead{buriol@inf.ufrgs.br}
+
+\cortext[cor1]{Principal corresponding author}
+\cortext[cor2]{Corresponding author}
+
+\address[ufrgs]{Federal University of Rio Grande do Sul (UFRGS), Porto Alegre, Brazil}
 
 \begin{abstract}
-\input{abstract}
+TODO: write abstract
 \end{abstract}
+
+% TODO: add keywords, discover what is MSC
+\begin{keyword}
+%% keywords here, in the form: keyword \sep keyword
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+\end{keyword}
+
+\end{frontmatter}
 
 %\begin{listofabbrv}{PRNG}
 %        \item[B\&B] Branch and Bound

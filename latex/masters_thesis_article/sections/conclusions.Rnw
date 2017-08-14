@@ -1,9 +1,5 @@
 \section{Conclusions}
 
-The author believes that the major contribution of this thesis is the critical review of the UKP literature, which is summarized in the following subsection.
-The review expresses and discusses statements that can be generalized to all the experimental research in computer science.
-Besides the review, the more objective and UKP-specific knowledge contributions and technical contributions are listed in the subsequent subsections.
-
 %However, the instances were too small to draw strong conclusions, and the relative difference between G.G. and MTU1 average times was not even one order of magnitude apart.
 %The G.G. algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
 %This trend could indicate that for big instances, the G.G. algorithm would have better times than MTU1 (e.g. the G.G. algorithm could have a costly initialization process but a better average-case asymptotic complexity).
@@ -35,27 +31,12 @@ A complete overview of the omitted steps is presented in this section.
 
 \end{comment}
 
-\subsection{A critical review}
 
 \emph{An algorithm is dominated by other in the context of a dataset.}
 An example presented in this thesis is MTU2.
 MTU2 is the best algorithm between eight algorithms for one dataset (see Section \ref{sec:breq_exp}), and is not competitive for other five datasets (see Section \ref{sec:pya_exp}).
 The literature review, and the further discussion of instance datasets and solving approaches, have shown \emph{how the choice of datasets defined the best algorithm through the last fifty years}.
-The unfolding of the events can be summarized as:
 
-\begin{description}
-\item[\cite{gg-61}] A real-world application of the UKP (pricing problem for BPP and CSP) is proposed.
-\item[\cite{gg-66}] Some dynamic programming algorithms for such application are proposed.
-\item[\cite{mtu1}] A B\&B method is proposed, and then compared with the DP algorithms over small artificial instances, obtaining marginally better results
-\item[\cite{mtu2}] The goal changes to solving larger instances faster. Artificial datasets are used for this. For such datasets, DP methods are clearly dominated by B\&B methods.
-\item[\cite{zhu_dominated}] The large artificial instances are shown to have only a little amount of relevant/undominated items and are discredited.
-\item[\cite{ukp_new_results}] A new DP method is proposed, together with new artificial datasets (without the same flaws of the previous datasets).
-\item[\cite{eduk}] The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments.
-\item[\cite{book_ukp_2004}] The new DP method is considered the state-of-the-art.
-\item[\cite{pya}] The new DP method is hybridized with B\&B, and the datasets are updated to be `harder'. Such datasets are hard for B\&B, and the hybrid method is only compared to B\&B. The hybrid method is the new state-of-the-art.
-\item[\cite{sea2016}] An old DP method is reinvented and outperforms the hybrid method in the updated datasets.
-\item[(this thesis)] Old algorithms are revised, reimplemented and tested. The influence of the datasets and the historical context becomes apparent.
-\end{description}
 It is worth mentioning that, taking into account the historical context, the choices made by previous researchers were sound and reasonable.
 Despite this, an efficient DP algorithm was ignored for decades when it was relevant for the comparisons and experiments realized.
 

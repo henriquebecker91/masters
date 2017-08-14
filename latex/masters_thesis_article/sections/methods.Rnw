@@ -4,7 +4,7 @@
 In this section, the algorithms and datasets used in the experiments are presented.
 A rationale for not including some algorithms and datasets from the literature is also presented.
 
-\subsection{Algorithms}
+\subsection{Algorithms and implementations}
 
 The algorithms used in the experiments can be divided in three main approachs: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (combine DP and B\&B).
 The DP approach has a worst-case time complexity of~\(O(nc)\) (pseudo-polynomial), and the its worst-case space complexity is~\(O(n + c)\).
@@ -53,6 +53,9 @@ UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms ov
 
 \subsection{Instance datasets}
 
+The datasets used in the experiments include: some datasets from the literature that mainly focus on being hard-to-solve (...); one dataset proposed by the authors to make a point (...); one dataset CONTINUE HERE
+The reasoning for not including \emph{uncorrelated} and \emph{weakly correlated} instances is also presented.
+
 \subsubsection{PYAsUKP dataset}
 \label{sec:pya_inst}
 
@@ -61,6 +64,8 @@ The PYAsUKP dataset was heavily based on five datasets presented in~\cite{pya}, 
 The instance generator used to generate this dataset share the code with the EDUK/EDUK2 implementations (PYAsUKP), which is the reason we call this dataset the \emph{PYAsUKP dataset}.
 The PYAsUKP dataset comprises: 400 subset-sum instances (\(10^3 \leq n \leq 10^4\); 240 strongly correlated instances (\(5\times10^3 \leq n \leq n = 10^4\)); 800 instances with postponed periodicity (\(2\times10^4 \leq n \leq 5\times10^4\)); 2000 instances without collective dominance (\(5\times10^3 \leq n \leq 5\times10^4\)); 1100 SAW instances (\(10^4 \leq n \leq 10^5\)).
 The authors calls one tenth of the PYAsUKP dataset the ADD MORE HERE?
+The PYAsUKP dataset consists of at least ten instances with different random seeds for each combination of the remaining generation parameters.
+The authors will refer to one tenth of the PYAsUKP dataset (454 instances), consisting of at least one instance with each combination of non-seed parameters, the \emph{reduced PYAsUKP dataset}.
 
 \subsubsection{CSP pricing subproblem dataset}
 \label{sec:csp_ukp_inst}
@@ -73,7 +78,7 @@ These datasets amount to 6195 instances, all available in \url{http://or.dei.uni
 The first seven cited datasets are described in \cite[p.~22]{survey2014}, the last one (GI Instances) comes from~\cite{irnich}.
 The code and data details needed to reproduce the experiment are described in \autoref{}.
 
-\subsubsection{Bottom Right Ellipse Quadrant instances}
+\subsubsection{BREQ 128-16 Standard Benchmark}
 \label{sec:breq_inst}
 
 The Bottom Right Ellipse Quadrant (BREQ) is an items distribution proposed by the authors in~\cite[p.~37]{ukp_hb_mastersthesis}. %and first described in REF\_MASTER\_THESIS.
@@ -99,7 +104,8 @@ Distributions with the opposite property (favor DP over B\&B) are common in the 
 
 % Proof that this interval is tight: http://www.wolframalpha.com/input/?i=2*(100+-+sqrt(100%5E2+-+w%5E2+*+16%5E2))+%3C%3D+100+-+sqrt(100%5E2+-+((sqrt(2)*w)%5E2+*+16%5E2))
 
-The BREQ dataset used in the experiments comprises 10 instances with distinct random seeds for each one of 10 distinct \(n\) values (\(n = 2^{n'}\), where \(n' \in \{11, 12, \dots, 20\}\)), totalling 100 instances.
+The authors named the BREQ dataset used in the experiments of \emph{BREQ 128-16 Standard Benchmark}.
+This dataset comprises 10 instances with distinct random seeds for each one of 10 distinct \(n\) values (\(n = 2^{n'}\), where \(n' \in \{11, 12, \dots, 20\}\)), totalling 100 instances.
 The values of the remaining parameters can be computed as follows: \(p_{min} = w_{min} = 1\), \(c = 128 \times n\), \(w_{max} = c\) and \(p_{max} = 16 \times w_{max}\).
 The items generation procedure follows:
 generate~\(n\) unique random integer weights uniformly distributed in~\([w_{min},w_{max}]\);
@@ -107,8 +113,8 @@ for each item weight, the corresponding profit is calculated by the formula pres
 
 \subsubsection{A Realistic Random Dataset}
 % PARAGRAPH ABOUT REALISTIC RANDOM INSTANCES
-A dataset of \emph{realistic random} instances was also used in our experiments, our generation procedure is based on~\cite{eduk}.
-Our generation procedure follows: generate a list of~\(n\) unique random integers uniformly distributed in~\([min,max]\) and sort them by increasing value; generate a second list repeating the same procedure; combine both lists into a single item list where the weight (profit) of each item~\(i \in [1,n]\) is the value at position \(i\) of the first (second) list; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
+A dataset of \emph{realistic random} instances was used in the experiments, the generation procedure is based on~\cite{eduk}.
+The generation procedure follows: generate a list of~\(n\) unique random integers uniformly distributed in~\([min,max]\) and sort them by increasing value; generate a second list repeating the same procedure; combine both lists into a single item list where the weight (profit) of each item~\(i \in [1,n]\) is the value at position \(i\) of the first (second) list; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
 Simple dominance can not occur in such instances, other dominances may be present.
 Our dataset comprises ten instances with distinct random seeds for each one of eight \(n\) values (\(2^{n'}\), where \(n' \in \{10, 11, \dots, 17\}\)), totalling 80 instances.
 The values of the remaining parameters come from \(n\): \(max = n \times 2^{10}\), \(min = \frac{max}{2^4}\), \(c_{min} = 2\times max\) and \(c_{max} = c_{min} + min\).
@@ -118,10 +124,11 @@ The values of the remaining parameters come from \(n\): \(max = n \times 2^{10}\
 The \emph{uncorrelated} and \emph{weakly correlated} item distributions were commonly used in the literature\cite{mtu1}\cite{mtu2}\cite{babayev}\cite{eduk}, but the authors decided against including them in the experiments.
 The literature has already questioned the suitability of \emph{uncorrelated} item distributions datasets for the analysis of the UKP\cite{zhu_dominated}\cite{ukp_new_results}.
 Uncorrelated instances often exhibit a great amount of simple and multiple dominated items, and polynomial algorithms can reduce the number of items in such instances by magnitudes.
-In the authors experience, uncorrelated instances often take more time to load from disk than to solve.
-The solving times of uncorrelated instances are more dependent on the implementation of polynomial-time preprocessing than dependent on the quality of the solving algorithm.
-Consequently, the authors do not believe uncorrelated instances provide a good benchmark for UKP solving algorithms.
+%In the authors experience, uncorrelated instances often take more time to load from disk than to solve.
+%The solving times of uncorrelated instances are more dependent on the implementation of polynomial-time preprocessing than dependent on the quality of the solving algorithm.
+%Consequently, the authors do not believe uncorrelated instances provide a good benchmark for UKP solving algorithms.
 
+% TODO: consider reducing the paragraph below
 The \emph{weakly correlated} item distribution can be seen as between the uncorrelated and strongly correlated distributions.
 Whereas strongly correlated instances have no simple dominance, weakly correlated can exhibit simple dominance, and multiple dominance is more common.
 Without the extra dominated items, which are promptly removed by many algorithms, the weakly correlated instances are very similar to strongly correlated instances of smaller size.

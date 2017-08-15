@@ -7,9 +7,7 @@ library(knitr)
 opts_chunk$set(cache = TRUE, autodep = TRUE)
 # comment = NA don't set no 'comments' but set the commen symbol to none
 opts_chunk$set(echo = FALSE, comment = NA, message = FALSE, warning = FALSE)
-@
 
-<<load_libraries>>=
 library(ggplot2) # used for all plotting
 library(stringi) # TODO: check if yet used
 library(reshape2) # for dcast, http://seananderson.ca/2013/10/19/reshape.html
@@ -70,7 +68,7 @@ library(tables) # for latex and tabular
 
 \usepackage{verbatim} % for \begin{comment} remove before final version
 
-\title{A comparison of unbounded knapsack algorithms}
+\title{A comparison of exact unbounded knapsack algorithms}
 
 \begin{document}
 

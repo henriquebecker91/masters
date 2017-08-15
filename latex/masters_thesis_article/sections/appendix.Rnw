@@ -12,41 +12,49 @@ get_n <- function(fname) {
   as.numeric(gsub(".*[^i]n([1-9][0-9]+).*", "\\1", fname))
 }
 
-# TODO: check why this isn't working for 
 get_wmin <- function(row) {
-  if (row[8] == 'hi') {
-    row[9]
+  if (row['dist'] == 'hi') {
+    as.numeric(row['n'])
   } else {
-    as.numeric(gsub(".*wmin([1-9][0-9]+).*", "\\1", row[2]))
+    as.numeric(gsub(".*wmin([1-9][0-9]+).*", "\\1", row['filename']))
   }
 }
+@
 
-ft <- read.csv("data/pya_ukp5.csv", sep = ";")
+<<pya_fast_table,echo=F>>=
+ft <- read.csv("../data/pya_ukp5.csv", sep = ";")
 ft$X <- NULL
+
+# we only show the results for the terminating_step_off
+ft <- filter(ft, algorithm != 'ordered_step_off')
+# adding extra columns parsed from filename
 ft <- ft %>%
   mutate(dist = get_dist(filename)) %>%
   mutate(a = get_alpha(filename)) %>%
   mutate(n = get_n(filename))
 ft$wmin <- apply(ft, 1, get_wmin)
 
+# this ordering is necessary to make_pya_row put the columns in the right places
+ft$algorithm <- factor(ft$algorithm, levels = c('terminating_step_off', 'mgreendp', 'pyasukp'))
 ft <- arrange(ft, algorithm)
 
+# subset-sum results are not discriminated by parameter combination
 ss2 <- ft %>%
   filter(dist == "ss2") %>%
   select(algorithm, internal_time) %>%
   group_by(algorithm) %>%
   summarise(
-    avg = mean(internal_time),
-    sd  =   sd(internal_time),
-    max =  max(internal_time))
+    avg = sprintf("%.2f", mean(internal_time)),
+    sd  = sprintf("%.2f",   sd(internal_time)),
+    max = sprintf("%.2f",  max(internal_time)))
 
 ft <- ft %>%
   select(algorithm, dist, a, n, wmin, internal_time) %>%
   group_by(algorithm, dist, a, n, wmin) %>%
   summarise(
-    avg = round(mean(internal_time), digits = 2),
-    sd = round(sd(internal_time), digits = 2),
-    max = round(max(internal_time), digits = 2))
+    avg = sprintf("%.2f", mean(internal_time)),
+    sd  = sprintf("%.2f",   sd(internal_time)),
+    max = sprintf("%.2f",  max(internal_time)))
 
 nsds2 <- filter(ft, dist == 'nsds2')
 hi <- filter(ft, dist == 'hi')
@@ -59,7 +67,6 @@ make_pya_row <- function(t, ...) {
   tt <- select(tt, avg, sd, max)
   paste(apply(tt, 1, paste, collapse=" & "), collapse = " & ")
 }
-make_pya_row(sc, a == -5 & n == 5000 & wmin == 10000)
 @
 
 \begin{table}
@@ -81,7 +88,7 @@ make_pya_row(sc, a == -5 & n == 5000 & wmin == 10000)
 & \textbf{n} & \(w_{min}\)  & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
-\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
+\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & \Sexpr{make_pya_row(ss2)}\\ % & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
 \hline
 
 \multicolumn{3}{l}{20 inst. per line} & \multicolumn{9}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
@@ -89,83 +96,97 @@ make_pya_row(sc, a == -5 & n == 5000 & wmin == 10000)
 \textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
- 5 & 5  & 10 & \Sexpr{make_pya_row(hi, a == 5 & n == 5000 & wmin == 10000)}\\
-   &    & 15 & 0.04 & 0.00 & 0.05 &  0.43 & 0.06 &  0.53 & 3.85 & 1.53 & 5.13\\
-   &    & 50 & 0.13 & 0.00 & 0.16 &  1.01 & 0.52 &  1.70 & 12.12 & 8.17 & 28.84\\
- 5 & 10 & 10 & 0.06 & 0.00 & 0.06 &  0.50 & 0.04 &  0.54 & 0.00 & 0.00 & 0.01\\
-   &    & 50 & 0.29 & 0.00 & 0.30 &  5.93 & 0.82 &  6.79 & 22.43 & 17.85 & 45.19\\
-   &    & 110& 0.66 & 0.00 & 0.66 & 16.05 & 3.36 & 19.68 & 76.53 & 62.54 & 175.61\\
--5 & 5  & 10 & 0.04 & 0.00 & 0.05 & 0.04 & 0.00 & 0.04 & 4.02 & 2.72 & 7.12\\
-   &    & 15 & 0.05 & 0.00 & 0.05 & 0.05 & 0.00 & 0.05 & 6.76 & 4.22 & 12.24\\
-   &    & 50 & 0.14 & 0.00 & 0.15 & 0.11 & 0.02 & 0.12 & 24.76 & 19.41 & 66.23\\
--5 & 10 & 10 & 0.10 & 0.00 & 0.10 & 0.11 & 0.01 & 0.13 & 6.74 & 6.28 & 15.38\\
-   &    & 50 & 0.32 & 0.00 & 0.32 & 0.28 & 0.01 & 0.29 & 48.70 & 42.53 & 111.61\\
-   &    & 110& 0.65 & 0.00 & 0.66 & 0.52 & 0.01 & 0.53 & 144.87 & 143.53 & 416.41\\
+ 5 & 5  & 10 & \Sexpr{make_pya_row(sc, a == 5 & n == 5000 & wmin == 10000)}\\
+   &    & 15 & \Sexpr{make_pya_row(sc, a == 5 & n == 5000 & wmin == 10000)}\\%0.04 & 0.00 & 0.05 &  0.43 & 0.06 &  0.53 & 3.85 & 1.53 & 5.13\\
+   &    & 50 & \Sexpr{make_pya_row(sc, a == 5 & n == 5000 & wmin == 10000)}\\%0.13 & 0.00 & 0.16 &  1.01 & 0.52 &  1.70 & 12.12 & 8.17 & 28.84\\
+ 5 & 10 & 10 & \Sexpr{make_pya_row(sc, a == 5 & n == 5000 & wmin == 10000)}\\%0.06 & 0.00 & 0.06 &  0.50 & 0.04 &  0.54 & 0.00 & 0.00 & 0.01\\
+   &    & 50 & \Sexpr{make_pya_row(sc, a == 5 & n == 5000 & wmin == 10000)}\\%0.29 & 0.00 & 0.30 &  5.93 & 0.82 &  6.79 & 22.43 & 17.85 & 45.19\\
+   &    & 110& \Sexpr{make_pya_row(sc, a == 5 & n == 5000 & wmin == 10000)}\\%0.66 & 0.00 & 0.66 & 16.05 & 3.36 & 19.68 & 76.53 & 62.54 & 175.61\\
+-5 & 5  & 10 & \Sexpr{make_pya_row(sc, a == -5 & n == 5000 & wmin == 10000)}\\%0.04 & 0.00 & 0.05 & 0.04 & 0.00 & 0.04 & 4.02 & 2.72 & 7.12\\
+   &    & 15 & \Sexpr{make_pya_row(sc, a == -5 & n == 5000 & wmin == 10000)}\\%0.05 & 0.00 & 0.05 & 0.05 & 0.00 & 0.05 & 6.76 & 4.22 & 12.24\\
+   &    & 50 & \Sexpr{make_pya_row(sc, a == -5 & n == 5000 & wmin == 10000)}\\%0.14 & 0.00 & 0.15 & 0.11 & 0.02 & 0.12 & 24.76 & 19.41 & 66.23\\
+-5 & 10 & 10 & \Sexpr{make_pya_row(sc, a == -5 & n == 10000 & wmin == 10000)}\\%0.10 & 0.00 & 0.10 & 0.11 & 0.01 & 0.13 & 6.74 & 6.28 & 15.38\\
+   &    & 50 & \Sexpr{make_pya_row(sc, a == -5 & n == 10000 & wmin == 10000)}\\%0.32 & 0.00 & 0.32 & 0.28 & 0.01 & 0.29 & 48.70 & 42.53 & 111.61\\
+   &    & 110& \Sexpr{make_pya_row(sc, a == -5 & n == 10000 & wmin == 10000)}\\%0.65 & 0.00 & 0.66 & 0.52 & 0.01 & 0.53 & 144.87 & 143.53 & 416.41\\
 \hline
 
 \multicolumn{3}{l}{200 inst. per line} & \multicolumn{9}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
 \cline{1-3}\cline{4-12}
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
-& 20 & 20 & 0.79 & 0.10 & 0.97 & 0.74 & 0.11 & 0.96 & 8.65 & 7.74 & 28.63\\
-& 50 & 20 & 5.70 & 0.37 & 6.54 & 5.12 & 0.65 & 6.13 & 78.34 & 82.46 & 356.67\\
-& 20 & 50 & 0.89 & 0.12 & 1.19 & 0.75 & 0.14 & 1.09 & 11.57 & 8.20 & 39.20\\
-& 50 & 50 & 4.72 & 0.69 & 6.27 & 3.97 & 0.75 & 5.30 & 113.21 & 87.16 & 267.10\\
+& 20 & 20 & \Sexpr{make_pya_row(nsds2, n == 20000 & wmin == 20000)}\\%0.79 & 0.10 & 0.97 & 0.74 & 0.11 & 0.96 & 8.65 & 7.74 & 28.63\\
+& 50 & 20 & \Sexpr{make_pya_row(nsds2, n == 50000 & wmin == 20000)}\\%5.70 & 0.37 & 6.54 & 5.12 & 0.65 & 6.13 & 78.34 & 82.46 & 356.67\\
+& 20 & 50 & \Sexpr{make_pya_row(nsds2, n == 20000 & wmin == 50000)}\\%0.89 & 0.12 & 1.19 & 0.75 & 0.14 & 1.09 & 11.57 & 8.20 & 39.20\\
+& 50 & 50 & \Sexpr{make_pya_row(nsds2, n == 50000 & wmin == 50000)}\\%4.72 & 0.69 & 6.27 & 3.97 & 0.75 & 5.30 & 113.21 & 87.16 & 267.10\\
 \hline
 
 \multicolumn{3}{l}{500 inst. per line} & \multicolumn{9}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
 \cline{1-3}\cline{4-12}
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
-&  5 & n & 0.07 & 0.03 & 0.14 & 0.04 & 0.01 & 0.07 & 0.59 & 0.44 & 2.03\\
-& 10 & n & 0.65 & 0.31 & 1.30 & 0.33 & 0.10 & 0.60 & 2.34 & 1.86 & 8.44\\
-& 20 & n & 1.04 & 0.32 & 1.91 & 0.72 & 0.12 & 1.31 & 8.62 & 7.64 & 31.22\\
-& 50 & n & 3.64 & 0.36 & 4.74 & 3.56 & 0.20 & 4.46 & 73.49 & 72.26 & 279.01\\
+&  5 & n & \Sexpr{make_pya_row(hi, n == 5000 & wmin == 5000)}\\% 0.07 & 0.03 & 0.14 & 0.04 & 0.01 & 0.07 & 0.59 & 0.44 & 2.03\\
+& 10 & n & \Sexpr{make_pya_row(hi, n == 10000 & wmin == 10000)}\\% 0.65 & 0.31 & 1.30 & 0.33 & 0.10 & 0.60 & 2.34 & 1.86 & 8.44\\
+& 20 & n & \Sexpr{make_pya_row(hi, n == 20000 & wmin == 20000)}\\% 1.04 & 0.32 & 1.91 & 0.72 & 0.12 & 1.31 & 8.62 & 7.64 & 31.22\\
+& 50 & n & \Sexpr{make_pya_row(hi, n == 50000 & wmin == 50000)}\\% 3.64 & 0.36 & 4.74 & 3.56 & 0.20 & 4.46 & 73.49 & 72.26 & 279.01\\
 \hline
 
 \multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{9}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\
 \cline{1-3}\cline{4-12}
 \textbf{qtd} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
-~200 &  10 & 10 & 0.08 & 0.00 & 0.09 & 0.14 & 0.02 & 0.21 & 1.32 & 0.85 & 3.01\\
-~500 &  50 &  5 & 0.50 & 0.01 & 0.53 & 2.09 & 1.00 & 3.75 & 3.36 & 2.86 & 11.16\\
-~200 &  50 & 10 & 0.72 & 0.01 & 0.74 & 2.15 & 0.85 & 3.65 & 6.99 & 5.81 & 23.04\\
-~200 & 100 & 10 & 7.34 & 0.32 & 8.09 & 33.93 & 6.94 & 43.40 & 40.43 & 35.13 & 118.28\\
+~200 &  10 & 10 & \Sexpr{make_pya_row(saw, n == 10000 & wmin == 10000)}\\%& 0.08 & 0.00 & 0.09 & 0.14 & 0.02 & 0.21 & 1.32 & 0.85 & 3.01\\
+~500 &  50 &  5 & \Sexpr{make_pya_row(saw, n == 50000 & wmin == 5000)}\\%0.50 & 0.01 & 0.53 & 2.09 & 1.00 & 3.75 & 3.36 & 2.86 & 11.16\\
+~200 &  50 & 10 & \Sexpr{make_pya_row(saw, n == 50000 & wmin == 10000)}\\%0.72 & 0.01 & 0.74 & 2.15 & 0.85 & 3.65 & 6.99 & 5.81 & 23.04\\
+~200 & 100 & 10 & \Sexpr{make_pya_row(saw, n == 100000 & wmin == 10000)}\\%7.34 & 0.32 & 8.09 & 33.93 & 6.94 & 43.40 & 40.43 & 35.13 & 118.28\\
 \hline
 
 \end{tabular}
 \end{table}
 
-% MTUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
-
 <<pya_mtu_table,echo=FALSE>>=
-# THIS IS THE SOURCE FOR THE VALUES IN THE TABLE BELOW,
-# THEY WERE COPIED BY HAND BY THE AUTHOR USING RSTUDIO
-slow <- read.csv("../data/mtus_pya.csv", sep = ";")
-slow$X <- NULL
+st<- read.csv("../data/mtus_pya.csv", sep = ";")
+st$X <- NULL
 
-t <- slow %>% mutate(dist = get_dist(filename)) %>% mutate(n = get_n(filename))
-t$wmin <- apply(t, 1, get_wmin)
+# adding extra columns parsed from filename
+st <- st %>%
+  mutate(dist = get_dist(filename)) %>%
+  mutate(a = get_alpha(filename)) %>%
+  mutate(n = get_n(filename))
+st$wmin <- apply(st, 1, get_wmin)
 
-ss2 <- filter(t, dist == "ss2") %>% select(algorithm, internal_time) %>%
-      group_by(algorithm) %>% summarise(avg = round(mean(internal_time, na.rm = TRUE), digits = 2), ter = sum(!is.na(internal_time)))
+# this ordering is necessary to make_pya_row put the columns in the right places
+st$algorithm <- factor(st$algorithm, levels = c('cpp-mtu1', 'cpp-mtu2', 'fmtu1', 'fmtu2'))
+st <- arrange(st, algorithm)
 
-sc <- filter(t, dist == "sc") %>% mutate(a = get_alpha(filename)) %>%
-      mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
-      select(algorithm, a, n, wmin, internal_time) %>% group_by(algorithm, a, n, wmin) %>%
-      summarise(avg = round(mean(internal_time, na.rm = TRUE), digits = 2), ter = sum(!is.na(internal_time)))
+# subset-sum results are not discriminated by parameter combination
+mt_ss2 <- st %>%
+  filter(dist == "ss2") %>%
+  select(algorithm, internal_time) %>%
+  group_by(algorithm) %>%
+  summarise(
+    avg = sprintf("%.2f", mean(internal_time, na.rm = T)),
+    fin = sum(!is.na(internal_time)))
 
-table_for_dist <- function(dist_in) {
-  filter(t, dist == dist_in) %>% mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
-    select(algorithm, n, wmin, internal_time) %>% group_by(algorithm, n, wmin) %>%
-    summarise(avg = round(mean(internal_time, na.rm = TRUE), digits = 2), ter = sum(!is.na(internal_time)))
+st <- st %>%
+  select(algorithm, dist, a, n, wmin, internal_time) %>%
+  group_by(algorithm, dist, a, n, wmin) %>%
+  summarise(
+    avg = sprintf("%.2f", mean(internal_time, na.rm = T)),
+    fin = sum(!is.na(internal_time)))
+
+mt_nsds2 <- filter(st, dist == 'nsds2')
+mt_hi <- filter(st, dist == 'hi')
+mt_saw <- filter(st, dist == 'saw')
+mt_sc <- filter(st, dist == 'sc')
+
+make_mtu_row <- function(t, ...) {
+  tt <- ungroup(t)
+  tt <- filter(tt, ...)
+  tt <- select(tt, avg, fin)
+  paste(apply(tt, 1, paste, collapse=" & "), collapse = " & ")
 }
-
-nsds2 <- table_for_dist("nsds2")
-hi <- table_for_dist("hi")
-saw <- table_for_dist("saw")
-
 @
+
 \begin{table}
 \caption{Results for the MTU implementatios over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\) (i.e. the number of runs that didn't end in timeout). The time unit of the table values is seconds.}
 \vspace{0.1cm}
@@ -185,46 +206,46 @@ saw <- table_for_dist("saw")
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin}  & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
 
-\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & 0.04 & 40 & 0.04 & 40 & 0.00 & 40 & 154.97 & 8\\
+\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & \Sexpr{make_mtu_row(mt_ss2)}\\ %0.04 & 40 & 0.04 & 40 & 0.00 & 40 & 154.97 & 8\\
 \hline
 
-\multicolumn{3}{l}{2 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
+\multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
 \cline{1-3}\cline{4-11}
 \textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin}  & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
 
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
- 5 & 5  & 10 & 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
-   &    & 15 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
-   &    & 50 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
- 5 & 10 & 10 & 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
-   &    & 50 & 0.04 & 1 &   -- & 0 & 0.03 & 1 &   -- & 0\\
-   &    & 110& 0.01 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
--5 & 5  & 10 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
-   &    & 15 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
-   &    & 50 &   -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
--5 & 10 & 10 & 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
-   &    & 50 & 0.00 & 1 & 0.79 & 1 & 0.00 & 1 & 0.83 & 1\\
-   &    & 110& 0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+ 5 & 5  & 10 & \Sexpr{make_mtu_row(mt_sc, a == 5 & n == 5000 & wmin == 10000)}\\%0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+   &    & 15 & \Sexpr{make_mtu_row(mt_sc, a == 5 & n == 5000 & wmin == 15000)}\\%  -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+   &    & 50 & \Sexpr{make_mtu_row(mt_sc, a == 5 & n == 5000 & wmin == 50000)}\\%  -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+ 5 & 10 & 10 & \Sexpr{make_mtu_row(mt_sc, a == 5 & n == 10000 & wmin == 10000)}\\%0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+   &    & 50 & \Sexpr{make_mtu_row(mt_sc, a == 5 & n == 10000 & wmin == 50000)}\\%0.04 & 1 &   -- & 0 & 0.03 & 1 &   -- & 0\\
+   &    & 110& \Sexpr{make_mtu_row(mt_sc, a == 5 & n == 10000 & wmin == 110000)}\\%0.01 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+-5 & 5  & 10 & \Sexpr{make_mtu_row(mt_sc, a == -5 & n == 5000 & wmin == 10000)}\\%  -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+   &    & 15 & \Sexpr{make_mtu_row(mt_sc, a == -5 & n == 5000 & wmin == 15000)}\\%  -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+   &    & 50 & \Sexpr{make_mtu_row(mt_sc, a == -5 & n == 5000 & wmin == 50000)}\\%  -- & 0 &   -- & 0 &   -- & 0 &   -- & 0\\
+-5 & 10 & 10 & \Sexpr{make_mtu_row(mt_sc, a == -5 & n == 10000 & wmin == 10000)}\\%0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
+   &    & 50 & \Sexpr{make_mtu_row(mt_sc, a == -5 & n == 10000 & wmin == 50000)}\\%0.00 & 1 & 0.79 & 1 & 0.00 & 1 & 0.83 & 1\\
+   &    & 110& \Sexpr{make_mtu_row(mt_sc, a == -5 & n == 10000 & wmin == 110000)}\\%0.00 & 1 &   -- & 0 & 0.00 & 1 &   -- & 0\\
 \hline
 
 \multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
 \cline{1-3}\cline{4-11}
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin}  & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
-& 20 & 20 &  67.17 & 19 & 67.17 & 19 &  18.05 & 17 &  15.12 & 17\\
-& 50 & 20 & 101.93 & 18 &  2.15 & 20 & 134.09 & 17 & 143.47 & 17\\
-& 20 & 50 &   3.15 & 20 &  1.74 & 20 &   6.33 & 20 &   7.83 & 20\\
-& 50 & 50 &   2.22 & 20 & 21.13 & 20 &   4.45 & 20 &  13.81 & 20\\
+& 20 & 20 & 67.17 & 19 & 67.17 & 19 &  18.05 & 17 &  15.12 & 17\\
+& 50 & 20 &  1.93 & 18 &  2.15 & 20 & 134.09 & 17 & 143.47 & 17\\
+& 20 & 50 &  3.15 & 20 &  1.74 & 20 &   6.33 & 20 &   7.83 & 20\\
+& 50 & 50 &  2.22 & 20 & 21.13 & 20 &   4.45 & 20 &  13.81 & 20\\
 \hline
 
 \multicolumn{3}{l}{50 inst. per line} & \multicolumn{8}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
 \cline{1-3}\cline{4-11}
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
-&  5 & n &  16.54 & 9 & 37.01 & 9 & 19.85 & 9 & 37.29 & 9\\
-& 10 & n & 147.08 & 6 &  5.84 & 5 & 34.41 & 5 & 10.09 & 5\\
-& 20 & n &  17.95 & 3 & 19.23 & 3 & 27.45 & 3 & 27.78 & 3\\
-& 50 & n &  13.36 & 2 &  1.40 & 2 & 26.73 & 2 &  2.64 & 2\\
+&  5 & n & \Sexpr{make_mtu_row(mt_hi, n == 5000 & wmin == 5000)}  \\%16.54 & 9 & 37.01 & 9 & 19.85 & 9 & 37.29 & 9\\
+& 10 & n & \Sexpr{make_mtu_row(mt_hi, n == 10000 & wmin == 10000)}\\%47.08 & 6 &  5.84 & 5 & 34.41 & 5 & 10.09 & 5\\
+& 20 & n & \Sexpr{make_mtu_row(mt_hi, n == 20000 & wmin == 20000)}\\%17.95 & 3 & 19.23 & 3 & 27.45 & 3 & 27.78 & 3\\
+& 50 & n & \Sexpr{make_mtu_row(mt_hi, n == 50000 & wmin == 50000)}\\%13.36 & 2 &  1.40 & 2 & 26.73 & 2 &  2.64 & 2\\
 \hline
 
 \multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{8}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\

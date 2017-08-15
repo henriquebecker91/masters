@@ -1,60 +1,65 @@
 \appendix
-<<setup,echo=F>>=
-library(xtable)
-#library(statsr)
-library(dplyr)
-
-get_n <- function(fname) {
-  gsub(".*[^i]n([1-9][0-9]+).*", "\\1", fname)
-}
-
-get_wmin <- function(row) {
-  if (row[8] == 'hi') {
-    row[9]
-  } else {
-    gsub(".*wmin([1-9][0-9]+).*", "\\1", row[2])
-  }
-}
-
+<<pya_tables_shared,echo=F>>=
 get_dist <- function(fname) {
   gsub("([^_]+).*", "\\1", fname)
 }
 
 get_alpha <- function(fname) {
-  gsub(".*a([5-][5]?).*", "\\1", fname)
-}
-@
-
-<<pya_ukp5_table,echo=FALSE>>=
-# THIS IS THE SOURCE FOR THE VALUES IN THE TABLE BELOW,
-# THEY WERE COPIED BY HAND BY THE AUTHOR USING RSTUDIO
-fast <- read.csv("../data/pya_ukp5.csv", sep = ";")
-fast$X <- NULL
-
-t <- fast %>% mutate(dist = get_dist(filename)) %>% mutate(n = get_n(filename))
-t$wmin <- apply(t, 1, get_wmin)
-
-ss2 <- filter(t, dist == "ss2") %>% select(algorithm, internal_time) %>%
-      group_by(algorithm) %>% summarise(avg = mean(internal_time), sd = sd(internal_time), max = max(internal_time))
-
-get_alpha <- function(fname) {
-  gsub(".*a([5-][5]?).*", "\\1", fname)
+  as.numeric(gsub(".*a([5-][5]?).*", "\\1", fname))
 }
 
-sc <- filter(t, dist == "sc") %>% mutate(a = get_alpha(filename)) %>%
-      mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
-      select(algorithm, a, n, wmin, internal_time) %>% group_by(algorithm, a, n, wmin) %>%
-      summarise(avg = round(mean(internal_time), digits = 2), sd = round(sd(internal_time), digits = 2), max = round(max(internal_time), digits = 2))
-
-table_for_dist <- function(dist_in) {
-  filter(t, dist == dist_in) %>% mutate(n = as.numeric(n), wmin = as.numeric(wmin)) %>%
-    select(algorithm, n, wmin, internal_time) %>% group_by(algorithm, n, wmin) %>%
-    summarise(avg = round(mean(internal_time), digits = 2), sd = round(sd(internal_time), digits = 2), max = round(max(internal_time), digits = 2))
+get_n <- function(fname) {
+  as.numeric(gsub(".*[^i]n([1-9][0-9]+).*", "\\1", fname))
 }
 
-nsds2 <- table_for_dist("nsds2")
-hi <- table_for_dist("hi")
-saw <- table_for_dist("saw")
+# TODO: check why this isn't working for 
+get_wmin <- function(row) {
+  if (row[8] == 'hi') {
+    row[9]
+  } else {
+    as.numeric(gsub(".*wmin([1-9][0-9]+).*", "\\1", row[2]))
+  }
+}
+
+ft <- read.csv("data/pya_ukp5.csv", sep = ";")
+ft$X <- NULL
+ft <- ft %>%
+  mutate(dist = get_dist(filename)) %>%
+  mutate(a = get_alpha(filename)) %>%
+  mutate(n = get_n(filename))
+ft$wmin <- apply(ft, 1, get_wmin)
+
+ft <- arrange(ft, algorithm)
+
+ss2 <- ft %>%
+  filter(dist == "ss2") %>%
+  select(algorithm, internal_time) %>%
+  group_by(algorithm) %>%
+  summarise(
+    avg = mean(internal_time),
+    sd  =   sd(internal_time),
+    max =  max(internal_time))
+
+ft <- ft %>%
+  select(algorithm, dist, a, n, wmin, internal_time) %>%
+  group_by(algorithm, dist, a, n, wmin) %>%
+  summarise(
+    avg = round(mean(internal_time), digits = 2),
+    sd = round(sd(internal_time), digits = 2),
+    max = round(max(internal_time), digits = 2))
+
+nsds2 <- filter(ft, dist == 'nsds2')
+hi <- filter(ft, dist == 'hi')
+saw <- filter(ft, dist == 'saw')
+sc <- filter(ft, dist == 'sc')
+
+make_pya_row <- function(t, ...) {
+  tt <- ungroup(t)
+  tt <- filter(tt, ...)
+  tt <- select(tt, avg, sd, max)
+  paste(apply(tt, 1, paste, collapse=" & "), collapse = " & ")
+}
+make_pya_row(sc, a == -5 & n == 5000 & wmin == 10000)
 @
 
 \begin{table}
@@ -84,7 +89,7 @@ saw <- table_for_dist("saw")
 \textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
- 5 & 5  & 10 & 0.03 & 0.00 & 0.03 &  0.24 & 0.03 &  0.29 & 1.57 & 1.78 & 3.62\\
+ 5 & 5  & 10 & \Sexpr{make_pya_row(hi, a == 5 & n == 5000 & wmin == 10000)}\\
    &    & 15 & 0.04 & 0.00 & 0.05 &  0.43 & 0.06 &  0.53 & 3.85 & 1.53 & 5.13\\
    &    & 50 & 0.13 & 0.00 & 0.16 &  1.01 & 0.52 &  1.70 & 12.12 & 8.17 & 28.84\\
  5 & 10 & 10 & 0.06 & 0.00 & 0.06 &  0.50 & 0.04 &  0.54 & 0.00 & 0.00 & 0.01\\

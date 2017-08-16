@@ -67,6 +67,7 @@ library(tables) # for latex and tabular
 \usepackage{makecell} % for makecell, that allows libreaks in cells
 
 \usepackage{verbatim} % for \begin{comment} remove before final version
+\usepackage{adjustbox}
 
 \title{A comparison of exact unbounded knapsack algorithms}
 

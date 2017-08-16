@@ -1,4 +1,15 @@
-\appendix
+\section{Data and code related to CSP pricing subproblem dataset}
+
+\label{sec:csp_appendix}
+The 596 selected instances of CSP are available in \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}, and the code used to solve the SCF relaxation can be found in the same repository (\url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}).
+The code can be compiled by executing \emph{make bin/cutstock} in the folder.
+Unfortunately, the code has external dependencies, and the user will need to install them before having success in the compilation.
+The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}).
+The library paths are configured inside the Makefile.
+The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
+
+\section{Tables}
+
 <<pya_tables_shared,echo=F>>=
 get_dist <- function(fname) {
   gsub("([^_]+).*", "\\1", fname)
@@ -70,7 +81,7 @@ make_pya_row <- function(t, ...) {
 }
 @
 
-\begin{table}
+\begin{table}[H]
 \caption{Results for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by UKP5, MGREENDP1 or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
 \vspace{1mm}
 \label{tab:times_pya}
@@ -194,7 +205,8 @@ make_mtu_row <- function(t, ...) {
 
 % TODO: put explanation of the overline in the caption, because it's used
 % in the explanation of capacities, do this for both pya tables
-\begin{table}
+%"TODO: decide what to put in the section reference of subset-sum instances
+\begin{table}[H]
 \caption{Results for the MTU implementatios over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\) (i.e. the number of runs that didn't end in timeout). The time unit of the table values is seconds.}
 \label{tab:times_mtu}
 \vspace{1mm}
@@ -260,21 +272,18 @@ make_mtu_row <- function(t, ...) {
 \cline{1-3}\cline{4-11}
 \textbf{qtd} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin}  & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
-~20 &  10 & 10 & \Sexpr{make_mtu_row(mt_saw, n == 10000  & wmin == 10000)}\\% 1.33 & 20 & 12.92 & 20 &  2.54 & 20 &  2.87 & 20\\
-~50 &  50 &  5 & \Sexpr{make_mtu_row(mt_saw, n == 50000  & wmin == 5000)} \\%43.08 & 46 & 43.97 & 19 & 59.14 & 38 & 38.63 & 16\\
-~20 &  50 & 10 & \Sexpr{make_mtu_row(mt_saw, n == 50000  & wmin == 10000)}\\%55.14 & 45 & 87.68 & 19 & 47.05 & 41 & 85.97 & 19\\
+~20 &  10 & 10 & \Sexpr{make_mtu_row(mt_saw, n ==  10000 & wmin == 10000)}\\% 1.33 & 20 & 12.92 & 20 &  2.54 & 20 &  2.87 & 20\\
+~50 &  50 &  5 & \Sexpr{make_mtu_row(mt_saw, n ==  50000 & wmin == 5000)} \\%43.08 & 46 & 43.97 & 19 & 59.14 & 38 & 38.63 & 16\\
+~20 &  50 & 10 & \Sexpr{make_mtu_row(mt_saw, n ==  50000 & wmin == 10000)}\\%55.14 & 45 & 87.68 & 19 & 47.05 & 41 & 85.97 & 19\\
 ~20 & 100 & 10 & \Sexpr{make_mtu_row(mt_saw, n == 100000 & wmin == 10000)}\\%10.10 & 16 & 38.41 & 17 & 20.23 & 16 & 44.41 & 16\\
 \hline
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
-<<breq_table_appendix,echo=FALSE,results='asis'>>=
-breq <- read.csv("../data/128_16_std_breqd.csv", sep = ";")
-breq$X <- NULL
-
+<<rr_breq_shared_appendix>>=
 get_n <- function(fname) {
-  gsub(".*-n([1-9][0-9]+).*", "\\1", fname)
+  gsub(".*n([1-9][0-9]+).*", "\\1", fname)
 }
 
 format_n <- function(x) {
@@ -282,17 +291,48 @@ format_n <- function(x) {
   gsub("(NA|NaN)", "--", str)
 }
 
-alg_label_bt <- c(
-'cpp-mtu1'             = 'MTU1 (C++)',
-'cpp-mtu2'             = 'MTU2 (C++)',
-'eduk'                 = 'EDUK',
-'eduk2'                = 'EDUK2',
-'ordered_step_off'     = 'Ord. Step-Off',
-'terminating_step_off' = 'Term. Step-Off',
-'mgreendp'             = 'MGREENDP'
-)
 
-breq$algorithm <- alg_label_bt[breq$algorithm]
+pretiffy_alg_names <- function(names) {
+  recode(names,
+  'cpp-mtu1'             = 'MTU1 (C++)',
+  'cpp-mtu2'             = 'MTU2 (C++)',
+  'eduk'                 = 'EDUK',
+  'eduk2'                = 'EDUK2',
+  'ordered_step_off'     = 'Ord. Step-Off',
+  'terminating_step_off' = 'Term. Step-Off',
+  'mgreendp'             = 'MGREENDP')
+}
+@
+
+<<rr_table_appendix,results='asis'>>=
+rr <- read.csv("../data/realistic_random.csv", sep = ";")
+rr$X <- NULL
+
+#rr <- filter(rr,
+#  algorithm != 'terminating_step_off' &
+#  algorithm != 'ordered_step_off')
+rr$algorithm <- pretiffy_alg_names(rr$algorithm)
+rt <- rr %>% mutate(n = as.integer(get_n(filename))) %>%
+  select(algorithm, n, internal_time) %>% group_by(algorithm, n) %>%
+  summarise(avg = format_n(mean(internal_time, na.rm = TRUE)),
+            sd  = format_n(  sd(internal_time, na.rm = TRUE)),
+            min = format_n( min(internal_time, na.rm = TRUE)),
+            max = format_n( max(internal_time, na.rm = TRUE)),
+            ter = sum(!is.na(internal_time)))
+
+# "The results for the step-offs were ommited as they are very similar to the MGREENDP results."
+lrt <- xtable(rt, caption = "Results of the experiment with realistic random dataset (see \\autoref{sec:rr_exp}). For each row, there is a set \\(T\\) comprised by the run times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We do not count the run time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{ter} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that did not end in timeout). The time unit of the table values is seconds.", label = 'tab:rr')
+align(lrt) <- c('r', 'c', rep('r', 5), 'c')
+print(lrt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, add.to.row = list(pos = list(0), command = "\\hline \\endhead ")) 
+@
+
+\clearpage
+
+<<breq_table_appendix,echo=FALSE,results='asis'>>=
+breq <- read.csv("../data/128_16_std_breqd.csv", sep = ";")
+breq$X <- NULL
+
+breq$algorithm <- pretiffy_alg_names(breq$algorithm)
 bt <- breq %>% mutate(n = as.integer(get_n(filename))) %>%
   select(algorithm, n, internal_time) %>% group_by(algorithm, n) %>%
   summarise(avg = format_n(mean(internal_time, na.rm = TRUE)),
@@ -305,34 +345,55 @@ align(lt) <- c('r', 'c', rep('r', 5), 'c')
 print(lt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, add.to.row = list(pos = list(0), command = "\\hline \\endhead ")) 
 @
 
-\iffalse
-\begin{landscape}
-<<cut_table,echo=FALSE,results='asis'>>=
-cut <- read.csv("../data/csp_6195.csv", sep = ";")
-cut$X <- NULL
-
-mysummary <- function(t, alg) {
-  t2 <- filter(t, algorithm == alg) %>%
-    select(total_iter, hex_sum_knapsack_time, hex_sum_sort_time,
-           hex_sum_master_prob_time)
-  summary(t2)
+\begin{table}
+\label{tab:csp}
+\caption{TODO: add caption.}
+<<csp_table, results='asis'>>=
+na_mean <- function(x) {
+  base::mean(x, na.rm = T)
 }
 
-lt <- xtable(mysummary(cut, 'ukp5_fp_cutstock'))
-digits(lt) <- xdigits(2)
-print(lt)
+count_na <- function(x) {
+  base::sum(is.na(x))
+}
+
+# Simple Format Float Significant Cases (and by simple I mean: without
+# resorting to scientific notation)
+sffsc <- function(digits, x, ...) {
+  sprintf(paste0('%.', digits, 'f'), x, ...)
+}
+
+table_rows_csp <- function(t) {
+  latex(
+    tabular(
+      dataset ~
+	(n = 1) + count_na*total_iter +
+        na_mean*#Justify('r')*
+          (Format(sffsc(2))*hex_sum_master_prob_time + Format(sffsc(2))*pricing_total_time + total_iter + Format(sffsc(5))*(pricing_total_time/total_iter)),
+      data = t
+    ),
+    mathmode = F,
+    options = list(latexrightpad = F, latexleftpad = F, doBegin = F, doHeader = F, doFooter = F, doEnd = F)
+  )
+}
+
+num_columns <- 7
+#cat('\\begin{tabu} to \\linewidth { L{1} R{1} R{1} R{1} R{1} C{1} C{1} }\n')
+cat('\\begin{tabu} to \\linewidth { lrrrrrr }\n')
+cat('Dataset  & N & finished & \\makecell{Master\\\\time} & \\makecell{Pricing\\\\time} & \\makecell{Number of\\\\sub-problems} & \\makecell{Pricing time\\\\per subproblem}\\\\\\\\')
+#cat('\\hline\n')
+cat("\\multicolumn{", num_columns, "}{c}{MTU1}\\\\\n", sep = '')
+#cat('\\hline\n')
+table_rows_csp(filter(csp_csv, algorithm == 'mtu1_cutstock'))
+#cat('\\hline\n')
+cat("\\multicolumn{", num_columns, "}{c}{CPLEX}\\\\\n", sep = '')
+#cat('\\hline\n')
+table_rows_csp(filter(csp_csv, algorithm == 'cplex_cutstock'))
+#cat('\\hline\n')
+cat("\\multicolumn{", num_columns, "}{c}{Ordered Step-off (integer, no sort)}\\\\\n", sep = '')
+#cat('\\hline\n')
+table_rows_csp(filter(csp_csv, algorithm == 'ordso_int_ns'))
+cat('\\end{tabu}\n')
 @
-\end{landscape}
-\fi
-
-\clearpage
-
-\section{Data and code related to CSP pricing subproblem dataset}
-\label{sec:csp_appendix}
-The 596 selected instances of CSP are available in \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}, and the code used to solve the SCF relaxation can be found in the same repository (\url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}).
-The code can be compiled by executing \emph{make bin/cutstock} in the folder.
-Unfortunately, the code has external dependencies, and the user will need to install them before having success in the compilation.
-The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}).
-The library paths are configured inside the Makefile.
-The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
+\end{table}
 

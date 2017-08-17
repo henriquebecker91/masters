@@ -1,4 +1,6 @@
-\section{Data and code related to CSP pricing subproblem dataset}
+\section{Supplementary Materials}
+
+\subsection{Data and code related to CSP pricing subproblem dataset}
 
 \label{sec:csp_appendix}
 The 596 selected instances of CSP are available in \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}, and the code used to solve the SCF relaxation can be found in the same repository (\url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}).
@@ -8,7 +10,7 @@ The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), a
 The library paths are configured inside the Makefile.
 The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
 
-\section{Tables}
+\subsection{Summary Tables}
 
 <<pya_tables_shared,echo=F>>=
 get_dist <- function(fname) {

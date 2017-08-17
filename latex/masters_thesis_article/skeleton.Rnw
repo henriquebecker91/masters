@@ -144,12 +144,10 @@ TODO: write abstract
 \Sexpr{knit_child('sections/experiments.Rnw')}
 \Sexpr{knit_child('sections/conclusions.Rnw')}
 
-\clearpage
 \section{References}
 \bibliography{biblio}
 \bibliographystyle{elsarticle-harv}
 
-\clearpage
 \appendix
 \Sexpr{knit_child('sections/appendix.Rnw')}
 

@@ -99,3 +99,7 @@ While the following quote was written in the context of the 0-1 KP, the author f
 \item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, and/or the same BPP/CSP instance? Is it possible that they converge to a specific distribution at each iteration of the column generation?
 \end{itemize}
 
+\subsection{Acknowledgements}
+
+PUT HERE ACKNOWLEDGMENT TO CNPQ, MAYBE PROJECT, POIRREZ
+

@@ -701,12 +701,14 @@ namespace hbm {
       HBM_STOP_TIMER(eip->bound_time);
 
       HBM_START_TIMER();
-      for (I j = 1; j < n; ++j) {
+      { // scope for first_y_reserved_for_best_items
         const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
-        const item_t<W, P> it = items[j];
-        if (it.w < first_y_reserved_for_best_items && it.p > f[it.w]) {
-          f[it.w] = it.p;
-          i[it.w] = j;
+        for (I j = n - 1; j >= 1; --j) {
+          const item_t<W, P> &it = items[j];
+          if (it.w < first_y_reserved_for_best_items && it.p > f[it.w]) {
+            f[it.w] = it.p;
+            i[it.w] = j;
+          }
         }
       }
       HBM_STOP_TIMER(eip->dp_time);
@@ -729,10 +731,14 @@ namespace hbm {
           for (I j = 1; j <= i[y]; ++j) {
             const item_t<W, P> &it = items[j];
             const W new_y = y + it.w;
-            if (new_y < first_y_reserved_for_best_items
-                && it.p + f[y] > f[new_y]) {
-              f[new_y] = it.p + f[y];
-              i[new_y] = j;
+            if (new_y < first_y_reserved_for_best_items) {
+              if(it.p + f[y] > f[new_y]) {
+                f[new_y] = it.p + f[y];
+                i[new_y] = j;
+              } else if (it.p + f[y] == f[new_y] && j < i[new_y]) {
+                // this 'else if' is a trick that isn't in the original code
+                i[new_y] = j;
+              }
             }
           }
         }

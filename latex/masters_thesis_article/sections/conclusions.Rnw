@@ -97,6 +97,7 @@ While the following quote was written in the context of the 0-1 KP, the author f
 \item What would be the pratical performance of an implementation of the algorithm described in \cite{babayev}?
 \item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e. optimal solution)?
 \item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, and/or the same BPP/CSP instance? Is it possible that they converge to a specific distribution at each iteration of the column generation?
+\item WOULD B\&B ALGORITHMS THAT WEREN'T DEEP FIRST DISPLAY THE SAME PROBLEMS?
 \end{itemize}
 
 \subsection{Acknowledgements}

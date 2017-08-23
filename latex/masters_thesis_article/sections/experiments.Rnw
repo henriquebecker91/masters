@@ -96,11 +96,11 @@ env_data$X <- NULL
 <<to_rework_shared>>=
 fix_names <- function(x) {
   x <- gsub('all', 'ALL', x)
-  x <- gsub('ss2', 'S.S.', x)
+  x <- gsub('ss2', 'SS', x)
   x <- gsub('saw', 'SAW', x)
-  x <- gsub('nsds2', 'P.P.', x)
-  x <- gsub('sc', 'S.C.', x)
-  x <- gsub('hi', 'W.C.D.', x)
+  x <- gsub('nsds2', 'PP', x)
+  x <- gsub('sc', 'SC', x)
+  x <- gsub('hi', 'WCD', x)
   x
 }
 @
@@ -117,23 +117,23 @@ csp_csv$dataset <- factor(csp_csv$dataset)
 csp_csv$pricing_total_time <- csp_csv$hex_sum_knapsack_time + csp_csv$hex_sum_sort_time
 @
 
-\section{Experiments and Analyses}
+\section{Results and Preliminary Analyses}
 \label{sec:exp_and_res}
 
 The experiments are split into five subsections.
 Each section address one dataset and the results of running some selected algorithms over them.
+Due to the diversity of experiments, the results of each individual experiment is presented with its immediate analysis.
+The big picture painted by all the experiments is discussed in \autoref{sec:discussion}.
 
 \subsection{PYAsUKP dataset}
 \label{sec:pya_exp}
 
-USE TERMINATING STEP-OFF HERE BECAUSE IT HAS A SLIGHT SMALLER MEAN?
-
 The experiment presented in this section is an updated version of the experiment first presented in~\cite{sea2016}.
-In this version GREENDP is considered, UKP5 is replaced by the terminating step-off, and all runs were executed serially.
+In this version GREENDP is considered, UKP5 is replaced by the Terminating Step-Off (TSO), and all runs were executed serially.
 The exact same 4540 instances were used.
 
 \begin{figure}[H]
-\caption{Benchmark using PYAsUKP dataset; the Terminating Step-off, GREENDP and EDUK2 algorithms; no timeout.}
+\caption{Benchmark using the PYAsUKP dataset and the Terminating Step-off, GREENDP and EDUK2 algorithms. No timeout. The instance classes acronyms stand for: Postponed Periodicity (PP); Strongly Correlated (SC); Subset-Sum (SS); and Without Collective Dominance (WCD). SAW is not an acronym. EDUK was not included because EDUK2 superseeds EDUK. The ordered step-off run times were ommited because they were too similar to the terminating step-off run times. The GREENDP run times over subset-sum instances are not displayed because GREENDP fails if the two most efficient items have the same efficiency, which always happens with subset-sum instances.}
 \begin{center}
 <<pya_fast_fig>>=
 fast_plot <- function(t) {
@@ -155,11 +155,11 @@ fast_plot <- function(t) {
         levels = unique(data$filename))
 
   #data$algorithm <- gsub('ordered_step_off', 'O.S.', data$algorithm)
-  data$algorithm <- gsub('terminating_step_off', 'T.S.', data$algorithm)
+  data$algorithm <- gsub('terminating_step_off', 'Terminating Step-Off', data$algorithm)
   data$algorithm <- gsub('pyasukp', 'EDUK2', data$algorithm)
   data$algorithm <- gsub('mgreendp', 'MGREENDP', data$algorithm)
   data$type <- fix_names(data$type)
-  shape_conv <- c('T.S.' = 15, 'EDUK2' = 16, 'MGREENDP' = 17)
+  shape_conv <- c('Terminating Step-Off' = 15, 'EDUK2' = 16, 'MGREENDP' = 17)
 
   ggplot(data,
          aes(x = as.numeric(filename),
@@ -172,10 +172,9 @@ fast_plot <- function(t) {
            labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800')) + 
   #  ggtitle('Benchmark with the 4540 PYAsUKP instances') +
     ylab('Time to solve (seconds, log10 scale)') +
-    xlab('Instance index when sorted by average time to solve\n(average between the methods)') +
+    xlab('Instance index when sorted by average time to solve\n(average between the algorithms)') +
     scale_colour_grey() +
     scale_shape_manual(name = "algorithm", values = shape_conv) + 
-    #theme_bw() +
     theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
 }
 
@@ -186,18 +185,14 @@ fast_plot(fast_csv)
 \label{fig:pya_fast}
 \end{figure}
 
-The subset-sum (S.S.) plot in \autoref{fig:pya_fast} does not show the run times of the MGREENDP algorithm.
-MGREENDP bound computation does not work if the two most efficient items of an instance have the same efficiency (what always happens at subset-sum instances).
-MGREENDP without its bound computation is very similar to the terminating/ordered step-offs, and so the authors found to be redundant to execute it over S.S. instances.
-
 Figure~\ref{fig:pya_fast} shows that, except for Strong Correlated (S.C.) and S.S., the run times of the EDKU2 runs often show two main trends.
-The first trend starts at the left of the x axis and covers UKP5 and MGREENDP (i.e. no run of UKP5 or MGREENDP has a run time above this trend).
+The first trend starts at the left of the x axis and covers the terminating step-off and MGREENDP (i.e. no run of the terminating step-off or MGREENDP has a run time above this trend).
 The second trend begins at middle/right of the x axis and is composed of run times significantly smaller than UKP5 and MGREENDP.
 Both trends merge in a single trend that points to the top right corner of the chart.
 UKP5 and MGREENDP present similar run times that form plateaus.
 Those plateaus aggregate instances that take about the same time to solve by UKP5/MGREENDP.
 
-The author believes that the second EDUK2 trend is formed by instances where the B\&B preprocessing phase had considerable success (stopped the computation or used bounds to remove items before executing the DP).
+The authors believe that the second EDUK2 trend is formed by instances where the B\&B preprocessing phase had considerable success (stopped the computation or used bounds to remove items before executing the DP).
 This would also explain the lack of this trend at the S.C. and S.S. instance classes, where such bounds and tests have less effect (the S.S. instances do not have different efficiency between items and, consequently, are little affected by bounds).
 When EDUK2 B\&B phase do not solve the instance or help to greatly reduce the amount of states, the run times of the EDUK2 DP phase are greater than the UKP5 and MGREENDP times.
 
@@ -209,26 +204,15 @@ EDUK2 seems to have a much greater variation between the run times for instances
 We can see a line with a slope of about 45 degrees close to the top right corner of the charts.
 This line is over a logarithmic y axis, so it is a huge variation compared to the UKP5 plateau below it, which is solving the same instances (these instances, as we have seen above, have similar number of items).
 
-The run times of UKP5 and MGREENDP are very similar, especially in the datasets Without Collective Dominance (W.C.D) and Postponed Periodicity (P.P.), in which MGREENDP has a small advantage. % TODO: surprising...
-This should come at no surprise as they are similar algorithms.
-What is surprising is its behaviour at SAW and S.C. instance classes, in which the situation is reversed, and MGREENDP takes considerably more time than UKP5 in many cases.
-The behaviour at those two classes can be explained by three main factors.
-
+The run times of TSO and MGREENDP are similar, except for the SAW instances, in which MGREENDP performed considerably worse than TSO.
+The authors believe that this is due to: SAW CONTINUE HERE
 The first factor is a characteristic of the optimal solutions from the SAW and S.C. instances.
 The optimal solutions of these distributions are composed of about \(\frac{c}{w_b}\) copies of the best item and a single copy of another item.
 This happens because, in such distributions, the smallest item is the best item (as already pointed out in Sections~\ref{sec:sc_inst} and~\ref{sec:saw_inst}).
 This characteristic gives a big importance to the best item in those instances, and together with the next two factors, it explains the algorithms behavior.
 
-The second factor is that MGREENDP solves the pricing subproblems without the best item.
-The algorithm does that to allow for a mechanism that periodically checks if it can stop the computation and fill the remaining knapsack capacity with copies of the best item.
 Solving the DP subproblems without the best item weakens the effect of the solution dominance applied by MGREENDP (also used by UKP5).
 Some solutions that would be never be generated in UKP5 will be generated in MGREENDP, since better solutions (using the best item) do not exist to dominate those inferior solutions.
-
-The third and last factor is the periodicity check applied by UKP5.
-As with the MGREENDP mechanism discussed above, if it finds that the remaining capacity can be filled with copies of the best item, then UKP5 is stopped.
-As this check does not remove the best item from the item list, it results in less overhead than the MGREENDP test for those instances.
-The UKP5 periodicity check benefited 222 of the 240 S.C. instances and 972 of the 1100 SAW instances. % this stat is buried in the file with all ukp5 outputs, sorry about that, check for last_y_value_outer_loop in ukp5 outputs
-% TODO: re-do the stat above
 
 In summary, for the instances of the PYAsUKP dataset, UKP5 and MGREENDP often need less time than EDUK2 to solve an instance.
 PYAsUKP solves some instances in less time than UKP5 and MGREENDP, but it takes much more time than UKP5/MGREENDP to solve the greatest instances.
@@ -306,6 +290,13 @@ The rationale follows: the C++ implementation can read the same format used by P
 \subsection{Realistic Random Dataset}
 \label{sec:rr_exp}
 
+The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
+The solving time of both step-off algorithms and MGREENDP become almost identical as the size of the input grow. % TODO: consider removing the three and presenting only one of them
+EDUK solving times are similar to the three above cited algorithms but, as the instance size grow, its times shift for worse. 
+EDUK2 has many solving times that are similar to the EDUK ones but, for some instances in each size group, its B\&B phase solves the instance or helps to considerably reduce the instance size; in the three largest instance size groups, EDUK2 has the smallest solving times for that instances.
+The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
+MTU1 and MTU2 have the smallest solving times for the smallest instances but, as the instance size (and \(w_{min}\)) grows, also grows the number of instances that need orders of magnitude more time to solve than the other algorithms.
+
 \begin{figure}[h]
 \caption{Solving times for 7 selected algorithms over each one of the 80 instances from the realistic random dataset. The time limit was of half an hour (1800 seconds), runs that exceeded the time limit are ploted as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
@@ -318,13 +309,6 @@ scale_x_continuous(trans = "log2",
 %\legend{Source: the author.}
 \label{fig:realistic_random}
 \end{figure}
-
-The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
-The solving time of both step-off algorithms and MGREENDP become almost identical as the size of the input grow. % TODO: consider removing the three and presenting only one of them
-EDUK solving times are similar to the three above cited algorithms but, as the instance size grow, its times shift for worse. 
-EDUK2 has many solving times that are similar to the EDUK ones but, for some instances in each size group, its B\&B phase solves the instance or helps to considerably reduce the instance size; in the three largest instance size groups, EDUK2 has the smallest solving times for that instances.
-The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
-MTU1 and MTU2 have the smallest solving times for the smallest instances but, as the instance size (and \(w_{min}\) grows), the number of instances that need orders of magnitude more time to solve than the other algorithms grow.
 
 % TODO: check if this will added or not
 \begin{comment}

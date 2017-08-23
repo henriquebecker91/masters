@@ -14,7 +14,7 @@ The hybrid algorithm used in the experiments display the same time and space wor
 
 MTU1 is a depth-first B\&B algorithm for the UKP\cite{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
 The MTU2 algorithm calls MTU1 over increasing fractions of the items list in an effort to avoid considering all items\cite{mtu2}.
-The Fortran implementation of MTU1 and MTU2 used in the experiments was the original implementation with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts; this version is publicly available in the authors code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at: \url{https://github.com/henriquebecker91/masters/blob/42ecda29905c0ab56c03b7254b52bb06e67ab8d7/codes/fortran/run_mtu.f}}.
+The Fortran implementation of MTU1 and MTU2 used in the experiments was the original implementation by Martello and Toth, but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at: \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
 The C++ implementations of both algorithms were written by the authors.
 The C++ and Fortran implementations of the MTU1 algorithm have no significant differences.
 
@@ -29,8 +29,14 @@ The terminating step-off is a variant of the ordered step-off which executes exa
 The algorithm proposed in~\cite{green_improv} is another variant of the ordered step-off, it will be referred as GREENDP.
 GREENDP does not use the best item~\(b\) in the DP, but interrupts the DP at each~\(w_b\) capacity positions to check if the DP can be stopped and the remaining capacity filled with copies of \(b\). 
 If two or more items share the greatest efficiency, GREENDP check does not work, and it is the same as the ordered step-off.
+
 The original implementations of the step-offs and GREENDP were not publicly available, so the authors made their own implementations in C++.
-All C++ implementations written by the authors are available at the authors code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at: \url{https://github.com/henriquebecker91/masters/tree/847cb53ea0d3f23fea52f4446d818c5fa99ed71a/codes/cpp}.}.
+All C++ implementations written by the authors are available at the authors code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at: \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
+The authors' implementations of these three algorithms made use of an speed up trick (implementation detail) that has considerable positive effect over the run times of some instances, specially the strongly correlated intances.
+A direct implementation of the pseudo-code presented in the papers that proposed the algorithms would not include this speed up trick.
+All three algorithms store the index of the most efficient item of a solution when it is generated, and do not store two solutions with the same weight but only the one with the greatest profit between them.
+The trick consists in keeping the solution with the most efficient item when two or more solutions with the same weight and profit are generated.
+The original pseudocode of the three algorithms simply discarded newly generated solutions if they had the same weight and profit of an already found solution.
 
 The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered in~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite{ukp_new_results}\cite{eduk}\cite[p.~223]{book_ukp_2004}.
 EDUK seems to be based on ideas first discussed in~\cite{algo_tech_cut}.

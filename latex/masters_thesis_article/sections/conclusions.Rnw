@@ -1,4 +1,5 @@
-\section{Conclusions}
+\section{General Discussion and Conclusions}
+\label{sec:discussion}
 
 %However, the instances were too small to draw strong conclusions, and the relative difference between G.G. and MTU1 average times was not even one order of magnitude apart.
 %The G.G. algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).

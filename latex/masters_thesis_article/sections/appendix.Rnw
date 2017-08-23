@@ -159,6 +159,8 @@ make_pya_row <- function(t, ...) {
 \end{adjustbox}
 \end{table}
 
+\clearpage
+
 <<pya_mtu_table,echo=FALSE>>=
 st<- read.csv("../data/mtus_pya.csv", sep = ";")
 st$X <- NULL
@@ -171,7 +173,7 @@ st <- st %>%
 st$wmin <- apply(st, 1, get_wmin)
 
 # this ordering is necessary to make_pya_row put the columns in the right places
-st$algorithm <- factor(st$algorithm, levels = c('cpp-mtu1', 'cpp-mtu2', 'fmtu1', 'fmtu2'))
+st$algorithm <- factor(st$algorithm, levels = c('fmtu1', 'cpp-mtu1', 'fmtu2', 'cpp-mtu2'))
 st <- arrange(st, algorithm)
 
 # subset-sum results are not discriminated by parameter combination
@@ -219,7 +221,7 @@ make_mtu_row <- function(t, ...) {
 \begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrr@{}}
 
 \hline
-\multicolumn{3}{l}{Instance desc.} & \multicolumn{2}{c}{CPP-MTU1} & \multicolumn{2}{c}{CPP-MTU2} & \multicolumn{2}{c}{F77-MTU1} & \multicolumn{2}{c}{F77-MTU2}\\
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{2}{c}{F77-MTU1} & \multicolumn{2}{c}{CPP-MTU1} & \multicolumn{2}{c}{F77-MTU2} & \multicolumn{2}{c}{CPP-MTU2}\\
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
 
 \multicolumn{3}{l}{40 inst. per line} & \multicolumn{8}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
@@ -282,6 +284,8 @@ make_mtu_row <- function(t, ...) {
 \end{tabular}
 \end{adjustbox}
 \end{table}
+
+\clearpage
 
 <<rr_breq_shared_appendix>>=
 get_n <- function(fname) {

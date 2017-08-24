@@ -639,6 +639,19 @@ namespace hbm {
       return true;
     }
 
+    /// Gets the minimal and maximal item weights and return them.
+    template<typename W, typename P>
+    pair<W, W> minmax_item_weight(const vector< item_t<W, P> > &items) {
+      W min, max;
+      min = max = items[0].w;
+      for (auto it = items.begin()+1; it != items.end(); ++it) {
+        W x = it->w;
+        if (x < min) min = x;
+        else if (x > max) max = x;
+      }
+      return make_pair(min, max);
+    }
+
     /// Modified greendp, or Modern greendp: essentially the same algorithm,
     /// but using loops (instead of gotos), and without trying to be a carbon
     /// copy of the article notation and step organization.
@@ -794,6 +807,73 @@ namespace hbm {
       #ifdef HBM_PROFILE
       eip->total_time = difftime_between_now_and(all_mgreendp_begin);
       #endif
+
+      { // begin scope
+        const auto &g = f;
+        const auto &d = i;
+        auto &out = std::cout;
+        // Some statistics
+        /// Number of items sized vector, with the quantity of each value i in dy.
+        /// @note As d isn't initialized, and is sparse, we only count numbers
+        ///   on d[y] if g[y] > 0.
+        std::vector<W> qt_i_in_dy;
+        /// Same as d, but without the positions skipped.
+        std::vector<I> non_skipped_d;
+        /// Last position of the d vector that wasn't zero or n (item indexes).
+        /// @note As d isn't initialized, and is sparse, we only count numbers
+        ///   on d[y] if g[y] > 0.
+        W last_dy_non_zero;
+        /// Quantity of g positions that weren't skipped by ukp5.
+        W qt_non_skipped_ys;
+        /// Quantity of zeros in g.
+        W qt_gy_zeros;
+        /// How many times ukp5 phase 1 inner loop executed. Sum of non_skipped_d.
+        const W w_min = minmax_item_weight(items).first;
+        W qt_inner_loop_executions;
+
+        non_skipped_d.assign(c - w_min + 1, n-1);
+
+        qt_i_in_dy.assign(n, 0);
+
+        qt_gy_zeros = w_min;
+        qt_non_skipped_ys = 0;
+        qt_inner_loop_executions = 0;
+
+        P opt = 0;
+        W last_position_used = c - w_min;
+        for (W y = w_min; y <= last_position_used; ++y) {
+          if (g[y] > opt) {
+            ++(qt_non_skipped_ys);
+            qt_inner_loop_executions += static_cast<W>(d[y]) + 1;
+            non_skipped_d[y] = d[y];
+            
+            opt = g[y];
+          }
+          if (g[y] == 0) {
+            ++(qt_gy_zeros);
+          } else {
+            if (g[y] > 0) {
+              ++(qt_i_in_dy[d[y]]);
+              last_dy_non_zero = y;
+            }
+          }
+        }
+
+        HBM_PRINT_VAR(w_min);
+        HBM_PRINT_VAR(last_dy_non_zero);
+        HBM_PRINT_VAR(qt_non_skipped_ys);
+        HBM_PRINT_VAR(qt_gy_zeros);
+        HBM_PRINT_VAR(qt_inner_loop_executions);
+        out << "qt_inner_loop_executions/qt_non_skipped_ys: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys) << endl;
+        out << "qt_inner_loop_executions/c: " << ((long double) qt_inner_loop_executions)/((long double) c) << endl;
+        out << "(qt_inner_loop_executions/qt_non_skipped_ys)/n: " << ((long double) qt_inner_loop_executions)/((long double) qt_non_skipped_ys)/((long double)n)  << endl;
+        out << "(qt_inner_loop_executions/c)/n: " << ((long double) qt_inner_loop_executions)/((long double) c)/((long double)n) << endl;
+
+        dump("./g_dump_mgreendp.dat", "y\tgy", g);
+        dump("./d_dump_mgreendp.dat", "y\tdy", d);
+        dump("./nsd_dump_mgreendp.dat", "y\tdy", non_skipped_d);
+        dump("./dqt_dump_mgreendp.dat", "i\tqt_in_d", qt_i_in_dy);
+      } // scope end
     }
 
     /// The first algorithm presented at "On Equivalent Knapsack Problems",

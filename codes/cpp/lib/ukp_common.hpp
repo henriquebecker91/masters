@@ -6,6 +6,7 @@
 #include <iostream>  // for istream and ostream
 #include <stdexcept> // for runtime_error
 #include <utility>   // to specialize swap
+#include <fstream>   // ofstream for dump
 
 // Includes for implementation.
 #include <regex>            // for regex, regex_match
@@ -594,6 +595,28 @@ namespace hbm {
     using namespace std::chrono;
     return duration_cast< duration<double> >(steady_clock::now() - begin)
            .count();
+  }
+
+  /// If an file existed in path, its content is dicarded.
+  /// The value of header is written in the file at path, then
+  /// two columns are written in the file. The first column is
+  /// composed from the vector indexes (will vary between 0 and
+  /// v.size()-1). The second column has the vector values.
+  template <typename V>
+  static void dump(const std::string &path,
+                   const std::string &header,
+                   const V &v) {
+    using namespace std;
+    ofstream f(path, ofstream::out|ofstream::trunc);
+    if (f.is_open())
+    {
+      f << header << endl;
+      for (size_t y = 0; y < v.size(); ++y) {
+        f << y << "\t" << v[y] << endl;
+      }
+    } else {
+      cerr << __func__ << ": Couldn't open file: " << path << endl;
+    }
   }
 
   /// Read an instance in the ukp format from the stream to instance_t.

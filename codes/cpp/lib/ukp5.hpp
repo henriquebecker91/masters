@@ -7,7 +7,6 @@
 #include "type_name.hpp"
 
 #include <sstream>  // For stringstream
-#include <fstream>  // ofstream for dump
 #include <iostream>
 #include <iomanip>  // For precision related routines
 #include <regex>  // For command-line argument handmade verification
@@ -172,28 +171,6 @@ namespace hbm {
     W last_gy_initialized;
     #endif
 
-    /// If an file existed in path, its content is dicarded.
-    /// The value of header is written in the file at path, then
-    /// two columns are written in the file. The first column is
-    /// composed from the vector indexes (will vary between 0 and
-    /// v.size()-1). The second column has the vector values.
-    template <typename V>
-    static void dump(const std::string &path,
-                     const std::string &header,
-                     const V &v) {
-      using namespace std;
-      ofstream f(path, ofstream::out|ofstream::trunc);
-      if (f.is_open())
-      {
-        f << header << endl;
-        for (size_t y = 0; y < v.size(); ++y) {
-          f << y << "\t" << v[y] << endl;
-        }
-      } else {
-        cerr << __func__ << ": Couldn't open file: " << path << endl;
-      }
-    }
-
     /// Generates a good number of stats about the UKP5 execution.
     /// Probably there's no way of adptating this method if the
     /// UKP5 arrays are changed to slices.
@@ -295,7 +272,7 @@ namespace hbm {
     /// changed by UKP5 (they aren't a copy of the vectors used by ukp5, they
     /// are the vectors used by ukp5).
     void ukp5_gen_stats(void) {
-      non_skipped_d.assign(y_bound-w_min + 1, n-1);
+      non_skipped_d.assign(y_bound-w_min + 1, n);
 
       qt_i_in_dy.assign(n, 0);
 

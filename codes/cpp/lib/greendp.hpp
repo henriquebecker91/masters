@@ -831,7 +831,7 @@ namespace hbm {
         const W w_min = minmax_item_weight(items).first;
         W qt_inner_loop_executions;
 
-        non_skipped_d.assign(c - w_min + 1, n-1);
+        non_skipped_d.assign(c - w_min + 1, n);
 
         qt_i_in_dy.assign(n, 0);
 

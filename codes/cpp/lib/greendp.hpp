@@ -716,7 +716,7 @@ namespace hbm {
       HBM_START_TIMER();
       { // scope for first_y_reserved_for_best_items
         const W first_y_reserved_for_best_items = (c - bi_qt_lb*bi.w) + 1;
-        for (I j = n - 1; j >= 1; --j) {
+        for (I j = 0; j < n; ++j) {
           const item_t<W, P> &it = items[j];
           if (it.w < first_y_reserved_for_best_items && it.p > f[it.w]) {
             f[it.w] = it.p;

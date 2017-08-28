@@ -144,13 +144,15 @@ fast_plot <- function(t) {
   data$type <- factor(data$type, levels = inst_types)
 
   data <- filter(data, algorithm != 'ordered_step_off')
+  #data <- group_by(data, filename) %>%
+  #  mutate(mean_methods_time = mean(internal_time))
   data <- group_by(data, filename) %>%
-    mutate(mean_methods_time = mean(internal_time))
+    mutate(eduk2_time = internal_time[algorithm == 'pyasukp'])
 
   data_copy <- data
   data$type <- factor('all', levels = inst_types)
 
-  data <- rbind(data, data_copy) %>% arrange(mean_methods_time)
+  data <- rbind(data, data_copy) %>% arrange(eduk2_time) #arrange(mean_methods_time)
   data$filename <- factor(data$filename,
         levels = unique(data$filename))
 
@@ -185,12 +187,16 @@ fast_plot(fast_csv)
 \label{fig:pya_fast}
 \end{figure}
 
+The run times of TSO and MGREENDP are similar, except for the SAW instances, in which MGREENDP performed considerably worse than TSO.
+GREENDP does not generate solutions with the best item during dynamic programming, this strategy weakens solution dominance (i.e. solutions that are not a subset of an optimal solution are needlessly generated), what the authors believe to be the reason of GREENDP performance drop.
+
 Figure~\ref{fig:pya_fast} shows that, except for Strong Correlated (S.C.) and S.S., the run times of the EDKU2 runs often show two main trends.
 The first trend starts at the left of the x axis and covers the terminating step-off and MGREENDP (i.e. no run of the terminating step-off or MGREENDP has a run time above this trend).
 The second trend begins at middle/right of the x axis and is composed of run times significantly smaller than UKP5 and MGREENDP.
 Both trends merge in a single trend that points to the top right corner of the chart.
-UKP5 and MGREENDP present similar run times that form plateaus.
-Those plateaus aggregate instances that take about the same time to solve by UKP5/MGREENDP.
+
+
+TSO and MGREENDP run times form plateaus.
 
 The authors believe that the second EDUK2 trend is formed by instances where the B\&B preprocessing phase had considerable success (stopped the computation or used bounds to remove items before executing the DP).
 This would also explain the lack of this trend at the S.C. and S.S. instance classes, where such bounds and tests have less effect (the S.S. instances do not have different efficiency between items and, consequently, are little affected by bounds).
@@ -204,21 +210,8 @@ EDUK2 seems to have a much greater variation between the run times for instances
 We can see a line with a slope of about 45 degrees close to the top right corner of the charts.
 This line is over a logarithmic y axis, so it is a huge variation compared to the UKP5 plateau below it, which is solving the same instances (these instances, as we have seen above, have similar number of items).
 
-The run times of TSO and MGREENDP are similar, except for the SAW instances, in which MGREENDP performed considerably worse than TSO.
-The authors believe that this is due to: SAW CONTINUE HERE
-The first factor is a characteristic of the optimal solutions from the SAW and S.C. instances.
-The optimal solutions of these distributions are composed of about \(\frac{c}{w_b}\) copies of the best item and a single copy of another item.
-This happens because, in such distributions, the smallest item is the best item (as already pointed out in Sections~\ref{sec:sc_inst} and~\ref{sec:saw_inst}).
-This characteristic gives a big importance to the best item in those instances, and together with the next two factors, it explains the algorithms behavior.
-
-Solving the DP subproblems without the best item weakens the effect of the solution dominance applied by MGREENDP (also used by UKP5).
-Some solutions that would be never be generated in UKP5 will be generated in MGREENDP, since better solutions (using the best item) do not exist to dominate those inferior solutions.
-
-In summary, for the instances of the PYAsUKP dataset, UKP5 and MGREENDP often need less time than EDUK2 to solve an instance.
-PYAsUKP solves some instances in less time than UKP5 and MGREENDP, but it takes much more time than UKP5/MGREENDP to solve the greatest instances.
-For some distributions, UKP5 takes slight more time than MGREENDP; for other distributions, MGREENDP takes considerably more time than UKP5.
-It should also be noted that MGREENDP needs a workaround to work with distributions that allow the highest efficiency to be shared by many items.
-%Consequenly, the author of this thesis believes that the choice between using UKP5 or MGREENDP should be based on the distribution that needs to be solved.
+In summary, for the instances of the PYAsUKP dataset, TSO and MGREENDP often need less time than EDUK2 to solve an instance.
+EDUK2 solves some instances in less time than TSO and MGREENDP, but it takes much more time than UKP5/MGREENDP to solve the 
 
 \subsection{MTU1 and MTU2 (C++ and Fortran)}
 \label{sec:mtu_exp}

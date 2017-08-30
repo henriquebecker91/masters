@@ -84,7 +84,7 @@ make_pya_row <- function(t, ...) {
 @
 
 \begin{table}[H]
-\caption{Results for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by UKP5, MGREENDP1 or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
+\caption{Results for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the Terminating Step-Off, MGREENDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
 \vspace{1mm}
 \label{tab:times_pya}
 \def\arraystretch{1.1}
@@ -94,7 +94,7 @@ make_pya_row <- function(t, ...) {
 \begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrrr@{}}
 
 \hline
-\multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{l}{UKP5} & \multicolumn{3}{l}{MGREENDP} & \multicolumn{3}{l}{PYAsUKP}\\
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{l}{TSO} & \multicolumn{3}{l}{MGREENDP} & \multicolumn{3}{l}{PYAsUKP}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
 \multicolumn{3}{l}{400 inst. per line} & \multicolumn{9}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\

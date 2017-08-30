@@ -271,7 +271,7 @@ The range \([190,221]\) of the x axis of \autoref{fig:mtu} is composed of subset
 Diregarding the subset-sum instances, the mean run time of Fortran MTU2 was 56 seconds and the mean run time of C++ MTU2 was 40.5 seconds.
 Only the C++ implementations are used in the rest of the experiments.
 
-<<range_190_121_stat, results=F>>=
+<<range_190_121_stat, results = 'hide'>>=
 mtu_csv_for_range <- group_by(mtu_csv, filename) %>%
   mutate(fname_mean_time = mean(internal_time)) %>%
   arrange(fname_mean_time)
@@ -338,11 +338,13 @@ print(rr_xt,
 @
 \end{comment}
 
-ADD STATS HERE
 
-<<realistic_random_table, results=F>>=
-rr_csv <- read.csv("data/realistic_random.csv", sep = ";")
-rr_dcast <- dcast(rr_csv, filename ~ algorithm, value.var = 'internal_time')
+Despite EDUK2 solving some instances orders of magnitude faster than the other algorithms (specially in the larger instance sizes), the mean run time of EDUK2 (8.51 seconds) is higher than the TSO mean run time (5.36 seconds).
+As already observed in \autoref{sec:pya_exp}, EDUK2 often have one or more run times that are one order of magnitude higher than the highest run time of TSO, what considerably increases its mean time.
+
+<<rr_means, results = 'hide' >>=
+rr_csv2 <- read.csv("../data/realistic_random.csv", sep = ";")
+rr_dcast <- dcast(rr_csv2, filename ~ algorithm, value.var = 'internal_time')
 summary(rr_dcast)
 summary(filter(rr_dcast, grepl('n131072', filename)))
 @
@@ -388,12 +390,6 @@ Examining only MTU1 and MTU2, we can clearly see that for small instances their 
 The behavior of EDUK2 shows that the default B\&B phase (executed before defaulting to EDUK) solves the BREQ instances in all cases.
 If it did not, some EDUK2 points would be together with the EDUK points for the same instance size.
 Among the pure DP algorithms, EDUK was the one with the worst run times, being clearly dominated by our two UKP5 versions. 
-
-The UKP5 algorithm sorted the items by non-increasing efficiency, and had the~\(y^*\) bound and periodicity checking enabled.
-These last two optimizations benefited none of the one hundred runs.
-No knapsack capacity from an instance was reduced by the use of the~\(y^*\) bound; all instances had only overhead from the use of the periodicity checking.
-The UKP5\_SBW sorted the items by increasing weight and had these two optimizations disabled.
-The benchmark instance files had the items in random order, so both algorithms used a small and similar time ordering the items\footnote{It is interesting to note that, except for the small items that have profit rounding problems, in BREQ instances, the increasing efficiency order is the increasing weight order.}.
 
 The MGREENDP is a modern implementation in C++, made by the author, of an algorithm made by Harold Greenberg.
 The algorithm of Harold Greenberg (that was not named in the original paper) was an adaptation of the \emph{ordered step-off} algorithm from Gilmore and Gomory.

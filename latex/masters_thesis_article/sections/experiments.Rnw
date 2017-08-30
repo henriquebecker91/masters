@@ -338,7 +338,6 @@ print(rr_xt,
 @
 \end{comment}
 
-
 Despite EDUK2 solving some instances orders of magnitude faster than the other algorithms (specially in the larger instance sizes), the mean run time of EDUK2 (8.51 seconds) is higher than the TSO mean run time (5.36 seconds).
 As already observed in \autoref{sec:pya_exp}, EDUK2 often have one or more run times that are one order of magnitude higher than the highest run time of TSO, what considerably increases its mean time.
 
@@ -352,11 +351,14 @@ summary(filter(rr_dcast, grepl('n131072', filename)))
 \subsection{BREQ 128-16 Standard Benchmark}
 \label{sec:breq_exp}
 
-BREQ 128-16 Standard Benchmark
-The results confirm the hypothesis that this distribution would be hard to solve by DP algorithms and easy to solve by B\&B algorithms.
+The results of the experiments over the BREQ 128-16 Standard Benchmark are summarized in \autoref{fig:breq}.
+The run times outline two groups with distinct time growth, a fast-growth group (which hit the time limit) and a slow-growth group (which always take less than a second).
+The fast-growth group is mainly composed by the DP algorithms: TSO, OSO, and EDUK.
+The slow-grouth group is mainly composed by the B\&B and hybrid algorithms: MTU1, MTU2, and EDUK2.
+GREENDP is the only algorithm with run times on both groups.
 
 \begin{figure}[h]
-\caption{Benchmark with the 128-16 Standard BREQ instances.}
+\caption{Benchmark using the BREQ 128-16 Standard Benchmark and seven algorithms. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<breq_figure, fig.height=5>>=
 gen_graph_all_alg_discrete_x(breq_csv) +
@@ -378,21 +380,10 @@ scale_x_continuous(trans = "log2",
 %xtable(breq_t)
 %@
 
-Let us examine Figure~\ref{fig:breq}.
-The algorithms form two lines with different slopes, one line with a steep slope and a line with a more gradual slope.
-The steep slope line shows algorithms whose time grows very fast relative to the instance size growth.
-This group is mainly composed by the DP algorithms: UKP5, UKP5\_SBW (i.e. UKP5 Sorted By Weight), and the EDUK algorithm.
-The second group, which forms a more gradual slope, has algorithms whose time grows much slower with the instance growth.
-This group is mainly composed by B\&B and hybrid methods, as: MTU1, MTU2, EDUK2 and MGREENDP.
+EDUK2 run times are in the slow-growth group due to its B\&B phase.
+EDUK2 without its B\&B phase is basically EDUK, which is in the fast-growth group.
+MTU2 core strategy improve MTU1 run times in BREQ instances.
 
-Examining only MTU1 and MTU2, we can clearly see that for small instances their times overlap, but with the instance size growth the core problem strategy of MTU2 (that tries to avoid sorting and examining all the items) begins to pay off, making it the \emph{best algorithm} to solve BREQ instances. 
-
-The behavior of EDUK2 shows that the default B\&B phase (executed before defaulting to EDUK) solves the BREQ instances in all cases.
-If it did not, some EDUK2 points would be together with the EDUK points for the same instance size.
-Among the pure DP algorithms, EDUK was the one with the worst run times, being clearly dominated by our two UKP5 versions. 
-
-The MGREENDP is a modern implementation in C++, made by the author, of an algorithm made by Harold Greenberg.
-The algorithm of Harold Greenberg (that was not named in the original paper) was an adaptation of the \emph{ordered step-off} algorithm from Gilmore and Gomory.
 This algorithm periodically computes bounds (similar to the ones used by the B\&B approach) to check if it can stop the DP computation and fill any remaining capacity with copies of the best item.
 In the majority of the runs, the bound computation allowed the algorithm to stop the computation at the beginning, having results very similar to EDUK2 (the hybrid B\&B-DP algorithm).
 However, six of the MGREENDP executions had times in the steep slope line (the bound failed to stop the computation).
@@ -406,10 +397,8 @@ While the simple, multiple and collective dominances are rare in a BREQ distribu
 The UKP5 combines optimal solutions for small capacities with single items and generate solutions that, if optimal for some capacity, will be used to generate more solutions after (recursively).
 In a BREQ instance, solutions composed of many small items rarely are optimal and, consequently, often discarded, wasting the time used to generate them.
 The weak solution dominance used by UKP5 does not completely avoid this problem, but helps to generate less of the useless subproblem solutions.
-%However, as a silver lining, the UKP5's solution dominance will discard those solutions as soon as possible, and will \emph{not} use them to generate any new solutions (saving some computational effort).
-%In other words, almost all subproblem solutions are useless, and UKP5's solution dominance helps to generate less of them.
 
-%The algorithms described at~\cite{TheUnboundedKnapsackProblem-T.C.HU.pdf} were not implemented and tested because of time reasons. However, we can see, by the algorithms assimptotic worst case complexity (\(O(n v_1 w_1)\) and~\(O(n w_i)\)), that they 
+The results confirm the hypothesis that this distribution would be hard to solve by DP algorithms and easy to solve by B\&B algorithms.
 
 \subsection{Solving pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}

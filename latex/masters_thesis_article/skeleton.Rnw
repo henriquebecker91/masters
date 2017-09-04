@@ -68,6 +68,15 @@ library(tables) # for latex and tabular
 
 \usepackage{verbatim} % for \begin{comment} remove before final version
 \usepackage{adjustbox}
+\usepackage[section]{placeins} % instead of [H]~[!ht] in floats
+
+\makeatletter
+\AtBeginDocument{%
+  \expandafter\renewcommand\expandafter\subsection\expandafter{%
+    \expandafter\@fb@secFB\subsection
+  }%
+}
+\makeatother
 
 \title{An empirical analysis of exact unbounded knapsack algorithms}
 

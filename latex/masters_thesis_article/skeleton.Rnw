@@ -61,7 +61,7 @@ library(tables) # for latex and tabular
 \usepackage{algpseudocode}
 
 \usepackage{longtable}
-\usepackage{pdflscape}
+\usepackage{pdflscape} % used for CSP experiment table
 \usepackage{tabu} % the latex wikibook suggest this table over others
 \usepackage{array} % for common commands inside \newcolumntype
 \usepackage{makecell} % for makecell, that allows libreaks in cells

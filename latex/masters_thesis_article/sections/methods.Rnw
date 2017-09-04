@@ -5,6 +5,20 @@ The experiments presented in this work consist in the execution of algorithm imp
 In order to allow the reproduction of the experiments and also to contextualize them, this section describes the algorithms, their implementations, the datasets and the computer setup used.
 A rationale for not including some algorithms and datasets from the literature is also presented.
 
+\subsection{Computer setup}
+
+All experiments were run using a computer with the following characteristics:
+the CPU was an Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz;
+there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where only L3 is shared between cores).
+The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
+Three of the four cores were isolated using the \emph{isolcpus} kernel flag (the non-isolated core was left to run the operating system). 
+The \emph{taskset} utility was used to execute runs in one of the isolated cores.
+All runs were executed in serial order (i.e. two runs did not coexist), as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
+
+OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with ocamlopt and the flags suggested by the authors of the code for maximum performance (\emph{-unsafe -inline 2048}).
+Fortran code (original MTU1/MTU2) was compiled with gcc-fortran and \emph{-O3 -std=f2008} flags enabled.
+C++ code (all remaining implementations) was compiled with gcc and the \emph{-O3 -std=c++11} flags enabled.
+
 \subsection{Algorithms and their implementations}
 
 The algorithms used in the experiments can be divided in three main approachs: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (combine DP and B\&B).
@@ -27,8 +41,8 @@ The Fortran implementation only sorted the items by efficiency, the C++ implemen
 The ordered step-off is a DP algorithm of about ten lines of code\cite[p.~15]{gg-66}.
 The terminating step-off is a variant of the ordered step-off which executes exactly \(n\) and up to \(c\) extra operations in order to save up to \(c\) operations.
 The algorithm proposed in~\cite{green_improv} is another variant of the ordered step-off, it will be referred as GREENDP.
-GREENDP does not use the best item~\(b\) in the DP, but interrupts the DP at each~\(w_b\) capacity positions to check if the DP can be stopped and the remaining capacity filled with copies of \(b\). 
-If two or more items share the greatest efficiency, GREENDP check does not work, and it is the same as the ordered step-off.
+GREENDP does not use the best item~\(b\) in the DP, but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can be stopped and the remaining capacity filled with copies of \(b\). 
+If two or more items share the greatest efficiency, GREENDP verification does not work, and it is the same as the ordered step-off.
 
 The original implementations of the step-offs and GREENDP were not publicly available, so the authors made their own implementations in C++.
 All C++ implementations written by the authors are available at the authors code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at: \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
@@ -45,7 +59,7 @@ Before EDUK2 was proposed, it was said that ``[...] EDUK [...] seems to be the m
 EDUK2 is an hybrid DP/B\&B algorithm which improves EDUK with a B\&B preprocessing phase~\cite{pya}.
 If B\&B can solve instance using less than a parametrized number of nodes, then EDUK is never executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
 
-The implementation of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml by the creators of EDUK and EDUK2. 
+The implementations of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml by the creators of EDUK and EDUK2. 
 The authors were given access to this code by Vincent Poirriez in January 11th, 2016 by email\footnote{The code is available at Henrique Becker master's thesis code repository (\url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}).}. The version of the code available at that time in the PYAsUKP official site had bugs\footnote{The EDUK and EDUK2 source was available to download in the following page of PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.}.
 
 \subsubsection{Algorithms deliberately ignored}
@@ -142,18 +156,4 @@ Uncorrelated instances often exhibit a great amount of simple and multiple domin
 
 The \emph{weakly correlated} item distribution can be seen as an \emph{strongly correlated} item distribution with more dominated items.
 The authors found redudant to present weakly correlated datasets in addition to the strongly correlated datasets, as preliminary results suggested that weakly correlated datasets times were similar to strongly correlated datasets of smaller size.
-
-\subsection{Computer setup}
-
-All experiments were run using a computer with the following characteristics:
-the CPU was an Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz;
-there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where only L3 is shared between cores).
-The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
-Three of the four cores were isolated using the \emph{isolcpus} kernel flag (the non-isolated core was left to run the operating system). 
-The \emph{taskset} utility was used to execute runs in one of the isolated cores.
-All runs were executed in serial order (i.e. two runs did not coexist), as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
-
-OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with ocamlopt and the flags suggested by the authors of the code for maximum performance (\emph{-unsafe -inline 2048}).
-Fortran code (original MTU1/MTU2) was compiled with gcc-fortran and \emph{-O3 -std=f2008} flags enabled.
-C++ code (all remaining implementations) was compiled with gcc and the \emph{-O3 -std=c++11} flags enabled.
 

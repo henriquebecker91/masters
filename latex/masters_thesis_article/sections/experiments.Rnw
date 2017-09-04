@@ -293,7 +293,7 @@ MTU1 and MTU2 have the smallest run times for the smallest instances but, as the
 %The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
 
 \begin{figure}[h]
-\caption{Benchmark using the realistic random dataset and seven algorithms. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
+\caption{Run times of all selected algorithms over the instances of the realistic random dataset. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<realistic_random_figure, fig.height = 5>>=
 gen_graph_all_alg_discrete_x(rr_csv) +
@@ -355,10 +355,10 @@ The results of the experiments over the BREQ 128-16 Standard Benchmark are summa
 The run times outline two groups with distinct time growth, a fast-growth group (which hit the time limit) and a slow-growth group (which always take less than a second).
 The fast-growth group is mainly composed by the DP algorithms: TSO, OSO, and EDUK.
 The slow-grouth group is mainly composed by the B\&B and hybrid algorithms: MTU1, MTU2, and EDUK2.
-GREENDP is the only algorithm with run times on both groups.
+GREENDP is the only algorithm with run times in both groups.
 
 \begin{figure}[h]
-\caption{Benchmark using the BREQ 128-16 Standard Benchmark and seven algorithms. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
+\caption{Run times of all selected algorithms over the instances of the BREQ 128-16 Standard Benchmark. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<breq_figure, fig.height=5>>=
 gen_graph_all_alg_discrete_x(breq_csv) +
@@ -382,129 +382,168 @@ scale_x_continuous(trans = "log2",
 
 EDUK2 run times are in the slow-growth group due to its B\&B phase.
 EDUK2 without its B\&B phase is basically EDUK, which is in the fast-growth group.
-MTU2 core strategy improve MTU1 run times in BREQ instances.
-
-This algorithm periodically computes bounds (similar to the ones used by the B\&B approach) to check if it can stop the DP computation and fill any remaining capacity with copies of the best item.
-In the majority of the runs, the bound computation allowed the algorithm to stop the computation at the beginning, having results very similar to EDUK2 (the hybrid B\&B-DP algorithm).
-However, six of the MGREENDP executions had times in the steep slope line (the bound failed to stop the computation).
-Without the bound computation, MGREENDP is basically the \emph{ordered step-off} from Gilmore and Gomory (which is very similar to UKP5, as already pointed out); consequently, those six outlier runs have times that would be expected from UKP5 for the respective instance size.
-
-% TODO: try to rephrase
-A run from the greatest instance size and one from the second greatest instance size were both ended by timeout.
-The bound failed to stop the computation and the DP algorithm was terminated by timeout.
-
-While the simple, multiple and collective dominances are rare in a BREQ distribution with integer profits, the solution dominance used by UKP5 works to some extent.
-The UKP5 combines optimal solutions for small capacities with single items and generate solutions that, if optimal for some capacity, will be used to generate more solutions after (recursively).
-In a BREQ instance, solutions composed of many small items rarely are optimal and, consequently, often discarded, wasting the time used to generate them.
-The weak solution dominance used by UKP5 does not completely avoid this problem, but helps to generate less of the useless subproblem solutions.
-
+MTU2 core strategy improve MTU1 run times over BREQ instances.
+TSO strategy yields no significant gains over OSO in BREQ instances.
+GREENDP is an OSO variant which periodically compute bounds (similar to the ones used by the B\&B approach) to verify if the DP can be stopped and any remaining capacity be filled with copies of the best item.
+If the bounds stop the DP early then GREENDP run time falls in the slow-growth group, otherwise the run time is similar to the OSO/TSO run time for the same instance.
 The results confirm the hypothesis that this distribution would be hard to solve by DP algorithms and easy to solve by B\&B algorithms.
 
 \subsection{Solving pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}
 
-All other experiments consisted of instances of the UKP with a specific distributions saved in files, and executables that read those instances, solved them and returned the solving time.
-In this experiment, the instances are not UKP instances but BPP/CSP instances.
-The times presented are the sum of the times used to solve all the pricing subproblems (and/or master problems) generated while solving the continuous relaxation of those BPP/CSP instances.
+The previous experiments included datasets of UKP instances and binaries that read and solved a single instance and then returned the solving time.
+In this experiment, the instances are BPP/CSP instances.
+Also, the times presented are the sum of all time spent solving the multiple pricing subproblems generated by the continuous relaxation of the Set Covering Formulation (with column generation) of a single BPP/CSP instance.
+
+% The TSO, GREENDP, MTU2 (C++ or Fortran), and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
+Only the ordered step-off and MTU1 (C++) were used in this experiment.
+GREENDP fails if the two most efficient items share the same efficiency, what often happens for at least one pricing subproblem of a CSP instance.
+In instances with a small number of items, MTU2 behaves almost the same way that MTU1, the same applies for the terminating step-off and the ordered step-off.
+The authors did not succeed in integrating the PYAsUKP code (written in OCaml) with the C++/CPLEX code needed by this experiment.
+
+%CPLEX was also used to solve the pricing problems, adding one more algorithm to the comparison.
 
 In a pricing subproblem, the profit of the items is a real number.
 Adapting MTU1 for using floating point profit values proved to be difficult, as the bound computation procedure is based on the assumption that both weight and profit values were integer.
 The solution found was to multiply the items profit values by a multiplicative factor, round them down and treat them as integer profit values.
 The multiplicative factor chosen was~\(2^{40}\).
-
-To measure the impact of the conversion described above, the author used two versions of the UKP5, one using floating point profit values, and the other using integer profit values and the same conversion described above.
-The items from a pricing subproblem are always naturally sorted by increasing weight.
-The author executed the two UKP5 variants with sorting enabled and disabled, to verify if the sorting cost would pay off.
-Consequently, four versions of UKP5 were used in the tests, for all combinations of profit type (the original floating point, or the converted integer), and sorting (sorting by non-increasing efficiency, or not sorting, which is the same that having the items sorted by increasing weight).
-The variants of each one of the four versions of the UKP5 described above to solve pricing subproblems will be referred to as: 
-
-
-The profit values of pricing subproblems can be non-positive, which breaks the assumptions of some algorithms.
+In a pricing subproblem, the profit of the items can also be non-positive, which breaks the assumptions of some algorithms.
 Items with non-positive profits are removed from the item list before passing it to the UKP solving algorithm.
 
-The timeout used in those experiments was of 1800 seconds.
-To simplify visualization, in the instances that CPLEX and MTU1 ended in timeout, these two methods are plotted as having used exactly 1800 seconds.
+%ITS IMPORTANT TO NOTE THAT SUCH INSTANCES ARE DIFFUCULT FOR THE MUCH HARDER PROBLEM OF SOLVING THE NOT RELAXATION EXCATLY
+%The sum of the times solving pricing problems for an instance is often less than a second as solving the continuous relaxation of the BPP/CSP is much easier than solving the BPP/CSP exactly ().
+Solving the continuous relaxation of the BPP/CSP is much easier than solving the BPP/CSP, due to this, the time spent solving pricing subproblems in instances designed for the latter problem often amount less than a second.
+%The majority of the times presented is below a second because: many old datasets from the literature were included; to get the exact solution of a BPP/CSP instance with a B\&B algorithm it is necessary to solve multiple continuous relaxations, if each relaxation takes a significant time to solve, then solving exactly the BPP/CSP instance with B\&B becomes impracticable.
 
-using CPLEX to solve the pricing subproblems is not really competitive;
-for the majority of the CSP instances in the benchmark, solving their continuous relaxation with a non-CPLEX method takes less than one second.
-
-The times are expected to be small because: many old datasets from the literature were included; if each relaxation takes more than couple of seconds to solve, then solving the original BPP/CSP instance with B\&B can become impracticable.
-
-\begin{figure}[H]
-\caption{Total time used solving pricing subproblems (UKP) in the continuous relaxation of the BPP/CSP.}
+\begin{figure}
+\caption{Time spent solving all pricing subproblems of each instance in the CSP pricing subproblem dataset, with two selected algorithms. % three selected algorithms.
+The time limit was 30 minutes (the time limit considered the run time, not only the time solving pricing subproblems). If a run is terminated by timeout, the time spent solving pricing subproblems is displayed as exactly the time limit.}
 \begin{center}
-<<knapsack_time, fig.height=5>>=
-# Note that the points at y = 600 were introduced to allow
+<<knapsack_time_shared>>=
+# Note that the points at y = 1800 were introduced to allow
 # for the visualization of the runs that resulted in timeout.
 # Also, note that after the visible mtu1 point closest to the top right
 # all other points are below cplex points (representing the mtu1 timeouts).
 # For the hardest problems, there is a small but clear pattern that shows
 # advantage of the methods that sort the array by efficiency over the ones
 # who does not.
-csp_fig <- csp_csv %>%
-  filter(
-    algorithm == 'cplex_cutstock'  |
-    algorithm == 'mtu1_cutstock'   |
-    algorithm == 'ordso_int_ns')
-csp_fig[is.na(csp_fig$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 1800
-csp_fig <- csp_fig %>%
-  group_by(filename) %>%
-  mutate(mean_methods_time = mean(hex_sum_knapsack_time)) %>%
-  arrange(mean_methods_time)
-csp_fig$filename <- factor(
-  csp_fig$filename,
-  levels = unique(csp_fig$filename))
 
-ggplot(csp_fig,
-       aes(x = as.numeric(filename),
-           y = hex_sum_knapsack_time,
-           color = algorithm)) +
-  xlab('Instance index when sorted by the\nmean time methods spent solving pricing subproblems') +
-  ylab('Total time (seconds, log10 scale)') +
-  geom_point(shape = 3) +
-  scale_shape_identity() +
-  scale_colour_manual(name = "Algorithm", labels = c(
-    'cplex_cutstock' = 'CPLEX',
-    'mtu1_cutstock' = 'MTU1',
-    'ordso_int_ns' = 'Ord. Step-Off (no sort, integer)'
-  ), values = c(
-    'cplex_cutstock' = 'black',
-    'mtu1_cutstock' = 'darkgrey',
-    'ordso_int_ns' = 'lightgrey'
-  )) +
-  scale_y_continuous(trans = 'log10',
-    breaks = c(0.001, 0.01, 0.1, 1, 10, 60, 600, 1800),
-    labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800')) + 
-  theme(legend.position = 'bottom')
+plot_csp <- function (csp_csv) {
+  csp_fig <- csp_csv %>%
+    filter(
+      #algorithm == 'cplex_cutstock'  |
+      algorithm == 'mtu1_cutstock'   |
+      algorithm == 'ordso_int_ns')
+  csp_fig[is.na(csp_fig$hex_sum_knapsack_time), ]$hex_sum_knapsack_time <- 1800
+  
+  csp_fig <- csp_fig %>%
+    group_by(filename) %>%
+    mutate(mean_methods_time = mean(hex_sum_knapsack_time)) %>%
+    arrange(mean_methods_time)
+    #mutate(mean_methods_time = hex_sum_knapsack_time[algorithm == 'mtu1_cutstock']) %>%
+    #arrange(mean_methods_time)
+  csp_fig$filename <- factor(
+    csp_fig$filename,
+    levels = unique(csp_fig$filename))
+  
+  ggplot(csp_fig,
+         aes(x = as.numeric(filename),
+             y = hex_sum_knapsack_time,
+             color = algorithm)) +
+    #xlab('Instance index when sorted by the mean time\nthe three algorithms spent solving pricing subproblems') +
+    geom_point(shape = 3) +
+    scale_shape_identity() +
+    scale_colour_manual(name = "Algorithm", labels = c(
+      'mtu1_cutstock' = 'MTU1',
+      'ordso_int_ns' = 'Ord. Step-Off (no sort, integer)'
+      # 'cplex_cutstock' = 'CPLEX'
+    ), values = c(
+      'mtu1_cutstock' = 'darkgrey',
+      'ordso_int_ns' = 'black'
+      # 'cplex_cutstock' = 'lightgrey'
+    )) +
+    coord_cartesian(ylim = c(0.001, 1800)) +
+    scale_y_continuous(trans = 'log10',
+      breaks = c(0.001, 0.01, 0.1, 1, 10, 60, 600, 1800),
+      labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800'))#,
+      #limits = c(0.0005, 1800))
+}
+@
+
+%<<knapsack_time1, fig.height = 2 >>=
+%csp_csv$dataset <- 'All datasets'
+%plot_csp(csp_csv) +
+%theme(legend.position = 'none') +
+%xlab('') +
+%ylab('')
+%@
+
+<<knapsack_time2, fig.height = 10 >>=
+csp_plot_labels <- csp_csv %>%
+  select(filename, dataset, algorithm, hex_sum_knapsack_time) %>%
+  dcast(filename + dataset ~ algorithm, value.var = 'hex_sum_knapsack_time') %>%
+  select(dataset, ordso_int_ns, mtu1_cutstock) %>%
+  group_by(dataset) %>%
+  summarise(
+    n = length(dataset),
+    no_na_ordso_int_ns = sum(!is.na(ordso_int_ns)),
+    mean_ordso_int_ns = mean(ordso_int_ns, na.rm = T),
+    no_na_mtu1_cutstock = sum(!is.na(mtu1_cutstock)),
+    mean_mtu1_cutstock = mean(mtu1_cutstock, na.rm = T)
+  )# %>%
+## DAMNED BUGGED MUATATE CANT WORK WITH FUNCTIONS REFERING TWO DIFFERENT
+## COLUMNS??
+#  mutate(label = paste0(
+#  	# CHANGE TO ONLY COUNT N NUMBER IN THE INTEGERS
+#      "     n: ", sprintf("%*i", ceiling(log10(n + 1)), n),
+#    "\nOSO  n: ", sprintf("%*i", ceiling(log10(n + 1)), no_na_ordso_int_ns),
+#    "\nMTU1 n: ", sprintf("%*i", ceiling(log10(n + 1)), no_na_mtu1_cutstock),
+#    "\nOSO  mean: ", sprintf("%f", max(mean_mtu1_cutstock, mean_ordso_int_ns)),# mean_ordso_int_ns),
+#    "\nMTU1 mean: ", sprintf("%i", mw1(mean_ordso_int_ns))#, mean_mtu1_cutstock)
+#  ))
+
+# number of digits
+nd <- function (i) { ceiling(log10(i + 1)) }
+nd2 <- function (a, b) { max(nd(floor(a)), nd(floor(b))) }
+# data frame to row list
+df2rw <- function (df) { setNames(split(df, seq(nrow(df))), rownames(df)) }
+lcsp_plot_labels <- df2rw(csp_plot_labels)
+csp_plot_labels$label <- sapply(lcsp_plot_labels, function (t) paste0(
+  # CHANGE TO ONLY COUNT N NUMBER IN THE INTEGERS
+  "     n: ", sprintf("%*i", nd(t[['n']]), t[['n']]),
+  "\nOSO  n: ", sprintf("%*i", nd(t[['n']]), t[['no_na_ordso_int_ns']]),
+  "\nMTU1 n: ", sprintf("%*i", nd(t[['n']]), t[['no_na_mtu1_cutstock']]),
+  "\nOSO  mean: ", sprintf("%*.2f", 3 + nd2(t[['mean_mtu1_cutstock']], t[['mean_ordso_int_ns']]), t[['mean_ordso_int_ns']]),
+  "\nMTU1 mean: ", sprintf("%*.2f", 3 + nd2(t[['mean_mtu1_cutstock']], t[['mean_ordso_int_ns']]), t[['mean_mtu1_cutstock']])))
+
+plot_csp(csp_csv) + facet_wrap( ~ dataset, ncol = 2) +
+theme(legend.position = 'bottom') +
+xlab('Instance index when sorted by the mean time\nthe two algorithms spent solving pricing subproblems') +
+ylab('Total time (seconds, log10 scale)') +
+geom_text(data = csp_plot_labels, aes(x = 125, y = 100, label = label, hjust = 0, family = 'mono', lineheight = 0.75), inherit.aes = F)
 @
 \end{center}
 %\legend{Source: the author.}
 \label{fig:csp_knapsack_time}
 \end{figure}
 
-There is a cluster of points where~\(5000 < x < 5500\) and~\(y < 0.1\).
-This cluster highlights the instances whose pricing subproblems were solved orders of magnitude faster by the step-off method in comparison with the CPLEX or MTU1.
+In \autoref{fig:csp_knapsack_time}, shows that the OSO 
 
-The authors will focus on the runs that spent more than a second solving pricing subproblems.%, in Figure~\ref{fig:csp_knapsack_time}, some patterns emerge.
-First, it becomes clear that the B\&B approach is not viable for larger/harder instances, as its exponential worst-case times make the problem untractable.
+%As can be seen in \autoref{fig:csp_knapsack_time}, for the dataset used, CPLEX always takes more time than MTU1 or the OSO to solve pricing problems, and often one or two orders of magnirude more time.
+%There is a cluster of points where~\(5000 < x < 5500\) and~\(y < 0.01\).
+%This cluster highlights the instances whose pricing subproblems were solved orders of magnitude faster by OSO method in comparison with the CPLEX or MTU1.
 
-Second, there seems to be an advantage in not sorting the items, and this difference is not caused by the time taken by the sorting procedure.
-In the runs that lasted more than a second, the time used to sort the items was between 3\% and 0.5\% of the time used to solve the pricing subproblems.
-Such small difference does not explain the gap displayed in the graph.
-When the items were kept sorted by increasing weight, UKP5 was up to two times faster than when the items were sorted by non-increasing efficiency.
-Keeping the items sorted by increasing weight seems to be the best choice for such instances.
-Third, it seems that executing all computation using integers is slight faster than using floating point profit values, but the difference is barely noticeable.
+%The authors will focus on the runs that spent more than a second solving pricing subproblems.%, in Figure~\ref{fig:csp_knapsack_time}, some patterns emerge.
+%First, it becomes clear that the B\&B approach is not viable for larger/harder instances, as its exponential worst-case times make the problem untractable.
 
-When CPLEX is used to solve the pricing subproblems, almost all total time is spent solving the pricing subproblems.
-However, the time taken by non-CPLEX methods to solve the pricing subproblem remained mostly below 25\% of the total time (or even less).
+%When CPLEX is used to solve the pricing subproblems, almost all total time is spent solving the pricing subproblems.
+%However, the time taken by non-CPLEX methods to solve the pricing subproblem remained mostly below 25\% of the total time (or even less).
 
-In the case of CUTSTOCK\_UKP5\_*, the most time-consuming instances spent no more than 40\% of the time solving the pricing subproblems (often considerably less).
-This is not to say that, in such time-consuming instances, the pricing subproblems were not harder.
-POINT TO ANI AI
+%In the case of CUTSTOCK\_UKP5\_*, the most time-consuming instances spent no more than 40\% of the time solving the pricing subproblems (often considerably less).
+%This is not to say that, in such time-consuming instances, the pricing subproblems were not harder.
 % In Figure~\ref{fig:percentage_knap_subproblem}, where~\(x > 550\), we can see that there is a rise of the relative time taken to solve the pricing subproblem instances with UKP5.
-However, the reason for the growth in the total time spent to solve the most time-consuming instances was that many cutting patterns had to be added to the master problem before it could not be improved anymore; what results in more iterations and, consequently, more instances of the pricing subproblem and master problem solved.
-
-except by ANI AI, which had many unfinished runs, the times used by CPLEX doesn't seem to depend on the method being used to solve subproblems
+%However, the reason for the growth in the total time spent to solve the most time-consuming instances was that many cutting patterns had to be added to the master problem before it could not be improved anymore; what results in more iterations and, consequently, more instances of the pricing subproblem and master problem solved.
+%except by ANI AI, which had many unfinished runs, the times used by CPLEX doesn't seem to depend on the method being used to solve subproblems
 
 %\subsection{The differences in the number of pricing subproblems solved}
 
@@ -518,17 +557,23 @@ except by ANI AI, which had many unfinished runs, the times used by CPLEX doesn'
 
 \subsection{The only outlier}
 
+To measure the impact of the conversion described above, the author used two versions of the UKP5, one using floating point profit values, and the other using integer profit values and the same conversion described above.
+The items from a pricing subproblem are always naturally sorted by increasing weight.
+The author executed the two UKP5 variants with sorting enabled and disabled, to verify if the sorting cost would pay off.
+Consequently, four versions of UKP5 were used in the tests, for all combinations of profit type (the original floating point, or the converted integer), and sorting (sorting by non-increasing efficiency, or not sorting, which is the same that having the items sorted by increasing weight).
+The variants of each one of the four versions of the UKP5 described above to solve pricing subproblems will be referred to as: 
+
+The two traits are: the type used for the profit values (floating point or integer); and if the items were sorted by efficiency or not.
+
+Consequently, four versions of UKP5 were used in the tests, for all combinations of profit type (the original floating point, or the converted integer), and sorting (sorting by non-increasing efficiency, or not sorting, which is the same that having the items sorted by increasing weight).
+The author executed the two UKP5 variants with sorting enabled and disabled, to verify if the sorting cost would pay off.
+Second, there seems to be an advantage in not sorting the items, and this difference is not caused by the time taken by the sorting procedure.
+THE INSTANCES ARE NATURALLY ORDERED BY INCREASING WEIGHT
+
 In every experiment presented in this thesis, the author verified if the optimal solution value (the value of the objective function) was the same for all methods.
 Given the innacurate nature of floating point arithmetic, in this experiment, the optimal solution values differed from method to method.
 
 The author found that differences among knapsack solutions because of precision loss, followed by the cascade effect, are common.
-
-\subsection{Similar methods generate different amounts of pricing subproblems}
-\label{sec:diff_it_count}
-
-The two traits are: the type used for the profit values (floating point or integer); and if the items were sorted by efficiency or not.
-
-Although there was one outlier, converting profit values to integer seems to be a valid method to test classic UKP algorithms (that work only with integer profits) for solving pricing subproblems (where the profit values are floating point values). 
 
 \subsection{previously in conclusions}
 
@@ -544,14 +589,4 @@ It is worth mentioning that almost all instances that ended in timeout are artif
 Such instances were proposed in \cite{survey2014}. % TODO: chech which dataset this was and spell it out
 The authors can not state that B\&B algorithms are not viable for solving pricing problems, only that there is evidence that the B\&B worst-case can arise in such circumstances.
 %Unfortunately, the author of this thesis did not have the time to gather CSP problems from industrial sources, and the experimentation had to stop at the literature instances.
-
-\subsection{Algorithms not used in this experiment}
-\label{sec:csp_alg_not_used}
-
-The MGREENDP, MTU2 (C++ or Fortran) and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
-MGREENDP fails if the two most efficient items share the same efficiency, what often happens for at least one pricing subproblem of a CSP instance.
-In instances with a small number of items, MTU2 behaves almost the same way that MTU1.
-Finally, the authors' did not succeed in integrating the PYAsUKP code (written in OCaml) with the C++/CPLEX code used in this experiment.
-%The code of this experiment needs to call the UKP solving methods from inside the C++ code that also solves the CPLEX master model.
-%The author tried to integrate EDUK and EDUK2 (which are written in OCaml) to the experiment, using the interface between C/C++ and OCaml, but the examples provided together with the PYAsUKP sources for this kind of integration were not working.
 

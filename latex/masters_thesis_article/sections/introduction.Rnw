@@ -117,8 +117,7 @@ For example, given that~\(y\) is the lowest common multiple of~\(w_b\) and~\(w_j
 Consequently, the threshold dominance defines a constraint~\(x_j < \alpha_j\) on every item~\(j\), and solutions that break such constraints can be safely ignored.
 All solutions that do not break such constraints and do not make use of the best item weight less than~\(y' = \sum \alpha_j \times w_j\).
 Consequently, an optimal solution for any capacity greater than \(y'\) can be obtained in the fashion described in the last paragraph.
-The capacity~\(y'\) is a upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}.
-The computation of the exact value of~\(y^+\) is very expensive.
+The capacity~\(y'\) is a upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}. %The computation of the exact value of~\(y^+\) is very expensive.
 Computing~\(y^+\) would equal to solving the UKP for capacities~\(y^+\) and lower while checking for threshold dominance.
 An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in polynomial time, before starting the solving process.
 %We are not aware of the existence of an algorithm for solving the UKP that compute the exact value of~\(y^+\) before starting to solve the UKP.

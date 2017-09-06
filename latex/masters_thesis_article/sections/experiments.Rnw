@@ -1,3 +1,10 @@
+<<graphs_shared>>=
+# number of digits
+nd <- function (i) { max(ceiling(log10(i + 1)), na.rm = T) }
+# data frame to row list
+df2rw <- function (df) { setNames(split(df, seq(nrow(df))), rownames(df)) }
+@
+
 <<rr_breq_shared_exp>>=
 my_relevel <- function(f) {
   factor(f, levels = c('cpp-mtu1', 'cpp-mtu2', 'eduk', 'eduk2', 'ordered_step_off', 'terminating_step_off', 'mgreendp'))
@@ -88,29 +95,13 @@ fast_csv <- read.csv("../data/pya_ukp5.csv", sep = ";")
 fast_csv$X <- NULL # necessary for complete.cases to work
 @
 
-<<env_shared>>=
-env_data <- read.csv("../data/env_influence.csv", sep = ";")
-env_data$X <- NULL
-@
-
-<<to_rework_shared>>=
-fix_names <- function(x) {
-  x <- gsub('all', 'ALL', x)
-  x <- gsub('ss2', 'SS', x)
-  x <- gsub('saw', 'SAW', x)
-  x <- gsub('nsds2', 'PP', x)
-  x <- gsub('sc', 'SC', x)
-  x <- gsub('hi', 'WCD', x)
-  x
-}
-@
-
 <<csp_shared>>=
 csp_csv <- read.csv("../data/csp_6195.csv", sep = ";")
 csp_csv$X <- NULL
 csp_csv$dataset <- gsub('(.*)/.*', '\\1', csp_csv$filename)
 csp_csv$dataset <- gsub('Randomly_Generated', 'Random', csp_csv$dataset)
-csp_csv$dataset <- gsub('ANI_AI', 'ANI AI', csp_csv$dataset)
+csp_csv$dataset <- gsub('ANI_AI', 'ANI\\&AI', csp_csv$dataset)
+csp_csv$dataset <- gsub('Irnich', 'GI', csp_csv$dataset)
 csp_csv$dataset <- factor(csp_csv$dataset)
 # forgot to add sort_time to knapsack time in the chart generation codes, now
 # changing it here to avoid changing many places
@@ -122,20 +113,24 @@ csp_csv$pricing_total_time <- csp_csv$hex_sum_knapsack_time + csp_csv$hex_sum_so
 
 The experiments are split into five subsections.
 Each section address one dataset and the results of running some selected algorithms over them.
-Due to the diversity of experiments, the results of each individual experiment is presented with its immediate analysis.
+In order to keep the results close to its discussion, the results of each individual experiment is presented with its immediate analysis.
 %The big picture painted by all the experiments is discussed in \autoref{sec:discussion}.
 
 \subsection{PYAsUKP dataset}
 \label{sec:pya_exp}
 
-\begin{figure}
-\caption{Benchmark using the PYAsUKP dataset and the Terminating Step-off, GREENDP and EDUK2 algorithms. There was no time limit. The instance classes acronyms stand for: Postponed Periodicity (PP); Strongly Correlated (SC); Subset-Sum (SS); and Without Collective Dominance (WCD). SAW is not an acronym. EDUK was not included because EDUK2 superseeds EDUK. The ordered step-off run times were ommited because they were too similar to the terminating step-off run times. The GREENDP run times over subset-sum instances are not displayed because GREENDP fails if the two most efficient items have the same efficiency, which always happens with subset-sum instances.}
+The experiment presented in this section is an updated version of the experiment first presented in~\cite{sea2016}.
+In this version GREENDP is considered, UKP5 is replaced by the Terminating Step-Off (TSO), and all runs were executed serially.
+The exact same 4540 instances were used.
+
+\begin{figure}[!htbp]
+\caption{Run times of the Terminating Step-off, GREENDP and EDUK2 algorithms over the 4540 instances of the PYAsUKP dataset. There was no time limit. The instance classes acronyms stand for: Postponed Periodicity (PP); Strongly Correlated (SC); Subset-Sum (SS); and Without Collective Dominance (WCD). SAW is not an acronym. EDUK was not included because EDUK2 superseeds EDUK. The ordered step-off run times were ommited because they were too similar to the terminating step-off run times. The GREENDP run times over subset-sum instances are not displayed because GREENDP fails if the two most efficient items have the same efficiency, which always happens with subset-sum instances. The mean labels inform the mean run time of each algorithm for the corresponding dataset.}
 \begin{center} 
 <<pya_fast_fig, fig.height = 9.5>>=
 fast_plot <- function(t) {
   inst_types <- c('all', 'hi', 'nsds2', 'saw', 'sc', 'ss2')
 
-  data <- t[complete.cases(t), ]
+  data <- t[complete.cases(t), ] # remove SS greendp runs
   data$type <- sapply(data$filename, (function (f) {strsplit(as.character(f), "_")[[1]][1] }))
   data$type <- factor(data$type, levels = inst_types)
 
@@ -156,9 +151,38 @@ fast_plot <- function(t) {
   data$algorithm <- gsub('terminating_step_off', 'Terminating Step-Off', data$algorithm)
   data$algorithm <- gsub('pyasukp', 'EDUK2', data$algorithm)
   data$algorithm <- gsub('mgreendp', 'MGREENDP', data$algorithm)
-  data$type <- fix_names(data$type)
+  pya_dataset_labeller <- as_labeller(c(
+    'all' = 'ALL (4540 inst.)',
+    'ss2' = 'SS (400 inst.)',
+    'saw' = 'SAW (1100 inst.)',
+    'nsds2' = 'PP (800 inst.)',
+    'sc' = 'SC (240 inst.)',
+    'hi' = 'WCD (2000 inst.)'
+  ))
+
   shape_conv <- c('Terminating Step-Off' = 15, 'EDUK2' = 16, 'MGREENDP' = 17)
 
+  pya_plot_labels <- data %>%
+    select(filename, type, algorithm, internal_time) %>%
+    dcast(filename + type ~ algorithm, value.var = 'internal_time') %>%
+    select(type, MGREENDP, `Terminating Step-Off`, EDUK2) %>%
+    group_by(type) %>%
+    summarise(
+      mean_greendp = mean(MGREENDP, na.rm = T),
+      mean_tso = mean(`Terminating Step-Off`, na.rm = T),
+      mean_eduk2 = mean(EDUK2, na.rm = T))
+
+  lpya_plot_labels <- df2rw(pya_plot_labels)
+  pya_plot_labels$label <- sapply(lpya_plot_labels, function (row) {
+    padd <- 3 + nd(c(
+      row[['mean_greendp']],
+      row[['mean_tso']],
+      row[['mean_eduk2']]))
+    paste0(
+      sprintf("EDUK2 mean: %*.2f\n", padd, row[['mean_eduk2']]),
+      sprintf("TSO   mean: %*.2f\n", padd, row[['mean_tso']]),
+      ifelse(is.na(row[['mean_greendp']]), '', sprintf("GREEN mean: %*.2f", padd, row[['mean_greendp']])))
+  })
   ggplot(data,
          aes(x = as.numeric(filename),
        y = internal_time,
@@ -172,20 +196,28 @@ fast_plot <- function(t) {
     ylab('Time to solve (seconds, log10 scale)') +
     xlab('Instance index when sorted by EDUK2 time to solve') +
     scale_colour_grey() +
-    scale_shape_manual(name = "algorithm", values = shape_conv) + 
-    theme(legend.position = 'bottom') + facet_wrap( ~ type, ncol = 3)
+    scale_shape_manual(name = "algorithm", values = shape_conv) +
+    theme(legend.position = 'bottom') +
+    facet_wrap( ~ type, ncol = 3, labeller = pya_dataset_labeller) +
+    geom_text(
+      data = pya_plot_labels,
+      aes(
+        x = 100,
+        y = 250,
+        label = label,
+        hjust = 0,
+        family = 'mono',
+        lineheight = 0.80),
+      inherit.aes = F)
 }
 
 fast_plot(fast_csv)
 @
+
 \end{center}
 %\legend{Source: the author.}
 \label{fig:pya_fast}
 \end{figure}
-
-The experiment presented in this section is an updated version of the experiment first presented in~\cite{sea2016}.
-In this version GREENDP is considered, UKP5 is replaced by the Terminating Step-Off (TSO), and all runs were executed serially.
-The exact same 4540 instances were used.
 
 In \autoref{fig:pya_fast}, the instances (x axis) are sorted by the time EDUK2 spent to solve them.
 EDUK2 B\&B phase allows EDUK2 to solve some instances of every magnitude faster than TSO/GREENDP.
@@ -203,16 +235,18 @@ The authors believe that the exclusion of the best item from the DP phase is the
 
 When EDUK2 solves an instance in less time than TSO, the difference is often less than a second, and up to ten seconds.
 When EDUK2 solves an instance in more time than TSO, the difference is often more than five seconds and up to six minutes.
-The EDUK2 mean time to solve a PYAsUKP instance is \(23\) seconds and TSO mean time to solve a PYAsUKP instance is \(1.5\) seconds.
+Such kind of behaviour harms EDUK2 mean run time in comparison to simpler DP methods.
 
 \subsection{MTU1 and MTU2 (C++ and Fortran)}
 \label{sec:mtu_exp}
 
-\begin{figure}
-\caption{Benchmark using the reduced PYAsUKP dataset and the MTU1 and MTU2, C++ and Fortran implementations. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit.}
+The MTU1 and MTU2 implementations in C++ and Fortran were all executed over the reduced PYAsUKP benchmark.
+
+\begin{figure}[!htbp]
+\caption{Run times of MTU1 and MTU2 (C++ and Fortran) over the 454 instances of the reduced PYAsUKP dataset. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit.}
 \begin{center}
 <<mtu_comp, fig.height=5.5>>=
-ukp_time_comp_plot <- function (data) {
+mtu_time_comp_plot <- function (data) {
   # select columns necessary to the plot, and divide information
   # given in algorithm column in two columns: language and algorithm
   data <- select(data, algorithm, filename, internal_time)
@@ -231,6 +265,29 @@ ukp_time_comp_plot <- function (data) {
   # make filename a factor so as.numeric of a filename will give its position
   # in the ordering described above
   data$filename <- factor(data$filename, levels = unique(data$filename))
+
+  #mtu_plot_labels <- data %>%
+  #  select(filename, language, algorithm, internal_time) %>%
+  #  dcast(filename + algorithm ~ language, value.var = 'internal_time') %>%
+  #  select(algorithm, `C++`, `Fortran`) %>%
+  #  group_by(algorithm) %>%
+  #  summarise(
+  #    no_na_cpp = sum(`C++` != 1800),
+  #    mean_cpp = mean(`C++`, na.rm = T),
+  #    no_na_fortran = sum(`Fortran` != 1800),
+  #    mean_fortran = mean(`Fortran`, na.rm = T)
+  #  )
+  
+  #lmtu_plot_labels <- df2rw(mtu_plot_labels)
+  #mtu_plot_labels$label <- sapply(lmtu_plot_labels, function (row) {
+  #  n_padd <- nd(c(row[['no_na_cpp']], row[['no_na_fortran']]))
+  #  m_padd <- 3 + nd(c(row[['mean_cpp']], row[['mean_fortran']]))
+  #  paste0(
+  #      "C++ n: ", sprintf("%*i", n_padd, row[['no_na_cpp']]),
+  #    "\nF77 n: ", sprintf("%*i", n_padd, row[['no_na_fortran']]),
+  #    "\nC++ mean: ", sprintf("%*.2f", m_padd, row[['mean_cpp']]),
+  #    "\nF77 mean: ", sprintf("%*.2f", m_padd, row[['mean_fortran']]))
+  #})
   # plot the graph, no change in data
   p <- ggplot(data,
               aes(x = as.numeric(filename),
@@ -245,20 +302,27 @@ ukp_time_comp_plot <- function (data) {
     ylab("Time to solve\n(seconds, log10 scale)") +
     xlab("Instances sorted by mean time to solve\n(mean between the four implementations) ") +
     theme(legend.position = 'bottom') +
-    facet_wrap(~ algorithm, ncol = 1)
-    
+    facet_wrap(~ algorithm, ncol = 1)# +
+    #geom_text(
+    #  data = mtu_plot_labels,
+    #  aes(
+    #    x = 280,
+    #    y = 1,
+    #    label = label,
+    #    hjust = 0,
+    #    family = 'mono',
+    #    lineheight = 0.80),
+    #  inherit.aes = F)
 
   return(p)
 }
 
-ukp_time_comp_plot(mtu_csv)
+mtu_time_comp_plot(mtu_csv)
 @
 \end{center}
 %\legend{Source: the author.}
 \label{fig:mtu}
 \end{figure}
-
-The MTU1 and MTU2 implementations in C++ and Fortran were all executed over the reduced PYAsUKP benchmark.
 
 In \autoref{fig:mtu}, both MTU1 implementations show run times in the same order of magnitude.
 However, considering only the instances that both MTU1 implementations solved before timeout, the mean run time of Fortran MTU1 was 59 seconds and the mean run time of C++ MTU1 was 30 seconds.
@@ -285,8 +349,15 @@ unique(mtu_csv_for_range$filename)
 \subsection{Realistic Random Dataset}
 \label{sec:rr_exp}
 
-\begin{figure}
-\caption{Run times of all selected algorithms over the instances of the realistic random dataset. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
+The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
+The run times of both step-off algorithms and MGREENDP become almost identical as the size of the input grow. % TODO: consider removing the three and presenting only one of them
+EDUK run times are similar to the three above cited algorithms but, as the instance size grow, its times shift for worse. 
+EDUK2 has many run times that are similar to the EDUK ones but, for some instances in each size group, its B\&B phase solves the instance or helps to considerably reduce the instance size.
+MTU1 and MTU2 have the smallest run times for the smallest instances but, as the instance size and \(w_{min}\) grow, also grow the number of instances in which MTU1 and MTU2 spend orders of magnitude more time to solve than the other algorithms.
+%The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
+
+\begin{figure}[!htbp]
+\caption{Run times of all selected algorithms over the 80 instances of the realistic random dataset. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<realistic_random_figure, fig.height = 5>>=
 gen_graph_all_alg_discrete_x(rr_csv) +
@@ -331,13 +402,6 @@ print(rr_xt,
 @
 \end{comment}
 
-The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
-The run times of both step-off algorithms and MGREENDP become almost identical as the size of the input grow. % TODO: consider removing the three and presenting only one of them
-EDUK run times are similar to the three above cited algorithms but, as the instance size grow, its times shift for worse. 
-EDUK2 has many run times that are similar to the EDUK ones but, for some instances in each size group, its B\&B phase solves the instance or helps to considerably reduce the instance size.
-MTU1 and MTU2 have the smallest run times for the smallest instances but, as the instance size and \(w_{min}\) grow, also grow the number of instances in which MTU1 and MTU2 spend orders of magnitude more time to solve than the other algorithms.
-%The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
-
 Despite EDUK2 solving some instances orders of magnitude faster than the other algorithms (specially in the larger instance sizes), the mean run time of EDUK2 (8.51 seconds) is higher than the TSO mean run time (5.36 seconds).
 As already observed in \autoref{sec:pya_exp}, EDUK2 often have one or more run times that are one order of magnitude higher than the highest run time of TSO, what considerably increases its mean time.
 
@@ -351,8 +415,14 @@ summary(filter(rr_dcast, grepl('n131072', filename)))
 \subsection{BREQ 128-16 Standard Benchmark}
 \label{sec:breq_exp}
 
-\begin{figure}
-\caption{Run times of all selected algorithms over the instances of the BREQ 128-16 Standard Benchmark. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
+The results of the experiments over the BREQ 128-16 Standard Benchmark are summarized in \autoref{fig:breq}.
+The run times outline two groups with distinct time growth, a fast-growth group (which hit the time limit) and a slow-growth group (which always take less than a second).
+The fast-growth group is mainly composed by the DP algorithms: TSO, OSO, and EDUK.
+The slow-grouth group is mainly composed by the B\&B and hybrid algorithms: MTU1, MTU2, and EDUK2.
+GREENDP is the only algorithm with run times in both groups.
+
+\begin{figure}[!htbp]
+\caption{Run times of all selected algorithms over the 100 instances of the BREQ 128-16 Standard Benchmark. The time limit was 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<breq_figure, fig.height=5>>=
 gen_graph_all_alg_discrete_x(breq_csv) +
@@ -365,12 +435,6 @@ scale_x_continuous(trans = "log2",
 %\legend{Source: the author.}
 \label{fig:breq}
 \end{figure}
-
-The results of the experiments over the BREQ 128-16 Standard Benchmark are summarized in \autoref{fig:breq}.
-The run times outline two groups with distinct time growth, a fast-growth group (which hit the time limit) and a slow-growth group (which always take less than a second).
-The fast-growth group is mainly composed by the DP algorithms: TSO, OSO, and EDUK.
-The slow-grouth group is mainly composed by the B\&B and hybrid algorithms: MTU1, MTU2, and EDUK2.
-GREENDP is the only algorithm with run times in both groups.
 
 % TODO: check if BREQ table will be kept and then remove this permanently
 %<<breq_table, results='asis'>>=
@@ -392,9 +456,28 @@ The results confirm the hypothesis that this distribution would be hard to solve
 \subsection{Solving pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}
 
-\begin{figure}
-\caption{Time spent solving all pricing subproblems of each instance in the CSP pricing subproblem dataset, with two selected algorithms. % three selected algorithms.
-The time limit was 30 minutes (the time limit considered the run time, not only the time solving pricing subproblems). If a run is terminated by timeout, the time spent solving pricing subproblems is displayed as exactly the time limit.}
+The previous experiments included datasets of UKP instances and binaries that read and solved a single instance and then returned the solving time.
+In this experiment, the instances are BPP/CSP instances.
+Also, the run time for each BPP/CSP instance presented is the sum of all time spent solving the multiple pricing subproblems generated by the continuous relaxation of the Set Covering Formulation (with column generation) of the instance.
+
+% The TSO, GREENDP, MTU2 (C++ or Fortran), and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
+Only the ordered step-off and MTU1 (C++) were used in this experiment.
+GREENDP fails if the two most efficient items share the same efficiency, what often happens for at least one pricing subproblem of a CSP instance.
+In instances with a small number of items, MTU2 behaves almost the same way that MTU1, the same applies for the terminating step-off and the ordered step-off.
+The authors did not succeed in integrating the PYAsUKP code (written in OCaml) with the C++/CPLEX code needed by this experiment.
+
+%CPLEX was also used to solve the pricing problems, adding one more algorithm to the comparison.
+
+In a pricing subproblem, the profit of the items is a real number.
+Adapting MTU1 for using floating point profit values proved to be difficult, as the bound computation procedure is based on the assumption that both weight and profit values were integer.
+The solution found was to multiply the items profit values by a multiplicative factor, round them down and treat them as integer profit values.
+The multiplicative factor chosen was~\(2^{40}\).
+In a pricing subproblem, the profit of the items can also be non-positive, which breaks the assumptions of some algorithms.
+Items with non-positive profits are removed from the item list before passing it to the UKP solving algorithm.
+
+\begin{figure}[!htbp]
+\caption{Time spent solving all pricing subproblems for each of the 6195 instances in the CSP pricing subproblem dataset, with MTU1 and TSO.% three selected algorithms.
+The time limit was 30 minutes (the time limit considered the run time, not only the time solving pricing subproblems). If a run is terminated by timeout, the time spent solving pricing subproblems is displayed as exactly the time limit. The labels mean: n -- number of instances in the dataset; \emph{algorithm} n -- number of instances solved before timeout by the algorithm; \emph{algorithm} mean -- mean of the algorithm run times that did not end in timeout.}
 \begin{center}
 <<knapsack_time_shared>>=
 # Note that the points at y = 1800 were introduced to allow
@@ -471,7 +554,6 @@ csp_plot_labels <- csp_csv %>%
 ## DAMNED BUGGED MUATATE CANT WORK WITH FUNCTIONS REFERING TWO DIFFERENT
 ## COLUMNS??
 #  mutate(label = paste0(
-#  	# CHANGE TO ONLY COUNT N NUMBER IN THE INTEGERS
 #      "     n: ", sprintf("%*i", ceiling(log10(n + 1)), n),
 #    "\nOSO  n: ", sprintf("%*i", ceiling(log10(n + 1)), no_na_ordso_int_ns),
 #    "\nMTU1 n: ", sprintf("%*i", ceiling(log10(n + 1)), no_na_mtu1_cutstock),
@@ -479,19 +561,14 @@ csp_plot_labels <- csp_csv %>%
 #    "\nMTU1 mean: ", sprintf("%i", mw1(mean_ordso_int_ns))#, mean_mtu1_cutstock)
 #  ))
 
-# number of digits
-nd <- function (i) { ceiling(log10(i + 1)) }
 nd2 <- function (a, b) { max(nd(floor(a)), nd(floor(b))) }
-# data frame to row list
-df2rw <- function (df) { setNames(split(df, seq(nrow(df))), rownames(df)) }
 lcsp_plot_labels <- df2rw(csp_plot_labels)
 csp_plot_labels$label <- sapply(lcsp_plot_labels, function (t) paste0(
-  # CHANGE TO ONLY COUNT N NUMBER IN THE INTEGERS
   "     n: ", sprintf("%*i", nd(t[['n']]), t[['n']]),
   "\nOSO  n: ", sprintf("%*i", nd(t[['n']]), t[['no_na_ordso_int_ns']]),
   "\nMTU1 n: ", sprintf("%*i", nd(t[['n']]), t[['no_na_mtu1_cutstock']]),
-  "\nOSO  mean: ", sprintf("%*.2f", 3 + nd2(t[['mean_mtu1_cutstock']], t[['mean_ordso_int_ns']]), t[['mean_ordso_int_ns']]),
-  "\nMTU1 mean: ", sprintf("%*.2f", 3 + nd2(t[['mean_mtu1_cutstock']], t[['mean_ordso_int_ns']]), t[['mean_mtu1_cutstock']])))
+  "\nOSO  mean: ", sprintf("%*.2f", 3 + nd(c(t[['mean_mtu1_cutstock']], t[['mean_ordso_int_ns']])), t[['mean_ordso_int_ns']]),
+  "\nMTU1 mean: ", sprintf("%*.2f", 3 + nd(c(t[['mean_mtu1_cutstock']], t[['mean_ordso_int_ns']])), t[['mean_mtu1_cutstock']])))
 
 plot_csp(csp_csv) + facet_wrap( ~ dataset, ncol = 2) +
 theme(legend.position = 'bottom') +
@@ -504,60 +581,21 @@ geom_text(data = csp_plot_labels, aes(x = 125, y = 100, label = label, hjust = 0
 \label{fig:csp_knapsack_time}
 \end{figure}
 
-The previous experiments included datasets of UKP instances and binaries that read and solved a single instance and then returned the solving time.
-In this experiment, the instances are BPP/CSP instances.
-Also, the times presented are the sum of all time spent solving the multiple pricing subproblems generated by the continuous relaxation of the Set Covering Formulation (with column generation) of a single BPP/CSP instance.
+In \autoref{fig:csp_knapsack_time}, it can be seen that except by two recent datasets (ANI\&AI and GI) the mean time solving pricing problems in an instance is below one second.
+Such times are explained by two main factors: for completeness, the authors included many classic but old datasets; the datasets were meant to be hard to solve by methods solving the BPP/CSP exactly, and solving the continuous relaxation of the problem takes only a fraction of that time.
+In the majority of these easy datasets, the highest times presented are from MTU1, giving OSO the advantage.
 
-% The TSO, GREENDP, MTU2 (C++ or Fortran), and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
-Only the ordered step-off and MTU1 (C++) were used in this experiment.
-GREENDP fails if the two most efficient items share the same efficiency, what often happens for at least one pricing subproblem of a CSP instance.
-In instances with a small number of items, MTU2 behaves almost the same way that MTU1, the same applies for the terminating step-off and the ordered step-off.
-The authors did not succeed in integrating the PYAsUKP code (written in OCaml) with the C++/CPLEX code needed by this experiment.
-
-%CPLEX was also used to solve the pricing problems, adding one more algorithm to the comparison.
-
-In a pricing subproblem, the profit of the items is a real number.
-Adapting MTU1 for using floating point profit values proved to be difficult, as the bound computation procedure is based on the assumption that both weight and profit values were integer.
-The solution found was to multiply the items profit values by a multiplicative factor, round them down and treat them as integer profit values.
-The multiplicative factor chosen was~\(2^{40}\).
-In a pricing subproblem, the profit of the items can also be non-positive, which breaks the assumptions of some algorithms.
-Items with non-positive profits are removed from the item list before passing it to the UKP solving algorithm.
-
-%ITS IMPORTANT TO NOTE THAT SUCH INSTANCES ARE DIFFUCULT FOR THE MUCH HARDER PROBLEM OF SOLVING THE NOT RELAXATION EXCATLY
-%The sum of the times solving pricing problems for an instance is often less than a second as solving the continuous relaxation of the BPP/CSP is much easier than solving the BPP/CSP exactly ().
-Solving the continuous relaxation of the BPP/CSP is much easier than solving the BPP/CSP, due to this, the time spent solving pricing subproblems in instances designed for the latter problem often amount less than a second.
-%The majority of the times presented is below a second because: many old datasets from the literature were included; to get the exact solution of a BPP/CSP instance with a B\&B algorithm it is necessary to solve multiple continuous relaxations, if each relaxation takes a significant time to solve, then solving exactly the BPP/CSP instance with B\&B becomes impracticable.
-
-
-In \autoref{fig:csp_knapsack_time}, shows that the OSO 
-
-%As can be seen in \autoref{fig:csp_knapsack_time}, for the dataset used, CPLEX always takes more time than MTU1 or the OSO to solve pricing problems, and often one or two orders of magnirude more time.
-%There is a cluster of points where~\(5000 < x < 5500\) and~\(y < 0.01\).
-%This cluster highlights the instances whose pricing subproblems were solved orders of magnitude faster by OSO method in comparison with the CPLEX or MTU1.
-
-%The authors will focus on the runs that spent more than a second solving pricing subproblems.%, in Figure~\ref{fig:csp_knapsack_time}, some patterns emerge.
-%First, it becomes clear that the B\&B approach is not viable for larger/harder instances, as its exponential worst-case times make the problem untractable.
-
-%When CPLEX is used to solve the pricing subproblems, almost all total time is spent solving the pricing subproblems.
-%However, the time taken by non-CPLEX methods to solve the pricing subproblem remained mostly below 25\% of the total time (or even less).
-
-%In the case of CUTSTOCK\_UKP5\_*, the most time-consuming instances spent no more than 40\% of the time solving the pricing subproblems (often considerably less).
-%This is not to say that, in such time-consuming instances, the pricing subproblems were not harder.
-% In Figure~\ref{fig:percentage_knap_subproblem}, where~\(x > 550\), we can see that there is a rise of the relative time taken to solve the pricing subproblem instances with UKP5.
-%However, the reason for the growth in the total time spent to solve the most time-consuming instances was that many cutting patterns had to be added to the master problem before it could not be improved anymore; what results in more iterations and, consequently, more instances of the pricing subproblem and master problem solved.
-%except by ANI AI, which had many unfinished runs, the times used by CPLEX doesn't seem to depend on the method being used to solve subproblems
-
-%\subsection{The differences in the number of pricing subproblems solved}
+The pricing problems generated by the same BPP/CSP instance share the same \(n\), \(c\) and items weights, the only significant difference between them is the item profit values\footnote{As the code used removes items with nonpositive profit values, the \(n\) and item weights do vary, but in a way not sigficantly different than they vary in an algorithm that applies simple dominance over the ite list before }.
+For a single example, we will focus on instance 201\_2500\_DI\_11.txt, for which MTU1\_CUTSTOCK ended in timeout.
+The pricing problems generated when solving such instance have \(n < 200\) and \(c = 2472\).
+Before timeout, MTU1 solved about 700 of those pricing problems in much less than a millisecond each.
+However, there was also a few pricing problems that took ten seconds or more to solve; run times like: 10, 12, 13, 13, 26, 32, 49, 54, and 351 seconds.
+All instances 
+Such behaviour corroborates with what was said about B\&B algorithms being strongly affected by the items distribution, and less by \(n\) and \(c\).
 
 %pricing subproblems can have many optimal solutions, and different methods break this tie in different ways.
 %The choice of optimal solution will affect the master problem, which will generate a slightly different pricing subproblem.
 %This effect cascades and can change the profit values of all next pricing subproblems, and the number of pricing subproblems that are needed to solve (which is the same as the number of iterations, and the number of master problems solved).
-
-%CPLEX\_CUTSTOCK stands out by requiring many of the smallest number of iterations.
-%The author cannot explain what property the pricing subproblem solutions returned by CPLEX have that creates such a difference.
-%the table masks a little this effect because it could be attributed to the instances to the highest count of iterations suffering timeout (and reducing the mean)
-
-\subsection{The only outlier}
 
 To measure the impact of the conversion described above, the author used two versions of the UKP5, one using floating point profit values, and the other using integer profit values and the same conversion described above.
 The items from a pricing subproblem are always naturally sorted by increasing weight.
@@ -576,16 +614,6 @@ In every experiment presented in this thesis, the author verified if the optimal
 Given the innacurate nature of floating point arithmetic, in this experiment, the optimal solution values differed from method to method.
 
 The author found that differences among knapsack solutions because of precision loss, followed by the cascade effect, are common.
-
-\subsection{previously in conclusions}
-
-% TODO: update example
-For a single example, we will focus on instance 201\_2500\_DI\_11.txt, for which MTU1\_CUTSTOCK ended in timeout.
-The pricing problems generated when solving such instance have \(n < 200\) and \(c = 2472\).
-Before timeout, MTU1 solved about 700 of those pricing problems in much less than a millisecond each.
-However, there was also a few pricing problems that took ten seconds or more to solve; run times like: 10, 12, 13, 13, 26, 32, 49, 54, and 351 seconds.
-All instances shared the same \(n\), \(c\) and the same items weights, the only difference between them is the profit values.
-Such behaviour corroborates with what was said about B\&B algorithms being strongly affected by the items distribution, and less by \(n\) and \(c\).
 
 It is worth mentioning that almost all instances that ended in timeout are artificial instances created to be hard to solve.
 Such instances were proposed in \cite{survey2014}. % TODO: chech which dataset this was and spell it out

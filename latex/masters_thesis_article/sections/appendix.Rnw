@@ -1,15 +1,5 @@
 \section{Supplementary Materials}
 
-\subsection{Data and code related to CSP pricing subproblem dataset}
-
-\label{sec:csp_appendix}
-The 596 selected instances of CSP are available in \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/data/selected_csp_inst}, and the code used to solve the SCF relaxation can be found in the same repository (\url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}).
-The code can be compiled by executing \emph{make bin/cutstock} in the folder.
-Unfortunately, the code has external dependencies, and the user will need to install them before having success in the compilation.
-The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en}).
-The library paths are configured inside the Makefile.
-The binaries generated inside the automatically created \emph{bin} subfolder will have the same names as the ones used to identify them in Section~\ref{sec:csp_experiments}.
-
 \subsection{Summary Tables}
 
 <<pya_tables_shared,echo=F>>=
@@ -324,15 +314,14 @@ rt <- rr %>% mutate(n = as.integer(get_n(filename))) %>%
             sd  = format_n(  sd(internal_time, na.rm = TRUE)),
             min = format_n( min(internal_time, na.rm = TRUE)),
             max = format_n( max(internal_time, na.rm = TRUE)),
-            ter = sum(!is.na(internal_time)))
+            fin = sum(!is.na(internal_time))) #%>%
+  #arrange(n, algorithm)
 
 # "The results for the step-offs were ommited as they are very similar to the MGREENDP results."
-lrt <- xtable(rt, caption = "Results of the experiment with realistic random dataset (see \\autoref{sec:rr_exp}). For each row, there is a set \\(T\\) comprised by the run times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We do not count the run time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{ter} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that did not end in timeout). The time unit of the table values is seconds.", label = 'tab:rr')
+lrt <- xtable(rt, caption = "Results of the experiment with realistic random dataset (see \\autoref{sec:rr_exp}). For each row, there is a set \\(T\\) comprised by the run times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We do not count the run time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{fin} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that did not end in timeout). The time unit of the table values is seconds.", label = 'tab:rr')
 align(lrt) <- c('r', 'c', rep('r', 5), 'c')
 print(lrt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, add.to.row = list(pos = list(0), command = "\\hline \\endhead ")) 
 @
-
-\clearpage
 
 <<breq_table_appendix,echo=FALSE,results='asis'>>=
 breq <- read.csv("../data/128_16_std_breqd.csv", sep = ";")
@@ -345,15 +334,18 @@ bt <- breq %>% mutate(n = as.integer(get_n(filename))) %>%
             sd  = format_n(  sd(internal_time, na.rm = TRUE)),
             min = format_n( min(internal_time, na.rm = TRUE)),
             max = format_n( max(internal_time, na.rm = TRUE)),
-            ter = sum(!is.na(internal_time)))
-lt <- xtable(bt, caption = "Results of the BREQ 128-16 Standard Benchmark (see Section \\ref{sec:breq_exp}). For each row, there is a set \\(T\\) comprised by the run times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We do not count the run time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{ter} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that did not end in timeout). The time unit of the table values is seconds.", label = 'tab:breq')
+            fin = sum(!is.na(internal_time))) #%>%
+  #arrange(n, algorithm)
+
+lt <- xtable(bt, caption = "Results of the BREQ 128-16 Standard Benchmark (see Section \\ref{sec:breq_exp}). For each row, there is a set \\(T\\) comprised by the run times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We do not count the run time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{fin} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that did not end in timeout). The time unit of the table values is seconds.", label = 'tab:breq')
 align(lt) <- c('r', 'c', rep('r', 5), 'c')
 print(lt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, add.to.row = list(pos = list(0), command = "\\hline \\endhead ")) 
 @
 
 \begin{table}
 \label{tab:csp}
-\caption{TODO: add caption.}
+\caption{Results of the experiment focused in solving pricing subproblems of the BPP/CSP (see \autoref{sec:csp_experiments}). The results of solving the pricing problems with CPLEX are included here for completeness. The time limit was half an hour for the total run time (which includes reading input, the master time and the pricing time). The unit of all time columns is seconds. The meaning of each column is: N -- amount of instances in the respective dataset; N' -- amount of instances in which the solver coupled with the respective algorithm exceeded the time limit; Master time -- amount of time taken by CPLEX to solve the continuous relaxation (disregarding the solving of pricing problems); Pricing time -- mean time spent by the respective algorithm solving all pricing problems of a single instance of the respective dataset; \# of subproblems -- the mean amount of generated pricing problems in a single instance of the respective dataset (this amount is affected by the exact optimal solutions which were returned by the algorithm used to solve the pricing problems); Time per subproblem -- the result of the division of the two last columns. } 
+\begin{adjustbox}{max width=\textwidth, center}
 <<csp_table, results='asis'>>=
 na_mean <- function(x) {
   base::mean(x, na.rm = T)
@@ -386,7 +378,7 @@ table_rows_csp <- function(t) {
 num_columns <- 7
 #cat('\\begin{tabu} to \\linewidth { L{1} R{1} R{1} R{1} R{1} C{1} C{1} }\n')
 cat('\\begin{tabu} to \\linewidth { lrrrrrr }\n')
-cat('Dataset  & N & finished & \\makecell{Master\\\\time} & \\makecell{Pricing\\\\time} & \\makecell{Number of\\\\sub-problems} & \\makecell{Pricing time\\\\per subproblem}\\\\\\\\')
+cat('Dataset  & N & N\' & \\makecell{Master\\\\time} & \\makecell{Pricing\\\\time} & \\makecell{\\# of sub-\\\\problems} & \\makecell{Time per\\\\subproblem}\\\\\\\\')
 #cat('\\hline\n')
 cat("\\multicolumn{", num_columns, "}{c}{MTU1}\\\\\n", sep = '')
 #cat('\\hline\n')
@@ -401,5 +393,6 @@ cat("\\multicolumn{", num_columns, "}{c}{Ordered Step-off (integer, no sort)}\\\
 table_rows_csp(filter(csp_csv, algorithm == 'ordso_int_ns'))
 cat('\\end{tabu}\n')
 @
+\end{adjustbox}
 \end{table}
 

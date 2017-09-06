@@ -68,8 +68,10 @@ library(tables) # for latex and tabular
 
 \usepackage{verbatim} % for \begin{comment} remove before final version
 \usepackage{adjustbox}
-\usepackage[section]{placeins} % instead of [H]~[!ht] in floats
 
+% used together with below code to put float barriers in all (sub)sections
+% now, figures with [!htbp] have a much more sensible placement
+\usepackage[section]{placeins}
 \makeatletter
 \AtBeginDocument{%
   \expandafter\renewcommand\expandafter\subsection\expandafter{%

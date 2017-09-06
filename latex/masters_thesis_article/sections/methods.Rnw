@@ -15,9 +15,9 @@ Three of the four cores were isolated using the \emph{isolcpus} kernel flag (the
 The \emph{taskset} utility was used to execute runs in one of the isolated cores.
 All runs were executed in serial order (i.e. two runs did not coexist), as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
 
-OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with ocamlopt and the flags suggested by the authors of the code for maximum performance (\emph{-unsafe -inline 2048}).
-Fortran code (original MTU1/MTU2) was compiled with gcc-fortran and \emph{-O3 -std=f2008} flags enabled.
-C++ code (all remaining implementations) was compiled with gcc and the \emph{-O3 -std=c++11} flags enabled.
+The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with ocamlopt and the flags suggested by the authors of the code for maximum performance (\emph{-unsafe -inline 2048}).
+The Fortran code (original MTU1/MTU2) was compiled with gcc-fortran and \emph{-O3 -std=f2008} flags enabled.
+The C++ code (all remaining implementations) was compiled with gcc and the \emph{-O3 -std=c++11} flags enabled.
 
 \subsection{Algorithms and their implementations}
 
@@ -39,14 +39,14 @@ The C++ implementation uses the \verb+std::partial_sort+ procedure of the standa
 The Fortran implementation only sorted the items by efficiency, the C++ implementation breaks efficiency ties sorting by weight.
 
 The ordered step-off is a DP algorithm of about ten lines of code\cite[p.~15]{gg-66}.
-The terminating step-off is a variant of the ordered step-off which executes exactly \(n\) and up to \(c\) extra operations in order to save up to \(c\) operations.
+The terminating step-off is a variant of the ordered step-off which executes exactly \(n\) and up to \(c\) extra operations in order to try to save up to \(c\) operations.
 The algorithm proposed in~\cite{green_improv} is another variant of the ordered step-off, it will be referred as GREENDP.
 GREENDP does not use the best item~\(b\) in the DP, but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can be stopped and the remaining capacity filled with copies of \(b\). 
 If two or more items share the greatest efficiency, GREENDP verification does not work, and it is the same as the ordered step-off.
 
 The original implementations of the step-offs and GREENDP were not publicly available, so the authors made their own implementations in C++.
 All C++ implementations written by the authors are available at the authors code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at: \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
-The authors' implementations of these three algorithms made use of an speed up trick (implementation detail) that has considerable positive effect over the run times of some instances, specially the strongly correlated intances.
+The authors' implementations of these three algorithms made use of an speed up trick (implementation detail) that has reduced considerably the run times for some instances, specially the instances of the subset-sum and strongly correlated datasets.
 A direct implementation of the pseudo-code presented in the papers that proposed the algorithms would not include this speed up trick.
 All three algorithms store the index of the most efficient item of a solution when it is generated, and do not store two solutions with the same weight but only the one with the greatest profit between them.
 The trick consists in keeping the solution with the most efficient item when two or more solutions with the same weight and profit are generated.
@@ -81,7 +81,7 @@ UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms ov
 
 \subsection{Instance datasets}
 
-The datasets used in the experiments include: artificial datasets from the literature that focus on being hard-to-solve (PYAsUKP and realistic random datasets); a dataset proposed by the authors in order to make a point (BREQ dataset); a dataset based on the solving of CSP/BPP instances with the column generation technique (CSP dataset).
+The datasets used in the experiments include: artificial datasets from the literature that focus on being hard-to-solve (PYAsUKP and realistic random datasets); a dataset proposed by the authors in order to prove an hypothesis (BREQ dataset); a dataset based on the solving of CSP/BPP instances with the column generation technique (CSP dataset).
 The reasoning for not including \emph{uncorrelated} and \emph{weakly correlated} instance is presented.
 
 \subsubsection{PYAsUKP dataset}
@@ -96,6 +96,7 @@ The authors will refer to one tenth of the PYAsUKP dataset (454 instances), incl
 
 \subsubsection{Realistic Random Dataset}
 A dataset of \emph{realistic random} instances was used in the experiments, the generation procedure is based on~\cite{eduk}.
+The generation procedure follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min,max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-esim of one list to the i-esim element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
 The generation procedure follows: generate a list of~\(n\) unique random integers uniformly distributed in~\([min,max]\) and sort them by increasing value; generate a second list repeating the same procedure; combine both lists into a single item list where the weight (profit) of each item~\(i \in [1,n]\) is the value at position \(i\) of the first (second) list; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
 Simple dominance can not occur in such instances, other dominances may be present.
 Our dataset comprises ten instances with distinct random seeds for each one of eight \(n\) values (\(2^{n'}\), where \(n' \in \{10, 11, \dots, 17\}\)), totalling 80 instances.
@@ -140,10 +141,11 @@ for each item weight, the corresponding profit is calculated by the formula pres
 An often mentioned application for solving the UKP is solving the pricing subproblems generated by solving the continuous relaxation of the Set Covering Formulation  (SCF) for the classic Bin Packing Problem (BPP) and Cutting Stock Problem (CSP) using the column generation approach\cite[p. 455--459]{book_ukp_2004}\cite{gg-61}.
 In order to analyse the performance of the algorithms in the context of this application, the authors have written a small C++ program that uses the CPLEX Solver to solve the SCF and feed the pricing problems generated to a custom UKP solving algorithm.
 
-Eight datasets of BPP/CSP instances were used in the experiments (Falkenauer, Scholl, Wäscher, Schwerin, Hard28, Randomly Generated Instances, Augmented Non IRUP and Augmented IRUP Instances, and GI Instances).
+Eight datasets of BPP/CSP instances were used in the experiments. They are: Falkenauer (160 instances), Scholl (1210 instances), Wäscher (17 instances), Schwerin (200 instances), Hard28 (28 instances), Randomly Generated Instances (3840 instances), Augmented Non IRUP and Augmented IRUP Instances (ANI\&AI, 500 instances), and Gschwind and Irnich instances (GI instances, 240).
 These datasets amount to 6195 instances, all available in \url{http://or.dei.unibo.it/library/bpplib}. 
 The first seven cited datasets are described in \cite[p.~22]{survey2014}, the last one (GI Instances) comes from~\cite{irnich}.
-The code and data details needed to reproduce the experiment are described in \autoref{}.
+The code used to solve the SCF relaxation can be found in the author's repository\footnote{The C++/CPLEX code used for solving SCF relaxation is available at: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}. The code can be compiled by executing \emph{make bin/cutstock} in the folder.
+The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en})}.
 
 \subsubsection{Datasets deliberately ignored}
 
@@ -155,5 +157,5 @@ Uncorrelated instances often exhibit a great amount of simple and multiple domin
 %Consequently, the authors do not believe uncorrelated instances provide a good benchmark for UKP solving algorithms.
 
 The \emph{weakly correlated} item distribution can be seen as an \emph{strongly correlated} item distribution with more dominated items.
-The authors found redudant to present weakly correlated datasets in addition to the strongly correlated datasets, as preliminary results suggested that weakly correlated datasets times were similar to strongly correlated datasets of smaller size.
+The authors found redudant to present weakly correlated datasets in addition to the strongly correlated datasets, as preliminary results suggested that the time spent weakly correlated datasets was similar to the time spent solving strongly correlated datasets of smaller size.
 

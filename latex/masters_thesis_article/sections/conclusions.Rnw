@@ -8,6 +8,12 @@
 %The author of this thesis believes that this claim was first made in~\cite{mtu2}, and then other papers as~\cite{babayev} began repeating it.
 %The fact that only the code for MTU1 and MTU2 was readily available also did not help the situation, as some began to claim that MTU2 was the \emph{de facto} standard algorithm for the UKP, see~\cite{ukp_new_results}.
 
+``In contrast, for UKP we found that a straightforward array-based implementation of the DP approach is faster than the list-based approach. We suspect that on a modern CPU, the smaller state graph of UKP can be accessed much faster (due to caching techniques) so that the solution of the UKP subproblems as they occur in the BP benchmark instances is possible in almost no (measurable) time.''\cite[p.~19]{irnich}
+
+The GI instances dataset is the only dataset in which OSO mean run time is significantly higher than the MTU1 run time.
+The authors believe such behaviour is explained by the intent behind the creation of the GI instance dataset.
+``[...] generated new and harder CS instances. These are characterized by huge values for the capacity (in order to complicate the subproblems) and larger numbers of items with distinct lengths.''\cite[p.~]{irnich}.
+
 % TODO: maybe add to discussions?
 \begin{comment}
 \subsubsection{Weak solution dominance}

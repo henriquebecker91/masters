@@ -531,7 +531,9 @@ int main(int argc, char **argv)
       f.close();
     }
     #else // Any knapsack solver that isn't CPLEX use the ukpi variable.
-    if (num_iter < 10) {//(num_iter % 10 == 0) {
+    */
+    //if (num_iter < 10) {//(num_iter % 10 == 0) {
+    {
       std::ofstream f(string(argv[1]) + "." + name + "." + std::to_string(num_iter) + ".csv");
       f << "w;p;fpph;fppd" << hexfloat << endl;
       // NOTE: Only shows the positive profit items
@@ -542,7 +544,7 @@ int main(int argc, char **argv)
       }
       f.close();
     }
-    #endif*/
+    /*#endif*/
 
     #if KNAPSACK_SOLVER == UKP5_FP  || KNAPSACK_SOLVER == UKP5_FP_NS  || \
         KNAPSACK_SOLVER == UKP5_INT || KNAPSACK_SOLVER == UKP5_INT_NS || \

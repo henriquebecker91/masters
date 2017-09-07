@@ -117,6 +117,10 @@ int main(int argc, char **argv)
   #endif
   cout << "algorithm_name: " << name << endl;
 
+  // to save the individual pricing times in a csv
+  std::ofstream times_csv(string(argv[1]) + "." + name + ".times.csv");
+  times_csv << "num_iter;knapsack_time;sort_time" << hexfloat << endl;
+
   IloNum      rollWidth;
   IloNumArray amount(env);
   IloNumArray size(env);
@@ -533,7 +537,9 @@ int main(int argc, char **argv)
     #else // Any knapsack solver that isn't CPLEX use the ukpi variable.
     */
     //if (num_iter < 10) {//(num_iter % 10 == 0) {
+      // NOTE: Only shows the positive profit items
     {
+      times_csv << num_iter << ";" << curr_knapsack_time << ";" << curr_sort_time << endl;
       std::ofstream f(string(argv[1]) + "." + name + "." + std::to_string(num_iter) + ".csv");
       f << "w;p;fpph;fppd" << hexfloat << endl;
       // NOTE: Only shows the positive profit items
@@ -577,6 +583,7 @@ int main(int argc, char **argv)
     }
   }
 
+  times_csv.close();
   env.end();
 
   return EXIT_SUCCESS;

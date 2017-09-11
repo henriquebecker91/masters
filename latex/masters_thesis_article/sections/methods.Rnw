@@ -36,7 +36,7 @@ The MTU2 implementations differed in the algorithm used to partially sort the it
 The original algorithm description in~\cite{mtu2} did not specify the exact method for performing the partial sorting.
 The original Fortran implementation uses a complex algorithm developed by one of the authors of MTU2 in~\cite{partial_sort_martello} to find the k\textsuperscript{th} most efficient item in an unsorted array (and then sort).
 The C++ implementation uses the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+.
-The Fortran implementation only sorted the items by efficiency, the C++ implementation breaks efficiency ties sorting by weight.
+The Fortran implementation only sorted the items by nonincreasing efficiency, the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
 
 The ordered step-off is a DP algorithm of about ten lines of code\cite[p.~15]{gg-66}.
 The terminating step-off is a variant of the ordered step-off which executes exactly \(n\) and up to \(c\) extra operations in order to try to save up to \(c\) operations.
@@ -46,10 +46,12 @@ If two or more items share the greatest efficiency, GREENDP verification does no
 
 The original implementations of the step-offs and GREENDP were not publicly available, so the authors made their own implementations in C++.
 All C++ implementations written by the authors are available at the authors code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at: \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
+As the C++ implementations of MTU1 and MTU2, our implementations change the items sorting by nonincreasing efficiency (specified by these three algorithms) to an items sorting by nonincreasing efficiency with efficiency ties sorted by nondecreasing weight.
+
 The authors' implementations of these three algorithms made use of an speed up trick (implementation detail) that has reduced considerably the run times for some instances, specially the instances of the subset-sum and strongly correlated datasets.
 A direct implementation of the pseudo-code presented in the papers that proposed the algorithms would not include this speed up trick.
-All three algorithms store the index of the most efficient item of a solution when it is generated, and do not store two solutions with the same weight but only the one with the greatest profit between them.
-The trick consists in keeping the solution with the most efficient item when two or more solutions with the same weight and profit are generated.
+In these three algorithms, the index of the item with the lowest index within a solution is stored together with the solution, also they do not store two solutions with the same weight but only the one with the greatest profit between them.
+The trick consists in keeping the solution with the item of lowest index when two or more solutions with the same weight and profit are generated.
 The original pseudocode of the three algorithms simply discarded newly generated solutions if they had the same weight and profit of an already found solution.
 
 The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered in~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite{ukp_new_results}\cite{eduk}\cite[p.~223]{book_ukp_2004}.

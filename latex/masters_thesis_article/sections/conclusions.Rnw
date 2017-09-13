@@ -4,7 +4,7 @@
 With exception of the BREQ dataset, a simple DP algorithm from 1966 (Terminating Step-Off, TSO) had lower mean times than the only known implementation of the current state-of-the-art-algorithm (EDUK2/PYAsUKP).
 Such results bring up two main questions the authors will try to address: 1) Why the TSO was abandoned and not considered in recent comparisons? How the TSO outperformed the current state-of-the-art after five decades of study of the UKP?
 
-The authors believe that artificial instances and limited comparisons are the answer to why TSO was not considered in recent comparisons.
+The authors believe that limited comparisons and changing artificial instance datasets are the answer to why TSO was not considered in recent comparisons.
 As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison\cite{mtu1}.
 In the experiments presented in~\cite{mtu1}, the TSO algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
 Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was not even one order of magnitude apart.
@@ -12,16 +12,19 @@ Also, the trend observed could indicate that for bigger instances, the OSO/TSO a
 
 An algorithm is dominated by other in the context of a dataset.
 The comparisons found in the literature often: 1) only compared a newly proposed algorithm to the algorithm that `won' the last comparison; 2) proposed new artificial datasets based on some definition of being `harder to solve'.
-These two characteristics leaded to the following scenario: algorithm B dominates algorithm A in the context of dataset D1; algorithm C dominates algorithm B in the context of dataset D2; nothing guarantees that algorithm A does not dominate algorithm C in the context of dataset D2.
+These two characteristics leaded to the following scenario: algorithm B dominates algorithm A in the context of dataset D1; algorithm C dominates algorithm B in the context of dataset D2; nothing guarantees that algorithm A does not dominate algorithm C in the context of dataset D2, algorithm A was not included in the last comparison.
 The new dataset proposed is harder to solve because it had characteristics that made it to be harder to solve by some algorithm in the comparison (often the `loser').
-It was not considered if those characteristics also negatively affect the algorithms excluded from comparison, or if they are algorithm or approach-specific.
+It was not considered if the characteristics that make it harder also negatively affect the algorithms excluded from comparison, or if they are algorithm or approach-specific.
 A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items\cite{mtu2}; EDUK was compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\).
 Even if TSO was included in the comparison between MTU1 and MTU2, it would probably perform worse than MTU2 as the dataset favored the B\&B approach.
 However, as we can see from the experiments of this work, TSO did perform well on the most recent instance datasets, which favor the DP approach. 
-Not specifically EDUK, but any optimized DP algorithm, would win against B\&B in the context of a dataset hard-to-solve by the B\&B approach.
+Not specifically EDUK, but any optimized DP algorithm, would outperform a B\&B algorithm in the context of a dataset that is hard to solve by the B\&B approach.
 
-The authors created their own new instance dataset (BREQ) to illustrate how such behaviour could go on.
-CONTINUE HERE
+The authors proposed the BREQ item distribution and dataset to further illustrate how artificial datasets that favor one approach over another can be easily created.
+The BREQ instances were hard to solve by pure DP algorithms, and very easy to solve by algorithms that made use of B\&B (or upper bounds).
+If they were the only instances considered, then MTU2 would be considered the best algorithm, however, considering all remaining datasets, MTU2 often come last.
+The BREQ instances do not suffer from the same richness of simple, multiple and collective dominated items that led uncorrelated and weakly correlated instances to be critisized and abandoned.
+However, they are very rich in threshold dominance, and 
 
 The effects of artificial instances in shaping what are considered the best algorithms for UKP is not limited to the instances proposed for the UKP.
 The authors of \cite{irnich} created the GI instances to be harder to solve by their their column generation implementation: 

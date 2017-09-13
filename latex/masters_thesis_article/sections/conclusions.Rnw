@@ -1,67 +1,48 @@
 \section{General Discussion and Conclusions}
 \label{sec:discussion}
 
-%However, the instances were too small to draw strong conclusions, and the relative difference between G.G. and MTU1 average times was not even one order of magnitude apart.
-%The G.G. algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
-%This trend could indicate that for big instances, the G.G. algorithm would have better times than MTU1 (e.g. the G.G. algorithm could have a costly initialization process but a better average-case asymptotic complexity).
-%The B\&B approach was established in the seventies as the most efficient approach for solving the UKP, what is greatly a consequence of the datasets, items distributions, and generation parameters used at the time.
-%The author of this thesis believes that this claim was first made in~\cite{mtu2}, and then other papers as~\cite{babayev} began repeating it.
-%The fact that only the code for MTU1 and MTU2 was readily available also did not help the situation, as some began to claim that MTU2 was the \emph{de facto} standard algorithm for the UKP, see~\cite{ukp_new_results}.
+With exception of the BREQ dataset, a simple DP algorithm from 1966 (Terminating Step-Off, TSO) had lower mean times than the only known implementation of the current state-of-the-art-algorithm (EDUK2/PYAsUKP).
+Such results bring up two main questions the authors will try to address: 1) Why the TSO was abandoned and not considered in recent comparisons? How the TSO outperformed the current state-of-the-art after five decades of study of the UKP?
+
+The authors believe that artificial instances and limited comparisons are the answer to why TSO was not considered in recent comparisons.
+As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison\cite{mtu1}.
+In the experiments presented in~\cite{mtu1}, the TSO algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
+Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was not even one order of magnitude apart.
+Also, the trend observed could indicate that for bigger instances, the OSO/TSO algorithm would have lower times than MTU1, as their relative diference was diminushing. %(e.g. the OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
+
+An algorithm is dominated by other in the context of a dataset.
+The comparisons found in the literature often: 1) only compared a newly proposed algorithm to the algorithm that `won' the last comparison; 2) proposed new artificial datasets based on some definition of being `harder to solve'.
+These two characteristics leaded to the following scenario: algorithm B dominates algorithm A in the context of dataset D1; algorithm C dominates algorithm B in the context of dataset D2; nothing guarantees that algorithm A does not dominate algorithm C in the context of dataset D2.
+The new dataset proposed is harder to solve because it had characteristics that made it to be harder to solve by some algorithm in the comparison (often the `loser').
+It was not considered if those characteristics also negatively affect the algorithms excluded from comparison, or if they are algorithm or approach-specific.
+A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items\cite{mtu2}; EDUK was compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\).
+Even if TSO was included in the comparison between MTU1 and MTU2, it would probably perform worse than MTU2 as the dataset favored the B\&B approach.
+However, as we can see from the experiments of this work, TSO did perform well on the most recent instance datasets, which favor the DP approach. 
+Not specifically EDUK, but any optimized DP algorithm, would win against B\&B in the context of a dataset hard-to-solve by the B\&B approach.
+
+The authors created their own new instance dataset (BREQ) to illustrate how such behaviour could go on.
+CONTINUE HERE
+
+The effects of artificial instances in shaping what are considered the best algorithms for UKP is not limited to the instances proposed for the UKP.
+The authors of \cite{irnich} created the GI instances to be harder to solve by their their column generation implementation: 
+``[...] generated new and harder CS instances. These are characterized by huge values for the capacity (in order to complicate the subproblems) and larger numbers of items with distinct lengths.''\cite[p.~18]{irnich}.
+Their implementation used a DP algorithm to solve pricing problems.
+The characteristics of these newly proposed BPP/CSP instances made the pricing problems harder to solve by a DP algorithm, but not necessarily by a B\&B algorithm, which is less affected by parameters like the knapsack capacity.
+To evaluate which is the best UKP algorithm to solve pricing subproblems, the BPP/CSP instances had also to be representative of real-world instances, otherwise another layer of bias is laiden.
+The ANI\&AI instances, which MTU1 had difficulties to solve the pricing problems, are also instances created with the purpose to be hard to solve\cite[p.~22]{survey2014}.
+The definition of hard to solve is different between the GI and ANI\&AI instances, as in ANI\&AI instances the objective is to make B\&B algorithms for the BPP/CSP struggle to prove the optimality of a solution for a BPP/CSP instance.
+The way such characteristic makes the pricing problems from ANI\&AI instances harder to solve by MTU1 is not so clear as in the case of GI instances and DP algorithms for the UKP.
+
+The answer to how the TSO outperformed EDUK2 seems to be twofold: the evolution of caching techniques and the choice of data structures; the overlook of how TSO simple mechanism already exploited dominance and periodicity before some dominance relations (as threshold and collective dominance) were formally defined.
 
 ``In contrast, for UKP we found that a straightforward array-based implementation of the DP approach is faster than the list-based approach. We suspect that on a modern CPU, the smaller state graph of UKP can be accessed much faster (due to caching techniques) so that the solution of the UKP subproblems as they occur in the BP benchmark instances is possible in almost no (measurable) time.''\cite[p.~19]{irnich}
 
-The GI instances dataset is the only dataset in which OSO mean run time is significantly higher than the MTU1 run time.
-The authors believe such behaviour is explained by the intent behind the creation of the GI instance dataset.
-``[...] generated new and harder CS instances. These are characterized by huge values for the capacity (in order to complicate the subproblems) and larger numbers of items with distinct lengths.''\cite[p.~]{irnich}.
+% TRANFORM IN BREQ PARAGRAPH, AND NOTE HOW 
+%MTU2 is the best algorithm between eight algorithms for one dataset (see Section \ref{sec:breq_exp}), and is not competitive for other five datasets (see Section \ref{sec:pya_exp}).
+%The literature review, and the further discussion of instance datasets and solving approaches, have shown \emph{how the choice of datasets defined the best algorithm through the last fifty years}.
+%\emph{reevaluation of the evidence chain.}
 
-% TODO: maybe add to discussions?
-\begin{comment}
-\subsubsection{Weak solution dominance}
-\label{sec:ukp5_sol_dom_expl}
-
-% TODO: ADD THIS SOMEPLACE ELSE
-In this section we will give a more detailed explanation of the workings of the previously cited weak solution dominance.
-We use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\).
-The notation~\(max_{ix}(s)\) has analogue meaning.
-
-When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u\), where~\(t \subset u\), are not generated. 
-If~\(s\) dominates~\(t\), and~\(t \subset u\), and~\(max_{ix}(u - t) \leq min_{ix}(t)\), then~\(u\) is not generated by UKP5. 
-For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by UKP5, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
-Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it will be dominated by a solution~\(u'\) where~\(s \subset u'\) anyway. 
-It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
-
-\subsubsection{Implementation details}
-\label{sec:ukp5_periodicity}
-
-With the purpose of making the initial explanation simpler, we have omitted some steps that are relevant to the algorithm performance, but not essential for assessing its correctness. 
-A complete overview of the omitted steps is presented in this section.
-
-\end{comment}
-
-
-\emph{An algorithm is dominated by other in the context of a dataset.}
-An example presented in this thesis is MTU2.
-MTU2 is the best algorithm between eight algorithms for one dataset (see Section \ref{sec:breq_exp}), and is not competitive for other five datasets (see Section \ref{sec:pya_exp}).
-The literature review, and the further discussion of instance datasets and solving approaches, have shown \emph{how the choice of datasets defined the best algorithm through the last fifty years}.
-
-It is worth mentioning that, taking into account the historical context, the choices made by previous researchers were sound and reasonable.
-Despite this, an efficient DP algorithm was ignored for decades when it was relevant for the comparisons and experiments realized.
-
-\emph{the bibliographical research is important, and should be followed by a reevaluation of the evidence chain.}
-
-\section{UKP-specific knowledge contributions}
-
-An outline of the UKP-specific knowledge contributions follows. It is ordered by the level of importance the author gives to them.
-\begin{enumerate}
-\item The knowledge that an old DP algorithm outperforms a state-of-the-art hybrid algorithm, in the most recent benchmark dataset.
-\item The concept of solution dominance, and its implications for periodicity bounds and the four previously established dominance relations.
-\item Evidence that the B\&B approach worst-case can arise when solving pricing subproblems of BPP/CSP.
-%\item Evidence that variations in the optimal solution returned by the pricing problem solver can have a strong effect in the number of pricing problems generated.
-%\item Evidence that UKP algorithms that are memory intensive should be executed serially for comparison.
-\item Evidence that converting the pricing problem profit values to large integers do not cause significant loss.
-\end{enumerate}
-
-The author believes that the first contribution is already well exposed, either in Section \ref{sec:pya_exp}, or in \cite{sea2016}.
+%\item The concept of solution dominance, and its implications for periodicity bounds and the four previously established dominance relations.
 The technical details of the second contribution (i.e. the concept of solution dominance) were already discussed (see Section \ref{sec:ukp5_sol_dom_expl}), but not how it impacts the previous techniques described in the literature.
 The weak solution dominance reduces the further improvement that can be found by applying the four dominance relations and/or periodicity bounds in the same algorithm.
 The weak solution dominance and the four dominance relations are two different ways of dealing with the same task.
@@ -88,11 +69,13 @@ If an upper bound on \(y^+\) could be used to stop the computation before it rea
 In an algorithm with periodicity checking, the utility of upper bounds on the periodicity capacity~\(y^+\) is restricted to saving memory and saving the time spent initializing such saved memory.
 Note that some algorithms would not even have such benefits, as they do not allocate or initialize the memory in advance.
 
-The evidence that constitutes the third knowledge contribution can be found in Section \ref{sec:csp_experiments}.
-In the majority of the instances, the time spent by both the B\&B and DP approaches when solving pricing problems was significantly smaller than the times solving the master problems of the same instance.
-Nevertheless, for some instances, the B\&B approach has presented its worst-case behavior and, in these instances, more time was spent solving pricing subproblems then solving the master problem.
+The authors do not discard the possibility of a new EDUK2 implementation having better results, nor dismiss the fact that EDUK2 design decision of computing all optimal solutions, can have a slowing effect over it (specially in subset-sum instances).
 
-While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
+% MINOR CONTRIBUTIONS?
+%\item Evidence that the B\&B approach worst-case can arise when solving pricing subproblems of BPP/CSP.
+%\item Evidence that converting the pricing problem profit values to large integers do not cause significant loss.
+
+%While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
 
 \section{Future work}
 \label{sec:future_works}

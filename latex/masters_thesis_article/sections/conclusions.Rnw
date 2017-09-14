@@ -13,18 +13,17 @@ Also, the trend observed could indicate that for bigger instances, the OSO/TSO a
 An algorithm is dominated by other in the context of a dataset.
 The comparisons found in the literature often: 1) only compared a newly proposed algorithm to the algorithm that `won' the last comparison; 2) proposed new artificial datasets based on some definition of being `harder to solve'.
 These two characteristics leaded to the following scenario: algorithm B dominates algorithm A in the context of dataset D1; algorithm C dominates algorithm B in the context of dataset D2; nothing guarantees that algorithm A does not dominate algorithm C in the context of dataset D2, algorithm A was not included in the last comparison.
-The new dataset proposed is harder to solve because it had characteristics that made it to be harder to solve by some algorithm in the comparison (often the `loser').
-It was not considered if the characteristics that make it harder also negatively affect the algorithms excluded from comparison, or if they are algorithm or approach-specific.
-A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items\cite{mtu2}; EDUK was compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\).
-Even if TSO was included in the comparison between MTU1 and MTU2, it would probably perform worse than MTU2 as the dataset favored the B\&B approach.
-However, as we can see from the experiments of this work, TSO did perform well on the most recent instance datasets, which favor the DP approach. 
-Not specifically EDUK, but any optimized DP algorithm, would outperform a B\&B algorithm in the context of a dataset that is hard to solve by the B\&B approach.
+The newly proposed dataset is often harder to solve because it had characteristics that made it to be harder to solve by some algorithm in the comparison (often the `loser').
+It is not considered if the characteristics that make it harder also negatively affect the algorithms excluded from comparison, or if they are algorithm or approach-specific.
+A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items\cite{mtu2}; EDUK(2) was compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\)\cite{eduk}\cite{eduk2}.
+To be fair, the objective in these papers was to show how the newly proposed algorithm was not negatively impacted by some instance characteristics as the older algorithm.
+However, in such experiments, no competitive algorithm of the same solving approach as the newly proposed algorithm (DP or B\&B) was included.
 
 The authors proposed the BREQ item distribution and dataset to further illustrate how artificial datasets that favor one approach over another can be easily created.
 The BREQ instances were hard to solve by pure DP algorithms, and very easy to solve by algorithms that made use of B\&B (or upper bounds).
-If they were the only instances considered, then MTU2 would be considered the best algorithm, however, considering all remaining datasets, MTU2 often come last.
-The BREQ instances do not suffer from the same richness of simple, multiple and collective dominated items that led uncorrelated and weakly correlated instances to be critisized and abandoned.
-However, they are very rich in threshold dominance, and 
+If they were the only instances considered, then MTU2 would be considered the best algorithm, however, considering all remaining datasets, MTU2 often comes last.
+The BREQ instances do not suffer from the same richness of simple, multiple and collective dominated items that led uncorrelated instances to be critisized and abandoned.
+However, threshold dominance is very common in BREQ instances and, as far the authors know, no real-world instances follow the BREQ distribution, so the authors do not suggest their use in future experiments.
 
 The effects of artificial instances in shaping what are considered the best algorithms for UKP is not limited to the instances proposed for the UKP.
 The authors of \cite{irnich} created the GI instances to be harder to solve by their their column generation implementation: 
@@ -34,45 +33,25 @@ The characteristics of these newly proposed BPP/CSP instances made the pricing p
 To evaluate which is the best UKP algorithm to solve pricing subproblems, the BPP/CSP instances had also to be representative of real-world instances, otherwise another layer of bias is laiden.
 The ANI\&AI instances, which MTU1 had difficulties to solve the pricing problems, are also instances created with the purpose to be hard to solve\cite[p.~22]{survey2014}.
 The definition of hard to solve is different between the GI and ANI\&AI instances, as in ANI\&AI instances the objective is to make B\&B algorithms for the BPP/CSP struggle to prove the optimality of a solution for a BPP/CSP instance.
-The way such characteristic makes the pricing problems from ANI\&AI instances harder to solve by MTU1 is not so clear as in the case of GI instances and DP algorithms for the UKP.
+The way such characteristic makes the pricing problems from ANI\&AI instances harder to solve by MTU1 is not so clear as in the case of GI instances and DP algorithms.
 
-The answer to how the TSO outperformed EDUK2 seems to be twofold: the evolution of caching techniques and the choice of data structures; the overlook of how TSO simple mechanism already exploited dominance and periodicity before some dominance relations (as threshold and collective dominance) were formally defined.
+The authors believe many factors allowed their TSO implementation to outperform EDUK2 PYAsUKP implementation.
+Some of them are: the weak solution dominance implicitly applied by TSO seems to be as effective as the explicit simple, multiple, collective and threshold dominance applied by EDUK2; TSO implementation has better space locality; TSO retrieve only one optimal solution.
 
-``In contrast, for UKP we found that a straightforward array-based implementation of the DP approach is faster than the list-based approach. We suspect that on a modern CPU, the smaller state graph of UKP can be accessed much faster (due to caching techniques) so that the solution of the UKP subproblems as they occur in the BP benchmark instances is possible in almost no (measurable) time.''\cite[p.~19]{irnich}
+The authors did not try to directly compare the effectiveness of the EDUK2 and the TSO dominance approach, as such would need changes in the EDUK2 code to allow gathering extra data.
+However, as the TSO finishes early if the best item is the only item which could be added to the solution, this means that TSO can discard every other item with its dominance strategy, as EDUK2 does.
 
-% TRANFORM IN BREQ PARAGRAPH, AND NOTE HOW 
-%MTU2 is the best algorithm between eight algorithms for one dataset (see Section \ref{sec:breq_exp}), and is not competitive for other five datasets (see Section \ref{sec:pya_exp}).
-%The literature review, and the further discussion of instance datasets and solving approaches, have shown \emph{how the choice of datasets defined the best algorithm through the last fifty years}.
-%\emph{reevaluation of the evidence chain.}
+The EDUK2 PYAsUKP implementation uses lazy lists to store solutions, while our TSO implementation uses an array.
+The instance \verb+sc_a-5n10000wmin110000-9-c9008057.ukp+ was the PYAsUKP dataset (strongly correlated) instance in which EDUK2 did spend more time to solve (416 seconds, TSO spent about one second to solve the same instance).
+By the use of the perf profiler, it was possible to verify that EDUK2 PYAsUKP implementation executed about \(1122\) instructions per cache miss, while TSO executed about \(288653\) instructions per cache miss.
+The performance gain for using an array-based implementation was also observed in \cite{irnich}, which tried to follow the approach suggested by EDUK in their pricing problem solver: ``In contrast, for UKP we found that a straightforward array-based implementation of the DP approach is faster than the list-based approach. We suspect that on a modern CPU, the smaller state graph of UKP can be accessed much faster (due to caching techniques) so that the solution of the UKP subproblems as they occur in the BP benchmark instances is possible in almost no (measurable) time.''\cite[p.~19]{irnich}
 
-%\item The concept of solution dominance, and its implications for periodicity bounds and the four previously established dominance relations.
-The technical details of the second contribution (i.e. the concept of solution dominance) were already discussed (see Section \ref{sec:ukp5_sol_dom_expl}), but not how it impacts the previous techniques described in the literature.
-The weak solution dominance reduces the further improvement that can be found by applying the four dominance relations and/or periodicity bounds in the same algorithm.
-The weak solution dominance and the four dominance relations are two different ways of dealing with the same task.
-The first involves keeping an index in each solution to mark which items can still be added to the solution.
-The second involves keeping a global list of undominated items, 
-%Applying one of the approaches reduce how much the other can further improve the algorithm.
+In \cite{eduk}, it is said that EDUK retrieves all optimal solutions for an UKP instance.
+In order to do this, the TSO could not make use of the speed-up trick mentioned in \autoref{sec:methods}, what would affect its performance considerably in strongly correlated and subset-sum datasets, which often have distinct solutions with the same weight and profit.
+Also, the application of the dominances would need to be less strict as, for example, for two items \(j\) and \(i\) that respect \(w_i < w_j\) and \(p_i = p_j\), \(j\) can yet be present in an optimal solution.
 
-The approach used by EDUK gives a strong guarantee that any dominated item will be discarded and never used again.
-However, the weak solution dominance described in Section \ref{sec:ukp5} is implemented with almost no overhead, and seems to have a very similar impact in the removal of dominated items/solutions.
-One could argue that EDUK can be at disadvantage for being implemented in a functional language, or that better implementations of the algorithm could be written, the author can not refute such claims.
-Maybe new implementations of the EDUK approach can show the superiority of applying the four dominances in the EDUK fashion.
-However, for the tested datasets, the weak solution dominance approach seems to be the most efficient one.
-
-The periodicity check exists both in algorithms like EDUK/EDUK2 and the old terminating step-off.
-In EDUK/EDUK2 it is a consequence of applying all four dominances repeatedly, and in the terminating step-off it is a consequence of applying weak solution dominance.
-A periodicity check can save effort by stopping the computation at a capacity~\(y < c\).
-However, in all algorithms that implement the periodicity check, when this early termination happens, it is because the only item that could possibly be used is the best item.
-Consequently, in each one of these last positions (between \(y\) and \(c\)), the algorithm would not execute \(O(n)\) steps anymore, but only \(O(1)\) steps.
-The periodicity check only saves the effort of iterating these last \(c - y\) positions.
-It is a minor improvement over the application of weak solution dominance, or the application of the four item dominances.
-
-The periodicity check (and, by consequence, the dominances) also reduces the utility of periodicity bounds.
-If an upper bound on \(y^+\) could be used to stop the computation before it reaches capacity \(c\), then the periodicity check would stop the computation even before the capacity predicted by the upper bound (with slightly more overhead).
-In an algorithm with periodicity checking, the utility of upper bounds on the periodicity capacity~\(y^+\) is restricted to saving memory and saving the time spent initializing such saved memory.
-Note that some algorithms would not even have such benefits, as they do not allocate or initialize the memory in advance.
-
-The authors do not discard the possibility of a new EDUK2 implementation having better results, nor dismiss the fact that EDUK2 design decision of computing all optimal solutions, can have a slowing effect over it (specially in subset-sum instances).
+In conclusion, what the authors hope the reader will take from this piece of work can be summarized as follows: 
+the choice of artificial instance datasets had an important role defining which algorithms were considered the best by the literature; the simple, multiple, collective and threshold dominance relations can be generalized to solution dominance, and the application of a weak version of it show similar efficiency.
 
 % MINOR CONTRIBUTIONS?
 %\item Evidence that the B\&B approach worst-case can arise when solving pricing subproblems of BPP/CSP.

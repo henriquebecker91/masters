@@ -159,5 +159,5 @@ Uncorrelated instances often exhibit a great amount of simple and multiple domin
 %Consequently, the authors do not believe uncorrelated instances provide a good benchmark for UKP solving algorithms.
 
 The \emph{weakly correlated} item distribution can be seen as an \emph{strongly correlated} item distribution with more dominated items.
-The authors found redudant to present weakly correlated datasets in addition to the strongly correlated datasets, as preliminary results suggested that the time spent weakly correlated datasets was similar to the time spent solving strongly correlated datasets of smaller size.
+The authors found redudant to present weakly correlated datasets in addition to the strongly correlated datasets, as preliminary results suggested that the time spent solving weakly correlated datasets was similar to the time spent solving strongly correlated datasets of smaller size.
 

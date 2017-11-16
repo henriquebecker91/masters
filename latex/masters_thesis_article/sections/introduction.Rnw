@@ -49,6 +49,7 @@ We refer to the item with greatest efficiency among all items of an specific ins
 In order to contextualize the reader, the authors present some selected papers related to the UKP and a summary of their relevance for the UKP.
 
 \begin{table}[!htb]
+\renewcommand{\arraystretch}{1.5}
 \label{tab:prior_work}
 %\begin{adjustbox}{max width=\textwidth, center}
 \begin{tabu}{clp{10cm}}
@@ -60,7 +61,7 @@ Year & Ref. & Notes\\
 1990 & \cite{mtu2} & Datasets of instances with up to 250,000 items (but rich in simple and multiple dominance) are proposed. MTU2 is proposed as an improvement of MTU1 for such dataset.\\
 %1997 & \cite{zhu_dominated} & Uncorrelated datasets are shown to  \\
 %1997 & \cite{babayev} & A new solving approach, more similar to dynamic programming than B\&B \\
-1998 & \cite{ukp_new_results,eduk} & The EDUK (a dynamic programming algorithm) is proposed. Old datasets receive some criticism for their dominance. New artificial datasets without the same flaws of the previous datasets are proposed. EDUK is compared to MTU2. The threshold dominance is proposed. EDUK is the first algorithm to exploit collective and threshold dominance.\\
+1998 & \cite{ukp_new_results,eduk} & The EDUK (a dynamic programming algorithm) is proposed. Threshold dominance is proposed. EDUK is the first algorithm to exploit collective and threshold dominance. Old datasets receive some criticism for their dominance. New artificial datasets without the same flaws of the previous datasets are proposed. EDUK is compared to MTU2.\\
 %2000 & \cite{eduk} & The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments. \\
 2004 & \cite{book_ukp_2004} & A book on knapsack problems cite EDUK as state-of-the-art dynamic programming for the UKP. \\
 2009 & \cite{pya} & EDUK2 is proposed, it consists in EDUK hybridized with B\&B. The datasets are updated to be `harder'. MTU2 is used in some comparisons, but not all because it has the risk of integer overflow. EDUK2 is compared to EDUK.\\ %Such datasets are hard for B\&B, and the hybrid method is only compared to B\&B. The hybrid method is the new state-of-the-art. \\
@@ -115,13 +116,13 @@ The periodicity property is a direct consequence of the threshold dominance.
 Except by the best item~\(b\), every item~\(j\) (\(j \neq b\)) is threshold dominated for some~\(\alpha_j\).
 For example, given that~\(y\) is the lowest common multiple of~\(w_b\) and~\(w_j\),~\(\beta_j = \frac{y}{w_b}\) and~\(\alpha_j = \frac{y}{w_j}\), then~\(\beta_j \times w_b \leq \alpha_j \times w_j\) and~\(\beta_j \times p_b \geq \alpha_j \times p_j\). %, since \(e_b \geq e_j\) (from the definition of the best item).
 Consequently, the threshold dominance defines a constraint~\(x_j < \alpha_j\) on every item~\(j\), and solutions that break such constraints can be safely ignored.
-All solutions that do not break such constraints and do not make use of the best item weight less than~\(y' = \sum \alpha_j \times w_j\).
-Consequently, an optimal solution for any capacity greater than \(y'\) can be obtained in the fashion described in the last paragraph.
-The capacity~\(y'\) is a upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}. %The computation of the exact value of~\(y^+\) is very expensive.
+All solutions that do not break such constraints and do not make use of the best item weight less than~\(y'' = \sum \alpha_j \times w_j\).
+Consequently, an optimal solution for any capacity greater than \(y''\) can be obtained in the fashion described in the last paragraph.
+The capacity~\(y''\) is a upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}. %The computation of the exact value of~\(y^+\) is very expensive.
 Computing~\(y^+\) would equal to solving the UKP for capacities~\(y^+\) and lower while checking for threshold dominance.
 An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in polynomial time, before starting the solving process.
 
-\subsection{The ordered step-off and (weak) solution dominance}
+\section{The ordered step-off and (weak) solution dominance}
 
 The ordered step-off is a simple dynamic programming algorithm for the UKP from \cite{gg-66}, it is described in Algorithm 1.%\autoref{alg:oso}. % ref not working with algorithm
 
@@ -177,76 +178,32 @@ The ordered step-off is a simple dynamic programming algorithm for the UKP from 
 \end{algorithm}
 
 Solution dominance is a dominance relation proposed by the authors.
-Solution dominance generalize the four previous described dominances.
+Solution dominance generalize simple, multiple, collective and threshold dominance.
 A solution \(t\) is solution dominated by a different solution \(s\) iff \(w_s \leq w_t\) and \(p_s \geq p_t\).
 If a solution \(q\) is solution dominated, then any solution that is a superset of \(q\) could be discarded (or not generated) without risk of discarding all optimal solutions.
-Without a way to enforce such dominance relation (with reasonable overhead), the concept of solution dominance is of little relevance.
-However, the authors will show below 
+The concept of solution dominance alone is of little use if there is not a way to design an algorithm that makes use of it without excessive overhead.
+The ordered step-off applies a weaker version of the concept of solution dominance.
 
-WORK IN PROGRESS IGNORE UNTIL END OF INTRODUCTION
-
-We use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\).
+The authors will use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\).
 The notation~\(max_{ix}(s)\) has analogue meaning.
 
 When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u\), where~\(t \subset u\), are not generated. 
 If~\(s\) dominates~\(t\), and~\(t \subset u\), and~\(max_{ix}(u - t) \leq min_{ix}(t)\), then~\(u\) is not generated by the ordered step-off. 
-For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by ordered step-off, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
+For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by ordered step-off, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the ordered equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
 Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it will be dominated by a solution~\(u'\) where~\(s \subset u'\) anyway. 
 It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
 
-%After examination, it becomes clear that these two old algorithms indirectly apply all four dominances.
-%By \emph{indirectly}, we means that, in the course of these algorithms execution, they eventually stop using dominated items to create new solutions, and that happens without testing items for each one of the four dominance relations previously explained.%, and then removing the dominated items from a global items list.
-%The approach used by these old algorithms is focused on solutions, not individual items.
-%Consequently, it would be more adequate to say that they make use of some sort of \emph{solution dominance}.
-%Ideally, given a solution~\(s\) and a solution~\(t\) (both \(s\) and \(t\) can be composed of any items), if \(w_s \leq w_t\) and \(p_s \geq p_t\), then an optimized algorithm could not generate any solutions that are a superset of~\(t\) (as the respective supersets of~\(s\) would dominate them anyway) without loss to the value of the optimal solution..
-%Such dominance relation would generalize all previous dominances, as the dominated items can be seen as single item solutions (or multiple item solutions, in the case of threshold dominance).
+EDUK2 is the state-of-the-art algorithm for the UKP, it exploits the simple, multiple, collective and threshold dominances.
+EDUK2 keeps a global item list, if an item is found to be dominated, it is removed from the list.
+If the global item list is reduced to a single item (the best item), the algorithm stop. 
+The ordered step-off keeps an index in each solution to mark which items can still be added to that solution.
+The terminating step-off is a variant of the ordered step-off which detects if the only item that can be yet used is the best item, if happens to be so, the algorithm stop.
 
-%Those old algorithms do not apply this ideal solution dominance, but a weaker version of it.
-%This weaker version of solution dominance does not avoid generating every solution that is a superset from a dominated solution, but it can be implemented with almost no overhead.
-%As this is algorithm-specific, it will be further discussed in Section~\ref{sec:ukp5_sol_dom_expl}.
-
-%\subsubsection{Periodicity and periodicity bounds}
-%\label{sec:periodicity}
-
-%The UKP has an obvious periodic property that for every knapsack capacity that is a multiple of the best item's weight, the optimal solution for that knapsack capacity is~\(\frac{c}{w_b}\) copies of the best item (it's clearly the most efficient use that can be made of such capacity). The UKP has also a not-so-obvious and more interesting periodic property that states that:
-
-
-%We are not aware of the existence of an algorithm for solving the UKP that compute the exact value of~\(y^+\) before starting to solve the UKP.
-%We know of algorithms that compute an \emph{upper bound} on the~\(y^+\) capacity value, as the one presented in the previous paragraph (
-
-%Given a solution \(s\) in which \(x_j = \alpha_j - 1\) for each item \(j \neq b\), no item \(j\) can be added \(s\) without breaking the bounds.
-%For any capacity \(y\) in which \(c \geq y > w_s\), an optimal solution can be found by computing the optimal solution for \(c - w_s\)
-
-%The threshold dominance property states that, if a solution~\(s\) dominates solution~\(t\), and~\(t\) contains only~\(n\) copies of the same item type~\(j\), then solutions with~\(n\) or more copies of~\(j\) can be be replaced by solutions using~\(s\) instead (without loss to the value of the optimal solution).
-%The periodicity property states that after some capacity~\(y^+\) we can obtain optimal solutions only by adding copies of the best item to the optimal solutions from capacities \(y^+\) or below (all other items are not relevant anymore).
-%The link between these two properties is that \emph{for a sufficiently large capacity, solutions composed of copies of the best item will threshold dominate solutions composed of copies of any other item}.
-
-%If one algorithm checks for threshold dominance periodically, it can stop when all non-best items have been threshold dominated by the best item.
-%Such algorithm would not benefit much from computing an upper bound on the~\(y\) capacity value.
-%If this algorithm setup phase (e.g. allocating and initializing memory) is linear in the knapsack capacity~\(c\) and the upper bound on the~\(y\) capacity value is considerably smaller than \(c\), then the algorithm could benefit from the upper bound. 
-
-%There exist many proposed periodicity bounds, but some are time-consuming, as the~\(O(n^2)\) periodicity bound presented in~\cite{badbound1}.
-%Others depend on specific instance characteristics to be tight, as the ones presented in~\cite{badbound2} and~\cite{pya}.
-%For reasons that will be made clear in the conclusions, the author did not found relevant to present a review on periodicity bounds in this work.
-
-The weak solution dominance reduces the further improvement that can be found by applying the four dominance relations and/or periodicity bounds in the same algorithm, and vice-versa.
-The weak solution dominance and the four dominance relations are two different ways of dealing with the same task.
-The first involves keeping an index in each solution to mark which items can still be added to the solution.
-The second involves keeping a global list of undominated items, 
-
-The approach used by EDUK gives a strong guarantee that any dominated item will be discarded and never used again.
-However, the weak solution dominance described in Section \ref{sec:ukp5} is implemented with almost no overhead, and seems to have a very similar impact in the removal of dominated items/solutions.
-
-The periodicity check exists both in algorithms like EDUK/EDUK2 and the terminating step-off.
-In EDUK/EDUK2 it is a consequence of applying all four dominances repeatedly, and in the terminating step-off it is a consequence of applying weak solution dominance.
-A periodicity check can save effort by stopping the computation at a capacity~\(y < c\).
-However, in all algorithms that implement the periodicity check, when this early termination happens, it is because the only item that could possibly be used is the best item.
-Consequently, in each one of these last positions (between \(y\) and \(c\)), the algorithm would not execute \(O(n)\) steps anymore, but only \(O(1)\) steps.
-The periodicity check only saves the effort of iterating these last \(c - y\) positions.
-It is a minor improvement over the application of weak solution dominance, or the application of the four item dominances.
-
-The periodicity check (and, by consequence, the dominances) also reduces the utility of periodicity bounds.
-If an upper bound on \(y^+\) could be used to stop the computation before it reaches capacity \(c\), then the periodicity check would stop the computation even before the capacity predicted by the upper bound (with slightly more overhead).
-In an algorithm with periodicity checking, the utility of upper bounds on the periodicity capacity~\(y^+\) is restricted to saving memory and saving the time spent initializing such saved memory.
-Note that some algorithms would not even have such benefits, as they do not allocate or initialize the memory in advance.
+If these periodicity checks stop their respective algorithm at capacity \(y\), they save the effort of iterating the last \(c - y\) positions.
+However, in the positions \([y,c]\) the algorithm would not execute \(O(n)\) steps anymore, but only \(O(1)\) steps, as only the best item is yet relevant.
+These periodicity checks are a small optimization in comparison to the application of dominance that makes them possible.
+An overlooked consequence of dominance is that it greatly reduces the usefulness of computing upper bounds on \(y^+\).
+When EDUK2 global item list is reduced to the best item, the exact value of \(y^+\) is found.
+In an algorithm with periodicity checking, the utility of upper bounds on~\(y^+\) is restricted to saving memory and saving the time spent initializing it.
+%If an upper bound on \(y^+\) can be computed, item dominance and the periodicity checks will stop the algorithm before the capacity predicted by the upper bound.
 

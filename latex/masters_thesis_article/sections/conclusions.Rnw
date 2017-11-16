@@ -15,7 +15,8 @@ The comparisons found in the literature often: 1) only compared a newly proposed
 These two characteristics leaded to the following scenario: algorithm B dominates algorithm A in the context of dataset D1; algorithm C dominates algorithm B in the context of dataset D2; nothing guarantees that algorithm A does not dominate algorithm C in the context of dataset D2, algorithm A was not included in the last comparison.
 The newly proposed dataset is often harder to solve because it had characteristics that made it to be harder to solve by some algorithm in the comparison (often the `loser').
 It is not considered if the characteristics that make it harder also negatively affect the algorithms excluded from comparison, or if they are algorithm or approach-specific.
-A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items\cite{mtu2}; EDUK(2) was compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\)\cite{eduk}\cite{eduk2}.
+
+A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items\cite{mtu2}; EDUK(2) was compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\)\cite{eduk,pya}.
 To be fair, the objective in these papers was to show how the newly proposed algorithm was not negatively impacted by some instance characteristics as the older algorithm.
 However, in such experiments, no competitive algorithm of the same solving approach as the newly proposed algorithm (DP or B\&B) was included.
 
@@ -42,7 +43,7 @@ The authors did not try to directly compare the effectiveness of the EDUK2 and t
 However, as the TSO finishes early if the best item is the only item which could be added to the solution, this means that TSO can discard every other item with its dominance strategy, as EDUK2 does.
 
 The EDUK2 PYAsUKP implementation uses lazy lists to store solutions, while our TSO implementation uses an array.
-The instance \verb+sc_a-5n10000wmin110000-9-c9008057.ukp+ was the PYAsUKP dataset (strongly correlated) instance in which EDUK2 did spend more time to solve (416 seconds, TSO spent about one second to solve the same instance).
+An strongly correlated (\(\alpha = -5\), \(n = 10000\), \(w_{min} = 110000\), \(c = 9008057\)) was the PYAsUKP dataset instance in which EDUK2 did spend more time to solve (416 seconds, TSO spent about one second to solve the same instance).
 By the use of the perf profiler, it was possible to verify that EDUK2 PYAsUKP implementation executed about \(1122\) instructions per cache miss, while TSO executed about \(288653\) instructions per cache miss.
 The performance gain for using an array-based implementation was also observed in \cite{irnich}, which tried to follow the approach suggested by EDUK in their pricing problem solver: ``In contrast, for UKP we found that a straightforward array-based implementation of the DP approach is faster than the list-based approach. We suspect that on a modern CPU, the smaller state graph of UKP can be accessed much faster (due to caching techniques) so that the solution of the UKP subproblems as they occur in the BP benchmark instances is possible in almost no (measurable) time.''\cite[p.~19]{irnich}
 
@@ -51,7 +52,7 @@ In order to do this, the TSO could not make use of the speed-up trick mentioned 
 Also, the application of the dominances would need to be less strict as, for example, for two items \(j\) and \(i\) that respect \(w_i < w_j\) and \(p_i = p_j\), \(j\) can yet be present in an optimal solution.
 
 In conclusion, what the authors hope the reader will take from this piece of work can be summarized as follows: 
-the choice of artificial instance datasets had an important role defining which algorithms were considered the best by the literature; the simple, multiple, collective and threshold dominance relations can be generalized to solution dominance, and the application of a weak version of it show similar efficiency.
+the choice of artificial instance datasets had an important role defining which algorithms were considered the best by the literature; the simple, multiple, collective and threshold dominance relations can be generalized to solution dominance, and the application of a weak version of it shows similar efficiency.
 
 % MINOR CONTRIBUTIONS?
 %\item Evidence that the B\&B approach worst-case can arise when solving pricing subproblems of BPP/CSP.
@@ -62,14 +63,15 @@ the choice of artificial instance datasets had an important role defining which 
 \section{Future work}
 \label{sec:future_works}
 
+Many questions raised during the development of this paper ended up unanswered. The authors selected they found more interesting in the list below.
+
 \begin{itemize}
-\item How similar are the datasets of the UKP and the BPP/CSP presented in the literature to the ones existent in the real-world?
-\item Do the instances found in the real-world benefit some approaches over others?
-\item Would a hybrid algorithm based on the `terminating step-off' and MTU2 present the same level of improvement that EDUK2 has over EDUK?
+\item How similar are the datasets of the UKP and the BPP/CSP presented in the literature to the ones existent in the real-world? Do the instances found in the real-world favor some approaches over others?
+\item If a B\&B phase was added to the terminating step-off (as in EDUK2), and a C++ and array-based implementation of EDUK2 was written, would they have a similar performance?
 \item What would be the pratical performance of an implementation of the algorithm described in \cite{babayev}?
-\item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e. optimal solution)?
+\item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e. optimal solution)? Or adding all optimal solutions instead of only one?
 \item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, and/or the same BPP/CSP instance? Is it possible that they converge to a specific distribution at each iteration of the column generation?
-\item WOULD B\&B ALGORITHMS THAT WEREN'T DEEP FIRST DISPLAY THE SAME PROBLEMS?
+\item The MTU1/MTU2 are depth-first branch-and-bound algorithms, what would be the performance of best-bound branch-and-bound algorithms?
 \end{itemize}
 
 \subsection{Acknowledgements}

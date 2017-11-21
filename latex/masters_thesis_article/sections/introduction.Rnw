@@ -73,7 +73,7 @@ Year & Ref. & Notes\\
 Algorithms that solve the UKP often exploit two properties to reduce the problem size: \emph{dominance} and \emph{periodicity}.
 Dominance relations are exploited to reduce~\(n\), and periodicity is exploited to reduce~\(c\).
 
-\subsubsection{Simple, multiple, collective and threshold dominance}
+\subsubsection{Simple, multiple, collective, and threshold dominance}
 
 Any item~\(j\) that does not appear in all optimal solutions of an instance can be excluded without affecting our capability of solving such instance.
 Given two items~\(i\) and~\(j\), if~\(w_i \leq w_j\) and~\(p_i \geq p_j\), then~\(j\) cannot be in all optimal solutions, since that for any optimal solution that contains~\(j\) there will exist another optimal solution with~\(i\) in the place of~\(j\).
@@ -177,7 +177,7 @@ The ordered step-off, a simple dynamic programming algorithm for the UKP from \c
 \end{algorithm}
 
 Solution dominance is a dominance relation proposed by the authors.
-Solution dominance generalizes simple, multiple, collective and threshold dominance.
+Solution dominance generalizes simple, multiple, collective, and threshold dominance.
 A solution \(t\) is solution dominated by a different solution \(s\) iff \(w_s \leq w_t\) and \(p_s \geq p_t\).
 If a solution \(q\) is solution dominated, then any solution that is a superset of \(q\) could be discarded (or not generated) without risk of discarding all optimal solutions.
 The concept of solution dominance alone is of little use if there is not a way to design an algorithm that makes use of it without excessive overhead.
@@ -192,7 +192,7 @@ For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\
 Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it would be dominated by a solution~\(u'\) where~\(s \subset u'\). 
 It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
 
-EDUK2, which was considered the state-of-the-art algorithm for the UKP by \cite{book_ukp_2004}, exploits the simple, multiple, collective and threshold dominance.
+EDUK2, which was considered the state-of-the-art algorithm for the UKP by \cite{book_ukp_2004}, exploits the simple, multiple, collective, and threshold dominance.
 EDUK2 keeps a global item list, if an item is found to be dominated, it is removed from the list.
 If the global item list is reduced to a single item (the best item), the algorithm stops. 
 The ordered step-off keeps an index in each solution to mark which items can still be added to that solution.

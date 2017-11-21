@@ -2,18 +2,18 @@
 \label{sec:methods}
 
 The experiments presented in this work consist in the execution of algorithm implementations over instance datasets.
-In order to allow the reproduction of the experiments and also to contextualize them, this section describes the algorithms, their implementations, the datasets and the computer setup used.
-A rationale for not including some algorithms and datasets from the literature is also presented.
+To allow the reproduction of the experiments and also to contextualize them, this section describes the algorithms, their implementations, the datasets and the computer setup used.
+The authors also present a rationale for not including some algorithms and datasets from the literature.
 
 \subsection{Computer setup}
 
 All experiments were run using a computer with the following characteristics:
 the CPU was an Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i5-4690 CPU @ 3.50GHz;
-there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB and 6MiB, where only L3 is shared between cores).
-The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e. Arch linux). 
+there were 8GiB RAM available (DIMM DDR3 Synchronous 1600 MHz) and three levels of cache (256KiB, 1MiB, and 6MiB, with the cores sharing only the last one).
+The operating system used was GNU/Linux 4.7.0-1-ARCH x86\_64 (i.e., Arch Linux). 
 Three of the four cores were isolated using the \emph{isolcpus} kernel flag (the non-isolated core was left to run the operating system). 
 The \emph{taskset} utility was used to execute runs in one of the isolated cores.
-All runs were executed in serial order (i.e. two runs did not coexist), as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
+All runs were executed in serial order, as the authors found that parallel executions effected the run times (even if each isolated core only hosted one run at each time)\cite[p.~87]{ukp_hb_mastersthesis}.
 
 The OCaml code (PYAsUKP/EDUK/EDUK2) was compiled with ocamlopt and the flags suggested by the authors of the code for maximum performance (\emph{-unsafe -inline 2048}).
 The Fortran code (original MTU1/MTU2) was compiled with gcc-fortran and \emph{-O3 -std=f2008} flags enabled.
@@ -21,53 +21,53 @@ The C++ code (all remaining implementations) was compiled with gcc and the \emph
 
 \subsection{Algorithms and their implementations}
 
-The algorithms used in the experiments can be divided in three main approachs: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (combine DP and B\&B).
+The algorithms used in the experiments can pertain to three main approaches: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (combine DP and B\&B).
 The DP approach has a worst-case time complexity of~\(O(nc)\) (pseudo-polynomial), and its worst-case space complexity is~\(O(n~+~c)\).
 The B\&B approach has an exponential worst-case time complexity (all item combinations that fit the knapsack), but the worst-case space complexity of the B\&B algorithms used in the experiments is~\(O(n)\).
-The hybrid algorithm used in the experiments display the same time and space worst-case complexities than the DP approach.
+The hybrid algorithm used in the experiments displays the same time and space worst-case complexities than the DP approach.
 
 MTU1 is a depth-first B\&B algorithm for the UKP\cite{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
 The MTU2 algorithm calls MTU1 over increasing fractions of the items list in an effort to avoid considering all items\cite{mtu2}.
-The Fortran implementation of MTU1 and MTU2 used in the experiments was the original implementation by Martello and Toth, but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at: \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
+The Fortran implementation of MTU1 and MTU2 used in the experiments was the original implementation by Martello and Toth but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
 The C++ implementations of both algorithms were written by the authors.
 The C++ and Fortran implementations of the MTU1 algorithm have no significant differences.
 
 The MTU2 implementations differed in the algorithm used to partially sort the items and the exact ordering.
 The original algorithm description in~\cite{mtu2} did not specify the exact method for performing the partial sorting.
-The original Fortran implementation uses a complex algorithm developed by one of the authors of MTU2 in~\cite{partial_sort_martello} to find the k\textsuperscript{th} most efficient item in an unsorted array (and then sort).
+The original Fortran implementation uses a complex algorithm developed by one of the authors of MTU2 in~\cite{partial_sort_martello} to find the k\textsuperscript{th} most efficient item in an unsorted array, and then select and sort only the items that have the same or a greater efficiency.
 The C++ implementation uses the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+.
-The Fortran implementation only sorted the items by nonincreasing efficiency, the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
+The Fortran implementation only sorted the items by nonincreasing efficiency; the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
 
 The ordered step-off is a DP algorithm of about ten lines of code\cite[p.~15]{gg-66}.
-The terminating step-off is a variant of the ordered step-off which executes exactly \(n\) and up to \(c\) extra operations in order to try to save up to \(c\) operations.
+The terminating step-off is a variant of the ordered step-off which executes exactly \(n\) and up to \(c\) extra operations to save up to \(c\) operations.
 The algorithm proposed in~\cite{green_improv} is another variant of the ordered step-off, it will be referred as GREENDP.
 GREENDP does not use the best item~\(b\) in the DP, but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can be stopped and the remaining capacity filled with copies of \(b\). 
 If two or more items share the greatest efficiency, GREENDP verification does not work, and it is the same as the ordered step-off.
 
-The original implementations of the step-offs and GREENDP were not publicly available, so the authors made their own implementations in C++.
-All C++ implementations written by the authors are available at the authors code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at: \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
-As the C++ implementations of MTU1 and MTU2, our implementations change the items sorting by nonincreasing efficiency (specified by these three algorithms) to an items sorting by nonincreasing efficiency with efficiency ties sorted by nondecreasing weight.
+The original implementations of the step-offs and GREENDP were not publicly available, so the authors wrote their own implementations in C++.
+All C++ implementations written by the authors are available at the author's code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
+As the C++ implementations of MTU1 and MTU2, our implementations change the items sorting by nonincreasing efficiency (specified by these three algorithms) to sorting by nonincreasing efficiency with efficiency ties sorted by nondecreasing weight.
 
-The authors' implementations of these three algorithms made use of an speed up trick (implementation detail) that has reduced considerably the run times for some instances, specially the instances of the subset-sum and strongly correlated datasets.
+The authors' implementations of these three algorithms made use of a speed up trick (implementation detail) that has reduced considerably the run times for some instances, especially the instances of the subset-sum and strongly correlated datasets.
 A direct implementation of the pseudo-code presented in the papers that proposed the algorithms would not include this speed up trick.
-In these three algorithms, the index of the item with the lowest index within a solution is stored together with the solution, also they do not store two solutions with the same weight but only the one with the greatest profit between them.
-The trick consists in keeping the solution with the item of lowest index when two or more solutions with the same weight and profit are generated.
+In these three algorithms, the index of the item with the lowest index within a solution is stored together with the solution. Also, they do not store two solutions with the same weight but only the one with the greatest profit between them.
+The trick consists in keeping the solution with the item of lowest index when the algorithm generates two or more solutions with the same weight and profit.
 The original pseudocode of the three algorithms simply discarded newly generated solutions if they had the same weight and profit of an already found solution.
 
-The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered in~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite{ukp_new_results}\cite{eduk}\cite[p.~223]{book_ukp_2004}.
+The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger in~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite{ukp_new_results}\cite{eduk}\cite[p.~223]{book_ukp_2004}.
 EDUK seems to be based on ideas first discussed in~\cite{algo_tech_cut}.
 Before EDUK2 was proposed, it was said that ``[...] EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p.~223]{book_ukp_2004}.
 
-EDUK2 is an hybrid DP/B\&B algorithm which improves EDUK with a B\&B preprocessing phase~\cite{pya}.
-If B\&B can solve instance using less than a parametrized number of nodes, then EDUK is never executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
+EDUK2 is a hybrid DP/B\&B algorithm which improves EDUK with a B\&B preprocessing phase~\cite{pya}.
+If B\&B can solve instance using less than a parameterized number of nodes, then EDUK is never executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
 
-The implementations of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml by the creators of EDUK and EDUK2. 
+The implementation of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml by the creators of EDUK and EDUK2. 
 The authors were given access to this code by Vincent Poirriez in January 11th, 2016 by email\footnote{The code is available at Henrique Becker master's thesis code repository (\url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}).}. The version of the code available at that time in the PYAsUKP official site had bugs\footnote{The EDUK and EDUK2 source was available to download in the following page of PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.}.
 
 \subsubsection{Algorithms deliberately ignored}
 
 The authors believe that both the naïve DP algorithm for the UKP\cite[p.~311]{tchu} and an improved version of it presented in~\cite[p.~221]{garfinkel} are dominated by the ordered step-off algorithm presented in \cite[p.~15]{gg-66}.
-Consequently both the naïve DP algorithm and its improved version were not included in the experiments.  
+Consequently, both the naïve DP algorithm and its improved version were not included in the experiments.  
 The UKP5 algorithm proposed in~\cite{sea2016} was found to be very similar to the terminating step-off\footnote{
   The authors of this article reinvented one algorithm from~\cite{gg-66} and published a paper about it while believing it was novel~\cite{sea2016}.
   The authors would like to apologize to the academic and scientific community for such disregard.}
@@ -75,7 +75,8 @@ and therefore only the terminating step-off was included.
 
 The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded every time limit, the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}. Both weren't included in the experiments.
 
-In \cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which was found to be dominated by MTU1; also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of the ordered step-off. Also, \cite{cabot}~was behind a paywall. The B\&B algorithms proposed in~\cite{gg-63} and~\cite{cabot} were not included in the experiments.
+In \cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which was found to be dominated by MTU1; also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of the ordered step-off. Also, \cite{cabot}~was behind a paywall.
+The B\&B algorithms proposed in~\cite{gg-63} and~\cite{cabot} were not included in the experiments.
 
 Likewise, \cite{turnpike}~is behind a paywall, and in~\cite{green_improv} it is implied that GREENDP is an improved version of the algorithm proposed in~\cite{turnpike}, so only GREENDP was included.
 The authors could not obtain the code of the algorithm proposed in~\cite{babayev} and had difficulties trying to implement it.
@@ -94,13 +95,13 @@ The PYAsUKP dataset was heavily based on datasets presented in~\cite{pya}, which
 The instance generator used to generate the 4540 instances share the code with the EDUK/EDUK2 implementations (PYAsUKP), which is the reason we call this dataset the \emph{PYAsUKP dataset}.
 The PYAsUKP dataset comprises: 400 subset-sum instances (\(10^3 \leq n \leq 10^4\); 240 strongly correlated instances (\(5\times10^3 \leq n \leq n = 10^4\)); 800 instances with postponed periodicity (\(2\times10^4 \leq n \leq 5\times10^4\)); 2000 instances without collective dominance (\(5\times10^3 \leq n \leq 5\times10^4\)); 1100 SAW instances (\(10^4 \leq n \leq 10^5\)).
 The PYAsUKP dataset has multiple-of-ten amounts of instances generated with different random seeds for each combination of the remaining generation parameters (\(n\), \(w_{min}\), \dots).
-The authors will refer to one tenth of the PYAsUKP dataset (454 instances), including the proportional amount of each parameter combination, the \emph{reduced PYAsUKP dataset}.
+The authors will refer to one-tenth of the PYAsUKP dataset (454 instances), including the proportional amount of each parameter combination, the \emph{reduced PYAsUKP dataset}.
 
 \subsubsection{Realistic Random Dataset}
-A dataset of \emph{realistic random} instances was used in the experiments, the generation procedure is based on~\cite{eduk}.
-The generation procedure follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min,max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-esim of one list to the i-esim element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
+A dataset of \emph{realistic random} instances was used in the experiments; the generation procedure is based on~\cite{eduk}.
+The generation procedure follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min, max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-esim of one list to the i-esim element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
 The generation procedure follows: generate a list of~\(n\) unique random integers uniformly distributed in~\([min,max]\) and sort them by increasing value; generate a second list repeating the same procedure; combine both lists into a single item list where the weight (profit) of each item~\(i \in [1,n]\) is the value at position \(i\) of the first (second) list; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
-Simple dominance can not occur in such instances, other dominances may be present.
+Simple dominance cannot occur in such instances; other dominances may be present.
 Our dataset comprises ten instances with distinct random seeds for each one of eight \(n\) values (\(2^{n'}\), where \(n' \in \{10, 11, \dots, 17\}\)), totalling 80 instances.
 The values of the remaining parameters come from \(n\): \(max = n \times 2^{10}\), \(min = \frac{max}{2^4}\), \(c_{min} = 2\times max\) and \(c_{max} = c_{min} + min\).
 
@@ -110,20 +111,20 @@ The values of the remaining parameters come from \(n\): \(max = n \times 2^{10}\
 The Bottom Right Ellipse Quadrant (BREQ) is an items distribution proposed by the authors in~\cite[p.~37]{ukp_hb_mastersthesis}. %and first described in REF\_MASTER\_THESIS.
 The items of an instance follow the BREQ distribution iff the profits and weights respect~\(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - w_i^2 \times (\frac{p_{max}}{w_{max}})^2}}\), where \(w_{max}\) (\(p_{max}\)) is an upper bound on the items weight (profit).
 The distribution name comes from the fact that its formula describes the bottom right quarter of an ellipse.
-%This instance distribution was created to illustrate that different item distributions favors different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
+%This instance distribution was created to illustrate that different item distributions favor different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
 
 The purpose of this items distribution is to illustrate the authors' point that artificial distributions can be construed to favor one solving approach over another.
 In the case of the BREQ distribution, it favors B\&B over DP.
 Distributions with the opposite property (favor DP over B\&B) are common in the recent literature.
 
-%The optimal solution of BREQ instances is often in the first fraction of the search space examinated by B\&B algorithms. 
+%The optimal solution of BREQ instances is often in the first fraction of the search space examined by B\&B algorithms. 
 %Moreover, the lower bounds from good solutions allow B\&B methods to skip a large fraction of the search space and promptly prove optimality.
 %In BREQ instances, the presence of simple, multiple and collective dominance is minimal
 %\footnote{
-%If the BREQ formula did not include the rounding, the items profit would be a strictly monotonically increasing function of the items weight.
-%Any item distribution with this property cannot present simple, multiple or collective dominance. 
+%If the BREQ formula did not include the rounding, the profit of the item would be a strictly monotonically increasing function of the items weight.
+%Any item distribution with this property cannot present simple, multiple, or collective dominance. 
 %}, and the threshold dominance is common\footnote{In BREQ instances, an optimal solution will never include the item~\(i\) two or more times if there is an item~\(j\) such as that~\(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\).}.
-%Such characteristics lead to optimal solutions comprised of the largest weight items, that do not reuse optimal solutions for lower capacities.
+%Such characteristics lead to optimal solutions comprised of the largest weight items, which do not reuse optimal solutions for lower capacities.
 %This means that solving the UKP for lower capacities as DP algorithms do is mostly a wasted effort.
 
 %If those three dominance relations are absent, for any solution~\(s\) composed of two or more items, and for any single item~\(i\), if~\(w_s \leq w_i\) then~\(p_s < p_i\).
@@ -141,23 +142,22 @@ for each item weight, the corresponding profit is calculated by the formula pres
 \label{sec:csp_ukp_inst}
 
 An often mentioned application for solving the UKP is solving the pricing subproblems generated by solving the continuous relaxation of the Set Covering Formulation  (SCF) for the classic Bin Packing Problem (BPP) and Cutting Stock Problem (CSP) using the column generation approach\cite[p. 455--459]{book_ukp_2004}\cite{gg-61}.
-In order to analyse the performance of the algorithms in the context of this application, the authors have written a small C++ program that uses the CPLEX Solver to solve the SCF and feed the pricing problems generated to a custom UKP solving algorithm.
+To analyze the performance of the algorithms in the context of this application, the authors have written a small C++ program that uses the CPLEX Solver to solve the SCF and feed the pricing problems generated to a custom UKP solving algorithm.
 
-Eight datasets of BPP/CSP instances were used in the experiments. They are: Falkenauer (160 instances), Scholl (1210 instances), Wäscher (17 instances), Schwerin (200 instances), Hard28 (28 instances), Randomly Generated Instances (3840 instances), Augmented Non IRUP and Augmented IRUP Instances (ANI\&AI, 500 instances), and Gschwind and Irnich instances (GI instances, 240).
+The experiments included eight datasets of BPP/CSP instances. The datasets are: Falkenauer (160 instances), Scholl (1210 instances), Wäscher (17 instances), Schwerin (200 instances), Hard28 (28 instances), Randomly Generated Instances (3840 instances), Augmented Non IRUP and Augmented IRUP Instances (ANI\&AI, 500 instances), and Gschwind and Irnich instances (GI instances, 240).
 These datasets amount to 6195 instances, all available in \url{http://or.dei.unibo.it/library/bpplib}. 
 The first seven cited datasets are described in \cite[p.~22]{survey2014}, the last one (GI Instances) comes from~\cite{irnich}.
-The code used to solve the SCF relaxation can be found in the author's repository\footnote{The C++/CPLEX code used for solving SCF relaxation is available at: \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}. The code can be compiled by executing \emph{make bin/cutstock} in the folder.
+The code used to solve the SCF relaxation can be found in the author's repository\footnote{The C++/CPLEX code used for solving SCF relaxation is available at \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}. The code can be compiled by executing \emph{make bin/cutstock} in the folder.
 The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en})}.
 
 \subsubsection{Datasets deliberately ignored}
 
 The \emph{uncorrelated} and \emph{weakly correlated} item distributions were commonly used in the literature\cite{mtu1}\cite{mtu2}\cite{babayev}\cite{eduk}, but the authors decided against including them in the experiments.
 The literature has already questioned the suitability of \emph{uncorrelated} item distributions datasets for the analysis of the UKP\cite{zhu_dominated}\cite{ukp_new_results}.
-Uncorrelated instances often exhibit a great amount of simple and multiple dominated items, and polynomial algorithms can reduce the number of items in such instances by magnitudes.
-%In the authors experience, uncorrelated instances often take more time to load from disk than to solve.
+Uncorrelated instances often exhibit a vast amount of simple and multiple dominated items, and polynomial algorithms can reduce the number of items in such instances by magnitudes.
+%In the author's experience, uncorrelated instances often take more time to load from disk than to solve.
 %The solving times of uncorrelated instances are more dependent on the implementation of polynomial-time preprocessing than dependent on the quality of the solving algorithm.
 %Consequently, the authors do not believe uncorrelated instances provide a good benchmark for UKP solving algorithms.
 
-The \emph{weakly correlated} item distribution can be seen as an \emph{strongly correlated} item distribution with more dominated items.
-The authors found redudant to present weakly correlated datasets in addition to the strongly correlated datasets, as preliminary results suggested that the time spent solving weakly correlated datasets was similar to the time spent solving strongly correlated datasets of smaller size.
-
+The \emph{weakly correlated} item distribution can be seen as a \emph{strongly correlated} item distribution with more dominated items.
+The authors found redundant to present weakly correlated datasets in addition to the strongly correlated datasets, as preliminary results suggested that the time spent solving weakly correlated datasets was similar to the time spent solving strongly correlated datasets of smaller size.

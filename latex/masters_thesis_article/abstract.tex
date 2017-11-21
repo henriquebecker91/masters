@@ -1,9 +1,10 @@
 An empirical analysis of exact algorithms for the unbounded knapsack problem was carried out.
 The experiments included seven algorithms from the literature and more than ten thousand instances.
 The terminating step-off, a dynamic programming algorithm from 1966, was found to have the lowest mean time to solve the most recent benchmark from the literature.
-The terminating step-off seems to partially and implicitly explore threshold and collective dominance, which are properties of the unbounded knapsack problem first discussed in 1998.
-A class of instances that favors the branch-and-bound approach over the dynamic programming approach without displaying high amounts of simple, multiple and collective dominance is presented.
-The pricing subproblems from solving hard cutting stock problems with column generation can cause branch-and-bound algorithms to display worst-case times. %seem to be best solved with dynamic programming as the branch-and-bound algorithms tested displayed worst case times.
+The threshold and collective dominance are properties of the unbounded knapsack problem first discussed in 1998, and the terminating step-off did not implement them, but has an alternative mechanism for dealing with dominance that seem competitive with the application of such dominances.
+The authors present a new class of instances.
+This class of instances favors the branch-and-bound approach over the dynamic programming approach but do not have high amounts of simple, multiple and collective dominated items.
+The pricing subproblems from solving hard cutting stock problems with column generation can cause branch-and-bound algorithms to display worst-case times. %seem to be best solved with dynamic programming as the branch-and-bound algorithms tested displayed worst-case times.
 The definition of which instances are of interest defines which algorithm is considered the best.
-All algorithm and instance generation code used is available online.
+The code used for solving the unbounded knapsack problem and for instance generation are available online.
 

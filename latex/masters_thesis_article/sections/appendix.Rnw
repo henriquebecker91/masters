@@ -47,18 +47,17 @@ ss2 <- ft %>%
   select(algorithm, internal_time) %>%
   group_by(algorithm) %>%
   summarise(
-    avg = sprintf("%.2f", mean(internal_time)),
-    sd  = sprintf("%.2f",   sd(internal_time)),
-    max = sprintf("%.2f",  max(internal_time)))
-ss2[] <- lapply(ss2, function(x) gsub('NA', '--', x))
+    avg = mean(internal_time),
+    sd  =   sd(internal_time),
+    max =  max(internal_time))
 
 ft <- ft %>%
   select(algorithm, dist, a, n, wmin, internal_time) %>%
   group_by(algorithm, dist, a, n, wmin) %>%
   summarise(
-    avg = sprintf("%.2f", mean(internal_time)),
-    sd  = sprintf("%.2f",   sd(internal_time)),
-    max = sprintf("%.2f",  max(internal_time)))
+    avg = mean(internal_time),
+    sd  =   sd(internal_time),
+    max =  max(internal_time))
 
 nsds2 <- filter(ft, dist == 'nsds2')
 hi <- filter(ft, dist == 'hi')
@@ -69,6 +68,25 @@ make_pya_row <- function(t, ...) {
   tt <- ungroup(t)
   tt <- filter(tt, ...)
   tt <- select(tt, avg, sd, max)
+  min_avg <- min(tt$avg, na.rm = T)
+  tt$avg <- sapply(tt$avg, function(x) {
+    if (is.na(x)) {
+      "--"
+    } else if(x == min_avg) {
+      paste0("\\textbf{", sprintf("%.2f", x), "}")
+    } else {
+      sprintf("%.2f", x)
+    }
+  })
+  f <- function (x) {
+    if (is.na(x)) {
+      "--"
+    } else {
+      sprintf("%.2f", x)
+    }
+  }
+  tt$sd <- sapply(tt$sd, f)
+  tt$max <- sapply(tt$max, f)
   paste(apply(tt, 1, paste, collapse=" & "), collapse = " & ")
 }
 @

@@ -39,7 +39,7 @@ The C++ implementation uses the \verb+std::partial_sort+ procedure of the standa
 The Fortran implementation only sorted the items by nonincreasing efficiency; the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
 
 The ordered step-off is a DP algorithm of about ten lines of code\cite[p.~15]{gg-66}.
-The terminating step-off is a variant of the ordered step-off which executes \(\tetha(n) + O(c)\) extra operations to save \(O(c)\) operations.
+The terminating step-off is a variant of the ordered step-off which executes \(\theta(n) + O(c)\) extra operations to save \(O(c)\) operations.
 The algorithm proposed in~\cite{green_improv} is another variant of the ordered step-off, it will be referred as GREENDP.
 GREENDP does not use the best item~\(b\) in the DP, but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can be stopped and the remaining capacity filled with copies of \(b\). 
 If two or more items share the greatest efficiency, GREENDP verification does not work, and it is the same as the ordered step-off.

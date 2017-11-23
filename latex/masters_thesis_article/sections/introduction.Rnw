@@ -176,7 +176,7 @@ The ordered step-off, a simple dynamic programming algorithm for the UKP from \c
 \end{algorithmic}
 \end{algorithm}
 
-Solution dominance is a dominance relation proposed by the authors.
+The authors propose the concept of \emph{solution dominance}.
 Solution dominance generalizes simple, multiple, collective, and threshold dominance.
 A solution \(t\) is solution dominated by a different solution \(s\) iff \(w_s \leq w_t\) and \(p_s \geq p_t\).
 If a solution \(q\) is solution dominated, then any solution that is a superset of \(q\) could be discarded (or not generated) without risk of discarding all optimal solutions.
@@ -193,7 +193,8 @@ Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it would be 
 It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
 
 EDUK2, which was considered the state-of-the-art algorithm for the UKP by \cite{book_ukp_2004}, exploits the simple, multiple, collective, and threshold dominance.
-EDUK2 keeps a global item list, if an item is found to be dominated, it is removed from the list.
+EDUK2 keeps a global item list.
+If an item is found to be dominated, it is removed from the list.
 If the global item list is reduced to a single item (the best item), the algorithm stops. 
 The ordered step-off keeps an index in each solution to mark which items can still be added to that solution.
 The terminating step-off is a variant of the ordered step-off which detects if the only item that can be yet used is the best item, and stops the algorithm if this is the case.

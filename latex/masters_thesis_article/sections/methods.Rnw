@@ -39,20 +39,20 @@ The C++ implementation uses the \verb+std::partial_sort+ procedure of the standa
 The Fortran implementation only sorted the items by nonincreasing efficiency; the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
 
 The ordered step-off is a DP algorithm of about ten lines of code\cite[p.~15]{gg-66}.
-The terminating step-off is a variant of the ordered step-off which executes exactly \(n\) and up to \(c\) extra operations to save up to \(c\) operations.
+The terminating step-off is a variant of the ordered step-off which executes \(\tetha(n) + O(c)\) extra operations to save \(O(c)\) operations.
 The algorithm proposed in~\cite{green_improv} is another variant of the ordered step-off, it will be referred as GREENDP.
 GREENDP does not use the best item~\(b\) in the DP, but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can be stopped and the remaining capacity filled with copies of \(b\). 
 If two or more items share the greatest efficiency, GREENDP verification does not work, and it is the same as the ordered step-off.
 
 The original implementations of the step-offs and GREENDP were not publicly available, so the authors wrote their own implementations in C++.
-All C++ implementations written by the authors are available at the author's code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
+All C++ implementations written by the authors are available at the first author's code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
 As the C++ implementations of MTU1 and MTU2, our implementations change the items sorting by nonincreasing efficiency (specified by these three algorithms) to sorting by nonincreasing efficiency with efficiency ties sorted by nondecreasing weight.
 
 The authors' implementations of these three algorithms made use of a speed up trick (implementation detail) that has reduced considerably the run times for some instances, especially the instances of the subset-sum and strongly correlated datasets.
-A direct implementation of the pseudo-code presented in the papers that proposed the algorithms would not include this speed up trick.
 In these three algorithms, the index of the item with the lowest index within a solution is stored together with the solution. Also, they do not store two solutions with the same weight but only the one with the greatest profit between them.
 The trick consists in keeping the solution with the item of lowest index when the algorithm generates two or more solutions with the same weight and profit.
 The original pseudocode of the three algorithms simply discarded newly generated solutions if they had the same weight and profit of an already found solution.
+%A direct implementation of the pseudo-code presented in the papers that proposed the algorithms would not include this speed up trick.
 
 The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger in~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite{ukp_new_results}\cite{eduk}\cite[p.~223]{book_ukp_2004}.
 EDUK seems to be based on ideas first discussed in~\cite{algo_tech_cut}.
@@ -147,7 +147,7 @@ To analyze the performance of the algorithms in the context of this application,
 The experiments included eight datasets of BPP/CSP instances. The datasets are: Falkenauer (160 instances), Scholl (1210 instances), Wäscher (17 instances), Schwerin (200 instances), Hard28 (28 instances), Randomly Generated Instances (3840 instances), Augmented Non IRUP and Augmented IRUP Instances (ANI\&AI, 500 instances), and Gschwind and Irnich instances (GI instances, 240).
 These datasets amount to 6195 instances, all available in \url{http://or.dei.unibo.it/library/bpplib}. 
 The first seven cited datasets are described in \cite[p.~22]{survey2014}, the last one (GI Instances) comes from~\cite{irnich}.
-The code used to solve the SCF relaxation can be found in the author's repository\footnote{The C++/CPLEX code used for solving SCF relaxation is available at \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}. The code can be compiled by executing \emph{make bin/cutstock} in the folder.
+The code used to solve the SCF relaxation can be found in the first author's repository\footnote{The C++/CPLEX code used for solving SCF relaxation is available at \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}. The code can be compiled by executing \emph{make bin/cutstock} in the folder.
 The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en})}.
 
 \subsubsection{Datasets deliberately ignored}

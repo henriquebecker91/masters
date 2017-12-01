@@ -33,13 +33,12 @@ Year & Ref. & Notes\\
 %2000 & \cite{eduk} & The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments. \\
 2004 & \cite{book_ukp_2004} & A book on knapsack problems cite EDUK as state-of-the-art dynamic programming for the UKP. \\
 2009 & \cite{pya} & EDUK2 is proposed. It consists in EDUK hybridized with B\&B. The datasets are updated to be `harder'. MTU2 is used in some comparisons, but not in all because it has the risk of integer overflow. EDUK2 is compared to EDUK.\\ %Such datasets are hard for B\&B, and the hybrid method is only compared to B\&B. The hybrid method is the new state-of-the-art. \\
-2016 & \cite{sea2016} & The terminating step-off is ``reinvented'' (with the name of UKP5) and outperforms the hybrid method in the updated datasets.\\
+2016 & \cite{sea2016} & The terminating step-off is reinvented (with the name of UKP5) and outperforms the hybrid method in the updated datasets.\\
 \end{tabu}
 %\end{adjustbox}
 \end{table}
 
 In the remainder of this section we discuss the mathematical formulation and well-known properties of the problem.
-
 
 \subsection{Formulation and notation}
 \label{sec:formulation}
@@ -123,14 +122,19 @@ All solutions that do not break such constraints and do not make use of the best
 Consequently, an optimal solution for any capacity greater than \(y''\) can be obtained by the procedure described in the last paragraph.
 The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}. %The computation of the exact value of~\(y^+\) is very expensive.
 
-If the exact value of \(y^+\) was determined by a preprocessing phase, and \(y^+ < c\), then we could solve the UKP for the smallest capacity necessary before filling the gap with copies of the best item.
+If the exact value of \(y^+\) would be determined by a preprocessing phase, and \(y^+~<~c\), then we could solve the UKP for a capacity smaller than $c$ and fill the gap up to \(c\) with copies of the best item.
 However, the effort necessary to compute a \(y^+\) (for \(y^+ < c\)) is about the same as solving the UKP for all capacities \(y \leq y^+\) while checking for threshold dominance.
-Consequently, \(y^+\) is implicitly determined by some dynamic programming algorithms    
+Consequently, \(y^+\) is implicitly determined by some dynamic programming algorithms while solving instances.
 An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in polynomial time, as a preprocessing phase.
 
 \section{The ordered step-off and (weak) solution dominance}
+\label{sec:oso_and_sol_dom}
 
-The ordered step-off, a simple dynamic programming algorithm for the UKP from \cite{gg-66}, is described in Algorithm 1.%\autoref{alg:oso}. % ref not working with algorithm
+The ordered step-off (OSO) is a dynamic programming algorithm for the UKP~\cite{gg-66}.
+The authors' revisited the OSO and made a small change to it, as it can be seen in Algorithm 1, namely the authors' added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end}.
+Without this change, between all solutions of the same weight, the algorithm would keep the first solution generated with the greatest profit value.
+With the change, between all solutions with the same weight, the algorithm keeps the first solution generated with the greatest profit value and smallest index of the last item added to the solution.
+Such small change reduced the run times for some instances considerably, especially the instances of the subset-sum and strongly correlated datasets.
 
 \begin{algorithm}[!htb]
 \caption{The ordered step-off (revisited)}
@@ -140,7 +144,7 @@ The ordered step-off, a simple dynamic programming algorithm for the UKP from \c
   \State~\(g \gets\) array of~\(c\) positions, initialized with~\(0\)\label{create_g}
   \State~\(d \gets\) array of~\(c\) positions, uninitialized\label{create_d}
   
-  \For{\(i \gets 1, n\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
+  \For{\(i \gets 1\) to \(n\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
     \If{\(g[w_i] < p_i\)}
       \State~\(g[w_i] \gets p_i\)
       \State~\(d[w_i] \gets i\)
@@ -149,24 +153,27 @@ The ordered step-off, a simple dynamic programming algorithm for the UKP from \c
 
   \State~\(opt \gets 0\)\label{init_opt}
 
-  \For{\(y \gets w_{min}, c - w_{min}\)}\label{main_ext_loop_begin}%\Comment{Can end earlier because of periodicity check}
+  \For{\(y \gets w_{min}\) to \(c - w_{min}\)}\label{main_ext_loop_begin}%\Comment{Can end earlier because of periodicity check}
     \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}\Comment{Prunes dominated solutions}
         \State \textbf{continue}\label{alg:continue}\Comment{Ends current iteration and begins the next}
     \EndIf\label{if_less_than_opt_end}
     
     \State~\(opt \gets g[y]\)\label{update_opt}
     
-    \For{\(i=1,d[y]\)}\label{main_inner_loop_begin}\Comment{Creates new solutions (never symmetric)}
+    \For{\(i=1\) to \(d[y]\)}\label{main_inner_loop_begin}\Comment{Creates new solutions (never symmetric)}
+      \If{\(y + w_i > c\)}\Comment{To avoid accessing invalid positions}
+        \State~\textbf{continue}
+      \EndIf
       \If{\(g[y + w_i] < g[y] + p_i\)}\label{if_new_lower_bound_begin}
         \State~\(g[y + w_i] \gets g[y] + p_i\)
         \State~\(d[y + w_i] \gets i\)
-%      \ElsIf{\(g[y + w_i] = g[y] + p_i \land i < d[y + w_i]\)}
-%        \State~\(d[y + w_i] \gets i\)
+      \ElsIf{\(g[y + w_i] = g[y] + p_i\) \textbf{and} \(i < d[y + w_i]\)}\label{added_elsif}
+        \State~\(d[y + w_i] \gets i\)
       \EndIf\label{if_new_lower_bound_end}
     \EndFor\label{main_inner_loop_end}
   \EndFor\label{main_ext_loop_end}
 
-  \For{\(y \gets c - w_{min} + 1, c\)}
+  \For{\(y \gets c - w_{min} + 1\) to \(c\)}
     \If{\(g[y] > opt\)}
       \State~\(opt \gets g[y]\)
     \EndIf
@@ -183,34 +190,39 @@ The ordered step-off, a simple dynamic programming algorithm for the UKP from \c
 \end{algorithmic}
 \end{algorithm}
 
-The authors propose the concept of \emph{solution dominance}.
-Solution dominance generalizes simple, multiple, collective, and threshold dominance.
+In addition to this small change, the authors propose the concept of \emph{solution dominance} and show how OSO applies a weaker version of this concept. 
+Solution dominance generalizes simple, multiple, collective, and threshold dominances.
 A solution \(t\) is solution dominated by a different solution \(s\) iff \(w_s \leq w_t\) and \(p_s \geq p_t\).
 If a solution \(q\) is solution dominated, then any solution that is a superset of \(q\) could be discarded (or not generated) without risk of discarding all optimal solutions.
-The concept of solution dominance alone is of little use if there is not a way to design an algorithm that makes use of it without excessive overhead.
-The ordered step-off applies a weaker version of the concept of solution dominance.
+%The concept of solution dominance alone is of little use if there is not a way to design an algorithm that makes use of it without excessive overhead.
 
 The authors use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\).
 The notation~\(max_{ix}(s)\) has analogue meaning.
 
 When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u\), where~\(t \subset u\), are not generated. 
-If~\(s\) dominates~\(t\), and~\(t \subset u\), and~\(max_{ix}(u - t) \leq min_{ix}(t)\), then~\(u\) is not generated by the ordered step-off algorithm. 
-For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by ordered step-off, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the ordered equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
+If~\(s\) dominates~\(t\), and~\(t \subset u\), and~\(max_{ix}(u - t) \leq min_{ix}(t)\), then~\(u\) is not generated by the OSO. 
+For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by the OSO, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the ordered equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
 Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it would be dominated by a solution~\(u'\) where~\(s \subset u'\). 
 It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
 
-EDUK2, which was considered the state-of-the-art algorithm for the UKP by \cite{book_ukp_2004}, exploits the simple, multiple, collective, and threshold dominance.
-EDUK2 keeps a global item list.
-If an item is found to be dominated, it is removed from the list.
-If the global item list is reduced to a single item (the best item), the algorithm stops. 
-The ordered step-off keeps an index in each solution to mark which items can still be added to that solution.
-The terminating step-off is a variant of the ordered step-off which detects if the only item that can be yet used is the best item, and stops the algorithm if this is the case.
+As another contribution of this paper, the authors point out the overlooked negligibility of periodicity checks and periodicity bounds.
+Many DP algorithms for the UKP present some form of implicit periodicity checking based on the application of the item dominances.
+Two examples of such algorithms are: the terminating step-off (TSO) and the EDUK algorithms.
+EDUK keeps a global items list, from which it removes items if they are simple, multiple, collective, or threshold dominated.
+If such list is reduced to a single item (that only can be the best item), the algorithm stops. 
+The TSO is a variant of the OSO which detects if the best item is the only item that can yet be added to solutions, and stops the algorithm if this is the case.
+The TSO periodicity checking mechanism is not the same as the one used by EDUK, as the TSO does remove items from a global item list, but instead checks the \(d\) array (the same described above in Algorithm 1) and an auxiliary array (which only exists in TSO and not in OSO).
 
-If these periodicity checks stop their respective algorithm at capacity \(y\), they save the effort of iterating the last \(c - y\) positions.
-However, in the positions \([y,c]\) the algorithm would not execute \(O(n)\) steps anymore, but only \(O(1)\) steps, as only the best item is yet relevant.
-These periodicity checks are a small optimization in comparison to the application of dominance checks that make them possible.
-An overlooked consequence of dominance is that it greatly reduces the usefulness of computing upper bounds on \(y^+\).
-When EDUK2 global item list is reduced to the best item, the exact value of \(y^+\) is found.
-In an algorithm with periodicity checking, the utility of upper bounds on~\(y^+\) is restricted to saving memory and saving the time spent initializing it.
+If one of these periodicity checks stop its respective algorithm at capacity \(y\), it saves the effort of iterating the last \(c - y\) positions.
+However, in the range \((y,c)\) the algorithm would not execute \(O(n)\) steps for each capacity anymore, but only \(O(1)\) steps, as only the best item is still relevant.
+Consequently, periodicity checks often demand about \(n\) and up to \(y \leq c\) extra operations to save up to \(c - y\) operations.
+Even in the best case, that is when \(y\) is close to zero, the magnitude of the amount of effort saved (about \(c\) operations) is small in comparison to \(O(nc)\) (unless for toy instances with very small \(n\)).
+In the worst case, that is when \(y\) is close to \(c\), then the doing the periodicity check wastes more effort than it saves.
+This way, periodicity checks are a small optimization in comparison to the application of item/solution dominance that makes them possible.
+
+If periodicity checks save little effort, then the computating of upper bounds on~\(y^+\) should save up even less effort.
+When the global item list of EDUK is reduced to the best item, the current capacity is probably a far better upper bound on \(y^+\) than any upper bound computed by a polynomial algorithm.
+In a dynamic programming algorithm with periodicity checking, the utility of upper bounds on~\(y^+\) is restricted to saving memory and saving the time spent initializing it (which is insignificant).
+While branch-and-bound algorithms does not have periodicity checking, they also do not obtain any considerable benefit from periodicity bounds, as their bound computation already supersedes them.
 %If an upper bound on \(y^+\) can be computed, item dominance and the periodicity checks stops the algorithm before the capacity predicted by the upper bound.
 

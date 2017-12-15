@@ -13,8 +13,8 @@ The B\&B algorithms have an exponential worst-case time complexity (all item com
 but the worst-case space complexity of the B\&B algorithms used in the experiments is~\(O(n)\).
 %The hybrid algorithm used in the experiments displays the same time and space worst-case complexities than the DP approach.
 
-MTU1 is a depth-first B\&B algorithm for the UKP\cite{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
-The MTU2 algorithm calls MTU1 over increasing fractions of the items list in an effort to avoid considering all items\cite{mtu2}.
+MTU1 is a depth-first B\&B algorithm for the UKP~\cite{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
+The MTU2 algorithm calls MTU1 over increasing fractions of the items list in an effort to avoid considering all items~\cite{mtu2}.
 The Fortran implementation of MTU1 and MTU2 used in the experiments was the original implementation by Martello and Toth but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
 The C++ implementations of both algorithms were written by the authors.
 The C++ and Fortran implementations of the MTU1 algorithm have no significant differences.
@@ -25,66 +25,69 @@ The original Fortran implementation uses a complex algorithm developed by one of
 The C++ implementation uses the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+.
 The Fortran implementation only sorted the items by nonincreasing efficiency; the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
 
-The ordered step-off (OSO) is a short DP algorithm proposed in~\cite[p.~15]{gg-66}.
+The ordered step-off (OSO) is a DP algorithm proposed in~\cite[p.~15]{gg-66}.
 The authors already presented and discussed a revisited version of OSO in~\autoref{sec:oso_and_sol_dom}.
 The terminating step-off (TSO) is the same as the OSO but it includes periodicity checking.
 %which executes \(\theta(n) + O(c)\) extra operations to save \(O(c)\) operations.
 The algorithm proposed in~\cite{green_improv} is another variant of the OSO, referred in this paper as GREENDP.
-The GREENDP does not use the best item~\(b\), but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can be stopped, and the remaining capacity filled with copies of \(b\). 
+The GREENDP does not use the best item~\(b\), but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can stop, and the remaining capacity filled with copies of \(b\). 
 If two or more items share the greatest efficiency, GREENDP verification does not work, and it is the same as the OSO. 
 
 The original implementations of the step-offs and GREENDP were not publicly available, so the authors wrote their own implementations in C++.
-The authors' implementations of TSO and GREENDP included the same improvement added by the authors to the revisited OSO and described in \autoref{sec:oso_and_sol_dom}.
+The authors' implementations of TSO and GREENDP include the same improvement added by the authors to the revisited OSO and described in \autoref{sec:oso_and_sol_dom}.
 All C++ implementations written by the authors are available at the first author's code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
 %As the C++ implementations of MTU1 and MTU2, our implementations change the items sorting by nonincreasing efficiency (specified by these three algorithms) to sorting by nonincreasing efficiency with efficiency ties sorted by nondecreasing weight.
 
-The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger in~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite{ukp_new_results}\cite{eduk}\cite[p.~223]{book_ukp_2004}.
+The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite[p.~223]{ukp_new_results,eduk,book_ukp_2004}.
 EDUK seems to be based on ideas first discussed in~\cite{algo_tech_cut}.
 Before EDUK2 was proposed, it was said that ``[...] EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''\cite[p.~223]{book_ukp_2004}.
 
 EDUK2 is a hybrid DP/B\&B algorithm which improves EDUK with a B\&B preprocessing phase~\cite{pya}.
-If B\&B can solve instance using less than a parameterized number of nodes, then EDUK is never executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
+If B\&B can solve the instance using less than a parameterized number of nodes, then EDUK is not executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
 
 The implementation of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml by the creators of EDUK and EDUK2. 
-The authors were given access to this code by Vincent Poirriez in January 11th, 2016 by email\footnote{The code is available at Henrique Becker master's thesis code repository (\url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}).}. The version of the code available at that time in the PYAsUKP official site had bugs\footnote{The EDUK and EDUK2 source was available to download in the following page of PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.}.
+Vincent Poirriez gave access to this code to the authors, by email,
+in January 11th, 2016\footnote{The code is available at Henrique Becker master's thesis code repository (\url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}).}.
+%The version of the code available at that time in the PYAsUKP official site had bugs\footnote{The EDUK and EDUK2 source was available to download in the following page of PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.}.
 
 \subsubsection{Algorithms deliberately ignored}
 
-The authors believe that both the naïve DP algorithm for the UKP\cite[p.~311]{tchu} and an improved version of it presented in~\cite[p.~221]{garfinkel} are dominated by the OSO algorithm presented in \cite[p.~15]{gg-66}.
-Consequently, both the naïve DP algorithm and its improved version were not included in the experiments.  
+The authors believe that both the naïve DP algorithm for the UKP~\cite[p.~311]{tchu} and an improved version of it presented in~\cite[p.~221]{garfinkel} are dominated by the OSO algorithm presented in~ \cite[p.~15]{gg-66}.
+Consequently, both the naïve DP algorithm and its improved version were not included in our experiments.  
 The UKP5 algorithm proposed in~\cite{sea2016} was found to be very similar to the TSO\footnote{
   The authors of this article reinvented one algorithm from~\cite{gg-66} and published a paper about it while believing it was novel~\cite{sea2016}.
   The authors would like to apologize to the academic and scientific community for such disregard.}
 and therefore only the TSO was included.
 
-The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded every time limit, the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}. Both weren't included in the experiments.
+The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}. Both weren't included in the experiments.
 
-In \cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which was found to be dominated by MTU1; also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of the OSO. Also, \cite{cabot}~was behind a paywall.
-The B\&B algorithms proposed in~\cite{gg-63} and~\cite{cabot} were not included in the experiments.
+In \cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which was found to be dominated by MTU1; 
+also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of the OSO. %Also, \cite{cabot}~was behind a paywall.
+Thus, the B\&B algorithms proposed in~\cite{gg-63} and~\cite{cabot} were not included in the experiments.
 
-Likewise, \cite{turnpike}~is behind a paywall, and in~\cite{green_improv} it is implied that GREENDP is an improved version of the algorithm proposed in~\cite{turnpike}, so only GREENDP was included.
+%Likewise, \cite{turnpike}~is behind a paywall, and 
+In~\cite{green_improv} it is implied that GREENDP is an improved version of the algorithm proposed in~\cite{turnpike}, so only GREENDP was included.
 The authors could not obtain the code of the algorithm proposed in~\cite{babayev} and had difficulties trying to implement it.
-UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms over converted UKP instances\cite{mtu1}, so BKP and 0-1 KP algorithms were not included.
+UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms over converted UKP instances~\cite{mtu1}, so BKP and 0-1 KP algorithms were not considered.
 
 \subsection{Instance datasets}
 
 The datasets used in the experiments include: artificial datasets from the literature that focus on being hard-to-solve (PYAsUKP and realistic random datasets); a dataset proposed by the authors in order to prove an hypothesis (BREQ dataset); a dataset based on the solving of CSP/BPP instances with the column generation technique (CSP dataset).
-The reasoning for not including \emph{uncorrelated} and \emph{weakly correlated} instance is presented.
+The reasoning for not including \emph{uncorrelated} and \emph{weakly correlated} instance is presented in the end of the section.
 
 \subsubsection{PYAsUKP dataset}
 \label{sec:pya_inst}
 
 The PYAsUKP dataset is described in~\cite[p. 9]{sea2016}, and comprises 4540 instances from five smaller datasets.
-The PYAsUKP dataset was heavily based on datasets presented in~\cite{pya}, which were used to compare EDUK2 to other UKP solving algorithms.
+The PYAsUKP dataset was heavily based on the datasets presented in~\cite{pya}, which were used to compare EDUK2 to other UKP solving algorithms.
 The instance generator used to generate the 4540 instances share the code with the EDUK/EDUK2 implementations (PYAsUKP), which is the reason we call this dataset the \emph{PYAsUKP dataset}.
 The PYAsUKP dataset comprises: 400 subset-sum instances (\(10^3 \leq n \leq 10^4\); 240 strongly correlated instances (\(5\times10^3 \leq n \leq n = 10^4\)); 800 instances with postponed periodicity (\(2\times10^4 \leq n \leq 5\times10^4\)); 2000 instances without collective dominance (\(5\times10^3 \leq n \leq 5\times10^4\)); 1100 SAW instances (\(10^4 \leq n \leq 10^5\)).
 The PYAsUKP dataset has multiple-of-ten amounts of instances generated with different random seeds for each combination of the remaining generation parameters (\(n\), \(w_{min}\), \dots).
-The authors will refer to one-tenth of the PYAsUKP dataset (454 instances), including the proportional amount of each parameter combination, the \emph{reduced PYAsUKP dataset}.
+The authors selected one-tenth of the instances for each parameter combination (in total 454) and will refer to it as the \emph{reduced PYAsUKP dataset}.
 
 \subsubsection{Realistic Random Dataset}
 A dataset of \emph{realistic random} instances was used in the experiments; the generation procedure is based on~\cite{eduk}.
-The generation procedure follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min, max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-esim of one list to the i-esim element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
-The generation procedure follows: generate a list of~\(n\) unique random integers uniformly distributed in~\([min,max]\) and sort them by increasing value; generate a second list repeating the same procedure; combine both lists into a single item list where the weight (profit) of each item~\(i \in [1,n]\) is the value at position \(i\) of the first (second) list; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
+The generation procedure follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min, max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-th of one list to the i-th element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
 Simple dominance cannot occur in such instances; other dominances may be present.
 Our dataset comprises ten instances with distinct random seeds for each one of eight \(n\) values (\(2^{n'}\), where \(n' \in \{10, 11, \dots, 17\}\)), totalling 80 instances.
 The values of the remaining parameters come from \(n\): \(max = n \times 2^{10}\), \(min = \frac{max}{2^4}\), \(c_{min} = 2\times max\) and \(c_{max} = c_{min} + min\).

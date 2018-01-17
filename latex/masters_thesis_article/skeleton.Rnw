@@ -68,6 +68,7 @@ library(tables) # for latex and tabular
 
 \usepackage{verbatim} % for \begin{comment} remove before final version
 \usepackage{adjustbox}
+\usepackage[nice]{nicefrac}
 %\usepackage{flafter}
 
 % used together with below code to put float barriers in all (sub)sections

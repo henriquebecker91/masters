@@ -64,7 +64,7 @@ The mathematical formulation of UKP is:
 The quantities of each item~\(i\) in a solution are denoted by~\(x_i\), and are restricted to the non-negative integers, as~Eq.~\eqref{eq:x_integer} indicates. 
 We assume that the capacity~\(c\), the quantity of items~\(n\) and the weights of the items~\(w_i\) are positive integers, while the profit values of the items~\(p_i\) are positive real numbers.
 
-The efficiency of an item~\(i\) is its profit-to-weight ratio (\(\frac{p_i}{w_i}\)), and is denoted by~\(e_i\). 
+The efficiency of an item~\(i\) is its profit-to-weight ratio (\(p_i/w_i\)), and is denoted by~\(e_i\). 
 We use~\(w_{min}\), or~\(w_{max}\), to denote the lowest weight among all items, or the highest weight among all items, within an instance of the UKP.
 We refer to the item with the greatest efficiency among all items of a specific instance as the \emph{best item} (or~\(b\)). If more than one item shares the greatest efficiency, then the item with the lowest weight among them is considered the best item type. 
 If more than an item has both previously stated characteristics, then the first item with both characteristics in the items list is the best item.
@@ -83,15 +83,15 @@ Given two items~\(i\) and~\(j\), if~\(w_i \leq w_j\) and~\(p_i \geq p_j\), then~
 Consequently, \(j\)~can be ignored when solving an instance that contains both~\(i\) and~\(j\).
 Such relationship between~\(i\) and~\(j\) is called \emph{simple dominance}, more specifically we can say that~\(i\) simple dominates~\(j\) (or that~\(j\) is simple dominated by~\(i\)).
 
-Given a positive integer~\(\alpha\), if~\(\alpha \times w_i \leq w_j\) and~\(\alpha \times p_i \geq p_j\), then~\(\alpha\) copies of~\(i\) can replace one of~\(j\),  and~\(j\) can be safely ignored.
+Given a positive integer~\(\alpha\), if~\(\alpha \times w_i \leq w_j\) and~\(\alpha \times p_i \geq p_j\), then~\(\alpha\) copies of~\(i\) can replace one of~\(j\),  and~\(j\) can be ignored.
 Such relationship is called \emph{multiple dominance}, and it generalizes simple dominance in which \(\alpha = 1\).
 
-Given a valid solution~\(s\), if~\(w_s \leq w_j\) and~\(p_s \geq p_j\), then the items that compose~\(s\) can replace~\(j\), and~\(j\) can be safely ignored.
+Given a valid solution~\(s\), if~\(w_s \leq w_j\) and~\(p_s \geq p_j\), then the items that compose~\(s\) can replace~\(j\), and~\(j\) can be ignored.
 Such relationship is called \emph{collective dominance}~\cite{ukp_new_results}, and it generalizes multiple dominance in which~\(s\) consists of~\(\alpha\) copies of~\(i\).
 
-If~\(w_s \leq \alpha \times w_j\) and~\(p_s \geq \alpha \times p_j\), then the items that compose~\(s\) can replace~\(\alpha\) copies of~\(j\), and solutions including~\(\alpha\) or more copies of~\(j\) can be safely ignored.
+If~\(w_s \leq \alpha \times w_j\) and~\(p_s \geq \alpha \times p_j\), then the items that compose~\(s\) can replace~\(\beta\) copies of~\(j\), and solutions including~\(\alpha\) or more copies of~\(j\) can be ignored.
 Such relationship is called \emph{threshold dominance}, and it generalizes collective dominance in which \(\alpha = 1\).
-Threshold dominance with~\(\alpha > 1\) does not allow to exclude an item~\(j\) as a preprocessing phase, but it reduces the search space by allowing the algorithm to ignore all solutions in which~\(x_j \geq \alpha\).
+Threshold dominance with~\(\beta > 1\) does not allow to exclude an item~\(j\) as a preprocessing phase, but it reduces the search space by allowing the algorithm to ignore all solutions in which~\(x_j \geq \alpha\).
 
 %\begin{figure}
 %  \centering
@@ -112,12 +112,12 @@ The \emph{periodicity} property shows the existence of a capacity \(y^+\).
 After such capacity, all items but the best one are dominated.
 For every capacity~\(y'\)~(\(y'~>~y^+\)) there exists an optimal solution that is an optimal solution for capacity~\(y' - w_b\) with one more copy of the best item \(b\) added.
 In other words, for capacities greater than~\(y^+\), we can find an optimal solution by adding copies of the best item to an optimal solution of capacity~\(y^+\) or lower.
-If~\(y^+ < c\), then the UKP can be solved for the capacity~\(y^{*} = c - \ceil{\frac{c - y^+}{w_b}}w_b\), and the gap between~\(y^{*}\) and~\(c\) filled with exactly~\(\frac{c - y^{*}}{w_b}\) copies of the best item \(b\), reducing the knapsack size from~\(c\) to~\(y^*\).
+If~\(y^+ < c\), then the UKP can be solved for the capacity~\(y^{*} = c - \ceil{(c - y^+)/w_b}w_b\), and the gap between~\(y^{*}\) and~\(c\) filled with exactly~\((c - y^{*})/w_b\) copies of the best item \(b\), reducing the knapsack size from~\(c\) to~\(y^*\).
 
 The periodicity property is a direct consequence of the threshold dominance.
 Except by the best item~\(b\), every item~\(j\) (\(j \neq b\)) is threshold dominated for some~\(\alpha_j\).
-For example, given that~\(y\) is the lowest common multiple of~\(w_b\) and~\(w_j\),~\(\beta_j = \frac{y}{w_b}\) and~\(\alpha_j = \frac{y}{w_j}\), then~\(\beta_j \times w_b \leq \alpha_j \times w_j\) and~\(\beta_j \times p_b \geq \alpha_j \times p_j\). %, since \(e_b \geq e_j\) (from the definition of the best item).
-Consequently, the threshold dominance defines a constraint~\(x_j < \alpha_j\) on every item~\(j\), and solutions that break such constraints can be safely ignored.
+For example, given that~\(y\) is the lowest common multiple of~\(w_b\) and~\(w_j\),~\(\beta_j = y/w_b\) and~\(\alpha_j = y/w_j\), then~\(\beta_j \times w_b \leq \alpha_j \times w_j\) and~\(\beta_j \times p_b \geq \alpha_j \times p_j\). %, since \(e_b \geq e_j\) (from the definition of the best item).
+Consequently, the threshold dominance defines a constraint~\(x_j < \alpha_j\) on every item~\(j\), and solutions that break such constraints can be ignored.
 All solutions that do not break such constraints and do not make use of the best item weight less than~\(y'' = \sum \alpha_j \times w_j\).
 Consequently, an optimal solution for any capacity greater than \(y''\) can be obtained by the procedure described in the last paragraph.
 The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}. %The computation of the exact value of~\(y^+\) is very expensive.
@@ -134,26 +134,28 @@ The ordered step-off (OSO) is a dynamic programming algorithm for the UKP~\cite{
 The authors' revisited the OSO and made a small change to it, as it can be seen in Algorithm 1, namely the authors' added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end}.
 Without this change, between all solutions of the same weight, the algorithm would keep the first solution generated with the greatest profit value.
 With the change, between all solutions with the same weight, the algorithm keeps the first solution generated with the greatest profit value and smallest index of the last item added to the solution.
-Such small change reduced the run times for some instances considerably, especially the instances of the subset-sum and strongly correlated datasets.
+Such small change reduced the run times for some instances by orders of magnitude, especially the instances of the subset-sum and strongly correlated datasets.
 
 \begin{algorithm}[!htb]
 \caption{The ordered step-off (revisited)}
 \begin{algorithmic}[1]
 \Procedure{oso}{$n, c, w, p$}
-  \State~Sort \(w\) and \(p\) by increasing item efficiency and find $w_{min}, w_{max}$ 
+  \State~Sort \(w\) and \(p\) by non-increasing item efficiency\footnotemark and find $w_{min}, w_{max}$ 
   \State~\(g \gets\) array of~\(c\) positions, initialized with~\(0\)\label{create_g}
   \State~\(d \gets\) array of~\(c\) positions, uninitialized\label{create_d}
   
-  \For{\(i \gets 1\) to \(n\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
-    \If{\(g[w_i] < p_i\)}
+  \For{\(i \gets n\) to \(1\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
+%  \For{\(i \gets 1\) to \(n\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
+%    \If{\(g[w_i] < p_i\)}
       \State~\(g[w_i] \gets p_i\)
       \State~\(d[w_i] \gets i\)
-    \EndIf
+%    \EndIf
   \EndFor\label{end_trivial_bounds}
 
   \State~\(opt \gets 0\)\label{init_opt}
 
-  \For{\(y \gets w_{min}\) to \(c - w_{min}\)}\label{main_ext_loop_begin}%\Comment{Can end earlier because of periodicity check}
+  %\For{\(y \gets w_{min}\) to \(c - w_{min}\)}\label{main_ext_loop_begin}%\Comment{Can end earlier because of periodicity check}
+  \For{\(y \gets w_{min}\) to \(c\)}\label{main_ext_loop_begin}%\Comment{Can end earlier because of periodicity check}
     \If{\(g[y] \leq opt\)}\label{if_less_than_opt_begin}\Comment{Prunes dominated solutions}
         \State \textbf{continue}\label{alg:continue}\Comment{Ends current iteration and begins the next}
     \EndIf\label{if_less_than_opt_end}
@@ -173,11 +175,11 @@ Such small change reduced the run times for some instances considerably, especia
     \EndFor\label{main_inner_loop_end}
   \EndFor\label{main_ext_loop_end}
 
-  \For{\(y \gets c - w_{min} + 1\) to \(c\)}
-    \If{\(g[y] > opt\)}
-      \State~\(opt \gets g[y]\)
-    \EndIf
-  \EndFor
+%  \For{\(y \gets c - w_{min} + 1\) to \(c\)}
+%    \If{\(g[y] > opt\)}
+%      \State~\(opt \gets g[y]\)
+%    \EndIf
+%  \EndFor
   \State \textbf{return}~\(opt\)
 
 %  \For{\(y \gets c-w_{min}+1, c\)}\label{get_y_opt_loop_begin}\Comment{Removal of dominated solutions}
@@ -189,6 +191,7 @@ Such small change reduced the run times for some instances considerably, especia
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+\footnotetext{If two or more items share the same efficiency they are sorted by non-decreasing weight.}
 
 In addition to this small change, the authors propose the concept of \emph{solution dominance} and show how OSO applies a weaker version of this concept. 
 Solution dominance generalizes simple, multiple, collective, and threshold dominances.
@@ -208,10 +211,10 @@ It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) 
 As another contribution of this paper, the authors point out the overlooked negligibility of periodicity checks and periodicity bounds.
 Many DP algorithms for the UKP present some form of implicit periodicity checking based on the application of the item dominances.
 Two examples of such algorithms are: the terminating step-off (TSO) and the EDUK algorithms.
-EDUK keeps a global items list, from which it removes items if they are simple, multiple, collective, or threshold dominated.
-If such list is reduced to a single item (that only can be the best item), the algorithm stops. 
-The TSO is a variant of the OSO which detects if the best item is the only item that can yet be added to solutions, and stops the algorithm if this is the case.
-The TSO periodicity checking mechanism is not the same as the one used by EDUK, as the TSO does remove items from a global item list, but instead checks the \(d\) array (the same described above in Algorithm 1) and an auxiliary array (which only exists in TSO and not in OSO).
+%These two algorithms have different mechanisms for checking periodicity, but both consist in \(O(y + n)\) extra operations, in which \(y\) is the last capacity considered before stopping the algorithm.
+%To base the discussion, an explanation of the EDUK periodicity check mechanism follows: EDUK keeps a global items list, from which it removes items if they are simple, multiple, collective, or threshold dominated; if such list is reduced to a single item (that only can be the best item), the algorithm stops. 
+%The TSO is a variant of the OSO which detects if the best item is the only item that can yet be added to solutions, and stops the algorithm if this is the case.
+%The TSO periodicity checking mechanism is not the same as the one used by EDUK, as the TSO does remove items from a global item list, but instead checks the \(d\) array (the same described above in Algorithm 1) and an auxiliary array (which only exists in TSO and not in OSO).
 
 If one of these periodicity checks stop its respective algorithm at capacity \(y\), it saves the effort of iterating the last \(c - y\) positions.
 However, in the range \((y,c)\) the algorithm would not execute \(O(n)\) steps for each capacity anymore, but only \(O(1)\) steps, as only the best item is still relevant.

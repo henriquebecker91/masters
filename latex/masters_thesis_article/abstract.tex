@@ -1,10 +1,9 @@
 An empirical analysis of exact algorithms for the unbounded knapsack problem was carried out.
 The experiments included seven algorithms from the literature and more than ten thousand instances.
 The terminating step-off, a dynamic programming algorithm from 1966, was found to have the lowest mean time to solve the most recent benchmark from the literature.
-The threshold and collective dominance are properties of the unbounded knapsack problem first discussed in 1998, and the terminating step-off did not implement them, but has an alternative mechanism for dealing with dominance that seem competitive with the application of such dominances.
-The authors present a new class of instances.
-This class of instances favors the branch-and-bound approach over the dynamic programming approach but do not have high amounts of simple, multiple and collective dominated items.
-The pricing subproblems from solving hard cutting stock problems with column generation can cause branch-and-bound algorithms to display worst-case times. %seem to be best solved with dynamic programming as the branch-and-bound algorithms tested displayed worst-case times.
-The definition of which instances are of interest defines which algorithm is considered the best.
-The code used for solving the unbounded knapsack problem and for instance generation are available online.
-
+The threshold and collective dominance are properties of the unbounded knapsack problem first discussed in 1998, and exploited by the current state-of-the-art algorithms. 
+The terminating step-off did not exploit such dominances, but has an alternative mechanism for dealing with dominance which does not explicitly exploits collective and threshold dominance.
+Also, the pricing subproblems from solving hard cutting stock problems with column generation can cause branch-and-bound algorithms to display worst-case times.
+The authors present a new class of instances; this class of instances favors the branch-and-bound approach over the dynamic programming approach but do not have high amounts of simple, multiple and collective dominated items.
+This behaviour illustrate how the definition of hard instances changes between algorithm approachs.
+The codes used for solving the unbounded knapsack problem and for instance generation are all available online.

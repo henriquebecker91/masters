@@ -4,7 +4,7 @@
 Except for the BREQ dataset, a DP algorithm from 1966 (Terminating Step-Off, TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2/PYAsUKP).
 Such results bring up two central questions the authors address: 1) Why the TSO was abandoned and not considered in recent comparisons? How the TSO outperformed the current state-of-the-art after five decades of study of the UKP?
 
-The authors believe that limited comparisons is the answer why TSO was not considered in recent comparisons.
+The authors believe the TSO was not considered in recent comparisons because: 1) CONTINUE HERE (old terminology and limited comparisons)
 As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison\cite{mtu1}.
 In the experiments presented in~\cite{mtu1}, the TSO algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
 Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was not even one order of magnitude apart.
@@ -24,7 +24,8 @@ The authors proposed the BREQ item distribution to further illustrate how artifi
 The BREQ instances are hard to solve by DP algorithms and easy to solve by B\&B algorithms.
 If they were the only instances considered, then MTU2 would be considered the best algorithm. However, considering all remaining datasets, MTU2 often presents the worst time performance.
 The BREQ instances do not suffer from the same richness of simple, multiple and collective dominated items that led uncorrelated instances to be criticized and abandoned.
-However, threshold dominance is widespread in BREQ instances and, as far the authors know, no real-world instances follow the BREQ distribution, so the authors do not suggest their use in future experiments.
+However, threshold dominance is widespread in BREQ instances and, as far the authors know, no real-world instances follow the BREQ distribution.%, so the authors do not suggest their use in future experiments.
+The authors ask any future researchers to take in account the purpose for which BREQ instances were created (i.e., favor the B\&B approach) before including them in their experiments.
 
 The effects of artificial instances in shaping what is considered the best algorithms for UKP is not limited to the instances proposed for the UKP.
 The authors of \cite{irnich} created the GI instances to be harder to solve by their column generation implementation: 

@@ -89,9 +89,9 @@ Such relationship is called \emph{multiple dominance}, and it generalizes simple
 Given a valid solution~\(s\), if~\(w_s \leq w_j\) and~\(p_s \geq p_j\), then the items that compose~\(s\) can replace~\(j\), and~\(j\) can be ignored.
 Such relationship is called \emph{collective dominance}~\cite{ukp_new_results}, and it generalizes multiple dominance in which~\(s\) consists of~\(\alpha\) copies of~\(i\).
 
-If~\(w_s \leq \alpha \times w_j\) and~\(p_s \geq \alpha \times p_j\), then the items that compose~\(s\) can replace~\(\beta\) copies of~\(j\), and solutions including~\(\alpha\) or more copies of~\(j\) can be ignored.
-Such relationship is called \emph{threshold dominance}, and it generalizes collective dominance in which \(\alpha = 1\).
-Threshold dominance with~\(\beta > 1\) does not allow to exclude an item~\(j\) as a preprocessing phase, but it reduces the search space by allowing the algorithm to ignore all solutions in which~\(x_j \geq \alpha\).
+If~\(w_s \leq \beta \times w_j\) and~\(p_s \geq \beta \times p_j\), then the items that compose~\(s\) can replace~\(\beta\) copies of~\(j\), and solutions including~\(\beta\) or more copies of~\(j\) can be ignored.
+Such relationship is called \emph{threshold dominance}, and it generalizes collective dominance in which \(\beta = 1\).
+Threshold dominance with~\(\beta > 1\) does not allow to exclude an item~\(j\) as a preprocessing phase, but it reduces the search space by allowing the algorithm to ignore all solutions in which~\(x_j \geq \beta\).
 
 %\begin{figure}
 %  \centering
@@ -116,14 +116,14 @@ If~\(y^+ < c\), then the UKP can be solved for the capacity~\(y^{*} = c - \ceil{
 
 The periodicity property is a direct consequence of the threshold dominance.
 Except by the best item~\(b\), every item~\(j\) (\(j \neq b\)) is threshold dominated for some~\(\alpha_j\).
-For example, given that~\(y\) is the lowest common multiple of~\(w_b\) and~\(w_j\),~\(\beta_j = y/w_b\) and~\(\alpha_j = y/w_j\), then~\(\beta_j \times w_b \leq \alpha_j \times w_j\) and~\(\beta_j \times p_b \geq \alpha_j \times p_j\). %, since \(e_b \geq e_j\) (from the definition of the best item).
+For example, given that~\(y\) is the lowest common multiple of~\(w_b\) and~\(w_j\),~\(\beta_j = y/w_b\) and~\(\alpha_j = y/w_j\), then~\(\beta_j \times w_b \leq \alpha_j \times w_j \equiv y \leq y\) and~\(\beta_j \times p_b \geq \alpha_j \times p_j\). %, since \(e_b \geq e_j\) (from the definition of the best item).
 Consequently, the threshold dominance defines a constraint~\(x_j < \alpha_j\) on every item~\(j\), and solutions that break such constraints can be ignored.
 All solutions that do not break such constraints and do not make use of the best item weight less than~\(y'' = \sum \alpha_j \times w_j\).
 Consequently, an optimal solution for any capacity greater than \(y''\) can be obtained by the procedure described in the last paragraph.
 The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}. %The computation of the exact value of~\(y^+\) is very expensive.
 
 If the exact value of \(y^+\) would be determined by a preprocessing phase, and \(y^+~<~c\), then we could solve the UKP for a capacity smaller than $c$ and fill the gap up to \(c\) with copies of the best item.
-However, the effort necessary to compute a \(y^+\) (for \(y^+ < c\)) is about the same as solving the UKP for all capacities \(y \leq y^+\) while checking for threshold dominance.
+However, the effort necessary to compute \(y^+\) (for \(y^+ < c\)) is about the same as solving the UKP for all capacities \(y \leq y^+\) while checking for threshold dominance.
 Consequently, \(y^+\) is implicitly determined by some dynamic programming algorithms while solving instances.
 An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in polynomial time, as a preprocessing phase.
 

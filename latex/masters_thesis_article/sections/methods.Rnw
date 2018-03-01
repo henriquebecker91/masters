@@ -14,7 +14,7 @@ but the worst-case space complexity of the B\&B algorithms used in the experimen
 %The hybrid algorithm used in the experiments displays the same time and space worst-case complexities than the DP approach.
 
 MTU1 is a depth-first B\&B algorithm for the UKP~\cite{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
-The MTU2 algorithm calls MTU1 over increasing fractions of the items list in an effort to avoid considering all items~\cite{mtu2}.
+The MTU2 algorithm calls MTU1 over the \(x\%\) most efficient items, and if this is not sufficient to obtain a solution with proved optimality, it repeat the process with \(x\%\) increased~\cite{mtu2}.
 The Fortran implementation of MTU1 and MTU2 used in the experiments was the original implementation by Martello and Toth but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
 The C++ implementations of both algorithms were written by the authors.
 The C++ and Fortran implementations of the MTU1 algorithm have no significant differences.
@@ -55,9 +55,9 @@ in January 11th, 2016\footnote{The code is available at Henrique Becker master's
 The authors believe that both the naïve DP algorithm for the UKP~\cite[p.~311]{tchu} and an improved version of it presented in~\cite[p.~221]{garfinkel} are dominated by the OSO algorithm presented in~ \cite[p.~15]{gg-66}.
 Consequently, both the naïve DP algorithm and its improved version were not included in our experiments.  
 The UKP5 algorithm proposed in~\cite{sea2016} was found to be very similar to the TSO\footnote{
-  The authors of this article reinvented one algorithm from~\cite{gg-66} and published a paper calling it UKP5 while believing it was novel~\cite{sea2016}.
-  The authors would like to apologize to the academic and scientific community for such disregard.
-  The only significant improvement of UPK5 over TSO is the small change described in \autoref{sec:oso_and_sol_dom}, which the authors included in all algorithms it was applicable.}
+  The authors of this article reinvented an algorithm from~\cite{gg-66} and published a paper calling it UKP5 while believing it was novel~\cite{sea2016}.
+  The authors would like to apologize to the scientific community for such disregard.
+  The only improvement of UPK5 over TSO is the small change described in \autoref{sec:oso_and_sol_dom}, which the authors included in all algorithms it was applicable.}
 and therefore only the TSO was included.
 
 The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}. Both weren't included in the experiments.

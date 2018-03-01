@@ -247,7 +247,7 @@ This four implementations were executed over the reduced PYAsUKP benchmark.
 \begin{figure}[!htbp]
 \caption{Run times of MTU1 and MTU2 (C++ and Fortran) over the 454 instances of the reduced PYAsUKP dataset. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit.}
 \begin{center}
-<<mtu_comp, fig.height=5.5>>=
+<<mtu_comp, fig.height=5.49>>=
 mtu_time_comp_plot <- function (data) {
   # select columns necessary to the plot, and divide information
   # given in algorithm column in two columns: language and algorithm
@@ -474,7 +474,7 @@ The authors did not succeed in integrating the PYAsUKP code (written in OCaml) w
 %CPLEX was also used to solve the pricing problems, adding one more algorithm to the comparison.
 
 In a pricing subproblem, the profit of the items is a real number.
-Adapting MTU1 for using floating point profit values proved to be difficult, as the bound computation procedure is based on the assumption that both weight and profit values are integers.
+Adapting MTU1 for using floating point profit values proved to be difficult.%, as the bound computation procedure is based on the assumption that both weight and profit values are integers.
 The solution found was to multiply the items profit values by a multiplicative factor, round them down and treat them as integer profit values.
 The multiplicative factor chosen was~\(2^{40}\) (approx. \(10^{12}\)).
 In a pricing subproblem, the profit of the items can also be non-positive, which breaks the assumptions of some algorithms.

@@ -69,6 +69,7 @@ library(tables) # for latex and tabular
 \usepackage{verbatim} % for \begin{comment} remove before final version
 \usepackage{adjustbox}
 \usepackage[nice]{nicefrac}
+\usepackage{float}
 %\usepackage{flafter}
 
 % used together with below code to put float barriers in all (sub)sections
@@ -81,6 +82,8 @@ library(tables) # for latex and tabular
   }%
 }
 \makeatother
+
+\renewcommand{\floatpagefraction}{.8}
 
 \title{An empirical analysis of exact unbounded knapsack algorithms}
 

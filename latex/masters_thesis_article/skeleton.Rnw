@@ -109,12 +109,11 @@ library(tables) # for latex and tabular
 \input{abstract.tex}
 \end{abstract}
 
-% TODO: add keywords, discover what is MSC
+% NOTE: DO NOT ADD MORE THAN FIVE KEYWORDS, THE FIRST KEYWORD NEEDS TO BE
+% FROM A SPECIAL LIST CONTAINED IN THE AUTHORS MATERIAL
 \begin{keyword}
-%% keywords here, in the form: keyword \sep keyword
-
-%% MSC codes here, in the form: \MSC code \sep code
-%% or \MSC[2008] code \sep code (2000 is the default)
+% Separate keywords with: \sep
+Combinatorial optimization \sep Unbounded Knapsack Problem \sep Dynamic Programming \sep Integer Programming \sep Branch and Bound
 \end{keyword}
 
 \end{frontmatter}

@@ -2,9 +2,9 @@
 \label{sec:discussion}
 
 Except for the BREQ dataset, a DP algorithm from 1966 (Terminating Step-Off, TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2/PYAsUKP).
-Such results bring up two central questions the authors address: 1) Why the TSO was abandoned and not considered in recent comparisons? How the TSO outperformed the current state-of-the-art after five decades of study of the UKP?
+Such results bring up two central questions the authors address: Why the TSO was abandoned and not considered in recent comparisons? How the TSO outperformed the current state-of-the-art after five decades of study of the UKP?
 
-The authors believe the TSO was not considered in recent comparisons because: 1) CONTINUE HERE (old terminology and limited comparisons)
+The authors believe the TSO was not considered in recent comparisons because: the paper used old terminology (the problem was not called UKP yet); the algorithm description was very short, used `goto' statements, and the authors did not emphasize it was orders of magnitude faster than the naïve DP for the UKP; B\&B algorithms performed better than the TSO in very small uncorrelated and weakly correlated instances.
 As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison\cite{mtu1}.
 In the experiments presented in~\cite{mtu1}, the TSO algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
 Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was not even one order of magnitude apart.
@@ -54,11 +54,10 @@ Also, the application of the dominances would need to be less strict as, for exa
 
 In conclusion,
 i) the choice of artificial instance datasets had an important role defining which algorithms were considered the best by the literature; 
-ii) the simple, multiple, collective, and threshold dominance relations can be generalized to solution dominance, and the application of a weak version of it shows similar efficiency.
-
-% MINOR CONTRIBUTIONS?
-%\item Evidence that the B\&B approach worst-case can arise when solving pricing subproblems of BPP/CSP.
-%\item Evidence that converting the pricing problem profit values to large integers do not cause significant loss.
+ii) the simple, multiple, collective, and threshold dominance relations can be generalized to solution dominance, and the application of a weak version of it shows similar efficiency;
+iii) there's evidence that the items distribution of pricing problems can converge to a strongly correlated distribution (which can take exponential time to solve by B\&B);
+iv) there's evidence that converting the profit of pricing problems to large integers do not cause significant loss to the master problem objetive value;
+v) the development of new and tighter periodicity bounds is of little use to the improvement of the current state-of-the-art algortithms for solving UKP exactly.
 
 %While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
 
@@ -78,5 +77,5 @@ Many questions raised during the development of this paper ended up unanswered. 
 
 \subsection{Acknowledgements}
 
-PUT HERE ACKNOWLEDGMENT TO CNPQ, MAYBE PROJECT, POIRREZ
+The authors are thankful to the CNPq (Conselho Nacional de Desenvolvimento Científico e Tecnológico) and CAPES (Coordenação de Aperfeiçoamento de Pessoal de Nível Superior) for the financial support. The authors are also thankful to Vincent Poirriez for his help with PYAsUKP. BURIOL CHECK NEED TO THANK PROJECT?
 

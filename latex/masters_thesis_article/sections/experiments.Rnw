@@ -151,7 +151,7 @@ fast_plot <- function(t) {
   #data$algorithm <- gsub('ordered_step_off', 'O.S.', data$algorithm)
   data$algorithm <- gsub('terminating_step_off', 'TSO', data$algorithm)
   data$algorithm <- gsub('pyasukp', 'EDUK2', data$algorithm)
-  data$algorithm <- gsub('mgreendp', 'MGREENDP', data$algorithm)
+  data$algorithm <- gsub('mgreendp', 'GREENDP', data$algorithm)
   pya_dataset_labeller <- as_labeller(c(
     'all' = 'ALL (4540 inst.)',
     'ss2' = 'SS (400 inst.)',
@@ -161,15 +161,15 @@ fast_plot <- function(t) {
     'hi' = 'WCD (2000 inst.)'
   ))
 
-  shape_conv <- c('TSO' = 15, 'EDUK2' = 16, 'MGREENDP' = 17)
+  shape_conv <- c('TSO' = 15, 'EDUK2' = 16, 'GREENDP' = 17)
 
   pya_plot_labels <- data %>%
     select(filename, type, algorithm, internal_time) %>%
     dcast(filename + type ~ algorithm, value.var = 'internal_time') %>%
-    select(type, MGREENDP, TSO, EDUK2) %>%
+    select(type, GREENDP, TSO, EDUK2) %>%
     group_by(type) %>%
     summarise(
-      mean_greendp = mean(MGREENDP, na.rm = T),
+      mean_greendp = mean(GREENDP, na.rm = T),
       mean_tso = mean(TSO, na.rm = T),
       mean_eduk2 = mean(EDUK2, na.rm = T))
 
@@ -223,13 +223,13 @@ fast_plot(fast_csv)
 In \autoref{fig:pya_fast}, the instances (x-axis) are sorted by the time EDUK2 spent to solve them.
 EDUK2 B\&B phase allows EDUK2 to solve some instances (distributed between all instance sizes) faster than TSO/GREENDP.
 This behavior shows that EDUK2 times for a specific instance cannot be predicted based on the number of items and distribution of the instance.
-Nonetheless, when the B\&B phase has little effect, the EDUK2 DP phase (basically EDUK) spend considerably more time than TSO/MGREENDP to solve the instance.
+Nonetheless, when the B\&B phase has little effect, the EDUK2 DP phase (basically EDUK) spend considerably more time than TSO/GREENDP to solve the instance.
 
-TSO and MGREENDP run times form plateaus in the figure.
+TSO and GREENDP run times form plateaus in the figure.
 For each class of instances, the plateaus aggregate runs over instances with a number of items of similar magnitude.
-This behavior shows that the specific items that constitute an instance affect TSO and MGREENDP less than the number of items and distribution, both which are good predictors of the TSO and MGREENDP run time.
+This behavior shows that the specific items that constitute an instance affect TSO and GREENDP less than the number of items and distribution, both which are good predictors of the TSO and GREENDP run time.
 
-The run times of TSO and MGREENDP are similar, except for the SAW instances, in which MGREENDP performed considerably worse than TSO.
+The run times of TSO and GREENDP are similar, except for the SAW instances, in which GREENDP performed considerably worse than TSO.
 GREENDP DP phase does not generate solutions including the best item.
 The use of the best item allows the generation of more efficient solutions, which dominate less efficient solutions, reducing the total number of solutions generated and, consequently, the computational effort spent.
 The authors believe that the exclusion of the best item from the DP phase is the reason that GREENDP presented run times higher than TSO over SAW instances.
@@ -367,7 +367,7 @@ scale_x_continuous(trans = "log2",
 \label{fig:realistic_random}
 \end{figure}
 
-The run times of both step-off algorithms and MGREENDP become almost identical as the size of the input grows. % TODO: consider removing the three and presenting only one of them
+The run times of both step-off algorithms and GREENDP become almost identical as the size of the input grows. % TODO: consider removing the three and presenting only one of them
 As the instance size grow, EDUK run times get a bit worse than the other three aforementioned algorithms.
 EDUK2 has many run times similar to the EDUK but, for some instances in each instance size, its B\&B phase solves the instance or helps to reduce the instance size considerably.
 MTU1 and MTU2 have the smallest run times for the smallest instances but, as the instance size and \(w_{min}\) grow, also grow the number of instances in which MTU1 and MTU2 spend orders of magnitude more time to solve than the other algorithms.
@@ -388,7 +388,7 @@ pretiffy_alg_names_short <- function(names) {
   'eduk2'                = 'EDUK2',
   'ordered_step_off'     = 'Ord. Step-Off',
   'terminating_step_off' = 'Term. Step-Off',
-  'mgreendp'             = 'MGREENDP')
+  'mgreendp'             = 'GREENDP')
 }
 
 rr_t$algorithm <- pretiffy_alg_names_short(rr_t$algorithm)

@@ -92,7 +92,7 @@ make_pya_row <- function(t, ...) {
 @
 
 \begin{table}[H]
-\caption{Results for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the Terminating Step-Off, MGREENDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
+\caption{Results for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the Terminating Step-Off, GREENDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The time unit of the table values is seconds.}
 \vspace{1mm}
 \label{tab:times_pya}
 \def\arraystretch{1.1}
@@ -102,7 +102,7 @@ make_pya_row <- function(t, ...) {
 \begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrrr@{}}
 
 \hline
-\multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{l}{TSO} & \multicolumn{3}{l}{MGREENDP} & \multicolumn{3}{l}{PYAsUKP}\\
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{l}{TSO} & \multicolumn{3}{l}{GREENDP} & \multicolumn{3}{l}{PYAsUKP}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
 \multicolumn{3}{l}{400 inst. per line} & \multicolumn{9}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
@@ -111,7 +111,7 @@ make_pya_row <- function(t, ...) {
 & \textbf{n} & \(w_{min}\)  & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
-\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & \Sexpr{make_pya_row(ss2)}\\ % & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
+\multicolumn{3}{c}{For detail see \cite{sea2016}} & \Sexpr{make_pya_row(ss2)}\\ % & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
 \hline
 
 \multicolumn{3}{l}{20 inst. per line} & \multicolumn{9}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
@@ -238,7 +238,7 @@ make_mtu_row <- function(t, ...) {
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin}  & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
 
-\multicolumn{3}{c}{See section~\ref{sec:subsetsum}} & \Sexpr{make_mtu_row(mt_ss2)}\\ %0.04 & 40 & 0.04 & 40 & 0.00 & 40 & 154.97 & 8\\
+\multicolumn{3}{c}{For detail see~\cite{sea2016}} & \Sexpr{make_mtu_row(mt_ss2)}\\ %0.04 & 40 & 0.04 & 40 & 0.00 & 40 & 154.97 & 8\\
 \hline
 
 \multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
@@ -314,7 +314,7 @@ pretiffy_alg_names <- function(names) {
   'eduk2'                = 'EDUK2',
   'ordered_step_off'     = 'Ord. Step-Off',
   'terminating_step_off' = 'Term. Step-Off',
-  'mgreendp'             = 'MGREENDP')
+  'mgreendp'             = 'GREENDP')
 }
 @
 
@@ -335,7 +335,7 @@ rt <- rr %>% mutate(n = as.integer(get_n(filename))) %>%
             fin = sum(!is.na(internal_time))) #%>%
   #arrange(n, algorithm)
 
-# "The results for the step-offs were ommited as they are very similar to the MGREENDP results."
+# "The results for the step-offs were ommited as they are very similar to the GREENDP results."
 lrt <- xtable(rt, caption = "Results of the experiment with realistic random dataset (see \\autoref{sec:rr_exp}). For each row, there is a set \\(T\\) comprised by the run times that \\textbf{algorithm} spent solving instances of size \\textbf{n}. We do not count the run time of runs that ended in timeout. The meaning of the columns \\textbf{avg}, \\textbf{sd}, \\textbf{min}, \\textbf{max} and \\textbf{fin} are, respectively, the arithmetic mean of \\(T\\), the standard deviation of \\(T\\), the minimal value in \\(T\\), the maximal value in \\(T\\), and the cardinality of \\(T\\) (i.e. the number of runs that did not end in timeout). The time unit of the table values is seconds.", label = 'tab:rr')
 align(lrt) <- c('r', 'c', rep('r', 5), 'c')
 print(lrt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, add.to.row = list(pos = list(0), command = "\\hline \\endhead ")) 

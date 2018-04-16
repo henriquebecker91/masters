@@ -111,7 +111,7 @@ make_pya_row <- function(t, ...) {
 & \textbf{n} & \(w_{min}\)  & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
-\multicolumn{3}{c}{For detail see \cite{sea2016}} & \Sexpr{make_pya_row(ss2)}\\ % & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
+\multicolumn{3}{c}{For detail see~\cite{sea2016}} & \Sexpr{make_pya_row(ss2)}\\ % & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
 \hline
 
 \multicolumn{3}{l}{20 inst. per line} & \multicolumn{9}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\

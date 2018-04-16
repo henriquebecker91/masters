@@ -35,26 +35,7 @@ library(tables) # for latex and tabular
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \usepackage{graphicx}           % pacote para importar figuras
 \usepackage{tikz}
-\newcommand{\drawvvector}[5]{
-	\edef \origin {#1}
-	\edef \ymax {#2}
-	\edef \rs {(#3,#4)}
-	\edef \scale {#5}
-	\foreach \y in {0,...,\ymax}{
-		\draw [shift={\origin}](0,\y) rectangle +\rs;
-		\node [scale=\scale, shift={\origin}, font=\LARGE] at (0.5, \y + 0.5) {\(\y\)};
-	}
-}
-\newcommand{\drawhvector}[6]{
-	\edef \origin {#1}
-	\edef \xmax {#2}
-	\edef \rs {(#3,#4)}
-	\edef \scale {#5}
-	\foreach \x in {0,...,\xmax}{
-		\draw [shift={\origin}] (\x,0) rectangle +\rs;
-		\node [scale=\scale, shift={\origin}, font=\LARGE] at (\x + 0.5, 0.5) {\(\x\)};
-	}
-}
+\usetikzlibrary{decorations.pathreplacing}
 
 % Packages for computer code
 \usepackage{algorithm}
@@ -71,6 +52,41 @@ library(tables) # for latex and tabular
 \usepackage[nice]{nicefrac}
 \usepackage{float}
 %\usepackage{flafter}
+
+\usepackage{tikz}
+% Define transparent elements
+\newcommand{\semitransp}[2][35]{\color{fg!#1}#2\color{fg!100}}
+\newcommand{\drawhvectorfill}[5]{
+	\edef \origin {#1}
+	\edef \xmax {#2}
+	\edef \rs {(#3,#4)}
+	\edef \filling {#5}
+	\foreach \x in {0,...,\xmax}{
+		\draw [shift={\origin},fill=\filling] (\x,0) rectangle +\rs;
+	}
+}
+\newcommand{\drawrectangle}[4]{
+	\edef \x     {#1}
+	\edef \y     {#2}
+	\edef \size  {#3}
+	\edef \color {#4}
+	\draw [fill=\color] (\x - \size, \y - \size) rectangle +(2*\size, 2*\size);
+}
+\newcommand{\drawaxis}[4]{
+	\edef \xmax {#1}
+	\edef \ymax {#2}
+	\edef \xlab {#3}
+	\edef \ylab {#4}
+	\draw [<->, thick] (\xmax,0) -- (0,0) -- (0,\ymax);
+	\node [below, font=\small] at (\xmax/2, 0) {\xlab};
+	\node [rotate=90, above, font=\small] at (0,\xmax/2) {\ylab};
+}
+\newcommand{\dominate}[3]{
+	\edef \xx {#1}
+	\edef \yy {#2}
+	\edef \xmax {#3}
+	\draw [dashed] (\xx, 0) -- (\xx,\yy) -- (\xmax,\yy);
+}
 
 % used together with below code to put float barriers in all (sub)sections
 % now, figures with [!htbp] have a much more sensible placement

@@ -234,44 +234,52 @@ Threshold dominance with~\(\beta > 1\) does not allow to exclude an item~\(j\) a
 %In other words, for any capacity greater than~\(y^+\), an optimal solution can be reached by adding copies of \(b\) to an optimal solution of capacity~\(y^+\) or lower.
 The \emph{periodicity} property shows the existence of a capacity \(y^+\) such that, for every capacity~\(y'\)~:~\(y'>y^+\), there exists an optimal solution for capacity~\(y'\) that is the same as an optimal solution for capacity~\(y' - w_b\) except it includes one more copy of the best item \(b\).
 If~\(y^+ < c\), then the UKP can be solved for capacity~\(y^{*} = c - \ceil{(c - y^+)/w_b}w_b\), and the gap between~\(y^{*}\) and~\(c\) filled with exactly~\((c - y^{*})/w_b\) copies of the best item \(b\), effectively reducing the knapsack size from~\(c\) to~\(y^*\).
+However, the effort necessary to compute the exact value of \(y^+\) (and \(y^*\)) is about the same as solving the UKP for all capacities \(y \leq y^+\) while checking for threshold dominance.
+Consequently, \(y^+\) is implicitly determined by some dynamic programming algorithms (as EDUK) while solving instances in which \(y^+ < c\).
+An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in polynomial time, as a preprocessing phase.
 
 \begin{figure}
   \centering
-  \caption{Graphical representation of the use of capacity \(y^+\) (periodicity) to reduce the computational effort to solve a UKP instance. If \(y^+\) (or a suitable upper bound) is known beforehand, the UKP instance can be solved optimally up to \(y^*\)  Source: primary.}
+  \caption{Graphical representation of an instance in which \(y^+ < c\) and its implications for the solving of the instance. Source: primary.}
   \hspace{0.4cm}
 \edef \scale {0.5}
 \begin{tikzpicture}[scale=\scale]
-\drawhvectorfill{(0, 0)}{20}{1}{1}{white}
+\drawhvectorfill{(0, 0)}{22}{1}{1}{white}
 \node [scale=\scale, font=\Huge] at (0 + 0.5, 0.5) {\(0\)};
-\node [scale=\scale, font=\Huge] at (1 + 0.5, 0.5) {\(...\)};
+\node [scale=\scale, font=\Huge] at (1 + 0.5, 0.5) {\(1\)};
+\node [scale=\scale, font=\Huge] at (2 + 0.5, 0.5) {\(2\)};
+\node [scale=\scale, font=\Huge] at (3 + 0.5, 0.5) {\(3\)};
+\node [scale=\scale, font=\Huge] at (4 + 0.5, 0.5) {\(...\)};
 \node [scale=\scale, font=\Huge] at (8 + 0.5, 0.5) {\(y^*\)};
 \node [scale=\scale, font=\Huge] at (10 + 0.5, 0.5) {\(y^+\)};
 \node [scale=\scale, font=\Huge] at (20 + 0.5, 0.5) {\(c\)};
-\draw[dashed, ultra thick, ->] (20.4, 1) to [out=135,in=45] (16.6, 1);
-\node [scale=\scale, above, font=\Huge] at (18.5, 2) {\(-w_b\)};
-\draw[dashed, ultra thick, ->] (16.4, 1) to [out=135,in=45] (12.6, 1);
-\node [scale=\scale, above, font=\Huge] at (14.5, 2) {\(-w_b\)};
-\draw[dashed, ultra thick, ->] (12.4, 1) to [out=135,in=45] (8.6, 1);
-\node [scale=\scale, above, font=\Huge] at (10.5, 2) {\(-w_b\)};
-\draw[decorate, decoration={brace, mirror, raise=5pt}] (0, 0) -- (8.9, 0);
-\node [below, scale=\scale, font=\Huge] at (4.5, -0.5) {capacities solved};
-\draw[decorate, decoration={brace, mirror, raise=5pt}] (9.1, 0) -- (21, 0);
-\node [below, scale=\scale, font=\Huge] at (14.5, -0.5) {capacities not touched};
+\node [scale=\scale, font=\Huge] at (21 + 0.5, 0.5) {\(...\)};
+\node [scale=\scale, font=\Huge] at (22 + 0.5, 0.5) {\(\infty\)};
+\draw[dashed, ultra thick, ->] (20.4, 1) to [out=135,in=45] (14.6, 1);
+\node [scale=\scale, below, font=\Huge] at (17.4, 2) {\(-w_b\)};
+\draw[dashed, ultra thick, ->] (14.4, 1) to [out=135,in=45] (8.6, 1);
+\node [scale=\scale, below, font=\Huge] at (11.4, 2) {\(-w_b\)};
+%\draw[dashed, ultra thick, ->] (12.4, 1) to [out=135,in=45] (8.6, 1);
+%\node [scale=\scale, above, font=\Huge] at (10.5, 2) {\(-w_b\)};
+\draw[decorate, decoration={brace, mirror, raise=5pt}] (0.1, 0) -- (4.9, 0);
+\node [below, font=\small, align=center] at (2.5, -0.5) {could be left \\ uncomputed};
+\draw[decorate, decoration={brace, mirror, raise=5pt}] (5.1, 0) -- (10.9, 0);
+\node [below, font=\small, align=center] at (8, -0.5) {\([y^+ + 1 - w_{b}, y^+]\)};
+\draw[decorate, decoration={brace, mirror, raise=5pt}] (11.1, 0) -- (22.9, 0);
+\node [below, font=\small, align=center] at (17, -0.5)
+{ optimal solutions can be computed \\
+  in \(O(1)\) if optimal solutions for range \\
+  \([y^+ + 1 - w_{b}, y^+]\) are known};
 \end{tikzpicture}
 \end{figure}
 
 The periodicity property is a direct consequence of the threshold dominance.
-Except by the best item~\(b\), every item~\(j\) (\(j \neq b\)) is threshold dominated for some~\(\alpha_j\).
+Except by the best item~\(b\), every item~\(j : j \neq b\) is threshold dominated for some~\(\alpha_j\).
 For example, given that~\(y\) is the lowest common multiple of~\(w_b\) and~\(w_j\),~\(\beta_j = y/w_b\) and~\(\alpha_j = y/w_j\), then~\(\beta_j \times w_b \leq \alpha_j \times w_j \equiv y \leq y\) and~\(\beta_j \times p_b \geq \alpha_j \times p_j\). %, since \(e_b \geq e_j\) (from the definition of the best item).
-Consequently, the threshold dominance defines a constraint~\(x_j < \alpha_j\) on every item~\(j\).
+Consequently, the threshold dominance defines a constraint~\(x_j < \alpha_j\) on every non-best item~\(j\).
 All solutions that do not break such constraints and do not make use of the best item weight less than~\(y'' = \sum \alpha_j \times w_j\).
 Consequently, an optimal solution for any capacity greater than \(y''\) can be obtained by the procedure described in the previous paragraph.
-The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}. %The computation of the exact value of~\(y^+\) is very expensive.
-
-If the exact value of \(y^+\) is determined by a preprocessing phase, and \(y^+ < c\), then the UKP can be solved for a capacity smaller than \(c\) and the gap up to \(c\) is filled with copies of the best item.
-However, the effort necessary to compute the exact value of \(y^+\) (for \(y^+ < c\)) is about the same as solving the UKP for all capacities \(y \leq y^+\) while checking for threshold dominance.
-Consequently, \(y^+\) is implicitly determined by some dynamic programming algorithms while solving instances.
-An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be computed in polynomial time, as a preprocessing phase.
+The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}.
 
 \section{The ordered step-off and (weak) solution dominance}
 \label{sec:oso_and_sol_dom}

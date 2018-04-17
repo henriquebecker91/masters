@@ -240,7 +240,11 @@ An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be co
 
 \begin{figure}
   \centering
-  \caption{Graphical representation of an instance in which \(y^+ < c\) and its implications for the solving of the instance. Source: primary.}
+  \caption{
+    Capacities and their connection with periodicity in an instance where \(y^+ < c\).
+    % Algorithms that solve the UKP only for an specific capacity can solve for \(y^*\) instead of \(c\).
+    % Algorithms that solve the UKP for all capacities up to \(c\) can solve up to \(y^*\) instead, but if they solve up to \(y^+\) then an optimal solution for any subsequent capacity can be computed in \(O(1)\).
+    Source: primary.}
   \hspace{0.4cm}
 \edef \scale {0.5}
 \begin{tikzpicture}[scale=\scale]
@@ -262,7 +266,7 @@ An upper bound on~\(y^+\) is less valuable than~\(y^+\) itself, but it can be co
 %\draw[dashed, ultra thick, ->] (12.4, 1) to [out=135,in=45] (8.6, 1);
 %\node [scale=\scale, above, font=\Huge] at (10.5, 2) {\(-w_b\)};
 \draw[decorate, decoration={brace, mirror, raise=5pt}] (0.1, 0) -- (4.9, 0);
-\node [below, font=\small, align=center] at (2.5, -0.5) {could be left \\ uncomputed};
+\node [below, font=\small, align=center] at (2.5, -0.5) {not relevant for \\ periodicity};
 \draw[decorate, decoration={brace, mirror, raise=5pt}] (5.1, 0) -- (10.9, 0);
 \node [below, font=\small, align=center] at (8, -0.5) {\([y^+ + 1 - w_{b}, y^+]\)};
 \draw[decorate, decoration={brace, mirror, raise=5pt}] (11.1, 0) -- (22.9, 0);
@@ -285,11 +289,10 @@ The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}.
 \label{sec:oso_and_sol_dom}
 
 The ordered step-off (OSO) is a dynamic programming algorithm for the UKP~\cite{gg-66}.
-The authors' revisited the OSO and added a small performance improvement to it, as it can be seen in Algorithm 1, namely the authors' added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end}.
-When two or more solutions generated have the same weight and profit, the original algorithm arbitrarily keeps the one generated first and ignores the rest.
-In the same situation, the revisited algorithm keeps the solution with the the smallest \(d[y]\).
-In other words, as a tiebreaker between two or more mutually dominated solutions, the revisited algorithm always choses the solution that will generate descendents, therefore minimizing the computational effort.
-Such small change reduced the run times for some instances by orders of magnitude, especially the instances of the subset-sum and strongly correlated datasets.
+The authors revisited the OSO and added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end} of Algorithm 1.
+When two or more solutions generated have the same weight and profit, the original algorithm arbitrarily keeps the first solution generated and ignores the others.
+In the same situation, the revisited algorithm keeps the solution that will generate less descendents (smallest \(d[y]\)), therefore minimizing the computational effort.
+This change of tiebreaker reduced the run times of subset-sum and strongly correlated instances by orders of magnitude; and slightly improved the run times of the rest of the instances.
 %Without this change, between all solutions of the same weight, the algorithm would keep the first solution generated with the greatest profit value.
 %With the change, between all solutions with the same weight, the algorithm keeps the first solution generated with the greatest profit value and smallest index of the last item added to the solution.
 
@@ -350,16 +353,14 @@ Such small change reduced the run times for some instances by orders of magnitud
 \end{algorithm}
 \footnotetext{If two or more items share the same efficiency they are sorted by non-decreasing weight.}
 
-In addition to this small change, the authors propose the concept of \emph{solution dominance} and show how OSO applies a weaker version of this concept. 
+In addition to this change of tiebreaker, the authors propose the concept of \emph{solution dominance} and show how the OSO applies a weaker version of this concept. 
 Solution dominance generalizes simple, multiple, collective, and threshold dominances.
 A solution \(t\) is solution dominated by a different solution \(s\) iff \(w_s \leq w_t\) and \(p_s \geq p_t\).
 If a solution \(q\) is solution dominated, then any solution that is a superset of \(q\) could be discarded (or not generated) without risk of discarding all optimal solutions.
 %The concept of solution dominance alone is of little use if there is not a way to design an algorithm that makes use of it without excessive overhead.
 
-The authors use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\).
-The notation~\(max_{ix}(s)\) has analogue meaning.
-When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u\), where~\(t \subset u\), are not generated. 
-If~\(s\) dominates~\(t\), and~\(t \subset u\), and~\(max_{ix}(u - t) \leq min_{ix}(t)\), then~\(u\) is not generated by the OSO. 
+When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u : t \subset u\), are not generated. 
+The authors use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\); the notation~\(max_{ix}(s)\) has analogue meaning.
 For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by the OSO, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the ordered equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
 Ideally, any~\(u\) where~\(t \subset u\) should not be generated as it would be dominated by a solution~\(u'\) where~\(s \subset u'\). 
 It is interesting to note that this happens eventually, as any~\(t \cap \{i\}\) where~\(i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.

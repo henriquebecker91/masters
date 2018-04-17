@@ -1,21 +1,20 @@
 \section{Methods}
 \label{sec:methods}
 
-The experiments presented in this work consist in the execution of algorithm implementations over instance datasets.
-To allow the reproduction of the experiments and also to contextualize them, this section describes the algorithms, their implementations, the instance datasets and the computer setup used.
+This section describes the algorithms, their implementations, the instance datasets and the computer setup used.
 The authors also present a rationale for not including some algorithms and datasets from the literature.
 
 \subsection{Algorithms and their implementations}
 
-The algorithms used in the experiments belong to three main approaches: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (combine DP and B\&B).
-The usual DP algorithms have a worst-case time complexity of~\(O(nc)\) (pseudo-polynomial), and worst-case space complexity of~\(O(n~+~c)\).
-The B\&B algorithms have an exponential worst-case time complexity (all item combinations that fit the knapsack), 
+%The algorithms used in the experiments belong to three main approaches: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (combine DP and B\&B).
+The usual dynamic programming (DP) algorithms for the UPK have a worst-case time complexity of~\(O(nc)\) (pseudo-polynomial), and worst-case space complexity of~\(O(n+c)\).
+The branch-and-bound (B\&B) algorithms have an exponential worst-case time complexity (all item combinations that fit the knapsack), 
 but the worst-case space complexity of the B\&B algorithms used in the experiments is~\(O(n)\).
 %The hybrid algorithm used in the experiments displays the same time and space worst-case complexities than the DP approach.
 
 MTU1 is a depth-first B\&B algorithm for the UKP~\cite{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
-The MTU2 algorithm calls MTU1 over the \(x\%\) most efficient items, and if this is not sufficient to obtain a solution with proved optimality, it repeat the process with \(x\%\) increased~\cite{mtu2}.
-The Fortran implementation of MTU1 and MTU2 used in the experiments was the original implementation by Martello and Toth but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
+The MTU2 algorithm calls MTU1 over the \(x\%\) most efficient items, and if this is not sufficient to obtain a solution with proved optimality, it repeats the process with \(x\%\) increased~\cite{mtu2}.
+The Fortran implementation of MTU1 and MTU2 used in our experiments was the original implementation by Martello and Toth but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
 The C++ implementations of both algorithms were written by the authors.
 The C++ and Fortran implementations of the MTU1 algorithm have no significant differences.
 
@@ -23,7 +22,7 @@ The MTU2 implementations differed in the algorithm used to partially sort the it
 The original algorithm description in~\cite{mtu2} did not specify the exact method for performing the partial sorting.
 The original Fortran implementation uses a complex algorithm developed by one of the authors of MTU2 in~\cite{partial_sort_martello} to find the k\textsuperscript{th} most efficient item in an unsorted array, and then select and sort only the items that have the same or a greater efficiency.
 The C++ implementation uses the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+.
-The Fortran implementation only sorted the items by nonincreasing efficiency; the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
+The Fortran implementation only sorts the items by nonincreasing efficiency; the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
 
 The ordered step-off (OSO) is a DP algorithm proposed in~\cite[p.~15]{gg-66}.
 The authors already presented and discussed a revisited version of OSO in~\autoref{sec:oso_and_sol_dom}.

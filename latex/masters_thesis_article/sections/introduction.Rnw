@@ -80,7 +80,7 @@ Dominance relations are exploited to reduce~\(n\), and periodicity is exploited 
 \subsubsection{Simple, multiple, collective, and threshold dominances}
 
 Any item~\(j\) that does not appear in all optimal solutions of an instance can be excluded without affecting our capability of solving such instance.
-Given two items~\(i\) and~\(j\), if~\(w_i \leq w_j\) and~\(p_i \geq p_j\), then~\(j\) cannot be in all optimal solutions, since for any optimal solution that contains~\(j\) there will exist another optimal solution with~\(i\) in place of~\(j\).
+Given two items~\(i\) and~\(j : j \neq i\), if~\(w_i \leq w_j\) and~\(p_i \geq p_j\), then~\(j\) cannot be in all optimal solutions, since for any optimal solution that contains~\(j\) there will exist another optimal solution with~\(i\) in place of~\(j\).
 Consequently, \(j\)~can be ignored when solving an instance that contains both~\(i\) and~\(j\).
 Such relationship between~\(i\) and~\(j\) is called \emph{simple dominance}, more specifically we can say that~\(i\) simple dominates~\(j\) (or that~\(j\) is simple dominated by~\(i\)).
 
@@ -243,7 +243,7 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 
 %After such capacity, all items but the best one are dominated.
 %In other words, for any capacity greater than~\(y^+\), an optimal solution can be reached by adding copies of \(b\) to an optimal solution of capacity~\(y^+\) or lower.
-The \emph{periodicity} property shows the existence of a capacity \(y^+\) such that, for every capacity~\(y'\)~:~\(y'>y^+\), there exists an optimal solution for capacity~\(y'\) that is the same as an optimal solution for capacity~\(y' - w_b\) except it includes one more copy of the best item \(b\).
+The \emph{periodicity} property shows the existence of a capacity \(y^+\) such that, for every capacity~\(y'\)~:~\(y'>y^+\), there exists an optimal solution for capacity~\(y'\) that is the same as an optimal solution for capacity~\(y' - w_b\) except it includes one more copy of the best item~\(b\)~\cite[p.~10]{gg-66}.
 If~\(y^+ < c\), then the UKP can be solved for capacity~\(y^{*} = c - \ceil{(c - y^+)/w_b}w_b\), and the gap between~\(y^{*}\) and~\(c\) filled with exactly~\((c - y^{*})/w_b\) copies of the best item \(b\), effectively reducing the knapsack size from~\(c\) to~\(y^*\) (see~\autoref{fig:periodicity}).
 However, the effort necessary to compute the exact value of \(y^+\) (and \(y^*\)) is about the same as solving the UKP for all capacities \(y \leq y^+\) while checking for threshold dominance.
 Consequently, \(y^+\) is implicitly determined by some dynamic programming algorithms (as EDUK) while solving instances in which \(y^+ < c\).
@@ -301,16 +301,22 @@ The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}.
 \section{The revisited ordered step-off and (weak) solution dominance}
 \label{sec:oso_and_sol_dom}
 
+Given two valid solutions~\(s\) and~\(t\), if~\(w_s \leq w_t\) and~\(p_s \geq p_t\), then solution~\(s\) can replace solution~\(t\), and any solution that is a superset of \(t\) can be ignored (see \autoref{fig:dominances}).
+The authors call this relationship \emph{solution dominance}, and it generalizes threshold dominance in which solution~\(t\) can only consist of copies of the same item.
+As far the authors know, the concept of solution dominance was not formalized before.
+The authors believe such overlook happened because: 1) the original concept of dominance focused on discarding single items from further consideration; 2) an algorithm that fully exploits such dominance relation has not been proposed.
+
 The ordered step-off (OSO) is a dynamic programming algorithm for the UKP~\cite{gg-66}.
 The authors revisited the OSO and added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end} of Algorithm 1.
-When two or more solutions generated have the same weight and profit, the original algorithm arbitrarily keeps the first solution generated and ignores the others.
+When two or more solutions generated have the same weight and profit (a special case of solution dominance), the original algorithm arbitrarily keeps the first solution generated and ignores the others.
 In the same situation, the revisited algorithm keeps the solution that will generate less descendents (smallest \(d[y]\)), therefore minimizing the computational effort.
-This change of tiebreaker reduced the run times of the algorithm over subset-sum and strongly correlated instances by orders of magnitude. What can be explained by the fact that, in subset-sum instances, all solutions with the same weight have the same profit and, in strongly correlated instances, all solutions with the same weight and the same number of items have the same profit.
+This change of tiebreaker reduced the run times of the algorithm over subset-sum and strongly correlated instances by orders of magnitude.
+Such performance gain can be explained by the fact that, in subset-sum instances, all solutions with the same weight have the same profit and, in strongly correlated instances, all solutions with the same weight and the same number of items have the same profit.
 %Without this change, between all solutions of the same weight, the algorithm would keep the first solution generated with the greatest profit value.
 %With the change, between all solutions with the same weight, the algorithm keeps the first solution generated with the greatest profit value and smallest index of the last item added to the solution.
 
 \begin{algorithm}[!htb]
-\caption{The ordered step-off (revisited)}
+\caption{The revisited ordered step-off (R-OSO)}
 \begin{algorithmic}[1]
 \Procedure{oso}{$n, c, w, p$}
   \State~Sort \(w\) and \(p\) by non-increasing item efficiency\footnotemark and find $w_{min}, w_{max}$ 
@@ -366,17 +372,13 @@ This change of tiebreaker reduced the run times of the algorithm over subset-sum
 \end{algorithm}
 \footnotetext{If two or more items share the same efficiency they are sorted by non-decreasing weight.}
 
-In addition to this change of tiebreaker, the authors propose the concept of \emph{solution dominance}  and show how the OSO applies a weaker version of this concept. 
-Solution dominance generalizes simple, multiple, collective, and threshold dominances.
-A solution \(t\) is solution dominated by a different solution \(s\) iff \(w_s \leq w_t\) and \(p_s \geq p_t\) (for example, see \autoref{fig:dominances}).
-If a solution \(t\) is solution dominated, then any solution that is a superset of \(t\) can be discarded (or not generated) without risk of discarding all optimal solutions.
-%The concept of solution dominance alone is of little use if there is not a way to design an algorithm that makes use of it without excessive overhead.
-
-When a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), some solutions~\(u : t \subset u\), are not generated. 
-The authors use the notation~\(min_{ix}(s)\) to refer to the lowest index among the items that compose the solution~\(s\); the notation~\(max_{ix}(s)\) has analogue meaning.
-For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by the OSO, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could yet be generated (note that, in reality, it is the ordered equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
+The (R-)OSO implements what the authors chose to call \emph{weak solution dominance}.
+The implementation of \emph{weak solution dominance} has no overhead but also does not avoid generating all supersets of dominated solutions (only some of them).
+The notation~\(min_{ix}(s)\) refer to index of the item of lowest index present in solution~\(s\); the notation~\(max_{ix}(s)\) has the analogue meaning.
+If a solution~\(t\) is pruned because~\(s\) dominates~\(t\) (lines~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end}), only the solutions~\(u : t \subset u \land min_{ix}(u) \leq min_{ix}(t)\) are guaranteed to not be generated.
+CONTINUE IN THIS PHRASE For example, if~\(\{3, 2\}\) is dominated, then~\(\{3, 2, 2\}\) and~\(\{3, 2, 1\}\) will never be generated by the OSO, but~\(\{3,2,3\}\) or~\(\{3,2,5\}\) could have been already generated or (note that, in reality, it is the ordered equivalent~\([3,3,2]\) and~\([5,3,2]\) that could yet be generated).
 Ideally, any~\(u : t \subset u\) should not be generated as it would be dominated by a solution~\(u' : s \subset u'\). 
-It is interesting to note that this happens eventually, as any~\(t \cap \{i\} : i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
+This eventually happens, as any~\(t \cap \{i\} : i > min_{ix}(t)\) will be dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)), and at some point no solution that is a superset of~\(t\) will be generated anymore.
 
 \section{A critique of periodicity tests and bounds}
 \label{sec:critique_of_periodicity}

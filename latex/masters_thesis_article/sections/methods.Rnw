@@ -33,18 +33,18 @@ The GREENDP does not use the best item~\(b\), but interrupts the DP at each~\(w_
 If two or more items share the greatest efficiency, GREENDP verification does not work, and it is the same as the OSO. 
 
 The original implementations of the step-offs and GREENDP were not publicly available, so the authors wrote their own implementations in C++.
-The authors' implementations of TSO and GREENDP include the same improvement added by the authors to the revisited OSO and described in \autoref{sec:oso_and_sol_dom}.
+The authors' implementations of TSO and GREENDP include the same tiebreaking improvement added by the authors to the OSO and described in~\autoref{sec:oso_and_sol_dom}.
 All C++ implementations written by the authors are available at the first author's code repository\footnote{The C++ implementations of MTU1, MTU2, the ordered/terminating step-offs, and GREENDP are available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
 %As the C++ implementations of MTU1 and MTU2, our implementations change the items sorting by nonincreasing efficiency (specified by these three algorithms) to sorting by nonincreasing efficiency with efficiency ties sorted by nondecreasing weight.
 
-The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain\cite[p.~223]{ukp_new_results,eduk,book_ukp_2004}.
+The EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain~\cite[p.~223]{ukp_new_results,eduk,book_ukp_2004}.
 EDUK seems to be based on ideas first discussed in~\cite{algo_tech_cut}.
 Before EDUK2 was proposed, it was said that ``[...] EDUK [...] seems to be the most efficient dynamic programming based method available at the moment.''~\cite[p.~223]{book_ukp_2004}.
 
 EDUK2 is a hybrid DP/B\&B algorithm which improves EDUK with a B\&B preprocessing phase~\cite{pya}.
 If B\&B can solve the instance using less than a parameterized number of nodes, then EDUK is not executed; otherwise, the bounds computed in the B\&B phase are used to reduce the number of items before EDUK execution and in intervals during its execution.
 
-The implementation of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml by the creators of EDUK and EDUK2. 
+The implementation of EDUK and EDUK2 used in the experiments was PYAsUKP (PYAsUKP: Yet Another solver for the Unbounded Knapsack Problem), which was written in OCaml.
 Vincent Poirriez gave access to this code to the authors, by email,
 in January 11th, 2016\footnote{The code is available at Henrique Becker master's thesis code repository (\url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}).}.
 %The version of the code available at that time in the PYAsUKP official site had bugs\footnote{The EDUK and EDUK2 source was available to download in the following page of PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.}.
@@ -56,7 +56,7 @@ Consequently, both the naïve DP algorithm and its improved version were not inc
 The UKP5 algorithm proposed in~\cite{sea2016} was found to be very similar to the TSO\footnote{
   The authors of this article reinvented an algorithm from~\cite{gg-66} and published a paper calling it UKP5 while believing it was novel~\cite{sea2016}.
   The authors would like to apologize to the scientific community for such disregard.
-  The only improvement of UPK5 over TSO is the small change described in \autoref{sec:oso_and_sol_dom}, which the authors included in all algorithms it was applicable.}
+  The only improvement of UPK5 over TSO is the tiebreaker change described in \autoref{sec:oso_and_sol_dom}, which the authors included in all algorithms it was applicable.}
 and therefore only the TSO was included.
 
 The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}. Both weren't included in the experiments.
@@ -72,8 +72,8 @@ UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms ov
 
 \subsection{Instance datasets}
 
-The datasets used in the experiments include: artificial datasets from the literature that focus on being hard-to-solve (PYAsUKP and realistic random datasets); a dataset proposed by the authors in order to prove an hypothesis (BREQ dataset); a dataset based on the solving of CSP/BPP instances with the column generation technique (CSP dataset).
-The reasoning for not including \emph{uncorrelated} and \emph{weakly correlated} instance is presented in the end of the section.
+The datasets used in the experiments include: artificial datasets from the literature that focus on being hard-to-solve (PYAsUKP and realistic random datasets); a dataset proposed by the authors in order to prove an hypothesis (BREQ dataset); a dataset based on solving of CSP/BPP instances with the column generation technique (CSP dataset).
+The reasoning for not including \emph{uncorrelated} and \emph{weakly correlated} instances is presented in the end of the section.
 
 \subsubsection{PYAsUKP dataset}
 \label{sec:pya_inst}
@@ -86,16 +86,15 @@ The PYAsUKP dataset has multiple-of-ten amounts of instances generated with diff
 The authors selected one-tenth of the instances for each parameter combination (in total 454) and will refer to it as the \emph{reduced PYAsUKP dataset}.
 
 \subsubsection{Realistic Random Dataset}
-A dataset of \emph{realistic random} instances was used in the experiments; the generation procedure is based on~\cite{eduk}.
-The generation procedure follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min, max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-th of one list to the i-th element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
+A dataset of \emph{realistic random} instances was used in the experiments. The generation procedure, based on~\cite{eduk}, is summarized as follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min, max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-th of one list to the i-th element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
 Simple dominance cannot occur in such instances; other dominances may be present.
-Our dataset comprises ten instances with distinct random seeds for each one of eight \(n\) values (\(2^{n'}\), where \(n' \in \{10, 11, \dots, 17\}\)), totalling 80 instances.
+Our dataset comprises ten instances generated with distinct random seeds for each one of eight \(n\) values (\(2^{n'}\), where \(n' \in \{10, 11, \dots, 17\}\)), totalling 80 instances.
 The values of the remaining parameters come from \(n\): \(max = n \times 2^{10}\), \(min = max/2^4\), \(c_{min} = 2\times max\) and \(c_{max} = c_{min} + min\).
 
 \subsubsection{BREQ 128-16 Standard Benchmark}
 \label{sec:breq_inst}
 
-The Bottom Right Ellipse Quadrant (BREQ) is an items distribution proposed by the authors in~\cite{ukp_hb_mastersthesis}. %and first described in REF\_MASTER\_THESIS.
+The Bottom Right Ellipse Quadrant (BREQ) is an items distribution proposed in~\cite{ukp_hb_mastersthesis}. %and first described in REF\_MASTER\_THESIS.
 The items of an instance follow the BREQ distribution iff the profits and weights respect~\(p_i = p_{max} - \floor[\big]{\sqrt{p_{max}^2 - w_i^2 \times (p_{max}/w_{max})^2}}\), where \(w_{max}\) (\(p_{max}\)) is an upper bound on the items weight (profit).
 The distribution name comes from the fact that the formula describes the bottom right quarter of an ellipse.
 %This instance distribution was created to illustrate that different item distributions favor different solution approaches and, therefore, the choice of instances (or specifically, their item distribution) defines what is considered the \emph{best algorithm}.
@@ -140,7 +139,7 @@ The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), a
 \subsubsection{Datasets deliberately ignored}
 
 The \emph{uncorrelated} and \emph{weakly correlated} item distributions were commonly used in the literature~\cite{mtu1,mtu2,babayev,eduk}, but the authors decided to not include them in the experiments.
-The literature has already questioned the suitability of \emph{uncorrelated} item distributions datasets for the analysis of the UKP~\cite{zhu_dominated}\cite{ukp_new_results}.
+The literature has already questioned the suitability of \emph{uncorrelated} item distributions datasets for the analysis of the UKP~\cite{zhu_dominated, ukp_new_results}.
 Uncorrelated instances often exhibit a vast amount of simple and multiple dominated items, and polynomial algorithms can reduce the number of items in such instances by orders of magnitude.
 %In the author's experience, uncorrelated instances often take more time to load from disk than to solve.
 %The solving times of uncorrelated instances are more dependent on the implementation of polynomial-time preprocessing than dependent on the quality of the solving algorithm.

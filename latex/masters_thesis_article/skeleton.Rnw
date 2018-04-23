@@ -22,7 +22,7 @@ library(tables) # for latex and tabular
 \PassOptionsToPackage{hyphens}{url}
 \usepackage{hyperref}
 \def\sectionautorefname{Section} % change hyperref autoref to capitalized
-\def\subsectionautorefname{Subsection} % change hyperref autoref to capitalized
+\def\subsectionautorefname{Section} % change hyperref autoref to capitalized
 \expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%  save the current 一
   \do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j%
   \do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t%
@@ -38,25 +38,17 @@ library(tables) # for latex and tabular
 \usepackage{graphicx}           % pacote para importar figuras
 \usepackage{tikz}
 \usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{shapes.misc}
+\tikzset{cross/.style={cross out, draw,
+         minimum size=2*(#1-\pgflinewidth),
+         inner sep=0pt, outer sep=0pt}}
 
-% Packages for computer code
-\usepackage{algorithm}
-\usepackage{algpseudocode}
+\newcommand{\drawolddomitem}[2]{
+	\edef \x     {#1}
+	\edef \y     {#2}
+	\draw (\x, \y) node[cross=2.5pt,draw=gray] {};
+}
 
-\usepackage{longtable}
-\usepackage{pdflscape} % used for CSP experiment table
-\usepackage{tabu} % the latex wikibook suggest this table over others
-\usepackage{array} % for common commands inside \newcolumntype
-\usepackage{makecell} % for makecell, that allows libreaks in cells
-
-\usepackage{verbatim} % for \begin{comment} remove before final version
-\usepackage{adjustbox}
-\usepackage[nice]{nicefrac}
-\usepackage{float}
-%\usepackage{flafter}
-
-\usepackage{tikz}
-% Define transparent elements
 \newcommand{\semitransp}[2][35]{\color{fg!#1}#2\color{fg!100}}
 \newcommand{\drawhvectorfill}[5]{
 	\edef \origin {#1}
@@ -89,6 +81,22 @@ library(tables) # for latex and tabular
 	\edef \xmax {#3}
 	\draw [dashed] (\xx, 0) -- (\xx,\yy) -- (\xmax,\yy);
 }
+
+% Packages for computer code
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{longtable}
+\usepackage{pdflscape} % used for CSP experiment table
+\usepackage{tabu} % the latex wikibook suggest this table over others
+\usepackage{array} % for common commands inside \newcolumntype
+\usepackage{makecell} % for makecell, that allows libreaks in cells
+
+\usepackage{verbatim} % for \begin{comment} remove before final version
+\usepackage{adjustbox}
+\usepackage[nice]{nicefrac}
+\usepackage{float}
+%\usepackage{flafter}
 
 % used together with below code to put float barriers in all (sub)sections
 % now, figures with [!htbp] have a much more sensible placement

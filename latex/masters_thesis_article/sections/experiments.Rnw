@@ -19,7 +19,7 @@ gen_graph_all_alg_discrete_x <- function(csv) {
     'eduk2'                = 'EDUK2',
     'ordered_step_off'     = 'OSO',
     'terminating_step_off' = 'TSO',
-    'mgreendp'             = 'GREENDP'
+    'mgreendp'             = 'Green'
   )
   # I thought of putting one of the legends in an unused area of the plot and
   # another below the plot, but separating legends with ggplot2 needs a hack:
@@ -114,18 +114,19 @@ csp_csv$pricing_total_time <- csp_csv$hex_sum_knapsack_time + csp_csv$hex_sum_so
 The experiments are split into five subsections.
 Each section addresses one dataset and the results of running some selected algorithms over them.
 To keep the results close to its discussion, each experiment section brings both the results and their immediate analysis.
+Only implementations including the tiebreaker improvement were used in the experiments, thus, for simplicity, the R-OSO, R-TSO and R-Green will be referred as OSO, TSO and Green in this section.
 %The big picture painted by all the experiments is discussed in \autoref{sec:discussion}.
 
 \subsection{Results on the PYAsUKP dataset}
 \label{sec:pya_exp}
 
 The experiment presented in this section is an updated version of the experiment first presented in~\cite{sea2016}.
-In this version GREENDP is considered, UKP5 is replaced by the Terminating Step-Off (TSO), and all runs were executed serially.
+In this version Green is considered, UKP5 is replaced by the Terminating Step-Off (TSO), and all runs were executed serially.
 The same 4540 instance files were used.
 
 \begin{figure}[!htbp]
-\caption{Run times of the TSO, GREENDP (GREEN in the plot) and EDUK2 algorithms over the 4540 instances of the PYAsUKP dataset. There was no time limit. The instance classes acronyms stand for Postponed Periodicity (PP); Strongly Correlated (SC); Subset-Sum (SS); and Without Collective Dominance (WCD). 
-EDUK was not included because EDUK2 supersedes EDUK. The ordered step-off run times were omitted because they were too similar to the terminating step-off run times. The GREENDP run times over subset-sum instances are not displayed because in this case the two most efficient items have the same efficiency and, therefore, GREENDP behaves as OSO. The mean labels inform the mean run times of each algorithm for the corresponding dataset, in seconds.}
+\caption{Run times of TSO, Green and EDUK2 algorithms over the 4540 instances of the PYAsUKP dataset. There was no time limit. The instance classes acronyms stand for Postponed Periodicity (PP); Strongly Correlated (SC); Subset-Sum (SS); and Without Collective Dominance (WCD). 
+EDUK was not included because EDUK2 supersedes EDUK. The ordered step-off run times were omitted because they were too similar to the terminating step-off run times. The Green run times over subset-sum instances are not displayed because in this case the two most efficient items have the same efficiency and, therefore, Green behaves as OSO. The mean labels inform the mean run times of each algorithm for the corresponding dataset, in seconds.}
 \begin{center} 
 <<pya_fast_fig, fig.height = 9.5>>=
 fast_plot <- function(t) {
@@ -151,7 +152,7 @@ fast_plot <- function(t) {
   #data$algorithm <- gsub('ordered_step_off', 'O.S.', data$algorithm)
   data$algorithm <- gsub('terminating_step_off', 'TSO', data$algorithm)
   data$algorithm <- gsub('pyasukp', 'EDUK2', data$algorithm)
-  data$algorithm <- gsub('mgreendp', 'GREENDP', data$algorithm)
+  data$algorithm <- gsub('mgreendp', 'Green', data$algorithm)
   pya_dataset_labeller <- as_labeller(c(
     'all' = 'ALL (4540 inst.)',
     'ss2' = 'SS (400 inst.)',
@@ -161,15 +162,15 @@ fast_plot <- function(t) {
     'hi' = 'WCD (2000 inst.)'
   ))
 
-  shape_conv <- c('TSO' = 15, 'EDUK2' = 16, 'GREENDP' = 17)
+  shape_conv <- c('TSO' = 15, 'EDUK2' = 16, 'Green' = 17)
 
   pya_plot_labels <- data %>%
     select(filename, type, algorithm, internal_time) %>%
     dcast(filename + type ~ algorithm, value.var = 'internal_time') %>%
-    select(type, GREENDP, TSO, EDUK2) %>%
+    select(type, Green, TSO, EDUK2) %>%
     group_by(type) %>%
     summarise(
-      mean_greendp = mean(GREENDP, na.rm = T),
+      mean_greendp = mean(Green, na.rm = T),
       mean_tso = mean(TSO, na.rm = T),
       mean_eduk2 = mean(EDUK2, na.rm = T))
 
@@ -182,7 +183,7 @@ fast_plot <- function(t) {
     paste0(
       sprintf("EDUK2 mean: %*.2f\n", padd, row[['mean_eduk2']]),
       sprintf("TSO   mean: %*.2f\n", padd, row[['mean_tso']]),
-      ifelse(is.na(row[['mean_greendp']]), '', sprintf("GREEN mean: %*.2f", padd, row[['mean_greendp']])))
+      ifelse(is.na(row[['mean_greendp']]), '', sprintf("Green mean: %*.2f", padd, row[['mean_greendp']])))
   })
   ggplot(data,
          aes(x = as.numeric(filename),
@@ -221,18 +222,18 @@ fast_plot(fast_csv)
 \end{figure}
 
 In \autoref{fig:pya_fast}, the instances (x-axis) are sorted by the time EDUK2 spent to solve them.
-EDUK2 B\&B phase allows EDUK2 to solve some instances (distributed between all instance sizes) faster than TSO/GREENDP.
+EDUK2 B\&B phase allows EDUK2 to solve some instances (distributed between all instance sizes) faster than TSO/Green
 This behavior shows that EDUK2 times for a specific instance cannot be predicted based on the number of items and distribution of the instance.
-Nonetheless, when the B\&B phase has little effect, the EDUK2 DP phase (basically EDUK) spend considerably more time than TSO/GREENDP to solve the instance.
+Nonetheless, when the B\&B phase has little effect, EDUK2 DP phase (basically EDUK) spend considerably more time than TSO/Green to solve the instance.
 
-TSO and GREENDP run times form plateaus in the figure.
+TSO and Green run times form plateaus in the figure.
 For each class of instances, the plateaus aggregate runs over instances with a number of items of similar magnitude.
-This behavior shows that the specific items that constitute an instance affect TSO and GREENDP less than the number of items and distribution, both which are good predictors of the TSO and GREENDP run times.
+This behavior shows that the specific items that constitute an instance affect TSO and Green less than the number of items and distribution, both which are good predictors of TSO and Green run times.
 
-The run times of TSO and GREENDP are similar, except for the SAW instances, in which GREENDP performed considerably worse than TSO.
-GREENDP DP phase does not generate solutions including the best item.
+The run times of TSO and Green are similar, except for the SAW instances, in which Green performed considerably worse than TSO.
+Green DP phase does not generate solutions including the best item.
 The use of the best item allows the generation of more efficient solutions, which dominate less efficient solutions, reducing the total number of solutions generated and, consequently, the computational effort spent.
-The authors believe that the exclusion of the best item from the DP phase is the reason that GREENDP presented run times higher than TSO over SAW instances.
+The authors believe that the exclusion of the best item from the DP phase is the reason that Green presented run times higher than TSO over SAW instances.
 
 When EDUK2 solves an instance in less time than TSO, the difference is often less than a second, and up to ten seconds.
 When EDUK2 solves an instance in more time than TSO, the difference is often more than five seconds and up to six minutes.
@@ -367,9 +368,9 @@ scale_x_continuous(trans = "log2",
 \label{fig:realistic_random}
 \end{figure}
 
-The run times of both step-off algorithms and GREENDP become almost identical as the size of the input grows. % TODO: consider removing the three and presenting only one of them
+The run times of both step-off algorithms and Green become almost identical as the size of the input grows. % TODO: consider removing the three and presenting only one of them
 As the instance size grow, EDUK run times get a bit worse than the other three aforementioned algorithms.
-EDUK2 has many run times similar to the EDUK but, for some instances in each instance size, its B\&B phase solves the instance or helps to reduce the instance size considerably.
+EDUK2 has many run times similar to EDUK but, for some instances in each instance size, its B\&B phase solves the instance or helps to reduce the instance size considerably.
 MTU1 and MTU2 have the shortest run times for the smallest instances but, as the instance size and \(w_{min}\) grow, also grow the number of instances in which MTU1 and MTU2 spend orders of magnitude more time to solve than the other algorithms.
 %The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
 
@@ -388,7 +389,7 @@ pretiffy_alg_names_short <- function(names) {
   'eduk2'                = 'EDUK2',
   'ordered_step_off'     = 'Ord. Step-Off',
   'terminating_step_off' = 'Term. Step-Off',
-  'mgreendp'             = 'GREENDP')
+  'mgreendp'             = 'Green')
 }
 
 rr_t$algorithm <- pretiffy_alg_names_short(rr_t$algorithm)
@@ -406,7 +407,7 @@ print(rr_xt,
 @
 \end{comment}
 
-Despite EDUK2 solving some instances orders of magnitude faster than the other algorithms (especially in the larger instance sizes), the mean run time of EDUK2 (8.51 seconds) is higher than the TSO mean run time (5.36 seconds).
+Despite EDUK2 solving some instances orders of magnitude faster than the other algorithms (especially in the larger instance sizes), the mean run time of EDUK2 (8.51 seconds) is higher than TSO mean run time (5.36 seconds).
 As already observed in \autoref{sec:pya_exp}, EDUK2 often presents a few run times that are one order of magnitude higher than the highest run time of TSO, what considerably increases its mean time.
 
 <<rr_means, results = 'hide' >>=
@@ -423,22 +424,7 @@ The results for the BREQ 128-16 Standard Benchmark are summarized in \autoref{fi
 The run times outline two groups with distinct time growth: a steep-growth group (which hit the time limit) and a gradual-growth group (which always take less than a second).
 The steep-growth group is mainly composed of the DP algorithms: TSO, OSO, and EDUK.
 The gradual-growth group is mainly composed of the B\&B and hybrid algorithms: MTU1, MTU2, and EDUK2.
-GREENDP is the only algorithm with run times in both groups.
-
-\begin{figure}[H]%[!htbp]
-\caption{Run times of the algorithms over the 100 instances of the BREQ 128-16 Standard Benchmark. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
-\begin{center}
-<<breq_figure, fig.height=4.5>>=
-gen_graph_all_alg_discrete_x(breq_csv) +
-scale_x_continuous(trans = "log2",
-                   breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
-                              2^17, 2^18, 2^19, 2^20))
-@
-
-\end{center}
-%\legend{Source: the author.}
-\label{fig:breq}
-\end{figure}
+Green is the only algorithm with run times in both groups.
 
 % TODO: check if BREQ table will be kept and then remove this permanently
 %<<breq_table, results='asis'>>=
@@ -453,9 +439,24 @@ EDUK2 run times are in the gradual-growth group due to its B\&B phase.
 EDUK2 without its B\&B phase and bounds checking is EDUK, which is in the steep-growth group.
 MTU2 core strategy improves MTU1 run times over BREQ instances.
 TSO strategy yields no significant gains over OSO in BREQ instances.
-GREENDP is an OSO variant which periodically computes bounds (similar to the ones used by the B\&B approach) to verify if the DP can be stopped and any remaining capacity be filled with copies of the best item.
-If the bounds stop the DP early then GREENDP run time falls in the gradual-growth group. Otherwise, the run time is similar to the OSO/TSO run time for the same instance.
+Green is an OSO variant which periodically computes bounds (similar to the ones used by the B\&B approach) to verify if the DP can be stopped and any remaining capacity be filled with copies of the best item.
+If the bounds stop the DP early then Green run time falls in the gradual-growth group. Otherwise, the run time is similar to OSO/TSO run time for the same instance.
 The results confirm the hypothesis that instances generated with this distribution would be hard to be solved by DP algorithms and easy to be solved by B\&B algorithms.
+
+\begin{figure}%[!htbp]
+\caption{Run times of the algorithms over the 100 instances of the BREQ 128-16 Standard Benchmark. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
+\begin{center}
+<<breq_figure, fig.height=4.5>>=
+gen_graph_all_alg_discrete_x(breq_csv) +
+scale_x_continuous(trans = "log2",
+                   breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
+                              2^17, 2^18, 2^19, 2^20))
+@
+
+\end{center}
+%\legend{Source: the author.}
+\label{fig:breq}
+\end{figure}
 
 \subsection{Results on the pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}
@@ -466,9 +467,9 @@ Also, the run time for each BPP/CSP instance presented is the sum of all time sp
 
 % The TSO, GREENDP, MTU2 (C++ or Fortran), and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
 Only OSO and MTU1 (C++) algorithms appear in this experiment.
-Since the instance capacity for these instances are small, GREENDP has a similar performance than OSO.
+Since the instance capacity for these instances are small, Green has a similar performance than OSO.
 %GREENDP is the same as OSO if the two most efficient items share the same efficiency, what often happens for at least one pricing subproblem of a CSP instance.
-In instances with a small number of items, MTU2 behaves almost as MTU1, the same applies to the TSO and OSO.
+In instances with a small number of items, MTU2 behaves almost as MTU1, the same applies to TSO and OSO.
 The authors did not succeed in integrating the PYAsUKP code (written in OCaml) with the C++/CPLEX code needed by this experiment.
 
 %CPLEX was also used to solve the pricing problems, adding one more algorithm to the comparison.
@@ -674,7 +675,7 @@ To measure the impacts of the multiplicative factor, OSO variants using floating
 The items of a pricing subproblem are always naturally sorted by increasing weight.
 The OSO algorithm sorts the items by nonincreasing efficiency but does not depend on this ordering to work.
 To verify if the sorting cost would pay off, variants with sorting enabled and disabled were used.
-Consequently, four versions of the OSO were used in this experiment, for all combinations of profit type (the original floating point, or the converted integer), and sorting (sorting by nonincreasing efficiency, or not sorting, which is the same as sorting the items by increasing weight).
+Consequently, four versions of OSO were used in this experiment, for all combinations of profit type (the original floating point, or the converted integer), and sorting (sorting by nonincreasing efficiency, or not sorting, which is the same as sorting the items by increasing weight).
 
 <<check_all_opt, results = 'hide'>>=
 {
@@ -727,8 +728,8 @@ summary(dcast(
 The four OSO variants spent time in the same order of magnitude to solve all pricing problems of the same BPP/CSP instances.
 The mean time of the four variants differed significantly: \(1.56\)s (sort, floating point), \(1.21\)s (no sort, floating point), \(1.46\)s (sort, integer), \(1.06\)s (no sort, integer).
 Using integer profits show a small but consistent improvement in the times (the time used to convert the value is included), keeping the items in the natural increasing weight order shows a greater and also consistent improvement.
-The mean time reduction observed in `no sort' variants did not come from cutting the time spent sorting the items (less than 1\% of the total pricing time), but from how the DP phase of the OSO behaved with a differently sorted list.
-The times of the OSO in all figures of this section are from the `no sort'/integer variant.
+The mean time reduction observed in `no sort' variants did not come from cutting the time spent sorting the items (less than 1\% of the total pricing time), but from how the DP phase of OSO behaved with a differently sorted list.
+The times of OSO in all figures of this section are from the `no sort'/integer variant.
 <<sorting_time_in_csp, results = 'hide'>>=
 {
 t <- csp_csv %>%

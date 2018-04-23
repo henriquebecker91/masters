@@ -30,7 +30,7 @@ Year & Ref. & Notes\\
 1990 & \cite{mtu2} & Datasets of instances with up to 250,000 items (but rich in simple and multiple dominances) are proposed. MTU2 is proposed as an improvement of MTU1 for such dataset.\\
 %1997 & \cite{zhu_dominated} & Uncorrelated datasets are shown to  \\
 %1997 & \cite{babayev} & A new solving approach, more similar to dynamic programming than B\&B \\
-1998 & \cite{ukp_new_results,eduk} & The EDUK (a dynamic programming algorithm) is proposed. Threshold dominance is proposed. EDUK is the first algorithm to exploit collective and threshold dominances. Old datasets receive some criticism for their high percentage of dominated items. New artificial datasets without the same flaws of the previous datasets are proposed. EDUK is compared to MTU2.\\
+1998 & \cite{ukp_new_results,eduk} & EDUK (a dynamic programming algorithm) is proposed. Threshold dominance is proposed. EDUK is the first algorithm to exploit collective and threshold dominances. Old datasets receive some criticism for their high percentage of dominated items. New artificial datasets without the same flaws of the previous datasets are proposed. EDUK is compared to MTU2.\\
 %2000 & \cite{eduk} & The new DP method only compares to B\&B and naive DP, the old non-naive DP algorithms were forgotten or excluded because of previous experiments. \\
 2004 & \cite{book_ukp_2004} & A book on knapsack problems cite EDUK as state-of-the-art dynamic programming for the UKP. \\
 2009 & \cite{pya} & EDUK2 is proposed. It consists in EDUK hybridized with B\&B. The datasets are updated to be `harder'. MTU2 is used in some comparisons, but not in all because it has the risk of integer overflow. EDUK2 is compared to EDUK.\\ %Such datasets are hard for B\&B, and the hybrid method is only compared to B\&B. The hybrid method is the new state-of-the-art. \\
@@ -163,12 +163,15 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 
 %\draw [fill] (7, 2) circle [radius=\myrad];
 %\draw [fill] (11, 4) circle [radius=\myrad];
-\draw [fill=lightgray] (6, 1) circle [radius=\myrad];
+%\draw [fill=lightgray] (6, 1) circle [radius=\myrad];
+\drawolddomitem{6}{1}
 %\node [right, font=\small, align=left] at (6, 1) {simple};
-\draw [fill] (12, 9) circle [radius=\myrad];
+%\draw [fill] (12, 9) circle [radius=\myrad];
+\drawolddomitem{12}{9}
 \draw [fill=lightgray] (14, 11) circle [radius=\myrad];
 \node [right, font=\small] at (14, 11) {collective};
-\draw [fill] (16, 13) circle [radius=\myrad];
+%\draw [fill] (16, 13) circle [radius=\myrad];
+\drawolddomitem{16}{13}
 \draw [fill] (17, 19) circle [radius=\myrad];
 \end{scope}
 
@@ -205,10 +208,11 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 %\draw [fill] (7, 2) circle [radius=\myrad];
 %\draw [fill=lightgray] (11, 4) circle [radius=\myrad];
 %\node [right, font=\small, align=left] at (11, 4) {simple};
-\draw [fill] (6, 1) circle [radius=\myrad];
-\draw [fill] (12, 9) circle [radius=\myrad];
-\draw [fill] (14, 11) circle [radius=\myrad];
-\draw [fill] (16, 13) circle [radius=\myrad];
+\drawolddomitem{6}{1}
+\drawolddomitem{12}{9}
+\drawolddomitem{14}{11}
+\drawolddomitem{16}{13}
+%\draw [fill] (14, 11) circle [radius=\myrad];
 
 %\draw [blue,fill=lightgray] (18, 17) circle [radius=\myrad];
 \drawrectangle{18}{17}{\myrad}{lightgray}
@@ -228,6 +232,8 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 \node [right, font=\footnotesize] at (35,-4) {undominated solution};
 \drawrectangle{57}{-4}{\myrad}{lightgray}
 \node [right, font=\footnotesize] at (57,-4) {dominated solution};
+\drawolddomitem{25.5}{-6}
+\node [right, font=\footnotesize] at (25.5,-6) {previously dominated item};
 
 \end{tikzpicture}
 \end{figure}
@@ -307,7 +313,7 @@ As far the authors know, the concept of solution dominance was not formalized be
 The authors believe such overlook happened because: 1) the original concept of dominance focused on discarding single items from further consideration; 2) an algorithm that fully exploits such dominance relation has not been proposed.
 
 The ordered step-off (OSO) is a dynamic programming algorithm for the UKP~\cite{gg-66}.
-The authors revisited the OSO and added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end} of Algorithm 1 (to distinguish this version from the original one, it will be called Revisited OSO, or R-OSO).
+The authors revisited OSO and added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end} of Algorithm 1 (to distinguish this version from the original one, it will be called Revisited OSO, or R-OSO).
 When two or more solutions generated have the same weight and profit (a special case of solution dominance), the original algorithm arbitrarily keeps the first solution generated and ignores the others.
 In the same situation, the revisited algorithm keeps the solution that will generate less descendents (smallest \(d[y]\)), therefore minimizing the computational effort.
 This change of tiebreaker reduced the run times of the algorithm over subset-sum and strongly correlated instances by orders of magnitude.
@@ -387,50 +393,39 @@ Our experiments show that, while \emph{delayed solution dominance} has not the s
 %In the worst-case item set for the (R-)OSO, the weight of the smallest item is \(1\) and such item is also the most inneficient one, the weight of the second-smallest item is much higher, and consequently, (R-)OSO will execute \(O(n)\) iterations per capacity until it arrives at the weight of the second smallest item.
 
 
-\section{A critique of periodicity tests and bounds}
+\section{A critique of periodicity checks and bounds}
 \label{sec:critique_of_periodicity}
 
+%Some prior work presents periodicity checks and bounds as ways of improving the performance of exact algorithms for the UKP.
+%However, such techniques contribute almost nothing to the performance of the current algorithms for the UKP.
+%The purpose of this section is to examine this often overlooked situation.
 
-the literature describes some bounds on~\(y^+\) (see section X)
-some ukp algorithms present periodicity checks
-both have very little pratical relevance in the solving of UKP
-the 
+State-of-the-art dynamic programming algorithms like EDUK~\cite{eduk} and the terminating step-off~\cite{gg-66} finish the execution early if they detect that only the best item will be used to generate new solutions.
+This mechanism is called \emph{periodicity check}.
+If a periodicity check finishes the execution at capacity~\(y\), it saves the effort of iterating the last \(c - y\) capacities.
+However, as only the best item is yet used, the algorithm would execute only \(\Theta(1)\) operations for each capacity in the range \([y+1,c]\).
+Periodicity checks often demand about \(n\) and up to \(y \leq c\) extra operations to save up to \(c - y\) operations.
+Consequently, periodicity checks save little effort if any, in comparison to the application of dominances which they depend on to work.
+%Even in the best case, that is when \(y\) is close to zero, the magnitude of the amount of effort saved (about \(c\) operations) is small in comparison to \(O(nc)\) (unless for toy instances with very small \(n\)).
+%In the worst case, that is when \(y\) is close to \(c\), then the doing the periodicity check wastes more effort than it saves.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-As another contribution of this paper, the authors point out the overlooked negligibility of periodicity checks and periodicity bounds.
-Many DP algorithms for the UKP present some form of implicit periodicity checking based on the application of the item dominances.
-Two examples of such algorithms are: the terminating step-off (TSO) and the EDUK algorithms.
+%As another contribution of this paper, the authors point out the overlooked negligibility of periodicity checks and periodicity bounds.
+%Many DP algorithms for the UKP present some form of implicit periodicity checking based on the application of the item dominances.
+%Two examples of such algorithms are: the terminating step-off (TSO) and the EDUK algorithms.
 %These two algorithms have different mechanisms for checking periodicity, but both consist in \(O(y + n)\) extra operations, in which \(y\) is the last capacity considered before stopping the algorithm.
 %To base the discussion, an explanation of the EDUK periodicity check mechanism follows: EDUK keeps a global items list, from which it removes items if they are simple, multiple, collective, or threshold dominated; if such list is reduced to a single item (that only can be the best item), the algorithm stops. 
-%The TSO is a variant of the OSO which detects if the best item is the only item that can yet be added to solutions, and stops the algorithm if this is the case.
-%The TSO periodicity checking mechanism is not the same as the one used by EDUK, as the TSO does remove items from a global item list, but instead checks the \(d\) array (the same described above in Algorithm 1) and an auxiliary array (which only exists in TSO and not in OSO).
+%The TSO is a variant of OSO which detects if the best item is the only item that can yet be added to solutions, and stops the algorithm if this is the case.
+%The TSO periodicity checking mechanism is not the same as the one used by EDUK, as TSO does remove items from a global item list, but instead checks the \(d\) array (the same described above in Algorithm 1) and an auxiliary array (which only exists in TSO and not in OSO).
 
-If one of these periodicity checks stop its respective algorithm at capacity~\(y\), it saves the effort of iterating the last \(c - y\) positions.
-However, in the range \((y,c)\) the algorithm would not execute \(O(n)\) steps for each capacity anymore, but only \(O(1)\) steps, as only the best item is still relevant.
-Consequently, periodicity checks often demand about \(n\) and up to \(y \leq c\) extra operations to save up to \(c - y\) operations.
-Even in the best case, that is when \(y\) is close to zero, the magnitude of the amount of effort saved (about \(c\) operations) is small in comparison to \(O(nc)\) (unless for toy instances with very small \(n\)).
-In the worst case, that is when \(y\) is close to \(c\), then the doing the periodicity check wastes more effort than it saves.
-This way, periodicity checks are a small optimization in comparison to the application of item/solution dominance that makes them possible.
-
-If periodicity checks save little effort, then the computating of upper bounds on~\(y^+\) should save up even less effort.
-When the global item list of EDUK is reduced to the best item, the current capacity is probably a far better upper bound on \(y^+\) than any upper bound computed by a polynomial algorithm.
-In a dynamic programming algorithm with periodicity checking, the utility of upper bounds on~\(y^+\) is restricted to saving memory and saving the time spent initializing it (which is insignificant).
+If periodicity checks save little effort, then the computation of upper bounds on~\(y^+\) save up even less effort.
+When the global item list of EDUK is reduced to the best item, the current capacity is probably a far better upper bound on~\(y^+\) than any upper bound computed by a polynomial algorithm.
 While branch-and-bound algorithms does not have periodicity checking, they also do not obtain any considerable benefit from periodicity bounds, as their bound computation already supersedes them.
+Consequently, periodicity checks and bounds are of little relevance for the performance of state-of-the-art algorithms for the UKP.
+
+%In a dynamic programming algorithm with periodicity checking, the utility of upper bounds on~\(y^+\) is restricted to saving memory and saving the time spent initializing it (which is insignificant).
+
 %If an upper bound on \(y^+\) can be computed, item dominance and the periodicity checks stops the algorithm before the capacity predicted by the upper bound.
+
+While on the topic of reducing \(c\), the authors would like to present a counterexample for the following statement: ``computing all optimal states \((y,f(N,y))\) with \(y \leq c/2\) is enough\footnotemark[5], since any knapsack with capacity \(y \in~] c/2 , c]\) can be solved by completing the solution of \(\text{UKP}^{y - c/2}_{\text{\textbf{w, b}}}\) with the one of \(\text{UKP}^{c/2}_{\text{\textbf{w, b}}}\).''~\cite{pya}. Consider the following instance: \(c = 6\), \(n = 2\), \(w_1 = p_1 = 1\), \(w_2 = 2\), \(p_2 = 10\). The optimal solution for \(c/2 = 3\) is \(11\) (one copy of each item), but the optimal solution for \(c\) is \(30\) (three copies of item two) not \(22\) (two copies of each item).
+%\footnotetext[5]{This test was not implemented in EDUK.}
 

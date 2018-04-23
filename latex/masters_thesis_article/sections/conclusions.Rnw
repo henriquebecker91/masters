@@ -1,14 +1,14 @@
 \section{General Discussion and Conclusions}
 \label{sec:discussion}
 
-Except for the BREQ dataset, a DP algorithm from 1966 (Terminating Step-Off, TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2/PYAsUKP).
-Such results bring up two central questions the authors address: Why the TSO was abandoned and not considered in recent comparisons? How the TSO outperformed the current state-of-the-art after five decades of study of the UKP?
+Except for the BREQ dataset, a revisited version of a DP algorithm from 1966 (Revisited Terminating Step-Off, R-TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2 /PYAsUKP).
+Such results bring up two central questions the authors address: Why TSO was abandoned and not considered in recent comparisons? How R-TSO outperformed the current state-of-the-art after five decades of study of the UKP?
 
-The authors believe the TSO was not considered in recent comparisons because: the paper used old terminology (the problem was not called UKP yet); the algorithm description was very short, used `goto' statements, and the authors did not emphasize it was orders of magnitude faster than the naïve DP for the UKP; B\&B algorithms performed better than the TSO in very small uncorrelated and weakly correlated instances.
+The authors believe TSO was not considered in recent comparisons because: the paper used old terminology (the problem was not called UKP yet); the algorithm description was very short, used `goto' statements, and the authors did not emphasize it was orders of magnitude faster than the naïve DP for the UKP; B\&B algorithms performed better than TSO in very small uncorrelated and weakly correlated instances.
 As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison~\cite{mtu1}.
-In the experiments presented in~\cite{mtu1}, the TSO algorithm was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
+In the experiments presented in~\cite{mtu1}, TSO was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
 Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was not even one order of magnitude apart.
-Also, the trend observed could indicate that for instances with a greater \(n\) value, the OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing. %(e.g., the OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
+Also, the trend observed could indicate that for instances with a greater \(n\) value, OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing. %(e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
 
 An algorithm is dominated by other in the context of a dataset.
 The comparisons found in the literature often: 1) only compared a newly proposed algorithm to the algorithm that `won' the last comparison; 2) proposed new artificial datasets based on some definition of being `harder to solve'.
@@ -16,7 +16,7 @@ These two characteristics led to the following scenario: algorithm B dominates a
 %The newly proposed dataset is often harder to solve because it has characteristics that made it harder to solve by some algorithm in the comparison (often the `loser').
 %It is not considered if the characteristics that make it harder also negatively affect the algorithms excluded from the comparison, or if they are algorithm or approach-specific.
 
-A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items~\cite{mtu2}; EDUK(2) was compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\)~\cite{eduk,pya}.
+A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items~\cite{mtu2}; EDUK and EDUK2 were compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\)~\cite{eduk,pya}.
 To be fair, the objective of these papers was to show how the newly proposed algorithm was not negatively impacted by some instance characteristics as the older algorithm was.
 However, in such experiments, no competitive algorithm of the same solving approach as the newly proposed algorithm (DP or B\&B) was included.
 
@@ -37,27 +37,27 @@ The ANI\&AI instances, which MTU1 had difficulties to solve the pricing problems
 The definition of hard to solve is different between the GI and ANI\&AI instances, as in ANI\&AI instances the objective is to make B\&B algorithms for the BPP/CSP struggle to prove the optimality of a solution for a BPP/CSP instance.
 The way such characteristic makes the pricing problems from ANI\&AI instances harder to solve by MTU1 is not so clear as in the case of GI instances and DP algorithms.
 
-The authors believe many factors allowed their TSO implementation to outperform EDUK2 PYAsUKP implementation.
-Some of them are: the weak solution dominance implicitly applied by TSO seems to be as effective as the explicit simple, multiple, collective and threshold dominance applied by EDUK2; TSO implementation has better space locality; TSO retrieve only one optimal solution.
+The authors believe many factors allowed R-TSO to outperform EDUK2 PYAsUKP implementation.
+Some of them are: the weak solution dominance implicitly applied by (R-)TSO seems to be as effective as the explicit simple, multiple, collective and threshold dominance applied by EDUK2; R-TSO has better space locality; R-TSO retrieves only one optimal solution.
 
-The authors did not try to directly compare the effectiveness of the EDUK2 and the TSO dominance approach, as such would need changes in the EDUK2 code to allow gathering extra data.
-However, as the TSO finishes early if the best item is the only item which could be added to the solution, this means that TSO can discard every other item with its dominance strategy, as EDUK2 does.
+The authors did not try to directly compare the effectiveness of EDUK2 and R-TSO dominance approach, as such would need changes in EDUK2 code to allow gathering extra data.
+However, as R-TSO finishes early if only the best item could be added to the solution, this means that TSO can discard every other item by applying solution dominance, as EDUK2 does.
 
-The EDUK2 PYAsUKP implementation uses lazy lists to store solutions, while our TSO implementation uses an array.
-An strongly correlated  instance (\(\alpha = -5\), \(n = 10000\), \(w_{min} = 110000\), \(c = 9008057\)) of the PYAsUKP dataset was the one EDUK2 spent more time to solve (416 seconds, TSO spent about one second to solve the same instance).
-By the use of the perf profiler, it was possible to verify that EDUK2 PYAsUKP implementation executed about \(1122\) instructions per cache miss, while TSO executed about \(288653\) instructions per cache miss.
+EDUK2 PYAsUKP implementation uses lazy lists to store solutions, while R-TSO uses an array.
+A strongly correlated  instance (\(\alpha = -5\), \(n = 10000\), \(w_{min} = 110000\), \(c = 9008057\)) of the PYAsUKP dataset was the one EDUK2 spent more time to solve (416 seconds, R-TSO spent about one second to solve the same instance).
+By the use of the \emph{perf} profiler, it was possible to verify that EDUK2 PYAsUKP implementation executed about \(1122\) instructions per cache miss, while R-TSO executed about \(288653\) instructions per cache miss.
 The performance gain for using an array-based implementation was also observed in~\cite{irnich}, which tried to follow the approach suggested by EDUK in their pricing problem solver: ``In contrast, for UKP we found that a straightforward array-based implementation of the DP approach is faster than the list-based approach. We suspect that on a modern CPU, the smaller state graph of UKP can be accessed much faster (due to caching techniques) so that the solution of the UKP subproblems as they occur in the BP benchmark instances is possible in almost no (measurable) time.''~\cite[p.~19]{irnich}
 
-In~\cite{eduk}, it is said that EDUK retrieves all optimal solutions for a UKP instance.
-To do this, the TSO could not make use of the speed-up trick mentioned in \autoref{sec:methods}, what would affect its performance considerably in strongly correlated and subset-sum datasets, which often have distinct solutions with the same weight and profit.
-Also, the application of the dominances would need to be less strict as, for example, for two items \(j\) and \(i\) that respect \(w_i < w_j\) and \(p_i = p_j\), \(j\) can yet be present in an optimal solution.
+In~\cite{eduk}, it is said that EDUK retrieves all optimal solutions for an UKP instance.
+To do the same, R-TSO could not make use of the tiebreaking optimization mentioned in \autoref{sec:oso_and_sol_dom}, what would affect its performance considerably in strongly correlated and subset-sum datasets.
+Also, the application of the solution dominance would need to be less strict as, for example, for two items \(j\) and \(i\) that respect \(w_i < w_j\) and \(p_i = p_j\), \(j\) can yet be present in an optimal solution.
 
 In conclusion,
 i) the choice of artificial instance datasets had an important role defining which algorithms were considered the best by the literature; 
 ii) the simple, multiple, collective, and threshold dominance relations can be generalized to solution dominance, and the application of a weak version of it shows similar efficiency;
-iii) there's evidence that the items distribution of pricing problems can converge to a strongly correlated distribution (which can take exponential time to solve by B\&B);
-iv) there's evidence that converting the profit of pricing problems to large integers do not cause significant loss to the master problem objetive value;
-v) the development of new and tighter periodicity bounds is of little use to the improvement of the current state-of-the-art algortithms for solving UKP exactly.
+iii) there is evidence that the items distribution of pricing problems can converge to a strongly correlated distribution (which can take exponential time to solve by B\&B);
+iv) there is evidence that converting the profit of pricing problems to large integers do not cause significant loss to the master problem objetive value;
+v) the development of new and tighter periodicity bounds is of little use to the improvement of the state-of-the-art algorithms for UKP.
 
 %While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
 
@@ -70,8 +70,7 @@ Many questions raised during the development of this paper ended up unanswered. 
 \item How similar are the datasets of the UKP and the BPP/CSP presented in the literature to the ones existent in the real world? Do the instances found in the real-world favor some approaches over others?
 \item If a B\&B phase was added to the terminating step-off (as in EDUK2), and a C++ and array-based implementation of EDUK2 was written, would they have a similar performance?
 \item What would be the practical performance of an implementation of the algorithm described in~\cite{babayev}?
-\item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e., optimal solution)? Or, instead, adding all optimal solutions instead of only one?
-\item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, or the same BPP/CSP instance, or in both cases? Is it possible that they converge to a specific distribution at each iteration of the column generation?
+\item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e., an optimal solution)? Or, instead, adding all optimal solutions instead of only one? %\item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, or the same BPP/CSP instance, or in both cases? Is it possible that they converge to a specific distribution at each iteration of the column generation?
 \item The MTU1/MTU2 are depth-first branch-and-bound algorithms, what would be the performance of best-bound branch-and-bound algorithms?
 \end{itemize}
 

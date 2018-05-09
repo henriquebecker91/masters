@@ -28,13 +28,13 @@ The ordered step-off (OSO) is a DP algorithm proposed in~\cite[p.~15]{gg-66}.
 The authors already presented and discussed a revisited version of OSO in~\autoref{sec:oso_and_sol_dom}.
 The terminating step-off (TSO) is the same as OSO but it includes periodicity checking.
 %which executes \(\theta(n) + O(c)\) extra operations to save \(O(c)\) operations.
-The algorithm proposed in~\cite{green_improv} is another variant of OSO, referred in this paper as Green.
-The Green does not use the best item~\(b\), but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can stop, and the remaining capacity filled with copies of \(b\). 
-If two or more items share the greatest efficiency, Green verification does not work, and it is the same as OSO. 
+The algorithm proposed in~\cite{green_improv} is another variant of OSO, referred in this paper as GFDP (Greenberg and Feldman's Dynamic Programming).
+The GFDP does not use the best item~\(b\), but interrupts the DP at each~\(w_b\) capacity positions to verify if the DP can stop, and the remaining capacity filled with copies of \(b\). 
+If two or more items share the greatest efficiency, GFDP verification does not work, and it is the same as OSO. 
 
-The original implementations of the step-offs and Green were not publicly available, so the authors wrote their own implementations in C++.
-The authors' implementations of TSO and Green include the same tiebreaking improvement added by the authors to OSO and described in~\autoref{sec:oso_and_sol_dom}.
-All C++ implementations written by the authors are available at the first author's code repository\footnote{The C++ implementations of MTU1, MTU2, the revisited ordered/terminating step-offs, and R-Green are available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
+The original implementations of the step-offs and GFDP were not publicly available, so the authors wrote their own implementations in C++.
+The authors' implementations of TSO and GFDP include the same tiebreaking improvement added by the authors to OSO and described in~\autoref{sec:oso_and_sol_dom}.
+All C++ implementations written by the authors are available at the first author's code repository\footnote{The C++ implementations of MTU1, MTU2, the revisited ordered/terminating step-offs, and R-GFDP are available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes/cpp}.}.
 %As the C++ implementations of MTU1 and MTU2, our implementations change the items sorting by nonincreasing efficiency (specified by these three algorithms) to sorting by nonincreasing efficiency with efficiency ties sorted by nondecreasing weight.
 
 EDUK (Efficient Dynamic programming for the Unbounded Knapsack problem) was the first DP algorithm to explicitly check for threshold dominance (a concept proposed together with the algorithm) and collective dominance (that was independently discovered by Pisinger~\cite{pisinger1994dominance}), it also features a sparse representation of the iteration domain~\cite[p.~223]{ukp_new_results,eduk,book_ukp_2004}.
@@ -66,7 +66,7 @@ also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors 
 Thus, the B\&B algorithms proposed in~\cite{gg-63} and~\cite{cabot} were not included in the experiments.
 
 %Likewise, \cite{turnpike}~is behind a paywall, and 
-In~\cite{green_improv} it is implied that Green is an improved version of the algorithm proposed in~\cite{turnpike}, so only Green was included.
+In~\cite{green_improv} it is implied that GFDP is an improved version of the algorithm proposed in~\cite{turnpike}, so only GFDP was included.
 The authors could not obtain the code of the algorithm proposed in~\cite{babayev}, and they chose to not reimplement it to not risk misrepresenting it, as it was not trivial to implement.
 UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms over converted UKP instances~\cite{mtu1}, so BKP and 0-1 KP algorithms were not considered.
 

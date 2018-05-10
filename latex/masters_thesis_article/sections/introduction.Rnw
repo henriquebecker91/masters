@@ -304,7 +304,7 @@ All solutions that do not break such constraints and do not make use of the best
 Consequently, an optimal solution for any capacity greater than \(y''\) can be obtained by the procedure described in the previous paragraph.
 The capacity~\(y''\) is an upper bound on~\(y^+\)~\cite[p.~215]{book_ukp_2004}.
 
-\section{The revisited ordered step-off and (weak) solution dominance}
+\section{The revisited ordered step-off and (partial) solution dominance}
 \label{sec:oso_and_sol_dom}
 
 Given two valid solutions~\(s\) and~\(t\), if~\(w_s \leq w_t\) and~\(p_s \geq p_t\), then the items of solution~\(s\) can replace the items of solution~\(t\), and any solution that is a superset of \(t\) can be ignored (see \autoref{fig:dominances}).
@@ -378,7 +378,7 @@ Such performance gain can be explained by the fact that, in subset-sum instances
 \end{algorithm}
 \footnotetext{If two or more items share the same efficiency they are sorted by non-decreasing weight.}
 
-The authors propose the term \emph{delayed solution dominance} to describe the mechanism responsible for (R-)OSO state-of-the-art performance.
+The authors propose the term \emph{partial solution dominance} to describe the mechanism responsible for (R-)OSO state-of-the-art performance.
 %The (R-)OSO may generate dominated solutions but those dominated solutions will not themselves generate dominated solutions, so they are restricted to a 
 %When the (R-)OSO prunes a dominated solution (in lines ~\ref{if_less_than_opt_begin} to~\ref{if_less_than_opt_end} of Algorithm 1), it only guarantee that some supersets will not be generated but not all. 
 %However, the subsets of the dominated solution that can be yet generated will not generate new solutions themselves. 
@@ -388,7 +388,7 @@ If a solution~\(t\) is skipped because solution~\(s\) dominates~\(t\) (lines~\re
 However, any solutions~\(t \cap \{i\} : i > min_{ix}(t)\) generated are dominated by~\(s \cap \{i\}\) (or by a solution that dominates~\(s \cap \{i\}\)).
 Consequently, such solutions are guaranteed to be skipped and the amount of supersets of~\(t\) generated is further reduced.
 Unfortunately, after skipping those solutions, the solutions~\(t \cap \{i, j\} : j > i > min_{ix}(t)\) may be yet generated, and so on.
-Our experiments show that, while \emph{delayed solution dominance} has not the same guarantees that applying simple, multiple, collective and threshold dominances as soon as possible (as in EDUK), its performance is state of the art.
+Our experiments show that, while \emph{partial solution dominance} has not the same guarantees that applying simple, multiple, collective and threshold dominances as soon as possible (as in EDUK), its performance is state of the art.
 %The number of dominated solutions generated using \emph{delayed solution dominance} is dependent on the item set, their ordering and \(c\).
 %In the worst-case item set for the (R-)OSO, the weight of the smallest item is \(1\) and such item is also the most inneficient one, the weight of the second-smallest item is much higher, and consequently, (R-)OSO will execute \(O(n)\) iterations per capacity until it arrives at the weight of the second smallest item.
 

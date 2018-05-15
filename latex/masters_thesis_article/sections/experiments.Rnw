@@ -435,14 +435,7 @@ GFDP is the only algorithm with run times in both groups.
 %xtable(breq_t)
 %@
 
-As EDUK2 is basically EDUK plus a B\&B phase and bounds checking, seems clear that it is the B\&B hybridization that allows for EDUK2 to be in the gradual-growth group (while EDUK that is pure DP is in the steep-growth group).
-MTU2 core strategy improves MTU1 run times over BREQ instances.
-TSO strategy yields no significant gains over OSO in BREQ instances.
-GFDP is an OSO variant which periodically computes bounds (similar to the ones used by the B\&B approach) to verify if the DP can be stopped and any remaining capacity be filled with copies of the best item.
-If the bounds stop the DP early then GFDP run time falls in the gradual-growth group. Otherwise, the run time is similar to OSO/TSO run time for the same instance.
-The results confirm the hypothesis that instances generated with this distribution would be hard to be solved by DP algorithms and easy to be solved by B\&B algorithms.
-
-\begin{figure}%[!htbp]
+\begin{figure}[!htbp]
 \caption{Run times of the algorithms over the 100 instances of the BREQ 128-16 Standard Benchmark. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<breq_figure, fig.height=4.5>>=
@@ -456,6 +449,13 @@ scale_x_continuous(trans = "log2",
 %\legend{Source: the author.}
 \label{fig:breq}
 \end{figure}
+
+As EDUK2 is basically EDUK plus a B\&B phase and bounds checking, seems clear that it is the B\&B hybridization that allows for EDUK2 to be in the gradual-growth group (while EDUK that is pure DP is in the steep-growth group).
+MTU2 core strategy improves MTU1 run times over BREQ instances.
+TSO strategy yields no significant gains over OSO in BREQ instances.
+GFDP is an OSO variant which periodically computes bounds (similar to the ones used by the B\&B approach) to verify if the DP can be stopped and any remaining capacity be filled with copies of the best item.
+If the bounds stop the DP early then GFDP run time falls in the gradual-growth group. Otherwise, the run time is similar to OSO/TSO run time for the same instance.
+The results confirm the hypothesis that instances generated with this distribution would be hard to be solved by DP algorithms and easy to be solved by B\&B algorithms.
 
 \subsection{Results on the pricing subproblems from BPP/CSP}
 \label{sec:csp_experiments}

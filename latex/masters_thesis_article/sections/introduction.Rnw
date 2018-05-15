@@ -117,12 +117,12 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 
 \draw [dashed] (10, 0) -- (10, 10) -- (24, 10);
 %\draw [fill=lightgray] (10 - \myrad, 10 - \myrad) rectangle +(2*\myrad, 2*\myrad);
-\drawrectangle{10}{10}{\myrad}{white}
+\drawrectangle{10}{10}{\myrad}{black}
 \node [above left, font=\tiny] at (10, 10) {(10, 10)};
 
 \draw [dashed] (15, 0) -- (15, 15) -- (24, 15);
 %\draw [blue,fill=white] (15, 15) circle [radius=\myrad];
-\drawrectangle{15}{15}{\myrad}{white}
+\drawrectangle{15}{15}{\myrad}{black}
 \node [above left, font=\tiny] at (15, 15) {(15, 15)};
 
 %\draw [fill=red] (7, 2) circle [radius=\myrad];
@@ -153,12 +153,12 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 \node [above left, font=\tiny] at (5, 5) {(5, 5)};
 
 %\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
-\drawrectangle{10}{10}{\myrad}{white}
+\drawrectangle{10}{10}{\myrad}{black}
 \node [above left, font=\tiny] at (10, 10) {(10, 10)};
 
 \draw [dashed] (13, 0) -- (13, 12) -- (24, 12);
 %\draw [blue,fill=white] (13, 12) circle [radius=\myrad];
-\drawrectangle{13}{12}{\myrad}{white}
+\drawrectangle{13}{12}{\myrad}{black}
 \node [above left, font=\tiny] at (13, 12) {(13, 12)};
 
 %\draw [fill] (7, 2) circle [radius=\myrad];
@@ -194,11 +194,11 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 \node [above left, font=\tiny] at (5, 5) {(5, 5)};
 
 %\draw [blue,fill=white] (10, 10) circle [radius=\myrad];
-\drawrectangle{10}{10}{\myrad}{white}
+\drawrectangle{10}{10}{\myrad}{black}
 \node [above left, font=\tiny] at (10, 10) {(10, 10)};
 
 %\draw [blue,fill=white] (15, 15) circle [radius=\myrad];
-\drawrectangle{15}{15}{\myrad}{white}
+\drawrectangle{15}{15}{\myrad}{black}
 \node [above left, font=\tiny] at (15, 15) {(15, 15)};
 
 %\draw [blue,fill=red] (20, 20) circle [radius=\myrad];
@@ -228,7 +228,7 @@ The~\autoref{fig:dominances} presents a small set of items in which these four d
 \node [right, font=\footnotesize] at (-1,-4) {undominated item};
 \draw [fill=lightgray] (18, -4) circle [radius=\myrad];
 \node [right, font=\footnotesize] at (18,-4) {dominated item};
-\drawrectangle{35}{-4}{\myrad}{white}
+\drawrectangle{35}{-4}{\myrad}{black}
 \node [right, font=\footnotesize] at (35,-4) {undominated solution};
 \drawrectangle{57}{-4}{\myrad}{lightgray}
 \node [right, font=\footnotesize] at (57,-4) {dominated solution};
@@ -419,7 +419,7 @@ Consequently, periodicity checks save little effort if any, in comparison to the
 
 If periodicity checks save little effort, then the computation of upper bounds on~\(y^+\) save up even less effort.
 When the global item list of EDUK is reduced to the best item, the current capacity is probably a far better upper bound on~\(y^+\) than any upper bound computed by a polynomial algorithm.
-While branch-and-bound algorithms does not have periodicity checking, they also do not obtain any considerable benefit from periodicity bounds, as their bound computation already supersedes them.
+While branch-and-bound algorithms do not have periodicity checking, they also do not obtain any considerable benefit from periodicity bounds, as their bound computation already supersedes them.
 Consequently, periodicity checks and bounds are of little relevance for the performance of state-of-the-art algorithms for the UKP.
 
 %In a dynamic programming algorithm with periodicity checking, the utility of upper bounds on~\(y^+\) is restricted to saving memory and saving the time spent initializing it (which is insignificant).

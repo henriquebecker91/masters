@@ -1,4 +1,4 @@
-\section{Supplementary Materials -- Summry Tables}
+\section{Supplementary Materials -- Summary Tables}
 
 <<pya_tables_shared,echo=F>>=
 get_dist <- function(fname) {
@@ -107,7 +107,7 @@ make_pya_row <- function(t, ...) {
 & \textbf{n} & \(w_{min}\)  & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max} & \textbf{avg} & \textbf{sd} & \textbf{max}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
-\multicolumn{3}{c}{For detail see~\cite{sea2016}} & \Sexpr{make_pya_row(ss2)}\\ % & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
+\multicolumn{3}{c}{See caption.} & \Sexpr{make_pya_row(ss2)}\\ % & 0.05 & 0.12 & 0.74 & -- & -- & -- & 2.52 & 21.75 & 302.51 \\
 \hline
 
 \multicolumn{3}{l}{20 inst. per line} & \multicolumn{9}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
@@ -161,7 +161,7 @@ make_pya_row <- function(t, ...) {
 
 \end{tabular}
 \end{adjustbox}
-\caption{Time (in seconds) for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the R-TSO, GFDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\).}
+\caption{Time (in seconds) for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the R-TSO, GFDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). For the subset-sum instances, there are ten instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.}
 \end{table}
 
 \clearpage
@@ -234,7 +234,7 @@ make_mtu_row <- function(t, ...) {
 & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin}  & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
 \cline{1-3}\cline{4-5}\cline{6-7}\cline{8-9}\cline{10-11}
 
-\multicolumn{3}{c}{For detail see~\cite{sea2016}} & \Sexpr{make_mtu_row(mt_ss2)}\\ %0.04 & 40 & 0.04 & 40 & 0.00 & 40 & 154.97 & 8\\
+\multicolumn{3}{c}{See caption.} & \Sexpr{make_mtu_row(mt_ss2)}\\ %0.04 & 40 & 0.04 & 40 & 0.00 & 40 & 154.97 & 8\\
 \hline
 
 \multicolumn{3}{l}{20 inst. per line} & \multicolumn{8}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
@@ -287,7 +287,7 @@ make_mtu_row <- function(t, ...) {
 \hline
 \end{tabular}
 \end{adjustbox}
-\caption{Time in seconds for the MTU implementations over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\). The time limit was set to 30 minutes. }
+\caption{Time in seconds for the MTU implementations over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\). The time limit was set to 30 minutes. For the subset-sum instances, there are ten instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.}
 \end{table}
 
 \clearpage
@@ -337,6 +337,8 @@ lrt <- xtable(rt, caption = "Time (in seconds) for the experiment with realistic
 align(lrt) <- c('r', 'c', rep('r', 5), 'c')
 print(lrt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, add.to.row = list(pos = list(0), command = "\\hline \\endhead "), include.rownames=FALSE) 
 @
+
+\clearpage
 
 <<breq_table_appendix,echo=FALSE,results='asis'>>=
 breq <- read.csv("../data/128_16_std_breqd.csv", sep = ";")

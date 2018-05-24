@@ -187,7 +187,9 @@ Combinatorial optimization \sep Unbounded Knapsack Problem \sep Dynamic Programm
 
 \section{References}
 \bibliography{biblio}
-\bibliographystyle{elsarticle-harv}
+%\bibliographystyle{elsarticle-harv}
+\bibliographystyle{model5-names}
+\biboptions{authoryear}
 
 \appendix
 \Sexpr{knit_child('sections/appendix.Rnw')}

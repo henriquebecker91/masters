@@ -1,0 +1,1 @@
+The problem seems to be that the header of the table summarizing the prior work caused confusion (the header was 'References and Notes'). The table does not present references in the APA format as the ones in the References section, nor 'Notes' means footnotes. To avoid confusion, we changed the table header to 'Summary of the prior work'.

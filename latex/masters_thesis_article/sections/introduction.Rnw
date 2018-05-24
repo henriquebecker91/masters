@@ -22,7 +22,7 @@ Next the authors present some selected papers and a summary of their relevance f
 \label{tab:prior_work}
 %\begin{adjustbox}{max width=\textwidth, center}
 \begin{tabu}{p{\textwidth}}
-Ref. \& Notes\\
+Summary of the prior work\\
 \hline
 \cite{gg-61} The column generation approach for the CSP linear programming relaxation is proposed; the UKP is the pricing problem.\\
 \cite{gg-66} The ordered and the terminating step-off algorithms (dynamic programming algorithms to solve the UKP) are proposed. \\

@@ -7,7 +7,7 @@ The authors also present a rationale for not including some algorithms and datas
 \subsection{Algorithms and their implementations}
 
 %The algorithms used in the experiments belong to three main approaches: dynamic programming (DP); branch-and-bound (B\&B); and hybrid (combine DP and B\&B).
-The usual dynamic programming (DP) algorithms for the UPK have a worst-case time complexity of~\(O(nc)\) (pseudo-polynomial), and worst-case space complexity of~\(O(n+c)\).
+The usual dynamic programming (DP) algorithms for the UKP have a worst-case time complexity of~\(O(nc)\) (pseudo-polynomial), and worst-case space complexity of~\(O(n+c)\).
 The branch-and-bound (B\&B) algorithms have an exponential worst-case time complexity (all item combinations that fit the knapsack), 
 but the worst-case space complexity of the B\&B algorithms used in the experiments is~\(O(n)\).
 %The hybrid algorithm used in the experiments displays the same time and space worst-case complexities than the DP approach.
@@ -56,7 +56,7 @@ Consequently, both the naïve DP algorithm and its improved version were not inc
 The UKP5 algorithm proposed in~\cite{sea2016} was found to be very similar to TSO\footnote{
   The authors of this article reinvented an algorithm from~\cite{gg-66} and published a paper calling it UKP5 while believing it was novel~\cite{sea2016}.
   The authors would like to apologize to the scientific community for such disregard.
-  The only improvement of UPK5 over TSO is the tiebreaker change described in \autoref{sec:oso_and_sol_dom}, which the authors included in all algorithms it was applicable.}
+  The only improvement of UKP5 over TSO is the tiebreaker change described in \autoref{sec:oso_and_sol_dom}, which the authors included in all algorithms it was applicable.}
 and therefore only TSO was included.
 
 The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}. Both weren't included in the experiments.

@@ -191,8 +191,8 @@ Combinatorial optimization \sep Unbounded Knapsack Problem \sep Dynamic Programm
 \bibliographystyle{model5-names}
 \biboptions{authoryear}
 
-%\appendix
-%\Sexpr{knit_child('sections/appendix.Rnw')}
+\appendix
+\Sexpr{knit_child('sections/appendix.Rnw')}
 
 \end{document}
 

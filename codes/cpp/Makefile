@@ -13,7 +13,7 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (all means "all except debug/profile build" in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/cutstock bin/ordered_step_off bin/terminating_step_off # bin/babayev 
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/cutstock bin/ordered_step_off bin/terminating_step_off bin/run_gurobi.out # bin/babayev 
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
@@ -181,6 +181,12 @@ bin/test_terminating_step_off.out: mains/test_terminating_step_off.cpp lib/stepo
 
 bin/terminating_step_off: bin/run_terminating_step_off.out bin/test_terminating_step_off.out
 	touch $@
+
+GUROBI_HOME   =/opt/gurobi801/linux64
+GUROBI_FLAGS  =-L${GUROBI_HOME}/lib -I${GUROBI_HOME}/include -lgurobi80 -lgurobi_g++5.2
+
+bin/run_gurobi.out: mains/run_gurobi.cpp lib/gurobi_ukp_model.hpp $(H_DEPS)
+	$(CC) -o $@ $< $(CFLAGS) $(DEFS) $(GUROBI_FLAGS)
 
 # Cutting-stock with multiple different knapsack solvers
 

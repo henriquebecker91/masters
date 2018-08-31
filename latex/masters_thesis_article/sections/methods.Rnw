@@ -131,7 +131,7 @@ An often mentioned UKP application is to solve the pricing subproblems generated
 To analyze the performance of the algorithms in the context of this application, the authors have written a C++ program that uses the CPLEX Solver to solve the SCF and feed the pricing problems generated to a custom UKP solving algorithm.
 
 The experiments included eight datasets of BPP/CSP instances. The datasets are: Falkenauer (160 instances), Scholl (1210 instances), Wäscher (17 instances), Schwerin (200 instances), Hard28 (28 instances), Randomly Generated Instances (3840 instances), Augmented Non IRUP and Augmented IRUP Instances (ANI \&AI, 500 instances), and Gschwind and Irnich instances (GI instances, 240).
-These datasets amount to 6195 instances, all available in \url{http://or.dei.unibo.it/library/bpplib}. 
+These datasets amount to 6195 instances, all made available in~\cite{Delorme2018}. %\url{http://or.dei.unibo.it/library/bpplib}. 
 The first seven datasets are described in~\cite{survey2014}, the last one (GI Instances) comes from~\cite{irnich}.
 The code used to solve the SCF relaxation can be found in the first author's repository\footnote{The C++/CPLEX code used for solving SCF relaxation is available at \url{https://github.com/henriquebecker91/masters/tree/8367836344a2f615640757ffa49254758e99fe0a/codes/cpp}. The code can be compiled by executing \emph{make bin/cutstock} in the folder.
 The dependencies are the Boost C++ library (see: \url{http://www.boost.org/}), and IBM ILOG CPLEX Studio 12.5 (see: \url{https://www.ibm.com/developerworks/community/blogs/jfp/entry/cplex_studio_in_ibm_academic_initiative?lang=en})}.

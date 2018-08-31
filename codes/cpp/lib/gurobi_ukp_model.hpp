@@ -23,13 +23,13 @@ namespace hbm {
   ) {
     using namespace std;
 
-    const I n = static_cast<I>(ukpi.items.size());
-    const double c = ukpi.c;
+    const int n = static_cast<int>(ukpi.items.size());
+    const double c = static_cast<double>(ukpi.c);
 
     unique_ptr<double[]> w(new double[n]);
     unique_ptr<double[]> p(new double[n]);
 
-    for (I i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
       w[i] = static_cast<double>(ukpi.items[i].w);
       p[i] = static_cast<double>(ukpi.items[i].p);
     }
@@ -40,19 +40,19 @@ namespace hbm {
       unique_ptr<GRBVar[]> x(model.addVars(n, GRB_INTEGER));
       GRBLinExpr objective_expr, capacity_lhs_expr;
 
-      objective_expr.setTerms(p, x, n);
+      objective_expr.addTerms(p.get(), x.get(), n);
       model.setObjective(objective_expr, GRB_MAXIMIZE);
-      capacity_lhs_expr.setTerms(w, x, n);
+      capacity_lhs_expr.addTerms(w.get(), x.get(), n);
       model.addConstr(capacity_lhs_expr, GRB_LESS_EQUAL, c);
       
       model.optimize();
 
       sol.opt = static_cast<P>(model.get(GRB_DoubleAttr_ObjVal) + HBM_TOLERANCE);
-      for (I i = 0; i < n; ++i) {
+      for (int i = 0; i < n; ++i) {
         double xi = x[i].get(GRB_DoubleAttr_X);
         assert(abs(xi - static_cast<int>(xi + HBM_TOLERANCE)) < HBM_TOLERANCE);
         if (xi >= (1.0 - HBM_TOLERANCE)) sol.used_items.emplace_back(
-          ukpi[i], static_cast<I>(xi + HBM_TOLERANCE), i
+          ukpi.items[i], static_cast<I>(xi + HBM_TOLERANCE), i
         );
       }
     } catch(GRBException e) {

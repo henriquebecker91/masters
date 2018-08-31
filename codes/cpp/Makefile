@@ -13,13 +13,13 @@
 # group rule. Also, if it's a profile version don't add it to the 'all' rule
 # (all means "all except debug/profile build" in truth).
 
-all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/cutstock bin/ordered_step_off bin/terminating_step_off bin/run_gurobi.out # bin/babayev 
+all: bin/ukp2sukp.out bin/sukp2ukp.out bin/run_eduk.out bin/run_per.out bin/run_dom.out bin/ukp5 bin/gardp bin/greendp bin/mtu1 bin/mtu2 bin/cutstock bin/ordered_step_off bin/terminating_step_off bin/run_gurobi.out bin/run_cplex.out # bin/babayev 
 
 CC=g++
 # The -ftrapv makes the program abort if there's and integer overflow.
 # This makes easies to debug overflow errors, but only works if the overflow
 # is from signed numbers.
-SFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -O3 #-g -Og #
+SFLAGS=-std=c++11 -Ilib -Wall -Wpedantic -Wconversion -ftrapv -O0 #-O3 #-g -Og #
 HEAD=$(shell git describe --abbrev=12 --dirty --always --tags)
 CFLAGS=$(SFLAGS) -DHBM_GIT_HEAD_AT_COMPILATION=\"$(HEAD)\"
 LBOOST=-lboost_filesystem -lboost_system
@@ -186,23 +186,23 @@ GUROBI_HOME   =/opt/gurobi801/linux64
 GUROBI_FLAGS  =-L${GUROBI_HOME}/lib -I${GUROBI_HOME}/include -lgurobi80 -lgurobi_g++5.2
 
 bin/run_gurobi.out: mains/run_gurobi.cpp lib/gurobi_ukp_model.hpp $(H_DEPS)
-	$(CC) -o $@ $< $(CFLAGS) $(DEFS) $(GUROBI_FLAGS)
+	$(CC) -o $@ $< $(CFLAGS) $(GUROBI_FLAGS)
 
 # Cutting-stock with multiple different knapsack solvers
 
 # Options used by Leonardo Moura for compiling with CPlex
-CPLEX_EFLAGS  = -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD
+CPLEX_EFLAGS  = -m64 -fPIC -fno-strict-aliasing -fexceptions -DIL_STD #-DNDEBUG 
 
 # Folders where CPlex is stored
-SYSTEM        = x86-64_sles10_4.1
+SYSTEM        = x86-64_linux
 LIBFORMAT     = static_pic
-CPLEXDIR      = /opt/ibm/ILOG/CPLEX_Studio125/cplex
-CONCERTDIR    = /opt/ibm/ILOG/CPLEX_Studio125/concert
+CPLEXDIR      = /opt/ibm/ILOG/CPLEX_Studio128/cplex
+CONCERTDIR    = /opt/ibm/ILOG/CPLEX_Studio128/concert
 
 # linking cplex
 CPLEXLIBDIR   = $(CPLEXDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
 CONCERTLIBDIR = $(CONCERTDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
-CPLEX_LFLAGS  = -L$(CPLEXLIBDIR) -lilocplex -lcplex -L$(CONCERTLIBDIR) -lconcert -lm -pthread
+CPLEX_LFLAGS  = -L$(CPLEXLIBDIR) -lilocplex -lcplex -L$(CONCERTLIBDIR) -lconcert -lm -pthread -ldl
 # includes for cplex
 CPLEXINCDIR   = $(CPLEXDIR)/include
 CONCERTINCDIR = $(CONCERTDIR)/include
@@ -295,6 +295,9 @@ bin/cutstock: bin/cplex_cutstock.out bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cut
 
 bin/fast_cutstock: bin/ukp5_fp_cutstock.out bin/ukp5_fp_ns_cutstock.out bin/ukp5_int_cutstock.out bin/ukp5_int_ns_cutstock.out bin/mtu1_cutstock.out bin/ordso_fp_cutstock.out bin/ordso_fp_ns_cutstock.out bin/ordso_int_cutstock.out bin/ordso_int_ns_cutstock.out bin/terso_fp_cutstock.out bin/terso_int_cutstock.out
 	touch $@
+
+bin/run_cplex.out: mains/run_cplex.cpp lib/cplex_ukp_model.hpp $(H_DEPS)
+	$(CC) $(CFLAGS) $< -o $@ $(CPLEX_EFLAGS)
 
 .PHONY: clean
 

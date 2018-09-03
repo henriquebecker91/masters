@@ -319,11 +319,17 @@ As far the authors know, the concept of solution dominance was not formalized be
 The authors believe such overlook happened because: 1) the original concept of dominance focused on discarding single items from further consideration; 2) an algorithm that fully exploits such dominance relation has not been proposed.
 
 The ordered step-off (OSO) is a dynamic programming algorithm for the UKP~\citep{gg-66}.
+The OSO is described in Algorithm 1, a complementary overview follows.
+The gist of the algorithm is: the solution pool is initialized with all single-item solutions; the solution pool is iterated by weight order; for each solution, the solution pool is expanded with new solutions, each new solution is a copy of the current solution with the addition of an extra item; this process enumerates all undominated solutions and gives the optimal profit value.
+The algorithm skips the creation of solutions from solutions already known to be dominated (lines~\ref{if_less_than_opt_begin}~to~\ref{if_less_than_opt_end}), discards some dominated solutions created (e.g., if two or more solutions share the same weight, the algorithm keeps only one of these which is tied for highest profit), and avoids considering symmetric solutions (by restricting the loops up to \(d[y]\), the algorithm only considers the permutation of the solution in which the items are added in order of efficiency).
+When the algorithm finishes executing, \(opt\) contains the optimal profit value and for every \(g[y] > 0\) there is a solution with weight~\(y\), profit value \(g[y]\), and \(d[y]\) is the index of the last (and most efficient) item added to that solution.
+
 The authors revisited OSO and added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end} of Algorithm 1 (to distinguish this version from the original one, it will be called Revisited OSO, or R-OSO).
 When two or more solutions generated have the same weight and profit (a special case of solution dominance), the original algorithm arbitrarily keeps the first solution generated and ignores the others.
 In the same situation, the revisited algorithm keeps the solution that will generate less descendents (smallest \(d[y]\)), therefore minimizing the computational effort.
 This change of tiebreaker reduced the run times of the algorithm over subset-sum and strongly correlated instances by orders of magnitude.
-Such performance gain can be explained by the fact that, in subset-sum instances, all solutions with the same weight have the same profit and, in strongly correlated instances, all solutions with the same weight and the same number of items have the same profit.
+Subset-sum instances are UKP instances with items respecting \(\forall i.~p_i = w_i\), while strongly correlated instances have items respecting \(\forall i.~p_i = w_i + \alpha\) (where \(\alpha\) is a small positive integer value which is the same for the whole instance).
+Therefore, the performance gain can be explained by the fact that, in subset-sum instances, all solutions with the same weight have the same profit and, in strongly correlated instances, all solutions with the same weight and the same number of items have the same profit.
 %Without this change, between all solutions of the same weight, the algorithm would keep the first solution generated with the greatest profit value.
 %With the change, between all solutions with the same weight, the algorithm keeps the first solution generated with the greatest profit value and smallest index of the last item added to the solution.
 
@@ -332,8 +338,8 @@ Such performance gain can be explained by the fact that, in subset-sum instances
 \begin{algorithmic}[1]
 \Procedure{oso}{$n, c, w, p$}
   \State~Sort \(w\) and \(p\) by non-increasing item efficiency\footnotemark and find $w_{min}, w_{max}$ 
-  \State~\(g \gets\) array of~\(c\) positions, initialized with~\(0\)\label{create_g}
-  \State~\(d \gets\) array of~\(c\) positions, uninitialized\label{create_d}
+  \State~\(g \gets\) array of profit values with size~\(c+1\), initialized with zeroes\label{create_g}
+  \State~\(d \gets\) array of item indexes with size~\(c+1\), values uninintialized\label{create_d}
   
   \For{\(i \gets n\) to \(1\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}
 %  \For{\(i \gets 1\) to \(n\)}\label{begin_trivial_bounds}\Comment{Stores one-item solutions}

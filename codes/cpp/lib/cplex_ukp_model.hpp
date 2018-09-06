@@ -21,32 +21,37 @@ namespace hbm {
     argv_t argv
   ) {
     using namespace std;
-    auto &out = cout;
+    //auto &out = cout;
 
     const IloInt n = static_cast<IloInt>(ukpi.items.size());
     const IloInt c = static_cast<IloInt>(ukpi.c);
 
-    HBM_PRINT_VAR(n);
-    HBM_PRINT_VAR(c);
+    //HBM_PRINT_VAR(n);
+    //HBM_PRINT_VAR(c);
 
     IloEnv env;
 
     IloIntArray w(env, n);
     IloIntArray p(env, n);
+    // The ub was removed to the model be the exact same as Gurobi.
+    // The ub was not added to Gurobi instead because some preliminary
+    // tests with ub gave terrible results.
+    //IloIntArray ub(env, n);
 
     for (IloInt i = 0; i < n; ++i) {
       w[i] = static_cast<IloInt>(ukpi.items[i].w);
       p[i] = static_cast<IloInt>(ukpi.items[i].p);
+      //ub[i] = c / w[i]; // intentionally implicitly truncated
     }
 
-    IloIntVarArray x(env, n);
+    //IloNumVarArray x(env, 0, ub);
+    IloNumVarArray x(env, n, 0, IloInfinity, ILOINT);
 
     IloModel model(env);
-    cout << "before maximize" << endl;
+    //cout << "before maximize" << endl;
 
-    IloExpr max_profit(env), constraint_capacity(env);
     model.add(IloMaximize(env, IloScalProd(p, x)));
-    cout << "before IloScalProd" << endl;
+    //cout << "before IloScalProd" << endl;
     model.add(IloScalProd(w, x) <= c);
 
     IloCplex cplex(model);
@@ -71,8 +76,8 @@ namespace hbm {
     //cplex.setParam(IloCplex::Param::Parallel, 1);
 
     // Maybe define an internal time limit?
-    cplex.setParam(IloCplex::Param::TimeLimit, 1000);
-    cplex.setParam(IloCplex::Param::MIP::Limits::TreeMemory, 7*1024);
+    cplex.setParam(IloCplex::Param::TimeLimit, 1800);
+    //cplex.setParam(IloCplex::Param::MIP::Limits::TreeMemory, 7*1024);
     // Guarantee CPLEX is using the wall clock time (default).
     cplex.setParam(IloCplex::Param::ClockType, 2);
     // TODO: make some preliminary tests with the parameters below to decide
@@ -86,6 +91,7 @@ namespace hbm {
     // 4 "consider this setting when the FEASIBILITY setting has
     //    difficulty finding solutions of acceptable quality."
 
+    // Granularity of the information display by CPLEX.
     cplex.setParam(IloCplex::Param::Simplex::Display, 0);
 
     // TODO: check if "numerical precision emphasis" should be set to one,
@@ -96,7 +102,7 @@ namespace hbm {
     // instead of taskset
     // TODO: check if CPLEX "integrality tolerance" has to be configured too.
 
-    cout << "before solve" << endl;
+    //cout << "before solve" << endl;
     cplex.solve();
 
     // The variables are from an IloIntVarArray, and even so their values need

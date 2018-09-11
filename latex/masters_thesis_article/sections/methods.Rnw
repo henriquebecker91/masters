@@ -12,7 +12,13 @@ The branch-and-bound (B\&B) algorithms have an exponential worst-case time compl
 but the worst-case space complexity of the B\&B algorithms used in the experiments is~\(O(n)\).
 %The hybrid algorithm used in the experiments displays the same time and space worst-case complexities than the DP approach.
 
-MTU1 is a depth-first B\&B algorithm for the UKP~\citep{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
+MTU1 is B\&B algorithm for the UKP~\citep{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
+In MTU1, the items are sorted by efficiency.
+Its branching scheme has \(\sum^{n}_{i=d} c' / w_d \)
+
+By virtue of being depth-first, it only needs to keep the current solution, and systematically explores the search space
+
+
 The MTU2 algorithm calls MTU1 over the \(x\%\) most efficient items, and if this is not sufficient to obtain a solution with proved optimality, it repeats the process with \(x\%\) increased~\citep{mtu2}.
 The Fortran implementation of MTU1 and MTU2 used in our experiments was the original implementation by Martello and Toth but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
 The C++ implementations of both algorithms were written by the authors.
@@ -51,8 +57,13 @@ in January 11th, 2016\footnote{The code is available at Henrique Becker master's
 
 \subsubsection{Algorithms deliberately ignored}
 
-The authors believe that both the naïve DP algorithm for the UKP~\cite[p.~311]{tchu} and an improved version of it presented in~\cite[p.~221]{garfinkel} are dominated by OSO algorithm presented in~\cite[p.~15]{gg-66}.
-Consequently, both the naïve DP algorithm and its improved version were not included in our experiments.
+%Both the naïve DP algorithm for the UKP~\cite[p.~311]{tchu} and an improved version of it presented in~\cite[p.~221]{garfinkel} are dominated by OSO algorithm presented in~\cite[p.~15]{gg-66}.
+The naïve DP algorithm for the UKP~\cite[p.~311]{tchu}, an improved version of it presented in~\cite[p.~221]{garfinkel} and the OSO~\cite[p.~15]{gg-66} are all \(O(nc)\) DP algorithms similar to each other. % These three DP algorithms are \(O(nc)\).
+However, OSO does not need to execute \(n\) operations for each distinct \(c\) value and, in practice, will iterate only a small fraction of \(n\) (or even an empty list) for most \(c\) values of most instances.
+The other two algorithms \emph{always} execute \(nc\) operations regardless of any instance properties. 
+Preliminary tests confirmed that OSO dominated the other two algorithms and, consequently, both were not included in our experiments.
+% Consequently, both the naïve DP algorithm and its improved version were not included in our experiments.
+
 The UKP5 algorithm proposed in~\cite{sea2016} was found to be very similar to TSO\footnote{
   The authors of this article reinvented an algorithm from~\cite{gg-66} and published a paper calling it UKP5 while believing it was novel~\cite{sea2016}.
   The authors would like to apologize to the scientific community for such disregard.
@@ -83,7 +94,7 @@ The PYAsUKP dataset was heavily based on the datasets presented in~\cite{pya}, w
 The instance generator used to generate the 4540 instances share the code with EDUK/EDUK2 implementations (PYAsUKP), which is the reason we call this dataset the \emph{PYAsUKP dataset}.
 The PYAsUKP dataset comprises: 400 subset-sum instances (\(10^3 \leq n \leq 10^4\)); 240 strongly correlated instances (\(5\times10^3 \leq n \leq n = 10^4\)); 800 instances with postponed periodicity (\(2\times10^4 \leq n \leq 5\times10^4\)); 2000 instances without collective dominance (\(5\times10^3 \leq n \leq 5\times10^4\)); 1100 SAW instances (\(10^4 \leq n \leq 10^5\)).
 The PYAsUKP dataset has multiple-of-ten amounts of instances generated with different random seeds for each combination of the remaining generation parameters (\(n\), \(w_{min}\), \dots).
-The authors selected one-tenth of the instances for each parameter combination (in total 454) and will refer to it as the \emph{reduced PYAsUKP dataset}.
+The authors selected the first one-tenth of the instances for each parameter combination (in total 454) and will refer to it as the \emph{reduced PYAsUKP dataset}.
 
 \subsubsection{Realistic Random Dataset}
 A dataset of \emph{realistic random} instances was used in the experiments. The generation procedure, based on~\cite{eduk}, is summarized as follows: generate two lists of~\(n\) unique random integers uniformly distributed in~\([min, max]\) and sort them by increasing value; combine both lists in an item list, by pairing up the i-th of one list to the i-th element of the other; randomly shuffle the item list; generate a random capacity~\(c \in [c_{min},c_{max}]\) (uniform distribution).
@@ -103,15 +114,15 @@ The purpose of this items distribution is to illustrate the authors' point that 
 In the case of the BREQ distribution, it favors B\&B over DP.
 Distributions with the opposite property (favor DP over B\&B) are common in the recent literature.
 
-%The optimal solution of BREQ instances is often in the first fraction of the search space examined by B\&B algorithms. 
-%Moreover, the lower bounds from good solutions allow B\&B methods to skip a large fraction of the search space and promptly prove optimality.
-%In BREQ instances, the presence of simple, multiple and collective dominance is minimal
-%\footnote{
-%If the BREQ formula did not include the rounding, the profit of the item would be a strictly monotonically increasing function of the items weight.
-%Any item distribution with this property cannot present simple, multiple, or collective dominance. 
-%}, and the threshold dominance is common\footnote{In BREQ instances, an optimal solution will never include the item~\(i\) two or more times if there is an item~\(j\) such as that~\(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\).}.
-%Such characteristics lead to optimal solutions comprised of the largest weight items, which do not reuse optimal solutions for lower capacities.
-%This means that solving the UKP for lower capacities as DP algorithms do is mostly a wasted effort.
+The optimal solution of BREQ instances is often in the first fraction of the search space examined by B\&B algorithms. 
+Moreover, the lower bounds from good solutions allow B\&B methods to skip a large fraction of the search space and promptly prove optimality.
+In BREQ instances, the presence of simple, multiple and collective dominance is minimal
+\footnote{
+If the BREQ formula did not include the rounding, the profit of the item would be a strictly monotonically increasing function of the items weight.
+Any item distribution with this property cannot present simple, multiple, or collective dominance. 
+}, but threshold dominance is very common: an optimal solution will never include the item~\(i\) two or more times if there is an item~\(j\) such as that~\(\sqrt{2} \times w_i \leq w_j \leq 2 \times w_i\).
+Such characteristics lead to optimal solutions comprised of the largest weight items, which do not reuse optimal solutions for lower capacities.
+This means that solving the UKP for lower capacities as DP algorithms do is mostly a wasted effort.
 
 %If those three dominance relations are absent, for any solution~\(s\) composed of two or more items, and for any single item~\(i\), if~\(w_s \leq w_i\) then~\(p_s < p_i\).
 

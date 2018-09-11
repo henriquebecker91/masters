@@ -7,8 +7,10 @@ Such results bring up two central questions the authors address: Why TSO was not
 The authors believe TSO was not considered in recent comparisons because: the algorithm was very similar to the naïve DP for the UKP but the authors did not emphasize it was orders of magnitude faster; B\&B algorithms performed better than TSO in uncorrelated and weakly correlated instances with one hundred items.
 As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison~\citep{mtu1}.
 In the experiments presented in~\cite{mtu1}, TSO was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
-Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was not even one order of magnitude apart.
-Also, the trend observed could indicate that for instances with a greater \(n\) value, OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing. %(e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
+Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was less than one order of magnitude apart and diminishing.
+This trend hinted the possibility of the times taken by OSO/TSO and MTU1 converging (or even OSO/TSO taking less time than MTU1) for larger instances (e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
+
+% Also, the trend observed could indicate that for instances with a greater \(n\) value, OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing. %(e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
 
 \subsection{An algorithm is dominated by other in the context of a dataset}
 

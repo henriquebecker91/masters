@@ -70,7 +70,7 @@ namespace hbm {
       // to focus more attention on proving optimality, select MIPFocus=2. If
       // the best objective bound is moving very slowly (or not at all), you
       // may want to try MIPFocus=3 to focus on the bound.
-      model.set(GRB_IntParam_MIPFocus, 0);
+      model.set(GRB_IntParam_MIPFocus, 3);
       model.optimize();
 
       sol.opt = static_cast<P>(model.get(GRB_DoubleAttr_ObjVal) + HBM_TOLERANCE);

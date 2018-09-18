@@ -82,7 +82,7 @@ namespace hbm {
     cplex.setParam(IloCplex::Param::ClockType, 2);
     // TODO: make some preliminary tests with the parameters below to decide
     // if one of them should be used.
-    cplex.setParam(IloCplex::Param::Emphasis::MIP, 0);
+    cplex.setParam(IloCplex::Param::Emphasis::MIP, 2);
     // Values for IloCplex::Param::Emphasis::MIP
     // 0 balance optimality and feasibility
     // 1 feasibility over optimality
@@ -93,6 +93,7 @@ namespace hbm {
 
     // Granularity of the information display by CPLEX.
     cplex.setParam(IloCplex::Param::Simplex::Display, 0);
+    cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0.0);
 
     // TODO: check if "numerical precision emphasis" should be set to one,
     // the default is zero that is to not worry much about numerical precision.

@@ -17,6 +17,12 @@ ejor_ukp_hb_lsb.pdf: skeleton.Rnw $(SECTIONS) $(DATA) Makefile biblio.bib
 	pdflatex skeleton.tex > /dev/null
 	mv skeleton.pdf ejor_ukp_hb_lsb.pdf
 
+cover_letter.pdf: cover_letter.tex
+	pdflatex $< /dev/null
+	bibtex cover_letter.aux > /dev/null
+	pdflatex $< > /dev/null
+	pdflatex $< > /dev/null
+
 clean: Makefile
 	rm -rf ejor_ukp_hb_lsb.pdf skeleton.tex *.log *.aux *.toc *.lof *.out *.bbl *.lot *.blg *.spl figure cache
 

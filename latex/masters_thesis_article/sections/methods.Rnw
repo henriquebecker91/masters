@@ -12,12 +12,18 @@ The branch-and-bound (B\&B) algorithms have an exponential worst-case time compl
 but the worst-case space complexity of the B\&B algorithms used in the experiments is~\(O(n)\).
 %The hybrid algorithm used in the experiments displays the same time and space worst-case complexities than the DP approach.
 
-MTU1 is B\&B algorithm for the UKP~\citep{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
-In MTU1, the items are sorted by efficiency.
-Its branching scheme has \(\sum^{n}_{i=d} c' / w_d \)
 
-By virtue of being depth-first, it only needs to keep the current solution, and systematically explores the search space
+% B&B INFO TO ADD: branching scheme, bounds used commonly, ...
 
+MTU1 is a B\&B algorithm for the UKP~\citep{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
+In the enumeration tree of MTU1, each node at depth~\(0 \leq d < n\) has~\((c'/w_{d+1}) + 1\) childs (where \(c'\) is the remaining capacity at current node), what means each node except the root represents a valid amount of copies of the item of the current depth being packed in the knapsack (including zero copies).
+In practice, by virtue of being depth-first, MTU1 has no explicit tree but only keeps the current solution, which represents the current branch from the root to a leaf.
+Items are added to and removed from the solution to simulate the tree traversal.
+The exploration order favor the childs representing higher amounts before lower amounts.
+As the items are sorted by efficiency, this means the first node after root will be the maximum amount of copies of the best item, and the path to the first leaf will be the solution given by the classic greedy heuristic\footnote{The classic greedy heuristic for the UKP packs the most efficient item that fits the knapsack until there is no item that fits the knapsack.}.
+The upper bound used by MTU1 is \(U3\) which is \(max(u1)\)
+
+% DP INFO TO ADD: states, stages, recursive function
 
 The MTU2 algorithm calls MTU1 over the \(x\%\) most efficient items, and if this is not sufficient to obtain a solution with proved optimality, it repeats the process with \(x\%\) increased~\citep{mtu2}.
 The Fortran implementation of MTU1 and MTU2 used in our experiments was the original implementation by Martello and Toth but with all 32 bits integers or float variables/parameters replaced by their 64 bits counterparts. This version is publicly available in the authors' code repository\footnote{The MTU1 and MTU2 adapted Fortran code used in the experiments is available at \url{https://github.com/henriquebecker91/masters/tree/136c1c1fbeb6ef7baa7ab6bcc8f48cb0bb68b697/codes}}.
@@ -70,7 +76,10 @@ The UKP5 algorithm proposed in~\cite{sea2016} was found to be very similar to TS
   The only improvement of UKP5 over TSO is the tiebreaker change described in \autoref{sec:oso_and_sol_dom}, which the authors included in all algorithms it was applicable.}
 and therefore only TSO was included.
 
-The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}. Both weren't included in the experiments.
+The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}.
+Both weren't included in the experiments.
+The Sage-3D algorithm from \cite{landa_sage} cited in \cite{ukp_hu_landa_shing_survey} needs \(\O(n w_b p_b)\) memory and time, which is prohibitive for many instances considered and, therefore, was also not included.
+Its complexity is justified by the fact Sage-3D does not solve the UKP for a specific knapsack capacity, but instead builds a data structure which allows querying the solution for a specific capacity in \(O(log(p_b))\).
 
 In~\cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which was found to be dominated by MTU1; 
 also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of OSO. %Also, \cite{cabot}~was behind a paywall.
@@ -79,6 +88,7 @@ Thus, the B\&B algorithms proposed in~\cite{gg-63} and~\cite{cabot} were not inc
 %Likewise, \cite{turnpike}~is behind a paywall, and 
 In~\cite{green_improv} it is implied that GFDP is an improved version of the algorithm proposed in~\cite{turnpike}, so only GFDP was included.
 The authors could not obtain the code of the algorithm proposed in~\cite{babayev}, and they chose to not reimplement it to not risk misrepresenting it, as it was not trivial to implement.
+
 UKP-specific algorithms perform better than applying BKP or 0-1 KP algorithms over converted UKP instances~\cite{mtu1}, so BKP and 0-1 KP algorithms were not considered.
 
 \subsection{Instance datasets}

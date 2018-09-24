@@ -11,14 +11,15 @@ my_relevel <- function(f) {
 }
 
 # used by rr and breq
-gen_graph_all_alg_discrete_x <- function(csv) {
+gen_graph_all_alg_discrete_x_no_toso <- function(csv) {
+  csv <- filter(csv,
+    algorithm != 'ordered_step_off' &
+    algorithm != 'terminating_step_off')
   alg_labels <- c(
     'cpp-mtu1'             = 'MTU1 (C++)',
     'cpp-mtu2'             = 'MTU2 (C++)',
     'eduk'                 = 'EDUK',
     'eduk2'                = 'EDUK2',
-    'ordered_step_off'     = 'OSO',
-    'terminating_step_off' = 'TSO',
     'mgreendp'             = 'GFDP'
   )
   # I thought of putting one of the legends in an unused area of the plot and
@@ -53,6 +54,55 @@ gen_graph_all_alg_discrete_x <- function(csv) {
     scale_shape_manual(name = "Algorithm",
                        labels = alg_labels,
                        values = c('cpp-mtu1' = 16, 'cpp-mtu2' = 16, 'eduk' = 17, 'eduk2' = 17, 'ordered_step_off' = 15, 'terminating_step_off' = 15, 'mgreendp' = 4)) +
+    ylab('Time to solve (seconds, log10 scale)') +
+    xlab('Instance size (number of items, log2 scale)') +
+    theme(legend.position = 'bottom')
+  #ggsave('realistic_random.pdf', width = 0.80*210, height = 0.5*297, unit = 'mm')
+  return(p);
+}
+
+gen_graph_all_alg_discrete_x_no_tso <- function(csv) {
+  csv <- filter(csv, algorithm != 'terminating_step_off')
+  alg_labels <- c(
+    'cpp-mtu1'             = 'MTU1 (C++)',
+    'cpp-mtu2'             = 'MTU2 (C++)',
+    'eduk'                 = 'EDUK',
+    'eduk2'                = 'EDUK2',
+    'ordered_step_off'     = 'OSO',
+    'mgreendp'             = 'GFDP'
+  )
+  # I thought of putting one of the legends in an unused area of the plot and
+  # another below the plot, but separating legends with ggplot2 needs a hack:
+  # https://stackoverflow.com/questions/13143894/how-do-i-position-two-legends-independently-in-ggplot
+  # which is too much effort for a little gain.
+  p <- ggplot(csv,
+              aes(x = n,# * (0.75 + 0.50*(as.numeric(algorithm) - 1)/6),
+                  y = internal_time,
+                  color = algorithm,
+                  shape = algorithm)) + 
+    #geom_jitter() +
+    #stat_bin2d(binwidth = 0.25, geom="text", aes(label=..count..), position = position_dodge(0.7)) +
+    #geom_point() + geom_count() +
+    stat_bin_2d(geom = "point",
+                aes(size=..count.., alpha = 0.80),
+        position = position_dodge(0.75)) +
+    scale_alpha(limits = c(0, 1), guide = FALSE) +
+    # remove default fill stat_bin_2d legend
+    scale_fill_gradient(guide = FALSE) +
+    scale_size_area(breaks = c(2, 5, 8),
+                    guide = guide_legend(title = "# of points",
+                                         title.position = 'top',
+                                         direction = 'horizontal',
+                                         title.hjust = 0.5)) +
+    scale_y_continuous(trans = "log10",
+                       breaks = c(10^-3, 10^-2, 10^-1, 1, 10, 60, 600, 1800),
+                       labels = c('0.001', '0.01', '0.1', '1', '10', '60', '600', '1800')) +
+    scale_colour_manual(name = "Algorithm",
+                       labels = alg_labels,
+                       values = c('cpp-mtu1' = 'black', 'cpp-mtu2' = 'darkgrey', 'eduk' = 'black', 'eduk2' = 'darkgrey', 'ordered_step_off' = 'darkgrey', 'mgreendp' = 'black')) +
+    scale_shape_manual(name = "Algorithm",
+                       labels = alg_labels,
+                       values = c('cpp-mtu1' = 16, 'cpp-mtu2' = 16, 'eduk' = 17, 'eduk2' = 17, 'ordered_step_off' = 15, 'mgreendp' = 4)) +
     ylab('Time to solve (seconds, log10 scale)') +
     xlab('Instance size (number of items, log2 scale)') +
     theme(legend.position = 'bottom')
@@ -359,7 +409,7 @@ The results of the experiments over the realistic random dataset are summarized 
 \caption{Run times of the algorithms over the 80 instances of the realistic random dataset. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<realistic_random_figure, fig.height = 5>>=
-gen_graph_all_alg_discrete_x(rr_csv) +
+gen_graph_all_alg_discrete_x_no_toso(rr_csv) +
 scale_x_continuous(trans = "log2",
                    breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17))
 @
@@ -439,7 +489,7 @@ GFDP is the only algorithm with run times in both groups.
 \caption{Run times of the algorithms over the 100 instances of the BREQ 128-16 Standard Benchmark. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<breq_figure, fig.height=4.5>>=
-gen_graph_all_alg_discrete_x(breq_csv) +
+gen_graph_all_alg_discrete_x_no_tso(breq_csv) +
 scale_x_continuous(trans = "log2",
                    breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16,
                               2^17, 2^18, 2^19, 2^20))

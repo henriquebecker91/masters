@@ -7,7 +7,7 @@ DATADIR = data
 _DATA = 128_16_std_breqd.csv csp_6195.csv mtus_pya.csv pya_ukp5.csv realistic_random.csv
 DATA = $(patsubst %,$(DATADIR)/%,$(_DATA))
 
-all: ejor_ukp_hb_lsb.pdf
+all: ejor_ukp_hb_lsb.pdf cover_letter.pdf
 
 ejor_ukp_hb_lsb.pdf: skeleton.Rnw $(SECTIONS) $(DATA) Makefile biblio.bib
 	Rscript -e "library(knitr); knit(basename('skeleton.Rnw'))"

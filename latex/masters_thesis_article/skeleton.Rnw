@@ -111,7 +111,7 @@ library(tables) # for latex and tabular
 
 \renewcommand{\floatpagefraction}{.8}
 
-\title{An empirical analysis of exact unbounded knapsack algorithms}
+\title{An empirical analysis of exact algorithms for the\\unbounded knapsack problem}
 
 \begin{document}
 

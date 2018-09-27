@@ -290,7 +290,152 @@ make_mtu_row <- function(t, ...) {
 \hline
 \end{tabular}
 \end{adjustbox}
-\caption{Time in seconds for the MTU implementations over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\). The time limit was set to 30 minutes. For the subset-sum instances, there are ten instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.}
+\caption{Time in seconds for the MTU implementations over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\). The time limit was set to 30 minutes. For the subset-sum instances, there is one instance for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 40 instances.}
+\end{table}
+
+\clearpage
+
+<<pya_solvers_table,echo=FALSE>>=
+pya_csv <- read.csv(
+  '../data/pya_ukp5.csv', sep = ';', stringsAsFactors = FALSE
+)
+
+# Create dataframe only with the best emphasis choices.
+ct <- pya_csv %>% filter(
+  algorithm == 'cplex2nt' | algorithm == 'gurobi0nt'
+) %>% select(algorithm, filename, internal_time, s_opt = opt)
+
+opts <- pya_csv %>%
+  filter(algorithm == 'ordered_step_off') %>%
+  select(filename, opt)
+
+ct <- inner_join(pya_solvers, opts, by = 'filename')
+
+# clean Gurobi errors for presentation
+ct <- ct %>% mutate(internal_time = ifelse(
+  (opt - s_opt)/opt > 1e-7, NA, internal_time
+))
+
+# adding extra columns parsed from filename
+ct <- ct %>%
+  mutate(dist = get_dist(filename)) %>%
+  mutate(a = get_alpha(filename)) %>%
+  mutate(n = get_n(filename))
+ct$wmin <- apply(ct, 1, get_wmin)
+
+# this ordering is necessary to make_pya_row put the columns in the right places
+ct$algorithm <- factor(ct$algorithm, levels = c('cplex2nt', 'gurobi0nt'))
+ct <- arrange(ct, algorithm)
+
+# subset-sum results are not discriminated by parameter combination
+ct_ss2 <- ct %>%
+  filter(dist == "ss2") %>%
+  select(algorithm, internal_time) %>%
+  group_by(algorithm) %>%
+  summarise(
+    avg = sprintf("%.2f", mean(internal_time, na.rm = T)),
+    sd  = sprintf("%.2f", sd(internal_time, na.rm = T)),
+    fin = sum(!is.na(internal_time)))
+ct_ss2[] <- lapply(ct_ss2, function(x) { gsub('NaN', '--', x) })
+
+st <- ct %>%
+  select(algorithm, dist, a, n, wmin, internal_time) %>%
+  group_by(algorithm, dist, a, n, wmin) %>%
+  summarise(
+    avg = sprintf("%.2f", mean(internal_time, na.rm = T)),
+    sd  = sprintf("%.2f", sd(internal_time, na.rm = T)),
+    fin = sum(!is.na(internal_time)))
+ct[] <- lapply(ct, function(x) { gsub('NaN', '--', x) })
+
+ct_nsds2 <- filter(ct, dist == 'nsds2')
+ct_hi <- filter(ct, dist == 'hi')
+ct_saw <- filter(ct, dist == 'saw')
+ct_sc <- filter(ct, dist == 'sc')
+
+make_cg_row <- function(t, ...) {
+  tt <- ungroup(t)
+  tt <- filter(tt, ...)
+  tt <- select(tt, avg, sd, fin)
+  paste(apply(tt, 1, paste, collapse=" & "), collapse = " & ")
+}
+@
+
+% TODO: put explanation of the overline in the caption, because it's used
+% in the explanation of capacities, do this for both pya tables
+% TODO: decide what to put in the section reference of subset-sum instances
+\begin{table}[H]
+\label{tab:times_solvers}
+\vspace{1mm}
+\def\arraystretch{1.1}
+\setlength\tabcolsep{6px}
+
+%\begin{adjustbox}{max width=\textwidth, center}
+\begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrr@{}}
+
+\hline
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{c}{CPLEX} & \multicolumn{3}{c}{Gurobi}\\
+\cline{1-3}\cline{4-6}\cline{7-9}
+
+\multicolumn{3}{l}{40 inst. per line} & \multicolumn{6}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
+\cline{1-3}\cline{4-9}
+
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{fin}  & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin} & \textbf{avg} & \textbf{fin}\\
+\cline{1-3}\cline{4-6}\cline{7-9}
+
+\multicolumn{3}{c}{See caption.} & \Sexpr{make_mtu_row(mt_ss2)}\\
+\hline
+
+\multicolumn{3}{l}{20 inst. per line} & \multicolumn{6}{l}{Strong correlation. Random \emph{c} between \([20\overline{n}; 100\overline{n}]\)}\\
+\cline{1-3}\cline{4-9}
+\textbf{\(\alpha\)} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd}  & \textbf{fin} & \textbf{avg} & \textbf{sd} & \textbf{fin}\\
+
+\cline{1-3}\cline{4-6}\cline{7-9}
+ 5 & 5  & 10 & \Sexpr{make_cg_row(ct_sc, a == 5 & n == 5000 & wmin == 10000)}\\
+   &    & 15 & \Sexpr{make_cg_row(ct_sc, a == 5 & n == 5000 & wmin == 15000)}\\
+   &    & 50 & \Sexpr{make_cg_row(ct_sc, a == 5 & n == 5000 & wmin == 50000)}\\
+ 5 & 10 & 10 & \Sexpr{make_cg_row(ct_sc, a == 5 & n == 10000 & wmin == 10000)}\\
+   &    & 50 & \Sexpr{make_cg_row(ct_sc, a == 5 & n == 10000 & wmin == 50000)}\\
+   &    & 110& \Sexpr{make_cg_row(ct_sc, a == 5 & n == 10000 & wmin == 110000)}\\
+-5 & 5  & 10 & \Sexpr{make_cg_row(ct_sc, a == -5 & n == 5000 & wmin == 10000)}\\
+   &    & 15 & \Sexpr{make_cg_row(ct_sc, a == -5 & n == 5000 & wmin == 15000)}\\
+   &    & 50 & \Sexpr{make_cg_row(ct_sc, a == -5 & n == 5000 & wmin == 50000)}\\
+-5 & 10 & 10 & \Sexpr{make_cg_row(ct_sc, a == -5 & n == 10000 & wmin == 10000)}\\
+   &    & 50 & \Sexpr{make_cg_row(ct_sc, a == -5 & n == 10000 & wmin == 50000)}\\
+   &    & 110& \Sexpr{make_cg_row(ct_sc, a == -5 & n == 10000 & wmin == 110000)}\\
+\hline
+
+\multicolumn{3}{l}{20 inst. per line} & \multicolumn{6}{l}{Postponed periodicity. Random \emph{c} between \([w_{max}; 2\times10^6]\)}\\
+\cline{1-3}\cline{4-9}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{fin} & \textbf{avg} & \textbf{sd} & \textbf{fin}\\
+\cline{1-3}\cline{4-6}\cline{7-9}
+& 20 & 20 & \Sexpr{make_cg_row(ct_nsds2, n == 20000 & wmin == 20000)}\\
+& 50 & 20 & \Sexpr{make_cg_row(ct_nsds2, n == 50000 & wmin == 20000)}\\
+& 20 & 50 & \Sexpr{make_cg_row(ct_nsds2, n == 20000 & wmin == 50000)}\\
+& 50 & 50 & \Sexpr{make_cg_row(ct_nsds2, n == 50000 & wmin == 50000)}\\
+\hline
+
+\multicolumn{3}{l}{50 inst. per line} & \multicolumn{6}{l}{No collective dominance. Random \emph{c} between \([w_{max}; 1000\overline{n}]\)}\\
+\cline{1-3}\cline{4-9}
+& \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd} & \textbf{fin} & \textbf{avg} & \textbf{sd} & \textbf{fin}\\
+\cline{1-3}\cline{4-6}\cline{7-9}
+&  5 & n & \Sexpr{make_cg_row(ct_hi, n ==  5000 & wmin ==  5000)}\\
+& 10 & n & \Sexpr{make_cg_row(ct_hi, n == 10000 & wmin == 10000)}\\
+& 20 & n & \Sexpr{make_cg_row(ct_hi, n == 20000 & wmin == 20000)}\\
+& 50 & n & \Sexpr{make_cg_row(ct_hi, n == 50000 & wmin == 50000)}\\
+\hline
+
+\multicolumn{3}{l}{\emph{qtd} inst. per line} & \multicolumn{6}{l}{SAW. Random \emph{c} between \([w_{max}; 10\overline{n}]\)}\\
+\cline{1-3}\cline{4-9}
+\textbf{qtd} & \textbf{n} & \(w_{min}\) & \textbf{avg} & \textbf{sd}  & \textbf{fin} & \textbf{avg} & \textbf{sd} & \textbf{fin}\\
+\cline{1-3}\cline{4-6}\cline{7-9}
+~20 &  10 & 10 & \Sexpr{make_cg_row(ct_saw, n ==  10000 & wmin == 10000)}\\
+~50 &  50 &  5 & \Sexpr{make_cg_row(ct_saw, n ==  50000 & wmin ==  5000)}\\
+~20 &  50 & 10 & \Sexpr{make_cg_row(ct_saw, n ==  50000 & wmin == 10000)}\\
+~20 & 100 & 10 & \Sexpr{make_cg_row(ct_saw, n == 100000 & wmin == 10000)}\\
+\hline
+\end{tabular}
+\end{adjustbox}
+\caption{Time in seconds for the model implementations (CPLEX and Gurobi) over the reduced PYAsUKP's dataset (see Section \ref{sec:sec:cplex_gurobi_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPLEX and Gurobi, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout, memory exhaustion or with a wrong answer). The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), and the cardinality of \(T\). The time limit was set to 30 minutes. For the subset-sum instances, there is one instance for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 40 instances.}
 \end{table}
 
 \clearpage

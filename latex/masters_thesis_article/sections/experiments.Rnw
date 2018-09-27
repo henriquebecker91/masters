@@ -424,6 +424,7 @@ unique(mtu_csv_for_range$filename)
 %The Fortran MTU2 does not seem to work well with this item ordering of the subset-sum instances.
 
 \subsubsection{CPLEX and Gurobi}
+\label{sec:cplex_gurobi_exp}
 
 As in last section, this section uses the reduced PYAsUKP benchmark to gauge the relative performance of two alternatives, in this case: our Gurobi and CPLEX models.
 Both Gurobi and CPLEX have an emphasis/focus setting.

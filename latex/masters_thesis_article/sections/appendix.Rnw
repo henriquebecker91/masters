@@ -27,7 +27,10 @@ ft <- read.csv("../data/pya_ukp5.csv", sep = ";")
 ft$X <- NULL
 
 # we only show the results for the terminating_step_off
-ft <- filter(ft, algorithm != 'ordered_step_off')
+ft <- filter(ft,
+	algorithm == 'mgreendp'             |
+	algorithm == 'terminating_step_off' |
+	algorithm == 'pyasukp')
 # adding extra columns parsed from filename
 ft <- ft %>%
   mutate(dist = get_dist(filename)) %>%
@@ -307,6 +310,7 @@ pretiffy_alg_names <- function(names) {
   recode(names,
   'cpp-mtu1'             = 'MTU1 (C++)',
   'cpp-mtu2'             = 'MTU2 (C++)',
+  'cplex2nt'             = 'CPLEX',
   'eduk'                 = 'EDUK',
   'eduk2'                = 'EDUK2',
   'ordered_step_off'     = 'Ord. Step-Off',
@@ -317,6 +321,7 @@ pretiffy_alg_names <- function(names) {
 
 <<rr_table_appendix,results='asis'>>=
 rr <- read.csv("../data/realistic_random.csv", sep = ";")
+rr$internal_time[rr$internal_time > 1800] <- NA
 rr$X <- NULL
 
 #rr <- filter(rr,

@@ -64,7 +64,8 @@ i) the choice of artificial instance datasets had an important role defining whi
 ii) the simple, multiple, collective, and threshold dominance relations can be generalized to solution dominance, and the application of a weak version of it shows similar efficiency;
 iii) there is evidence that the items distribution of pricing problems can converge to a strongly correlated distribution (which can take exponential time to solve by B\&B);
 iv) there is evidence that converting the profit of pricing problems to large integers do not cause significant loss to the master problem objetive value;
-v) the development of new and tighter periodicity bounds is of little use to the improvement of the state-of-the-art algorithms for UKP.
+v) the development of new and tighter periodicity bounds is of little use to the improvement of the state-of-the-art algorithms for UKP;
+vi) CPLEX has better performance than B\&B algorithms for UKP in instances with few items but `hard' to solve by B\&B approach, but it is worse when the instances are large but `easy' (many variables) or too many small instances (costly initialization).
 
 %While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
 

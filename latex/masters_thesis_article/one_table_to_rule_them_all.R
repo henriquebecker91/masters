@@ -4,6 +4,13 @@ pya_csv <- read.csv(
   '../data/pya_ukp5.csv', sep = ";", stringsAsFactors = FALSE
 )
 pya_csv$X <- NULL
+pya_columns <- pya_csv %>% group_by(algorithm) %>% 
+  filter(algorithm != 'cplex2nt' & algorithm != 'gurobi0nt') %>%
+  summarise(
+    finished = 4540 - sum(is.na(internal_time)),
+    mean_time = mean(internal_time, na.rm = T)
+  )
+
 mtu_csv <- read.csv(
   '../data/mtus_pya.csv', sep = ";", stringsAsFactors = FALSE
 ) %>% filter(algorithm != 'fmtu1' & algorithm != 'fmtu2')
@@ -15,38 +22,58 @@ reduced_pya <- rbind(semi_join(pya_csv, mtu_csv, by = 'filename'), mtu_csv)
 correct_opt <- filter(reduced_pya, algorithm == 'ordered_step_off') %>%
   select(filename, c_opt = opt)
 reduced_pya <- inner_join(reduced_pya, correct_opt, by = 'filename')
-# clean the cplex and gurobi timeouts, and the 
-sum(is.na(reduced_pya$internal_time))
-#t <- data.frame(diff = (reduced_pya$opt - reduced_pya$c_opt))
-#t$r <- t$diff / reduced_pya$opt 
-#t <- filter(t, diff != 0)
-#filter(reduced_pya, opt == 0)
-#reduced_pya <- reduced_pya %>% mutate(internal_time = case_when(
-#  opt == 0 ~ as.numeric(NA),
-#  opt != 0 ~ internal_time
-#))
 
-ifelse(reduced_pya$opt == 0, NA, reduced_pya$internal_time)
+reduced_pya <- reduced_pya %>% mutate(
+  opt = ifelse(is.na(opt) | opt == 0, NA, opt)
+) %>% mutate(
+  # Some Gurobi Instances had rounding errors and finished with the
+  # optimal solution but wrong opt (error of one unity in values greater
+  # than 10^6), other had larger errors and wrong solutions, this is the
+  # cuttoff to excluding only instances with wrong solutions.
+  opt = ifelse(is.na(opt) | abs(opt - c_opt)/opt > 1e-7, NA, opt) 
+) %>% mutate(
+  internal_time = ifelse(is.na(opt) | internal_time > 1799, NA, internal_time)
+) %>% filter(
+  algorithm == 'cpp-mtu1' |
+  algorithm == 'cpp-mtu2' |
+  algorithm == 'cplex2nt' |
+  algorithm == 'gurobi0nt'
+)
 
-reduced_pya <- reduced_pya %>% mutate(internal_time = ifelse(
-  (opt - c_opt)/opt < -1e-7, NA, internal_time
-))
-sum(is.na(reduced_pya$internal_time))
-# GUROBI RETURNED THE WRONG ANSWER FOR NO 
-reduced_pya <- filter(reduced_pya, internal_time < 1799)
+reduced_columns <- reduced_pya %>% group_by(algorithm) %>% summarise(
+  finished = 454 - sum(is.na(internal_time)),
+  mean_time = mean(internal_time, na.rm = T)
+)
+both_pya <- rbind(pya_columns, reduced_columns)
 
+rr_csv <- read.csv(
+  '../data/realistic_random.csv', sep = ";", stringsAsFactors = FALSE
+)
+rr_csv$X <- NULL
+rr_columns <- rr_csv %>% group_by(algorithm) %>% summarise(
+  finished = 80 - sum(is.na(internal_time)),
+  mean_time = mean(internal_time, na.rm = T)
+)
 
 breq_csv <- read.csv(
   '../data/128_16_std_breqd.csv', sep = ";", stringsAsFactors = FALSE
 )
-rr_csv <- read.csv(
-  '../data/realistic_random.csv', sep = ";", stringsAsFactors = FALSE
+breq_csv$X <- NULL
+breq_columns <- breq_csv %>% group_by(algorithm) %>% summarise(
+  finished = 80 - sum(is.na(internal_time)),
+  mean_time = mean(internal_time, na.rm = T)
 )
+
 csp_csv <- read.csv(
   '../data/csp_6195.csv', sep = ";", stringsAsFactors = FALSE
 )
-
-reduced_columns <- reduced_pya %>% group_by(algorithm) %>% summarise(
-  mean = mean(internal_time)
+csp_csv$X <- NULL
+csp_csv <- csp_csv %>% mutate(
+  internal_time = hex_sum_knapsack_time + hex_sum_sort_time
+)
+csp_columns <- csp_csv %>% group_by(algorithm) %>% summarise(
+  finished = 6195 - sum(is.na(internal_time)),
+  mean_time = mean(internal_time, na.rm = T)
 )
 
+inner_join(both_pya, rr_columns, by = 'algorithm')

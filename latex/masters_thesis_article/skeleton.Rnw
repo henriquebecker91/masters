@@ -9,7 +9,6 @@ opts_chunk$set(cache = TRUE, autodep = TRUE)
 opts_chunk$set(echo = FALSE, comment = NA, message = FALSE, warning = FALSE)
 
 library(ggplot2) # used for all plotting
-library(stringi) # TODO: check if yet used
 library(reshape2) # for dcast, http://seananderson.ca/2013/10/19/reshape.html
 library(dplyr) # for select, group_by, summarise, %>%, etc..
 library(xtable) # for xtable
@@ -23,6 +22,7 @@ library(tables) # for latex and tabular
 \usepackage{hyperref}
 \def\sectionautorefname{Section} % change hyperref autoref to capitalized
 \def\subsectionautorefname{Section} % change hyperref autoref to capitalized
+\def\subsubsectionautorefname{Section} % change hyperref autoref to capitalized
 \expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%  save the current 一
   \do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j%
   \do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t%
@@ -96,6 +96,7 @@ library(tables) # for latex and tabular
 \usepackage{adjustbox}
 \usepackage[nice]{nicefrac}
 \usepackage{float}
+\usepackage{tabularx}
 %\usepackage{flafter}
 
 % used together with below code to put float barriers in all (sub)sections

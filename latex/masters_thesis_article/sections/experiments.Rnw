@@ -428,9 +428,9 @@ unique(mtu_csv_for_range$filename)
 
 As in last section, this section uses the reduced PYAsUKP benchmark to gauge the relative performance of two alternatives, in this case: our Gurobi and CPLEX models.
 Both Gurobi and CPLEX have an emphasis/focus setting.
-The authors selected the emphases they deemed more adequate, and this experiment with all of them.
+The authors selected the emphases they deemed more adequate, and performed this experiment with all of them.
 For each solver, only the results for the emphasis with the best performance are presented\footnote{
-  The focus/emphasis parameters are GRB\_IntParam\_MIPFocus (Gurobi) and IloCplex::Param::Emphasis::MIP (CPlex).
+  The focus/emphasis parameters are GRB\_IntParam\_MIPFocus (Gurobi) and IloCplex::Param::Emphasis::MIP (CPLEX).
   The default of both solvers is balance between feasibility and optimality (code 0).
   Besides the default value (Gurobi best performance), the focus on optimality (code 2 on both solvers, CPLEX best performance) and the aggressive focus on optimality (code 3 on both solvers) were also tested.
   Other foci, as the emphasis in feasibility, were ignored as they did not seem relevant for an UKP model.
@@ -510,7 +510,7 @@ solver_time_comp_plot(clean_pya_solvers)
 Gurobi returned slightly wrong results for three instances (in which it warned about integrality tolerance violation) and exhausted the available memory (more than 7GiB) in another fifteen instances.
 CPLEX did not present the same issues.
 Performance-wise, \autoref{fig:cplex_gurobi} shows a clear advantage of CPLEX over Gurobi, not only with slightly shorter times for most instances, but there were also many cases in which Gurobi ended in timeout (or near it) and CPLEX finished in orders of magnitude less time.
-Even only considering the finished and correct runs of both solvers, CPLEX mean time was 56 seconds while Gurobi mean time was 95 seconds
+Even only considering the finished and correct runs of both solvers, CPLEX mean time was 57 seconds while Gurobi mean time was 94 seconds.
 None of the solvers can compete with TSO/GFDP/EDUK2 (as seen in \autoref{sec:pya_exp}), however their performance is superior to MTU1 and MTU2 (as seen in \autoref{sec:mtu_exp}).
 Taking in account Gurobi performance and its memory and integrality issues, the authors chose to restrict the solvers presented to only CPLEX for the remaining experiments (the same emphasis was kept, unless said otherwise).
 
@@ -549,39 +549,6 @@ MTU1 and MTU2 had the best run times for smaller instances but, as the instance 
 %the shortest run times for the smallest instances but, as the instance size and \, also grow the number of instances in which MTU1 and MTU2 spend orders of magnitude more time to solve than the other algorithms.
 %The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
 
-% TODO: check if this will added or not
-\begin{comment}
-<<realistic_random_table, results='asis'>>=
-rr_t <- select(rr_csv, algorithm, n, internal_time)
-rr_t <- group_by(rr_t, algorithm, n) %>% summarise(time = mean(internal_time))
-rr_t <- dcast(rr_t, algorithm ~ n, value.var = "time")
-
-pretiffy_alg_names_short <- function(names) {
-  recode(names,
-  'cpp-mtu1'             = 'MTU1 (C++)',
-  'cpp-mtu2'             = 'MTU2 (C++)',
-  'eduk'                 = 'EDUK',
-  'eduk2'                = 'EDUK2',
-  'ordered_step_off'     = 'Ord. Step-Off',
-  'terminating_step_off' = 'Term. Step-Off',
-  'mgreendp'             = 'GFDP')
-}
-
-rr_t$algorithm <- pretiffy_alg_names_short(rr_t$algorithm)
-rr_xt <- xtable(rr_t)
-caption(rr_xt) <- paste0("Mean time to solve the 80 instances from the ",
-  "realistic random dataset with each of seven selected algorithms. ",
-  "Runs that exceeded the 1800 seconds timeout counted as taking ",
-  "1800 seconds (only affecs MTU1 and MTU2). Each column display the mean ",
-  "time to solve the ten instances with the same \\(n\\) value.")
-
-print(rr_xt, 
-  include.rownames = F,
-  scalebox = 0.91
-)
-@
-\end{comment}
-
 Despite EDUK2 solving some instances orders of magnitude faster than the other algorithms (especially in the larger instance sizes), the mean run time of EDUK2 (8.51 seconds) is higher than TSO mean run time (5.36 seconds).
 As already observed in \autoref{sec:pya_exp}, EDUK2 often presents a few run times that are one order of magnitude higher than the highest run time of TSO, what considerably increases its mean time.
 
@@ -599,7 +566,7 @@ The results for the BREQ 128-16 Standard Benchmark are summarized in \autoref{fi
 The run times outline two groups with distinct time growth: a steep-growth group (which hit the time limit) and a gradual-growth group (in which no run ends in timeout).
 The steep-growth group is mainly composed of the DP algorithms: TSO, OSO, and EDUK.
 The gradual-growth group is mainly composed of the B\&B and hybrid algorithms: CPLEX, MTU1, MTU2, and EDUK2.
-MTU1 is not shown because its results are similar but dominated by MTU2, the same applies to TSO and OSO.
+MTU1 is not shown because its results are similar but dominated by MTU2, the analogue applies to TSO and OSO.
 CPLEX is classified as gradual-growth, it is orders of magnitude worse than its fellow group members, but yet orders of magnitude better than the steady-growth group members, and has no run ending in timeout.
 GFDP is the only algorithm with run times in both groups.
 
@@ -633,6 +600,7 @@ The results confirm the hypothesis that instances generated with this distributi
 The previous experiments included datasets of UKP instances and binaries that read and solved a single instance and then returned the solving time.
 In this experiment, the instances are BPP/CSP instances.
 Also, the run time for each BPP/CSP instance presented is the sum of all time spent solving the multiple pricing subproblems generated by the column generation approach applied over the linear programming relaxation of the set covering formulation.
+In this experiment, the CPLEX version used was 12.5, and the emphasis is the default.
 
 % The TSO, GREENDP, MTU2 (C++ or Fortran), and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
 Only CPLEX, OSO and MTU1 (C++) were used as pricing problem solvers in this experiment.
@@ -776,7 +744,7 @@ The pricing problems generated when solving this specific instance have \(n = 91
 mtu1_times <- read.csv("../data/mtu1_cutstock_out_ANI_AI_1002_80000_DI_12_txt.out.csv", sep = ";")
 ordso_times <- read.csv("../data/ordso_int_ns_cutstock_out_ANI_AI_1002_80000_DI_12_txt.out.csv", sep = ";")
 mtu1_times$alg <- 'MTU1'
-ordso_times$alg <- 'OSO (weight, integer)' # TODO: check this at end
+ordso_times$alg <- 'OSO (weight, integer)'
 both_times <- rbind(mtu1_times, ordso_times)
 
 ggplot(both_times, aes(x = num_iter, y = knapsack_time + sort_time)) +

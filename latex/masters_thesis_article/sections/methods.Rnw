@@ -61,7 +61,7 @@ Vincent Poirriez gave access to this code to the authors, by email,
 in January 11th, 2016\footnote{The code is available at Henrique Becker master's thesis code repository (\url{https://github.com/henriquebecker91/masters/blob/f5bbabf47d6852816615315c8839d3f74013af5f/codes/ocaml/pyasukp_mail.tgz}).}.
 %The version of the code available at that time in the PYAsUKP official site had bugs\footnote{The EDUK and EDUK2 source was available to download in the following page of PYAsUKP official site: \url{http://download.gna.org/pyasukp/pyasukpsrc.html}.}.
 
-Finally, the authors also implemented the mathematical formulation of the UKP (i.e., Eq. \eqref{eq:objfun}--\eqref{eq:x_integer}) using the C++ interface of both Gurobi~8.0.1~\citep{gurobi} and CPlex~12.8~\citep{cplex} to solve single UKP instances.
+Finally, the authors also implemented the mathematical formulation of the UKP (i.e., Eq. \eqref{eq:objfun}--\eqref{eq:x_integer}) using the C++ interface of both Gurobi~8.0.1~\citep{gurobi} and CPLEX~12.8~\citep{cplex} to solve single UKP instances.
 To make comparison to other methods fair and the results reproducible, the solvers were configured to: execute in single thread and deterministically (i.e., random seed fixed to zero); finish before time limit only with a \(0\%\) gap between the upper and lower bounds (i.e., search for a proven optimal solution); have the smallest tolerance possible to variable values deviating from integrality (without this about \(9\%\) of the results were slightly below or above the optimal value)\footnote{The exact parameters used for each solver were: GRB\_IntParam\_Threads (Gurobi) and Threads (CPLEX); GRB\_IntParam\_Seed (Gurobi) and RandomSeed (CPLEX); GRB\_DoubleParam\_MIPGap (Gurobi) and MIP::Tolerances::MIPGap (CPLEX); GRB\_DoubleParam\_IntFeasTol (Gurobi) and MIP::Tolerances::Integrality (CPLEX). All CPLEX parameters are prefixed by IloCplex::Param. The codes are available in: \url{https://github.com/henriquebecker91/masters/tree/efea8a981a72237edd17fedb4742ac568ded831c/codes/cpp/lib} (files \emph{cplex\_ukp\_model.hpp} and \emph{gurobi\_ukp\_model.hpp}). }.
 
 \subsubsection{Algorithms deliberately ignored}
@@ -81,8 +81,8 @@ and therefore only TSO was included.
 
 The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}.
 Both weren't included in the experiments.
-The Sage-3D algorithm from \cite{landa_sage} cited in \cite{ukp_hu_landa_shing_survey} needs \(\O(n w_b p_b)\) memory and time, which is prohibitive for many instances considered and, therefore, was also not included.
-Its complexity is justified by the fact Sage-3D does not solve the UKP for a specific knapsack capacity, but instead builds a data structure which allows querying the solution for a specific capacity in \(O(log(p_b))\).
+The Sage-3D algorithm from \cite{landa_sage} cited in \cite{ukp_hu_landa_shing_survey} needs \(O(n w_b p_b)\) memory and time, which is prohibitive for many instances considered and, therefore, was also not included.
+Its complexity is justified by the fact Sage-3D does not solve the UKP for a specific knapsack capacity, but instead explores periodicity to build a data structure which allows querying the solution for a specific capacity in \(O(log(p_b))\) (polynomial in the input size).
 
 In~\cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which was found to be dominated by MTU1; 
 also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of OSO. %Also, \cite{cabot}~was behind a paywall.

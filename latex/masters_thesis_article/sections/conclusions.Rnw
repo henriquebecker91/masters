@@ -4,6 +4,212 @@
 Except for the BREQ dataset, a revisited version of a DP algorithm from 1966 (Revisited Terminating Step-Off, R-TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2 /PYAsUKP).
 Such results bring up two central questions the authors address: Why TSO was not considered in recent comparisons? How R-TSO outperformed the current state-of-the-art after five decades of study of the UKP?
 
+\begin{table}[H]
+\label{tab:one_table}
+\def\arraystretch{1.1}
+%\setlength\tabcolsep{4px}
+
+\begin{adjustbox}{max width=\textwidth, center}
+\begin{tabular}{@{\extracolsep{4pt}}lrrrrrrrr@{}}
+
+& \multicolumn{2}{c}{PYAsUKP\textsuperscript{a}} & \multicolumn{2}{c}{RR} & \multicolumn{2}{c}{BREQ} & \multicolumn{2}{c}{CSP\textsuperscript{b}}\\
+\cline{2-3}\cline{4-5}\cline{6-7}\cline{8-9}
+Method & \multicolumn{1}{c}{fin} & \multicolumn{1}{c}{avg} & \multicolumn{1}{c}{fin} & \multicolumn{1}{c}{avg} & \multicolumn{1}{c}{fin} & \multicolumn{1}{c}{avg} & \multicolumn{1}{c}{fin} & \multicolumn{1}{c}{avg}\\
+%& fin & time & fin & time & fin & time & fin & time\\
+\cline{1-1}\cline{2-3}\cline{4-5}\cline{6-7}\cline{8-9}
+<<one_table,results='asis'>>=
+library(dplyr)
+
+pya_csv2 <- read.csv(
+  '../data/pya_ukp5.csv', sep = ";", stringsAsFactors = FALSE
+) %>% filter(algorithm != 'fmtu1' & algorithm != 'fmtu2')
+pya_csv2$X <- NULL
+
+# Get only the algorithms executed over the reduced pyasukp dataset.
+reduced_pya <- read.csv(
+  '../data/mtus_pya.csv', sep = ";", stringsAsFactors = FALSE
+) %>% filter(algorithm != 'fmtu1' & algorithm != 'fmtu2')
+reduced_pya$X <- NULL
+reduced_pya <- rbind(
+  reduced_pya,
+  filter(pya_csv2, algorithm == 'cplex2nt' | algorithm == 'gurobi0nt')
+)
+# We need to get the runs of OSO for the reduced pyasukp dataset to
+# have one algorithm with the correct instance values for all instances.
+reduced_pya <- rbind(
+  reduced_pya,
+  semi_join(
+    filter(pya_csv2, algorithm == 'ordered_step_off'),
+    reduced_pya,
+    by = 'filename'
+  )
+)
+
+clean_and_summarise <- function(dt, correct_alg = 'none') {
+  qt_inst <- length(unique(dt$filename))
+  has_opt <- correct_alg != 'none'
+  
+  # Creates a column with the correct opt.
+  if (has_opt) {
+    correct_opt <- dt %>% filter(algorithm == correct_alg) %>%
+      select(filename, c_opt = opt)
+    dt <- inner_join(dt, correct_opt, by = 'filename')
+  }
+  # Set internal_time to NA for instances in which Gurobi finished because
+  # memory exhaustion (opt == 0), or instances for which Gurobi had wrong
+  # results (abs(opt - c_opt)/opt > 1e-7), or instances for which
+  # cplex or gurobi hit the timeout (internal_time > 1799).
+  if (has_opt) {
+    dt <- dt %>% mutate(
+      internal_time = ifelse(
+        (is.na(opt)                    |
+           opt == 0                    |
+           abs(opt - c_opt)/opt > 1e-7 |
+           internal_time > 1799),
+        NA,
+        internal_time
+      )
+    )
+  } else {
+    dt <- dt %>% mutate(
+      internal_time = ifelse(internal_time > 1799, NA, internal_time)
+    )
+  }
+  
+  dt <- dt %>% select(algorithm, internal_time)
+  
+  cols <- dt %>% group_by(algorithm) %>% summarise(
+    finished = sprintf('%d', qt_inst - sum(is.na(internal_time))),
+    mean_time = sprintf('%.2f', mean(internal_time, na.rm = T))
+  )
+  
+  return(cols)
+}
+
+red_cols <- clean_and_summarise(reduced_pya, 'ordered_step_off') %>%
+  filter(algorithm != 'ordered_step_off')
+fast_cols <- clean_and_summarise(filter(
+  pya_csv2, algorithm != 'cplex2nt' & algorithm != 'gurobi0nt'
+))
+pya_cols <- rbind(red_cols, fast_cols)
+pya_cols$algorithm <- recode(pya_cols$algorithm, pyasukp = 'eduk2')
+
+rr_csv2 <- read.csv(
+  '../data/realistic_random.csv', sep = ";", stringsAsFactors = FALSE
+)
+rr_cols <- clean_and_summarise(rr_csv2, 'ordered_step_off')
+
+breq_csv2 <- read.csv(
+  '../data/128_16_std_breqd.csv', sep = ";", stringsAsFactors = FALSE
+)
+breq_cols <- clean_and_summarise(breq_csv2, 'cpp-mtu2')
+
+csp_csv2 <- read.csv(
+  '../data/csp_6195.csv', sep = ";", stringsAsFactors = FALSE
+) %>% filter(
+  algorithm == 'cplex_cutstock' |
+  algorithm == 'mtu1_cutstock'  |
+  algorithm == 'ordso_int_ns'   |
+  algorithm == 'terso_int'
+) %>% mutate(
+  internal_time = hex_sum_knapsack_time + hex_sum_sort_time
+) %>% select(algorithm, filename, internal_time)
+csp_cols <- clean_and_summarise(csp_csv2)
+csp_cols$algorithm <- recode(csp_cols$algorithm,
+  # not really cplex2nt, but it is cplex, and this is the code
+  # we refer to it in the other csvs
+  cplex_cutstock = 'cplex2nt',
+  mtu1_cutstock = 'cpp-mtu1',
+  ordso_int_ns = 'ordered_step_off',
+  terso_int = 'terminating_step_off'
+)
+
+create_empty_rows <- function (existing, universe) {
+  forgotten <- vector(mode = 'character')
+  for (u in universe) {
+    if (!(u %in% existing)) { forgotten <- append(u, forgotten) }
+  }
+  return(data.frame(
+    algorithm = forgotten,
+    finished = '--',
+    mean_time = '--'
+  ))
+}
+
+add_missing <- function (dt) {
+  all_algs = c(
+    'cpp-mtu1', 'cpp-mtu2', 'cplex2nt', 'gurobi0nt', 'ordered_step_off',
+    'terminating_step_off', 'mgreendp', 'eduk', 'eduk2'
+  )
+  mock <- create_empty_rows(dt$algorithm, all_algs)
+  return(rbind(dt, mock))
+}
+
+pya_cols <- add_missing(pya_cols) %>% rename(
+  pya_fin = finished,
+  pya_mtm = mean_time
+)
+rr_cols <- add_missing(rr_cols) %>% rename(
+  rr_fin = finished,
+  rr_mtm = mean_time
+)
+breq_cols <- add_missing(breq_cols) %>% rename(
+  breq_fin = finished,
+  breq_mtm = mean_time
+)
+csp_cols <- add_missing(csp_cols) %>% rename(
+  csp_fin = finished,
+  csp_mtm = mean_time
+)
+
+one_table <- inner_join(pya_cols, rr_cols, by = 'algorithm')
+one_table <- inner_join(one_table, breq_cols, by = 'algorithm')
+one_table <- inner_join(one_table, csp_cols, by = 'algorithm')
+one_table$algorithm <- recode(
+  one_table$algorithm,
+  eduk  = 'EDUK',
+  eduk2 = 'EDUK2',
+  `cpp-mtu1` = 'MTU1',
+  `cpp-mtu2` = 'MTU2',
+  gurobi0nt = 'Gurobi',
+  cplex2nt = 'CPLEX',
+  ordered_step_off = 'R-OSO',
+  terminating_step_off = 'R-TSO',
+  mgreendp = 'R-GFDP'
+)
+one_table$algorithm <- factor(
+  one_table$algorithm,
+  levels = c(
+    'R-TSO', 'R-OSO', 'R-GFDP', 'EDUK2', 'EDUK',
+    'MTU2', 'MTU1', 'CPLEX', 'Gurobi'
+  )
+)
+one_table <- one_table %>% arrange(algorithm)
+
+library(xtable)
+
+print.xtable(
+  xtable(one_table),
+  only.contents = T,
+  include.rownames = F,
+  include.colnames = F,
+  hline.after = NULL,
+  comment = F
+)
+@
+\hline
+\end{tabular}
+\end{adjustbox}
+%\caption{Time (in seconds) for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the R-TSO, GFDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). For the subset-sum instances, there are ten instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.}
+\caption{
+The number of \textbf{fin}ished runs of a method (row) over a dataset (column), and the \textbf{av}era\textbf{g}e time (in seconds) of the finished runs (dashes mean the respective method was not used to solve the respective dataset).
+%The runs not finished are mostly timeouts (all runs had a half hour time limit), but some (as the Gurobi ones) include memory exhaustion and wrong results.
+%The dashes mean the respective method was not executed over the respective dataset.
+\textsuperscript{a} The MTU1, MTU2, CPLEX, and Gurobi were executed only over the 454 instances of the reduced PYAsUKP dataset (not all 4540 instances as the remaining methods).
+\textsuperscript{b} The times reported are for the following variants: R-TSO -- integer profit, sort by efficiency; R-OSO -- integer profit, sort by weight; CPLEX -- custom code reusing the model and only changing the profits (coefficients of the objective function) between the iterations. %In the CSP dataset, the 6192 instances are CSP instances, the run is considered finished if the CSP was solved to proven optimality before the time limit, and the time is the mean time spent by instance solving all their pricing problems with the respective method. Also in the CSP column: the TSO results come from the variant that converts profit to integers and sort items by efficiency; the OSO variant also converts profit to integers but sort by weight; the CPLEX results come from a custom code that reuses the same model and only changes the profits at each iteration. 
+}
+\end{table}
+
 The authors believe TSO was not considered in recent comparisons because: the algorithm was very similar to the naïve DP for the UKP but the authors did not emphasize it was orders of magnitude faster; B\&B algorithms performed better than TSO in uncorrelated and weakly correlated instances with one hundred items.
 As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison~\citep{mtu1}.
 In the experiments presented in~\cite{mtu1}, TSO was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
@@ -79,7 +285,7 @@ Many questions raised during the development of this paper ended up unanswered:%
 \item If a B\&B phase was added to the terminating step-off (as in EDUK2), and a C++ and array-based implementation of EDUK2 was written, would they have a similar performance?
 %\item What would be the practical performance of an implementation of the algorithm described in~\cite{babayev}?
 %\item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e., an optimal solution)? Or, instead, adding all optimal solutions instead of only one? %\item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, or the same BPP/CSP instance, or in both cases? Is it possible that they converge to a specific distribution at each iteration of the column generation?
-\item The MTU1/MTU2 are depth-first branch-and-bound algorithms, what would be the performance of best-bound branch-and-bound algorithms?
+\item The difference in performance of MTU1/MTU2 and CPLEX/Gurobi over the PYAsUKP dataset comes from the fact MTU1/MTU2 are depth-first? What would be the performance of a best-bound B\&B made for the UKP?
 \end{itemize}
 
 \subsection{Acknowledgements}

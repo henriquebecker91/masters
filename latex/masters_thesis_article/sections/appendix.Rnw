@@ -1,4 +1,5 @@
 \section{Supplementary Materials -- Summary Tables}
+\setcounter{figure}{0} % Make the first appendix table to be A.1
 
 <<pya_tables_shared,echo=F>>=
 get_dist <- function(fname) {
@@ -101,7 +102,7 @@ make_pya_row <- function(t, ...) {
 \begin{tabular}{@{\extracolsep{4pt}}rrrrrrrrrrrr@{}}
 
 \hline
-\multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{l}{TSO} & \multicolumn{3}{l}{GFDP} & \multicolumn{3}{l}{PYAsUKP}\\
+\multicolumn{3}{l}{Instance desc.} & \multicolumn{3}{l}{R-TSO} & \multicolumn{3}{l}{R-GFDP} & \multicolumn{3}{l}{PYAsUKP}\\
 \cline{1-3}\cline{4-6}\cline{7-9}\cline{10-12}
 
 \multicolumn{3}{l}{400 inst. per line} & \multicolumn{9}{l}{Subset-sum. Random \emph{c} between \([5\times10^6; 10^7]\)}\\
@@ -164,7 +165,7 @@ make_pya_row <- function(t, ...) {
 
 \end{tabular}
 \end{adjustbox}
-\caption{Time (in seconds) for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the R-TSO, GFDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). For the subset-sum instances, there are ten instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.}
+\caption{Time (in seconds) for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the R-TSO, R-GFDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). The notation \(x\overline{n}\) means \(x\) concatenated to the value of \(n\) (e.g. \(n = 5000\) then \(10\overline{n} = 105000\)). For the subset-sum instances, there are ten instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.}
 \end{table}
 
 \clearpage
@@ -215,9 +216,6 @@ make_mtu_row <- function(t, ...) {
 }
 @
 
-% TODO: put explanation of the overline in the caption, because it's used
-% in the explanation of capacities, do this for both pya tables
-%"TODO: decide what to put in the section reference of subset-sum instances
 \begin{table}[H]
 \label{tab:times_mtu}
 \vspace{1mm}
@@ -290,7 +288,7 @@ make_mtu_row <- function(t, ...) {
 \hline
 \end{tabular}
 \end{adjustbox}
-\caption{Time in seconds for the MTU implementations over the reduced PYAsUKP's dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\). The time limit was set to 30 minutes. For the subset-sum instances, there is one instance for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 40 instances.}
+\caption{Time in seconds for the MTU implementations over the reduced PYAsUKP dataset (see Section \ref{sec:mtu_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPP-MTU1, CPP-MTU2, F77-MTU1 and F77-MTU2, for the instance dataset described by a row (in this case, we do not count runs that ended in timeout). The meaning of the columns \textbf{avg} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\) and the cardinality of \(T\). The time limit was set to 30 minutes. The notation \(x\overline{n}\) means \(x\) concatenated to the value of \(n\) (e.g. \(n = 5000\) then \(10\overline{n} = 105000\)). For the subset-sum instances, there is one instance for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 40 instances.}
 \end{table}
 
 <<pya_solvers_table,echo=FALSE>>=
@@ -359,9 +357,6 @@ make_cg_row <- function(t, ...) {
 }
 @
 
-% TODO: put explanation of the overline in the caption, because it's used
-% in the explanation of capacities, do this for both pya tables
-% TODO: decide what to put in the section reference of subset-sum instances
 \begin{table}[H]
 \label{tab:times_solvers}
 \vspace{1mm}
@@ -434,7 +429,7 @@ make_cg_row <- function(t, ...) {
 \hline
 \end{tabular}
 %\end{adjustbox}
-\caption{Time in seconds for the model implementations (CPLEX and Gurobi) over the reduced PYAsUKP's dataset (see Section \ref{sec:cplex_gurobi_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by CPLEX and Gurobi, for the instance dataset described by a row (in this case, we don't count runs that ended in timeout, memory exhaustion or with a wrong answer). The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), and the cardinality of \(T\). The time limit was set to 30 minutes. For the subset-sum instances, there is one instance for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 40 instances.}
+\caption{Time in seconds for the CPLEX and Gurobi over the reduced PYAsUKP dataset (see Section \ref{sec:cplex_gurobi_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times (not considering timeouts, memory exhaustion or wrong answer) for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{fin}ished, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), and the cardinality of \(T\). The time limit was set to 30 minutes. The notation \(x\overline{n}\) means \(x\) concatenated to the value of \(n\) (e.g. \(n = 5000\) then \(10\overline{n} = 105000\)). For the subset-sum instances, there is one instance for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 40 instances.}
 \end{table}
 
 \clearpage
@@ -457,9 +452,9 @@ pretiffy_alg_names <- function(names) {
   'cplex2nt'             = 'CPLEX',
   'eduk'                 = 'EDUK',
   'eduk2'                = 'EDUK2',
-  'ordered_step_off'     = 'Ord. Step-Off',
-  'terminating_step_off' = 'Term. Step-Off',
-  'mgreendp'             = 'GFDP')
+  'ordered_step_off'     = 'R-OSO',
+  'terminating_step_off' = 'R-TSO',
+  'mgreendp'             = 'R-GFDP')
 }
 @
 
@@ -509,7 +504,6 @@ print(lt, hline.after=c(-1, 0), tabular.environment = "longtable", floating=F, a
 @
 
 \begin{table}
-\label{tab:csp}
 \begin{adjustbox}{max width=\textwidth, center}
 <<csp_table, results='asis'>>=
 na_mean <- function(x) {
@@ -559,6 +553,7 @@ table_rows_csp(filter(csp_csv, algorithm == 'ordso_int_ns'))
 cat('\\end{tabu}\n')
 @
 \end{adjustbox}
-\caption{Results of the experiment focused in solving pricing subproblems of the BPP/CSP (see \autoref{sec:csp_experiments}). The results of solving the pricing problems with CPLEX are included here for completeness. The time limit was half an hour for the total run time (which includes reading input, the master time and the pricing time). The unit of all time columns is seconds. The meaning of each column is: N -- amount of instances in the respective dataset; N' -- amount of instances in which the solver coupled with the respective algorithm exceeded the time limit; Master time -- amount of time taken by CPLEX to solve the linear programming relaxation (disregarding the solving of pricing problems); Pricing time -- mean time spent by the respective algorithm solving all pricing problems of a single instance of the respective dataset; \# of subproblems -- the mean amount of generated pricing problems in a single instance of the respective dataset (this amount is affected by the exact optimal solutions which were returned by the algorithm used to solve the pricing problems); Time per subproblem -- the result of the division of the two last columns. } 
+\caption{Results of the experiment focused in solving pricing subproblems of the BPP/CSP (see \autoref{sec:csp_experiments}). The results of solving the pricing problems with CPLEX are included here for completeness. The time limit was 30 minutes for the total run time (which includes reading input, the master time and the pricing time). The unit of all time columns is seconds. The meaning of each column is: N -- amount of instances in the respective dataset; N' -- amount of instances in which the solver coupled with the respective algorithm exceeded the time limit; Master time -- amount of time taken by CPLEX to solve the linear programming relaxation (disregarding the solving of pricing problems); Pricing time -- mean time spent by the respective algorithm solving all pricing problems of a single instance of the respective dataset; \# of subproblems -- the mean amount of generated pricing problems in a single instance of the respective dataset (this amount is affected by the exact optimal solutions which were returned by the algorithm used to solve the pricing problems); Time per subproblem -- the result of the division of the two last columns. } 
+\label{tab:csp}
 \end{table}
 

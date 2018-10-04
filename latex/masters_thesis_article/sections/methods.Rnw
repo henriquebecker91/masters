@@ -36,10 +36,11 @@ The original Fortran implementation uses a complex algorithm developed by one of
 The C++ implementation uses the \verb+std::partial_sort+ procedure of the standard C++ library \verb+algorithm+.
 The Fortran implementation only sorts the items by nonincreasing efficiency; the C++ implementation breaks efficiency ties sorting by nondecreasing weight.
 
-The states, stages and basic recursion used by DP algorithms for the UKP are similar and generically described below.
-An advantage DP algorithms for the UKP have against DP algorithms that solve BKP and 01 KP is that the states consist solely of weight and profit pairs; which items were already used do not affect the validity of the solution. 
-Consequently, there is no need for separating states by the items used, and if two or more states have the same weight only one needs to be stored, allowing DP algorithms to use \(O(c)\) memory instead of \(O(nc)\).
-
+A description of the recursion, states, and stages in which the DPs for the UKP are based follow.
+Given \(opt(y)\) denotes the optimal solution value for capacity~\(y\), the recursion for the UKP can be written as \(opt(y) = max \{0, p_1 + opt(y - w_1), p_2 + opt(y - w_2), \dots, p_n + opt(y - w_n)\}\) (where \(\forall~y < 0. opt(y) = -\infty\)).
+The UKP has a single state, that is the remaining knapsack capacity~\(y\), different from 0-1 KP and BKP, the UKP has no need to take in account which items were already used at each decision as there is no restriction to their use.
+It is this difference that allows UKP to only need \(O(c)\) memory, instead of \(O(nc)\) as in 0-1 KP and BKP.
+For each capacity~\(y = c - w_s\) (where \(s\) is a valid solution), there is a decision point, consequently, the number of stages is not exact but can go up to~\(c\) (as in the case of \(w_{min} = 1\)).
 
 The ordered step-off (OSO) is a DP algorithm proposed in~\cite[p.~15]{gg-66}.
 The authors already presented and discussed a revisited version of OSO in~\autoref{sec:oso_and_sol_dom}.

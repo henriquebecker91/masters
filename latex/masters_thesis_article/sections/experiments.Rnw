@@ -427,19 +427,11 @@ unique(mtu_csv_for_range$filename)
 \label{sec:cplex_gurobi_exp}
 
 As in last section, this section uses the reduced PYAsUKP benchmark to gauge the relative performance of two alternatives, in this case: our Gurobi and CPLEX models.
-Both Gurobi and CPLEX have an emphasis/focus setting.
-The authors selected the emphases they deemed more adequate, and performed this experiment with all of them.
-For each solver, only the results for the emphasis with the best performance are presented\footnote{
-  The focus/emphasis parameters are GRB\_IntParam\_MIPFocus (Gurobi) and IloCplex::Param::Emphasis::MIP (CPLEX).
-  The default of both solvers is balance between feasibility and optimality (code 0).
-  Besides the default value (Gurobi best performance), the focus on optimality (code 2 on both solvers, CPLEX best performance) and the aggressive focus on optimality (code 3 on both solvers) were also tested.
-  Other foci, as the emphasis in feasibility, were ignored as they did not seem relevant for an UKP model.
-}.
 
-\begin{figure}[!htbp]
+\begin{figure}[!htp]
 \caption{Run times of CPLEX and Gurobi over the 454 instances of the reduced PYAsUKP dataset. The time limit was set to 30 minutes. Runs terminated by timeout, memory exhaustion, or with wrong results are displayed as taking exactly the time limit.}
 \begin{center}
-<<cplex_gurobi, fig.height=5>>=
+<<cplex_gurobi, fig.height=3.5>>=
 # Create dataframe only with the best emphasis choices.
 pya_csv <- read.csv(
   '../data/pya_ukp5.csv', sep = ";", stringsAsFactors = FALSE
@@ -507,6 +499,15 @@ solver_time_comp_plot(clean_pya_solvers)
 \label{fig:cplex_gurobi}
 \end{figure}
 
+Both Gurobi and CPLEX have an emphasis/focus setting.
+The authors selected the emphases they deemed more adequate, and performed this experiment with all of them.
+For each solver, only the results for the emphasis with the best performance are presented\footnote{
+  The focus/emphasis parameters are GRB\_IntParam\_MIPFocus (Gurobi) and IloCplex::Param::Emphasis::MIP (CPLEX).
+  The default of both solvers is balance between feasibility and optimality (code 0).
+  Besides the default value (Gurobi best performance), the focus on optimality (code 2 on both solvers, CPLEX best performance) and the aggressive focus on optimality (code 3 on both solvers) were also tested.
+  Other foci, as the emphasis in feasibility, were ignored as they did not seem relevant for an UKP model.
+}.
+
 Gurobi returned slightly wrong results for three instances (in which it warned about integrality tolerance violation) and exhausted the available memory (more than 7GiB) in another fifteen instances.
 CPLEX did not present the same issues.
 Performance-wise, \autoref{fig:cplex_gurobi} shows a clear advantage of CPLEX over Gurobi, not only with slightly shorter times for most instances, but there were also many cases in which Gurobi ended in timeout (or near it) and CPLEX finished in orders of magnitude less time.
@@ -528,10 +529,10 @@ no_problem %>%
 
 The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
 \caption{Run times of the algorithms over the 80 instances of the realistic random dataset. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
-<<realistic_random_figure, fig.height = 5>>=
+<<realistic_random_figure, fig.height = 4>>=
 gen_graph_all_alg_discrete_x_no_toso(rr_csv) +
 scale_x_continuous(trans = "log2",
                    breaks = c(2^10, 2^11, 2^12, 2^13, 2^14, 2^15, 2^16, 2^17))

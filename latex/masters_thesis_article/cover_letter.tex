@@ -116,7 +116,22 @@ Henrique Becker (on behalf of all authors)
 
 \textbf{Request \#1:} ``\textit{A more general description of the methods in a couple of paragraphs would widen the potential readers of the paper. In particular the general dynamic programming approach (mentioning the states, stages, recursive function) and the general branch-and-bound approach (mentioning the branching scheme, bounds used commonly, ...).}'': 
 
-\textbf{Our answer:} DEFINE IF WILL BE DONE AND ANSWER.
+\textbf{Our answer:} The description of MTU1 was expanded to encompass what was asked (as MTU1 and MTU2 are the only two B\&B algorithms for the UKP considered, and MTU2 uses MTU1 inside itself). A short description of the generic recursive function, states and stages of the DP for UKP was also added. The rewritten MTU1 follows: ``\textcolor{blue}{
+MTU1 is a B\&B algorithm for the UKP~\citep{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
+In the enumeration tree of MTU1, each node at depth~\(0 \leq d < n\) has~\((c'/w_{d+1}) + 1\) childs (where \(c'\) is the remaining capacity at current node), with each of those childs representing a valid amount of copies of the item~\(d+1\) being packed in the knapsack (including zero copies).
+In practice, by virtue of being depth-first, MTU1 has no explicit tree but instead make changes directly over the current solution, which represents the current branch from the root to a leaf.
+Items are added to and removed from the solution to simulate the tree traversal.
+The exploration order favor the childs representing higher amounts before lower amounts.
+As the items are sorted by efficiency, this means the first node after root will represent the maximum amount of copies of the best item, and the path to the first leaf will be the solution given by the classic greedy heuristic\footnote{The classic greedy heuristic for the UKP packs the most efficient item that yet fits the knapsack until there is no item that fits the knapsack.}, so the first solution found is a common lower bound.
+The upper bound computed by MTU1 in each node is the continuous relaxation of the problem with the already set variables fixed, which is solved by multiplying the efficiency of the most efficient item not yet fixed by the remaining capacity.
+}''.
+The other paragraph consists in: ``\textcolor{blue}{
+A description of the recursion, states, and stages in which the DPs for the UKP are based follow.
+Given \(opt(y)\) denotes the optimal solution value for capacity~\(y\), the recursion for the UKP can be written as \(opt(y) = max \{0, p_1 + opt(y - w_1), p_2 + opt(y - w_2), \dots, p_n + opt(y - w_n)\}\) (where \(\forall~y < 0.~opt(y) = -\infty\)).
+The UKP has a single state, that is the remaining knapsack capacity~\(y\), different from 0-1 KP and BKP, the UKP has no need to take in account which items were already used at each decision as there is no restriction to their use.
+It is this difference that allows UKP to only need \(O(c)\) memory, instead of \(O(nc)\) as in 0-1 KP and BKP.
+For each capacity~\(y = c - w_s\) (where \(s\) is a valid solution), there is a decision point, consequently, the number of stages is not exact but can go up to~\(c\) (as in the case of \(w_{min} = 1\)).
+}''.
 \medskip
 
 \textbf{Request \#2:} ``\textit{A related issue is the explanation of algorithm 1 for which a text description should be given providing an overview of the algorithm.}'': 

@@ -19,7 +19,7 @@ ejor_ukp_hb_lsb.pdf: skeleton.Rnw $(SECTIONS) $(DATA) Makefile biblio.bib
 
 cover_letter.pdf: cover_letter.tex
 	pdflatex $< /dev/null
-	bibtex cover_letter.aux > /dev/null
+	bibtex cover_letter.aux 
 	pdflatex $< > /dev/null
 	pdflatex $< > /dev/null
 

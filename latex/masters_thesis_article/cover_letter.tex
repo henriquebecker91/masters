@@ -57,9 +57,8 @@ Co-ordinating Editor of the European Journal of Operational Research
 First of all, we would like to thank all reviewers for their comments on our paper ``An empirical analysis of exact algorithms for the unbounded knapsack problem''.
 We are thankful for both the praise and the constructive criticism, and if we focus on the criticism in the next pages is only to take less of your time.
 We would also like to thank the editor for giving the opportunity of sending a revised version of the paper for possible publication in the European Journal of Operational Research.
-We have addressed all questions and issues raised by the reviewers, which are discussed in the report enclosed below.
-The argumentation requested by the editor in favor of the paper publication in EJOR is presented in the last section.
-For the convenience of the reviewers, their comments and requests are quoted, numbered and italicized, and excerpts from the revised paper which address the request are colored in blue and quoted.
+We have addressed all questions and issues raised by the reviewers and the editor, which are discussed in the report enclosed below.
+For the convenience of the reviewers, their questions and requests are quoted, numbered and italicized, and excerpts from the revised paper which address the request are colored in blue and quoted.
 
 \medskip
 
@@ -69,6 +68,16 @@ Henrique Becker (on behalf of all authors)
 \end{flushleft}
 
 \newpage
+
+\section{Editor}
+
+\textbf{Request \#1:} ``\textit{The most critical comments made me doubt whether I should reconsider your paper, so I need convincing arguments from you and a thorough revision to counterbalance the critical comments.}'':
+
+\textbf{Our answer:} We are grateful for the opportunity to improve our paper and send it to be reconsidered for publication in EJOR. We believe to have provided a thorough revision. For the convincing arguments, we would like to point to our answer to the \#1 request of the \#3 referee.
+
+\textbf{Request \#2:} ``\textit{Please, noticed that the paper `BPP and CSP: Mathematical models and exact algorithms' is now published in EJOR and that the reference needs to be updated.}'':
+
+\textbf{Our answer:} Thanks for the catch. The reference is now updated.
 
 \section{Anonymous Referee \#1}
 
@@ -131,15 +140,9 @@ Such distinction is made because the instance generators do not guarantee unique
 \textbf{General commentary:} ``{\itshape
 This paper addresses the unbounded knapsack problem, in which the objective is to select a set of items (duplicates are allowed) to maximize the total profit. Each item has a given profit and a given weight and the weight of the selected items cannot exceed a given capacity.
 
-The paper succinctly reviews properties of the problem and the most relevant methods for that problem from the literature (also proposing a variant in an existent one), justifying their choice of methods. Results on extensive computational experiments are reported.
+The paper succinctly reviews properties of the problem and the most relevant methods for that problem from the literature (also proposing a variant in an existent one), justifying their choice of methods. Results on extensive computational experiments are reported. It is worth noting that the authors made available online all the codes used, allowing the reproducibility of the experiments.
 
-It is worth noting that the authors made available online all the codes used, allowing the reproducibility of the experiments. The authors
-
-The unbounded knapsack problem is relevant problem (at least, as a subproblem, as in a set of instances tested in the paper) and the comparison between dynamic programming based and branch-and-bound is potentially useful for related problems.
-
-The paper is well written and rigorous.
-
-I have a few minor comments that I would like the authors to consider.
+The unbounded knapsack problem is relevant problem (at least, as a subproblem, as in a set of instances tested in the paper) and the comparison between dynamic programming based and branch-and-bound is potentially useful for related problems. The paper is well written and rigorous. I have a few minor comments that I would like the authors to consider.
 }''
 
 \textbf{Request \#1:} ``\textit{A more general description of the methods in a couple of paragraphs would widen the potential readers of the paper. In particular the general dynamic programming approach (mentioning the states, stages, recursive function) and the general branch-and-bound approach (mentioning the branching scheme, bounds used commonly, ...).}'':
@@ -201,7 +204,28 @@ Summarizing, the authors present a carefully prepared computational study showin
 
 \textbf{Request \#1:} ``\textit{This work might well be published somewhere, but I believe that it is not strong enough for a publication in EJOR, which strives to be the flagship of the OR-community. The study does not bring sufficiently new contributions for the special topic of UKP or general outcomes of wider interest. Therefore, I suggest submitting the paper to a less highly ranked journal than EJOR.}'':
 
-\textbf{Our answer:} Please see the answer to the \#1 request of the Editor (last section).
+\textbf{Our answer:} 
+The authors believe the scientific value of a paper comes from their original contributions to knowledge.
+However, we do not believe that only new algorithms or improvements to existing algorithms are to be considered as original contributions to knowledge.
+
+Our paper cover the UKP which is a classical problem and common subproblem.
+While widely studied, the UKP lacked a comprehensive empiric analysis and contextualization which helped the OR practitioner to chose the algorithm with the best practical performance.
+A context in which algorithms with the same worst-case complexity can have radically different performances in practice, and theoretical improvements as the ones presented by GFDP can, in fact, result in worse performance for the literature daatasets.
+
+In the beginning of our work we proposed a new algorithmn, that we published in~\cite{sea2016}.
+While writting the extended version of that paper, aiming a journal publication of the work, we deepened the literature review and realized that that an algorithm of 1966 was very similar than ours.
+That algorithm, 52 years old, maybe was forgotten because: a) its pseudocode is not structured (go to statement) making it difficult to understand or compare to more recent algorithms; b) it does not mention modern dominance relations, which are the source of the efficiency of the latest algorithms for solving UKP; c) it does not emphasize how much its performance is superior to the naïve DP algorithm.
+We are very happy, and also impressed, with our finding.
+We believe that this contribution by itself is of a huge impact, specially when we consider a classic problem as the unbounded knapsack problem, that is being approached for several research groups, along decades. 
+Moreover, we decided to include more algorithms, instances and tests to show this clearly, to all this information be self contained in one single paper, and this resulted in this paper we are proposing.
+
+Finally, the paper brings other minor contributions that, while alone cannot justify a paper, together are considerable:
+a) the concept of \emph{solution dominance} which generalizes all previously proposed dominances; 
+b) the concept of \emph{partial solution dominance} as a competitive alternative to the state-of-the-art application of simple, multiple, collective, and threshold dominances;
+c) a discussion on how tigther bounds for periodicity will not help to improve the performance of state-of-the-art algorithms;
+d) a new item distribution, rich only in threshould dominance, and how it favors one solving approach in relation to other (i.e., B\&B over DP);
+e) a study of the item distribution evolution in CSP/BPP pricing problems and some of its implications (how it biases against some UKP-solving approachs, how it is affected by authors trying to create `hard' CSP/BPP instances);
+f) finally and thanks to referee \#2, that commercial solvers as CPLEX are not a good solution to solving CSP/BPP pricing problems (in comparison to both DP and specialized B\&B) but are better than specialized B\&B for some instances of the literature.
 \medskip
 
 \textbf{Request \#2:} ``\textit{The following reference considers an algorithm by Landa (2004) which might provide interesting results: Hu T.C., Landa L., Shing MT. (2009) The Unbounded Knapsack Problem. In: Cook W., Lovász L., Vygen J. (eds) Research Trends in Combinatorial Optimization. Springer. doi.org/10.1007/978-3-540-76796-1\_10}'':
@@ -211,19 +235,20 @@ We would like to thank the referee for bringing an overlooked survey and technic
 The main point of our paper is to provide a comprehensive empirical analysis of exact UKP algorithms.
 Unfortunately, as our time and the length of the paper are limited, we need to determine boundaries for the paper scope.
 Landa presents three algorithms (Sage-1D, Sage-2D and Sage-3D) for the UKP.
-Only Sage-3D can be fairly considered as an exact algorithm for the UKP as it gives an optimal solution independently of the knapsack size (denoted by \(c\) in our paper).
+Only Sage-3D can be fairly considered as an exact algorithm for the UKP as it gives an optimal solution independently of the knapsack size (denoted by~\(c\) in our paper).
 The other two algorithms do not return an optimal solution for some range of capacities.
-We use \(w_b\) and \(p_b\) to denote, respectively, the weight and the profit of the best item.
-Sage-3D needs \(O(n w_b p_b)\) memory space and executes at least \(n w_b p_b\) instructions (if anything else, at least to initialize memory).
+We use~\(w_b\) and~\(p_b\) to denote, respectively, the weight and the profit of the best item.
+The amount of items is denoted by~\(n\).
+Sage-3D needs~\(O(n w_b p_b)\) memory space and executes at least~\(n w_b p_b\) instructions (if anything else, at least to initialize memory).
 Such amount of memory is prohibitively high for many instances.
-The benchmark datasets include classes of instances in which: the profit values are at least an order of magnitude greater than the weight values; the best item is always the one with highest weight; the highest item weight is close to \(c\); any combination of the previous characteristics.
-For some instances, a memory cost of \(nc\) would already be prohibitively high, and \(n w_b p_b\) can be close to \(n c^2\) for such instances.
-As \(n w_b p_b\) is also a minimum amount of instructions executed, the algorithm cannot be competitive.
-Empirically, the DP algorithms compared in our paper execute far less than \(nc\) steps (about a small constant number of steps for each c) and, in fact, solve UKP faster than running a naive \(n^2\) steps algorithm for removing simply dominated items from the item list.
+The benchmark datasets include classes of instances in which: the profit values are at least an order of magnitude greater than the weight values; the best item is always the one with highest weight; the highest weight among the items is close to~\(c\); any combination of the previous characteristics.
+For some instances, a memory cost of~\(nc\) would already be prohibitively high, and~\(n w_b p_b\) can be close to~\(n c^2\) for such instances.
+As~\(n w_b p_b\) is also a minimum amount of instructions executed, the algorithm cannot be competitive.
+Empirically, the DP algorithms compared in our paper execute far less than~\(nc\) steps (about a small constant number of steps for each~\(c\)) and, in fact, solve UKP faster than running a naive~\(n^2\) steps algorithm for removing simple and multiple dominated items from the item list.
 The algorithm holds a considerable theoretical value, but is not adequate to the empirical performance comparison we propose in our paper.
 Consequently, we did not implement and run Landa's Sage-3D to add it to the comparison, but we added a mention to it in the section "4.1.1 Algorithms deliberately ignored".
-The mention follows: ``\textcolor{blue}{The Sage-3D algorithm from \cite{landa_sage} cited in \cite{ukp_hu_landa_shing_survey} needs \(O(n w_b p_b)\) memory and time, which is prohibitive for many instances considered and, therefore, was also not included.
-The algorithm holds a considerable theoretical value, and its complexity is justified by the fact Sage-3D does not solve the UKP for a specific knapsack capacity, but instead builds a data structure which allows querying the solution for a specific capacity in \(O(log(p_b))\).}''.
+The mention follows: ``\textcolor{blue}{The Sage-3D algorithm from \cite{landa_sage} cited in \cite{ukp_hu_landa_shing_survey} needs~\(O(n w_b p_b)\) memory and time, which is prohibitive for many instances considered and, therefore, was also not included.
+The algorithm holds a considerable theoretical value, and its complexity is justified by the fact Sage-3D does not solve the UKP for a specific knapsack capacity, but instead builds a data structure which allows querying the solution for a specific capacity in~\(O(log(p_b))\).}''.
 \medskip
 
 \textbf{Request \#3:} ``\textit{p 6, Alg 1: lines 6, 7: The arrays g and d should be properly defined.}'':
@@ -235,7 +260,7 @@ Such description includes the following: ``\textcolor{blue}{The arrays \(g\) and
 
 \textbf{Request \#4:} ``\textit{p 6,7: The discussion after Algorithm 1 should be improved. Moreover, there is some notational error since \(t \cap \{i\}\)  is either \(\{i\}\) or the empty set.}'':
 
-\textbf{Our answer:} Correct. All \verb+\cap+ (\(\cap\)) in that paragraph should have been \verb+\cup+ (\(\cup\)). Fixed.
+\textbf{Our answer:} There was a notational error, all \verb+\cap+ (\(\cap\)) in that paragraph should have been \verb+\cup+ (\(\cup\)), thanks for the catch. The discussion after Algorithm~1 was changed in the following ways: the proposal of solution dominance now appears after the algorithm-specific paragraphs, immediately before the proposal of partial solution dominance; the formal description of the partial solution dominance now counts with an introductory paragraph before it and an exemplifying paragraph after it; a paragraph detailing a possible weakpoint of the (R-)OSO mechanism of partial solution dominance is also provided. The affect paragraphs are too many to be copied there.
 \medskip
 
 \textbf{Request \#5:} ``\textit{p 9, Sec. 4.1.1.: `The authors believe that [...]' This not an acceptable argument. Find a better line of reasoning.}'':
@@ -269,7 +294,7 @@ This means that solving the UKP for lower capacities as DP algorithms do is most
 
 \textbf{Request \#8:} ``\textit{Most Figures contain dense clouds of overlapping symbols and it is very hard to recognize meaningful evidence (see e.g. Figures 4, 5, 7).}'':
 
-\textbf{Our answer:} The purpose of most figures presented is to stress the difference (or lack of thereof) in the behavior and performance of distinct algorithms. The y axis of the figures is logarithmic time, consequently, similar times are clumped very closely together. If a figure presents clearly separate clouds, each one of a single symbol, this means the algorithms have a clearly distinct behavior/performance. If different symbols overlap, the methods have similar performance/behavior. We do believe the figures present a better `big picture'/`whole story' notion than tables, and because of that we use them in the article body, but we also present tables for each dataset in the appendix (for people wanting to refer to numeric objective measures). To reduce the visual pollution and simplify analysis we removed some algorithms from some comparisons and pointed in the text that they had similar behavior and performance than another one already present.
+\textbf{Our answer:} The purpose of most figures presented is to stress the difference (or lack of thereof) in the behavior and performance of distinct algorithms. The y axis of the figures is logarithmic time and, consequently, similar times are clumped very closely together. If a figure presents clearly separate clouds, each one of a single symbol, this means the algorithms have a clearly distinct behavior/performance. If different symbols overlap, the methods have similar performance/behavior. We do believe the figures present a better `big picture'/`whole story' notion than tables, and because of that we use them in the article body, but we also present tables for each dataset in the appendix. To reduce the visual pollution and simplify analysis we removed some algorithms from two comparisons and pointed in the text that they had behavior and performance similar to one of the yet presented algorithms. In the Figure~6 of the revised paper (Figure~3 of the first version) which presents results over the realistic random dataset, MTU1 and MTU2 are replaced by CPLEX, and among OSO, TSO, and GFDP only GFDP was kept. In Figure~7 of the revised paper (Figure~4 of the first version) which presents results over the BREQ dataset, TSO and MTU are removed because, respectively, OSO and MTU2 are already presented (CPLEX, however, was added in conformity with request \#8 of referee \#1).
 \medskip
 
 \textbf{Request \#9:} ``\textit{p.23, `Also, the trend observed could indicate that for instances with a greater n value, OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing.' This is a very risky, unfounded statement, the two might just as well converge to each other.}'':
@@ -290,26 +315,6 @@ Work of real interest, specially the introduction of the solution dominance and 
 \textbf{Request \#1:} ``\textit{pg 8 ln 17 UPK \(\rightarrow\) UKP} [...] \textit{Two small typos I have noticed: pg 23 ln 22 algorith \(\rightarrow\) algorithm}'':
 
 \textbf{Our answer:} Typos fixed.
-
-\section{Editor}
-
-\textbf{Request \#1:} ``\textit{The most critical comments made me doubt whether I should reconsider your paper, so I need convincing arguments from you and a thorough revision to counterbalance the critical comments.}'':
-
-\textbf{Our answer:} We are grateful for the opportunity to improve our paper and send it to be reconsidered for publication in EJOR.
-We believe it is expected of us to provide a defense of our decision to (re-)submit this paper to EJOR, instead of another lesser ranked journal.
-Such defense is not to be understood as a claim that we know better thana the editor and referees what consists or not in sufficient material for publication in EJOR.
-Instead, we only intend to fulfill the request for a rebuttal asked by the editor.
-
-The authors believe the scientific value of a paper comes from their original contributions to knowledge.
-However, we do not believe that only new algorithms or improvements to existing algorithms are to be considered as original contributions to knowledge.
-
-Our paper provides many knowledge contributions that ae not directly algorithmic but are, in our opinion, in need to be published in the ``OR flagship'' that is EJOR.
-
-Our paper cover the UKP which is a classical problem and common subproblem. While widely studied, the UKP lacked a comprehensive empiric analysis and contextualization which helped the OR practitioner to chose the algorithm with the best practical performance. A context in which algorithms with the same worst-case complexity can have radically different performances in practice, and theoretical improvements as the ones presented by GFDP can, in fact, result in worse performance for the literature daatasets.
-
-\textbf{Request \#2:} ``\textit{Please, noticed that the paper `BPP and CSP: Mathematical models and exact algorithms' is now published in EJOR and that the reference needs to be updated.}'':
-
-\textbf{Our answer:} Thanks for the pointer. The reference is now updated.
 
 \section{References}
 \bibliography{biblio}

@@ -16,11 +16,11 @@ but the worst-case space complexity of the B\&B algorithms used in the experimen
 % B&B INFO TO ADD: branching scheme, bounds used commonly, ...
 
 MTU1 is a B\&B algorithm for the UKP~\citep{mtu1}. %with worst-case space complexity \(O(n)\)\cite{mtu1}.
-In the enumeration tree of MTU1, each node at depth~\(0 \leq d < n\) has~\((c'/w_{d+1}) + 1\) children (where \(c'\) is the remaining capacity at the current node), with each of those children representing a valid amount of copies of the item~\(d+1\) being packed in the knapsack (including zero copies).
-In practice, by virtue of being depth-first, MTU1 has no explicit tree but instead make changes directly over the current solution, which represents the current branch from the root to a leaf.
+In the enumeration tree of MTU1, each node at depth~\(0 \leq d < n\) has~\((c'/w_{d+1}) + 1\) children (where \(c'\) is the remaining capacity at the current node), with each child representing a valid amount of copies of the item~\(d+1\) being packed in the knapsack (including zero copies).
+In practice, since it follows a depth-first search, MTU1 has no explicit tree, but instead, make changes directly over the current solution, which represents the current branch from the root to a leaf.
 Items are added to and removed from the solution to simulate the tree traversal.
-The exploration order favors the children representing higher amounts before lower amounts.
-As the items are sorted by efficiency, this means the first node after root will represent the maximum amount of copies of the best item, and the path to the first leaf will be the solution given by the classic greedy heuristic which packs the most efficient item that yet fits the knapsack until there is no item that fits the knapsack. So, the first solution found is a common lower bound for the UKP.
+The exploration order favors the siblings representing higher amounts before lower amounts.
+As the items are sorted by efficiency, this means the first node after the root will represent the maximum amount of copies of the best item, and the path to the first leaf will be the solution given by the classic greedy heuristic which packs the most efficient item that yet fits the knapsack until there is no item that fits the knapsack. So, the first solution found is a classical lower bound for the UKP.
 The upper bound computed by MTU1 in each node is the continuous relaxation of the problem with the already set variables fixed, which is solved by multiplying the efficiency of the most efficient item not yet fixed by the remaining capacity.
 
 % DP INFO TO ADD: states, stages, recursive function
@@ -89,7 +89,7 @@ and therefore only TSO was included.
 The authors' implementation of the first algorithm proposed in~\cite{on_equivalent_greenberg} exceeded the time limits we used in the experiments, while the second algorithm does not work for all UKP instances\footnote{The authors' implementations of both algorithms were made available at \url{https://github.com/henriquebecker91/masters/blob/e2ff269998576cb69b8d6fb1de59fa5d3ce02852/codes/cpp/lib/greendp.hpp}.}.
 Both weren't included in the experiments.
 The Sage-3D algorithm from \cite{landa_sage} cited in \cite{ukp_hu_landa_shing_survey} needs \(O(n w_b p_b)\) memory and time, which is prohibitive for many instances considered and, therefore, was also not included.
-The algorithm holds a considerable theoretical value, and its complexity is justified by the fact Sage-3D does not solve the UKP for a specific knapsack capacity but instead builds a data structure which allows querying the solution for a specific capacity in \(O(log(p_b))\).
+The algorithm holds a considerable theoretical value, and its complexity is justified by the fact Sage-3D does not solve the UKP for a specific knapsack capacity, but instead, builds a data structure which allows querying the solution for a specific capacity in \(O(log(p_b))\).
 
 In~\cite{mtu1}, the B\&B algorithm proposed in~\cite{gg-63} is said to be two times slower than the algorithm proposed in~\cite{cabot}, which was found to be dominated by MTU1; 
 also, the algorithm in~\cite{gg-63} seems to have been abandoned by its authors in favor of OSO. %Also, \cite{cabot}~was behind a paywall.

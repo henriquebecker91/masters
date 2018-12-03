@@ -72,7 +72,7 @@ The efficiency of an item~\(i\) is its profit-to-weight ratio (\(p_i/w_i\)).%, a
 We use~\(w_{min}\), or~\(w_{max}\), to denote the lowest weight among all items, or the highest weight among all items, within an instance of the UKP.
 We refer to the item with the greatest efficiency among all items of a specific instance as the \emph{best item} (or~\(b\)). If more than one item shares the greatest efficiency, then the item with the lowest weight among them is considered the best item type. 
 If more than an item has both previously stated characteristics (i.e., they are equal), then the first item with both characteristics in the items list is the best item.
-The authors make such distinction because the instance generators do not guarantee unique items, and is often faster to let the algorithms themselves deal with the replicas than running a preprocessing phase.
+The authors make such distinction because the instance generators do not guarantee unique items, and is often faster to let the algorithms themselves deal with the replicas than running a preprocessing phase to remove duplicated items.
 
 \subsection{Properties of the UKP}
 \label{sec:well_known_prop}
@@ -309,9 +309,11 @@ The capacity~\(y''\) is an upper bound on~\(y^+\)~\citep[p.~215]{book_ukp_2004}.
 
 The ordered step-off (OSO) is a dynamic programming algorithm for the UKP~\citep{gg-66}.
 The OSO is described in Algorithm 1, a complementary overview follows.
-The arrays \(g\) and \(d\) store, respectively, the profit value of generated solutions and the index of the most efficient item present in such solutions, together they can be seen as a solution pool indexed by solution weight.
-The gist of the algorithm is: the solution pool is initialized with all single-item solutions; the solution pool is iterated by weight order; for each solution, the solution pool is expanded with new solutions, each new solution is a copy of the current solution plus an extra item; this process enumerates all undominated solutions, and it returns the optimal profit value.
-The algorithm skips the creation of new solutions from old solutions already known to be dominated (lines~\ref{if_less_than_opt_begin}~to~\ref{if_less_than_opt_end}), discards some dominated solutions created (e.g., if two or more solutions share the same weight, the algorithm keeps only one of these which is tied for highest profit), and avoids considering symmetric solutions (by restricting the loops up to \(d[y]\), the algorithm only considers the permutation of the solution in which the items are added in order of efficiency).
+The arrays \(g\) and \(d\) store, respectively, the profit value of generated solutions and the index of the most efficient item present in such solutions.
+Together they can be seen as a solution pool indexed by solution weight.
+A summary of the algorithm follows: the solution pool is initialized with all single-item solutions; the solution pool is iterated by weight order; for each solution, the solution pool is expanded with new solutions, each new solution is a copy of the current solution plus an extra item.
+This process enumerates all undominated solutions, and it returns the optimal profit value.
+The algorithm skips the creation of new solutions from old solutions already known to be dominated (lines~\ref{if_less_than_opt_begin}~to~\ref{if_less_than_opt_end}), discards some dominated solutions created (e.g., if two or more solutions share the same weight, the algorithm keeps only one of these which is tied for the highest profit), and avoids considering symmetric solutions (by restricting the loops up to \(d[y]\), the algorithm only considers the permutation of the solution in which the items are added in order of efficiency).
 When the algorithm finishes executing, \(opt\) contains the optimal profit value and for every \(g[y] > 0\) there is a solution with: weight~\(y\), profit value \(g[y]\), and the index of the last (and most efficient) item added~\(d[y]\).
 
 The authors revisited OSO and added the \emph{else if} found in lines \ref{added_elsif}~to~\ref{if_new_lower_bound_end} of Algorithm 1 (to distinguish this version from the original one, it will be called Revisited OSO, or R-OSO).

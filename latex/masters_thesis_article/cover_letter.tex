@@ -223,24 +223,43 @@ Summarizing, the authors present a carefully prepared computational study showin
 %The authors believe the scientific value of a paper comes from their original contributions to knowledge.
 %However, we do not believe that only new algorithms or improvements to existing algorithms are to be considered as original contributions to knowledge.
 
-Our paper covers the UKP which is a classical problem and common subproblem.
-While widely studied, the UKP lacked a comprehensive empiric analysis and contextualization which helped the OR practitioner to choose the algorithm with the best practical performance.
-A context in which algorithms with the same worst-case complexity can have radically different performances in practice, and theoretical improvements as the ones presented by GFDP can, in fact, result in worse performance for the literature datasets.
+We are fully convinced of the scientific contributions given by this article and we will argue below.
 
-At the beginning of our work, we proposed a new algorithm, that we published in~\cite{sea2016}.
-While writing the extended version of that paper, aiming a journal publication of the work, we deepened the literature review and realized that that an algorithm of 1966 was very similar than ours.
-That algorithm, 52 years old, maybe was forgotten because: a) its pseudocode is not structured (go to statement) making it difficult to understand or compare to more recent algorithms; b) it does not mention modern dominance relations, which are the source of the efficiency of the latest algorithms for solving UKP; c) it does not emphasize how much its performance is superior to the naïve DP algorithm.
-We are very happy, and also impressed, with our finding.
-We believe that this contribution by itself is of a huge impact, especially when we consider a classic problem as the unbounded knapsack problem, that is being approached for several research groups, along the last decades. 
-Moreover, we decided to include more algorithms, instances and tests to show this clearly, to all this information be self-contained in one single paper, and this resulted in this paper we are proposing.
+First of all, it is important to note that the UKP problem is a classic optimization problem,
+widely studied by different research groups in the world for decades.
+As a result, new algorithms were proposed, characteristics of the problem identified and explored by the algorithms, larger and more diverse instances were proposed.
+It culminated with the EDUK2 (2009), and it was understood to be the state-of-the-art method for solving the problem.
 
-Finally, the paper brings other minor contributions that, while alone cannot justify a paper, together are considerable:
-a) the concept of \emph{solution dominance} which generalizes all previously proposed dominances; 
-b) the concept of \emph{partial solution dominance} as a competitive alternative to the state-of-the-art application of simple, multiple, collective, and threshold dominances;
-c) a discussion on how tighter bounds for periodicity will not help to improve the performance of state-of-the-art algorithms;
-d) a new item distribution, rich only in threshold dominance, and how it favors one solving approach in relation to other (i.e., B\&B over DP);
-e) a study of the item distribution evolution in CSP/BPP pricing problems and some of its implications (how it biases against some UKP-solving approaches, how it is affected by authors trying to create `hard' CSP/BPP instances);
-f) finally and thanks to referee \#2, that commercial solvers as CPLEX are not a good solution to solving CSP/BPP pricing problems (in comparison to both DP and specialized B\&B) but are better than a specialized B\&B for some instances of the literature.
+It is surprising that a 1966 algorithm - much simpler than EDUK2 - is the state-of-the-art algorithm, and we believe the reasons it has been unnoticed for decades are:
+
+\begin{itemize}
+
+\item \textbf{lack of nomenclature}: it does not use the terms of dominance and symmetry of solutions, latter clearly defined, and their use in the algorithms is responsable for the efficiency in solving the problem;
+
+\item \textbf{presentation}: its pseudocode uses go to statements and, in a first look, it seems to be the naive DP algorithm for the UKP;
+
+\item \textbf{results comparison}: the 1966 paper does not emphasize how much its performance is superior to the naïve DP algorithm.
+
+\end{itemize}
+
+Having observed that and shown how the algorithm from 1966 already explored dominance, periodicity and symmetry of solutions alone is already a very important contribution and of a huge impact.
+
+Moreover, the article presents other important contributions:
+\begin{enumerate}
+\item a comprehensive empiric analysis including several algorithms, solvers, and datasets, in a single self-contained paper -- in Section 5;
+\item an updated pseudocode of the algorithm, using the current nomenclature and a new tie-breaking criterium -- in Section 2;
+\item the concept of \emph{solution dominance} which generalizes all previously proposed dominances -- in Section 2;
+\item the evidence that \emph{partial solution dominance} is a competitive alternative to the state-of-the-art application of simple, multiple, collective, and threshold dominances -- in Section 5;
+\item the discussion on how tighter bounds for periodicity do not help to improve the performance of state-of-the-art algorithms -- in Section 3;
+\item a new item distribution and how it favors a solving approach in relation to other (B\&B over DP) -- in sections 4.2.3 and 5.3;
+\item a study of the item distribution evolution in CSP/BPP pricing problems and some of its implications (how it biases against some UKP-solving approaches, how it is affected by `hard' CSP/BPP instances) -- in Section 5.4;
+%\item finally, and thanks to referee \#2, we show that the current DP algorithm outperforms commercial solvers as CPLEX -- in Section 5.1.2.
+\end{enumerate}
+
+\textbf{We believe that any single paper on the UKP from now on will cite our paper.}
+
+However, we agree that the contributions of the paper can be summarized in the beginning of the paper, and for that we added the list above right before the beginning of Section~1.1.
+
 \bigskip
 
 \textbf{Request \#2:} ``\textit{The following reference considers an algorithm by Landa (2004) which might provide interesting results: Hu T.C., Landa L., Shing MT. (2009) The Unbounded Knapsack Problem. In: Cook W., Lovász L., Vygen J. (eds) Research Trends in Combinatorial Optimization. Springer. doi.org/10.1007/978-3-540-76796-1\_10}'':

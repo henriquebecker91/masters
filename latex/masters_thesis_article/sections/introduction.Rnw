@@ -42,6 +42,18 @@ The best lower bounds known for the BPP and CSP are their linear programming rel
 This is the tightest formulation for these problems but it has an exponential number of columns, and thus is solved by using the column generation approach~\citep{gg-61}.
 However, recently \cite{eq_lb_delorme} proved that a pseudo-polynomial formulation (dynamic programming-flow formulation) is equivalent to the set covering formulation and, therefore, provides the same lower bounds for the problem.
 
+The main contributions made by this paper follow:
+
+\begin{enumerate}
+\item a comprehensive empiric analysis including several algorithms, solvers, and datasets, in a single self-contained paper -- in \autoref{sec:exp_and_res};
+\item an updated pseudocode of the ordered step-off~\citep{gg-66}, using the current nomenclature and a new tiebreaker -- in \autoref{sec:oso_and_sol_dom};
+\item the concept of \emph{solution dominance} which generalizes all previously proposed dominances -- in \autoref{sec:oso_and_sol_dom};
+\item the evidence that \emph{partial solution dominance} is a competitive alternative to the state-of-the-art application of simple, multiple, collective, and threshold dominances -- in Section \autoref{sec:exp_and_res};
+\item the discussion on how tighter bounds for periodicity do not help to improve the performance of state-of-the-art algorithms -- in \autoref{sec:critique_of_periodicity};
+\item a new item distribution and how it favors a solving approach in relation to other (B\&B over DP) -- in sections \ref{sec:breq_inst} and \ref{sec:breq_exp};
+\item a study of the item distribution evolution in CSP/BPP pricing problems and some of its implications (how it biases against some UKP-solving approaches, how it is affected by `hard' CSP/BPP instances) -- in \autoref{sec:csp_experiments};
+\end{enumerate}
+
 In the remainder of this section we discuss the mathematical formulation and well-known properties of the problem.
 
 \subsection{Formulation and notation}

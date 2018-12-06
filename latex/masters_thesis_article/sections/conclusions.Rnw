@@ -4,8 +4,43 @@
 Except for the BREQ dataset, a revisited version of a DP algorithm from 1966 (Revisited Terminating Step-Off, R-TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2 /PYAsUKP).
 Such results bring up two central questions the authors address: Why TSO was not considered in recent comparisons? How R-TSO outperformed the current state-of-the-art after five decades of study of the UKP?
 
-\begin{table}[H]
-\label{tab:one_table}
+The authors believe TSO was not considered in recent comparisons because: the algorithm was very similar to the naïve DP for the UKP but the authors did not emphasize it was orders of magnitude faster; B\&B algorithms performed better than TSO in uncorrelated and weakly correlated instances with one hundred items.
+As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison~\citep{mtu1}.
+In the experiments presented in~\cite{mtu1}, TSO was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
+Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was less than one order of magnitude apart and diminishing.
+This trend hinted the possibility of the times taken by OSO/TSO and MTU1 converging (or even OSO/TSO taking less time than MTU1) for larger instances (e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
+% Also, the trend observed could indicate that for instances with a greater \(n\) value, OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing. %(e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
+
+\subsection{An algorithm is dominated by other in the context of a dataset}
+
+The comparisons often found in the literature: 1) only compared a newly proposed algorithm to the algorithm that `won' the last comparison; 2) proposed new artificial datasets based on some definition of being `harder to solve'.
+These two characteristics led to the following scenario: algorithm B dominates algorithm A in the context of dataset D1; algorithm C dominates algorithm B in the context of dataset D2; nothing guarantees that algorithm A does not dominate algorithm C in the context of dataset D2, as algorithm A was not included in the last comparison.
+%The newly proposed dataset is often harder to solve because it has characteristics that made it harder to solve by some algorithm in the comparison (often the `loser').
+%It is not considered if the characteristics that make it harder also negatively affect the algorithms excluded from the comparison, or if they are algorithm or approach-specific.
+
+A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items~\citep{mtu2}; EDUK and EDUK2 were compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\)~\citep{eduk,pya}.
+To be fair, the objective of these papers was to show how the newly proposed algorithm was not negatively impacted by some instance characteristics as the older algorithm was.
+However, in such experiments, no old competitive algorithm of the same solving approach as the newly proposed algorithm (DP or B\&B) was included.
+
+The purpose of the BREQ item distribution is to further illustrate how artificial datasets that favor one approach over another can be created.
+The BREQ instances are hard to solve by DP algorithms and easy to solve by B\&B algorithms.
+If they were the only instances considered, then MTU2 would be considered the best algorithm (as it can be seen in \autoref{tab:one_table}).
+However, considering all remaining datasets, MTU2 often presents the worst time performance.
+The BREQ instances do not suffer from the same richness of simple, multiple and collective dominated items that led uncorrelated instances to be criticized and abandoned.
+However, threshold dominance is widespread in BREQ instances and, as far the authors know, no real-world instances follow the BREQ distribution.%, so the authors do not suggest their use in future experiments.
+%The authors ask any future researchers to take in account the purpose for which BREQ instances were created (i.e., favor the B\&B approach) before including them in their experiments.
+
+The effects of artificial instances in shaping what is considered the best algorithms for UKP is not limited to the instances proposed for the UKP.
+\cite{irnich} created the GI instances to be harder to solve by their column generation implementation: 
+``[...] generated new and harder CS instances. These are characterized by huge values for the capacity (to complicate the subproblems) and larger numbers of items with distinct lengths.''.
+Their implementation used a DP algorithm to solve pricing problems.
+The characteristics of these newly proposed BPP/CSP instances made the pricing problems harder to solve by a DP algorithm, but not necessarily by a B\&B algorithm, which is less affected by parameters like the knapsack capacity.
+To evaluate which is the best UKP algorithm to solve pricing subproblems, the BPP/CSP instances had also to be representative of real-world instances; otherwise, another layer of bias is laid.
+The ANI\&AI instances, which MTU1 had difficulties to solve the pricing problems, are also instances created with the purpose to be hard to solve~\citep{survey2014}.
+The definition of hard to solve is different between the GI and ANI\&AI instances, as in ANI\&AI instances the objective is to make B\&B algorithms for the BPP/CSP struggle to prove the optimality of a solution for a BPP/CSP instance.
+The way such characteristic makes the pricing problems from ANI\&AI instances harder to solve by MTU1 is not so clear as in the case of GI instances and DP algorithms.
+
+\begin{table}[ht]
 \def\arraystretch{1.1}
 %\setlength\tabcolsep{4px}
 
@@ -208,43 +243,8 @@ The number of \textbf{fin}ished runs of a method (row) over a dataset (column), 
 \textsuperscript{a} The MTU1, MTU2, CPLEX, and Gurobi were executed only over the 454 instances of the reduced PYAsUKP dataset (not all 4540 instances as the remaining methods).
 \textsuperscript{b} The times reported are for the following variants: R-TSO -- integer profit, sort by efficiency; R-OSO -- integer profit, sort by weight; CPLEX -- custom code reusing the model and only changing the profits (coefficients of the objective function) between the iterations. %In the CSP dataset, the 6192 instances are CSP instances, the run is considered finished if the CSP was solved to proven optimality before the time limit, and the time is the mean time spent by instance solving all their pricing problems with the respective method. Also in the CSP column: the TSO results come from the variant that converts profit to integers and sort items by efficiency; the OSO variant also converts profit to integers but sort by weight; the CPLEX results come from a custom code that reuses the same model and only changes the profits at each iteration. 
 }
+\label{tab:one_table}
 \end{table}
-
-The authors believe TSO was not considered in recent comparisons because: the algorithm was very similar to the naïve DP for the UKP but the authors did not emphasize it was orders of magnitude faster; B\&B algorithms performed better than TSO in uncorrelated and weakly correlated instances with one hundred items.
-As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison~\citep{mtu1}.
-In the experiments presented in~\cite{mtu1}, TSO was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
-Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was less than one order of magnitude apart and diminishing.
-This trend hinted the possibility of the times taken by OSO/TSO and MTU1 converging (or even OSO/TSO taking less time than MTU1) for larger instances (e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
-
-% Also, the trend observed could indicate that for instances with a greater \(n\) value, OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing. %(e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
-
-\subsection{An algorithm is dominated by other in the context of a dataset}
-
-The comparisons often found in the literature: 1) only compared a newly proposed algorithm to the algorithm that `won' the last comparison; 2) proposed new artificial datasets based on some definition of being `harder to solve'.
-These two characteristics led to the following scenario: algorithm B dominates algorithm A in the context of dataset D1; algorithm C dominates algorithm B in the context of dataset D2; nothing guarantees that algorithm A does not dominate algorithm C in the context of dataset D2, as algorithm A was not included in the last comparison.
-%The newly proposed dataset is often harder to solve because it has characteristics that made it harder to solve by some algorithm in the comparison (often the `loser').
-%It is not considered if the characteristics that make it harder also negatively affect the algorithms excluded from the comparison, or if they are algorithm or approach-specific.
-
-A concrete example of this behavior in the UKP literature follows: MTU2 was compared only to MTU1, and in the context of a new dataset of large \(n\) and rich in simple and multiple dominated items~\citep{mtu2}; EDUK and EDUK2 were compared only to MTU2, and in the context of new datasets with a smaller \(n\) but with less dominated items and higher \(w_{min}\)~\citep{eduk,pya}.
-To be fair, the objective of these papers was to show how the newly proposed algorithm was not negatively impacted by some instance characteristics as the older algorithm was.
-However, in such experiments, no old competitive algorithm of the same solving approach as the newly proposed algorithm (DP or B\&B) was included.
-
-The purpose of the BREQ item distribution is to further illustrate how artificial datasets that favor one approach over another can be created.
-The BREQ instances are hard to solve by DP algorithms and easy to solve by B\&B algorithms.
-If they were the only instances considered, then MTU2 would be considered the best algorithm. However, considering all remaining datasets, MTU2 often presents the worst time performance.
-The BREQ instances do not suffer from the same richness of simple, multiple and collective dominated items that led uncorrelated instances to be criticized and abandoned.
-However, threshold dominance is widespread in BREQ instances and, as far the authors know, no real-world instances follow the BREQ distribution.%, so the authors do not suggest their use in future experiments.
-%The authors ask any future researchers to take in account the purpose for which BREQ instances were created (i.e., favor the B\&B approach) before including them in their experiments.
-
-The effects of artificial instances in shaping what is considered the best algorithms for UKP is not limited to the instances proposed for the UKP.
-\cite{irnich} created the GI instances to be harder to solve by their column generation implementation: 
-``[...] generated new and harder CS instances. These are characterized by huge values for the capacity (to complicate the subproblems) and larger numbers of items with distinct lengths.''.
-Their implementation used a DP algorithm to solve pricing problems.
-The characteristics of these newly proposed BPP/CSP instances made the pricing problems harder to solve by a DP algorithm, but not necessarily by a B\&B algorithm, which is less affected by parameters like the knapsack capacity.
-To evaluate which is the best UKP algorithm to solve pricing subproblems, the BPP/CSP instances had also to be representative of real-world instances; otherwise, another layer of bias is laid.
-The ANI\&AI instances, which MTU1 had difficulties to solve the pricing problems, are also instances created with the purpose to be hard to solve~\citep{survey2014}.
-The definition of hard to solve is different between the GI and ANI\&AI instances, as in ANI\&AI instances the objective is to make B\&B algorithms for the BPP/CSP struggle to prove the optimality of a solution for a BPP/CSP instance.
-The way such characteristic makes the pricing problems from ANI\&AI instances harder to solve by MTU1 is not so clear as in the case of GI instances and DP algorithms.
 
 \subsection{Comments on R-TSO and EDUK2 times gap}
 

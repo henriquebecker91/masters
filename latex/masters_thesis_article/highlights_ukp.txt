@@ -1,0 +1,5 @@
+an algorithm of 1966 has state-of-the-art performance for current instances
+a concept of solution dominance which generalizes all previous dominances is proposed
+a partial solution dominance competes with the item dominances of the literature
+cutting stock pricing problems may converge to a strongly correlated distribution
+new and tighter periodicity bounds are not useful for the current algorithms

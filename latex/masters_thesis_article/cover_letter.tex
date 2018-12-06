@@ -45,7 +45,8 @@
 \end{flushright}
 
 \begin{flushleft}
-November, 24$^{\text{th}}$ 2016.
+%November, 24$^{\text{th}}$ 2016.
+December, 06$^{\text{th}}$ 2018.
 
 \vspace{1.5cm}
 
@@ -73,7 +74,46 @@ Henrique Becker (on behalf of all authors)
 
 \textbf{Request \#1:} ``\textit{The most critical comments made me doubt whether I should reconsider your paper, so I need convincing arguments from you and a thorough revision to counterbalance the critical comments.}'':
 
-\textbf{Our answer:} We are grateful for the opportunity to improve our paper and send it to be reconsidered for publication in EJOR. We believe to have provided a thorough revision. For the convincing arguments, we would like to point to our answer to the \#1 request of the \#3 referee.
+\textbf{Our answer:} We are grateful for the opportunity to improve our paper and send it to be reconsidered for publication in EJOR. We believe to have provided a thorough revision. For the convincing arguments, we replicate below our answer to the \#1 request of the \#3 referee.
+
+We are fully convinced of the scientific contributions given by this article and we will argue below.
+
+First of all, it is important to note that the UKP problem is a classic optimization problem,
+widely studied by different research groups in the world for decades.
+As a result, new algorithms were proposed, characteristics of the problem identified and explored by the algorithms, larger and more diverse instances were proposed.
+It culminated with the EDUK2 (2009), and it was understood to be the state-of-the-art method for solving the problem.
+
+It is surprising that a 1966 algorithm - much simpler than EDUK2 - is the state-of-the-art algorithm, and we believe the reasons it has been unnoticed for decades are:
+
+\begin{itemize}
+
+\item \textbf{lack of nomenclature}: it does not use the terms of dominance and symmetry of solutions, latter clearly defined, and their use in the algorithms is responsable for the efficiency in solving the problem;
+
+\item \textbf{presentation}: its pseudocode uses go to statements and, in a first look, it seems to be the naive DP algorithm for the UKP;
+
+\item \textbf{results comparison}: the 1966 paper does not emphasize how much its performance is superior to the naïve DP algorithm.
+
+\end{itemize}
+
+Having observed that and shown how the algorithm from 1966 already explored dominance, periodicity and symmetry of solutions alone is already a very important contribution and of a huge impact.
+
+Moreover, the article presents other important contributions:
+\begin{enumerate}
+\item a comprehensive empiric analysis including several algorithms, solvers, and datasets, in a single self-contained paper -- in Section 5;
+\item an updated pseudocode of the algorithm, using the current nomenclature and a new tie-breaking criterium -- in Section 2;
+\item the concept of \emph{solution dominance} which generalizes all previously proposed dominances -- in Section 2;
+\item the evidence that \emph{partial solution dominance} is a competitive alternative to the state-of-the-art application of simple, multiple, collective, and threshold dominances -- in Section 5;
+\item the discussion on how tighter bounds for periodicity do not help to improve the performance of state-of-the-art algorithms -- in Section 3;
+\item a new item distribution and how it favors a solving approach in relation to other (B\&B over DP) -- in sections 4.2.3 and 5.3;
+\item a study of the item distribution evolution in CSP/BPP pricing problems and some of its implications (how it biases against some UKP-solving approaches, how it is affected by `hard' CSP/BPP instances) -- in Section 5.4;
+%\item finally, and thanks to referee \#2, we show that the current DP algorithm outperforms commercial solvers as CPLEX -- in Section 5.1.2.
+\end{enumerate}
+
+\textbf{We believe that any single paper on the UKP from now on will cite our paper.}
+
+However, we agree that the contributions of the paper can be summarized in the beginning of the paper, and for that we added the list above right before the beginning of Section~1.1.
+
+\bigskip
 
 \textbf{Request \#2:} ``\textit{Please, noticed that the paper `BPP and CSP: Mathematical models and exact algorithms' is now published in EJOR and that the reference needs to be updated.}'':
 
@@ -86,6 +126,8 @@ The manuscript deals with the Unbounded Knapsack Problem (UKP), a knapsack probl
 
 Overall, I think the manuscript is very interesting and useful for the reader who wants to solve the UKP. I believe it deserves to be published after some minor changes (with one request of additional experimental result)
 }''
+
+\bigskip
 
 \textbf{Request \#1:} ``\textit{Page 1, line 49. The authors start their introduction by defining the UKP with respect to the 0-1 knapsack problem. In my opinion, the UKP is as famous as the 0-1 knapsack problem, so the reader who already knows about knapsack problems does not need this definition, and the reader who does not will not be helped. I would suggest to add first a small sentence explaining in plain words what is the UKP, and then detail its relations with the other knapsack problems.}'':
 
@@ -125,7 +167,7 @@ The authors make such distinction because the instance generators do not guarant
 
 \textbf{Request \#6:} ``\textit{Overall, I believe the results are very interesting and well detailed, but it would be better for the reader to have an additional unique table that summarizes the results obtained by all algorithms on all datasets, maybe with just the time and the number of instances solved to give a general overview.}'':
 
-\textbf{Our answer:} Thank you for the suggestion. The table summarized well the overall results. It is on page XXX of the revised paper.
+\textbf{Our answer:} Thank you for the suggestion. The table summarized well the overall results. It is on page 29 of the revised paper.
 \bigskip
 
 \textbf{Request \#7:} ``\textit{Page 23, line 22. `Algorithm', the `m' was forgotten.}'':
@@ -154,6 +196,7 @@ The paper succinctly reviews properties of the problem and the most relevant met
 
 The unbounded knapsack problem is relevant problem (at least, as a subproblem, as in a set of instances tested in the paper) and the comparison between dynamic programming based and branch-and-bound is potentially useful for related problems. The paper is well written and rigorous. I have a few minor comments that I would like the authors to consider.
 }''
+\bigskip
 
 \textbf{Request \#1:} ``\textit{A more general description of the methods in a couple of paragraphs would widen the potential readers of the paper. In particular the general dynamic programming approach (mentioning the states, stages, recursive function) and the general branch-and-bound approach (mentioning the branching scheme, bounds used commonly, ...).}'':
 
@@ -163,7 +206,7 @@ In the enumeration tree of MTU1, each node at depth~\(0 \leq d < n\) has~\((c'/w
 In practice, since it follows a depth-first search, MTU1 has no explicit tree, but instead, make changes directly over the current solution, which represents the current branch from the root to a leaf.
 Items are added to and removed from the solution to simulate the tree traversal.
 The exploration order favors the siblings representing higher amounts before lower amounts.
-As the items are sorted by efficiency, this means the first node after the root will represent the maximum amount of copies of the best item, and the path to the first leaf will be the solution given by the classic greedy heuristic which packs the most efficient item that yet fits the knapsack until there is no item that fits the knapsack. So, the first solution found is a classical lower bound for the UKP.
+As the items are sorted by efficiency, this means the first node after the root will represent the maximum amount of copies of the best item, and the path to the first visited leaf will be the solution given by the classic greedy heuristic which packs the most efficient item that yet fits the knapsack until there is no item that fits the knapsack. Consequently, the algorithm already begins with this lower bound.
 The upper bound computed by MTU1 in each node is the continuous relaxation of the problem with the already set variables fixed, which is solved by multiplying the efficiency of the most efficient item not yet fixed by the remaining capacity.
 }''.
 
@@ -217,11 +260,15 @@ The main message resulting from the extensive experiments seems to be that the `
 Summarizing, the authors present a carefully prepared computational study showing the surprising performance of an ancient algorithm which gains a lot from a small improvement step. They bring to attention several general aspects of computational experiments.
 }''
 
+\bigskip
+
 \textbf{Request \#1:} ``\textit{This work might well be published somewhere, but I believe that it is not strong enough for a publication in EJOR, which strives to be the flagship of the OR-community. The study does not bring sufficiently new contributions for the special topic of UKP or general outcomes of wider interest. Therefore, I suggest submitting the paper to a less highly ranked journal than EJOR.}'':
 
 \textbf{Our answer:} 
 %The authors believe the scientific value of a paper comes from their original contributions to knowledge.
 %However, we do not believe that only new algorithms or improvements to existing algorithms are to be considered as original contributions to knowledge.
+
+For the Editor's convenience, the text below is replicated in the answer to their \#1 request.
 
 We are fully convinced of the scientific contributions given by this article and we will argue below.
 
@@ -340,6 +387,7 @@ This means that solving the UKP for lower capacities as DP algorithms do is most
 
 \textbf{Our answer:} We are not sure how but seems as we copied an incomplete reference. Now it is fixed. Thanks for the pointer.
 
+\newpage
 \section{Anonymous Referee \#4}
 
 \textbf{General commentary:} ``\textit{

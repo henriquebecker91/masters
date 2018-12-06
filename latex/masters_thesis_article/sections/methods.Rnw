@@ -20,7 +20,7 @@ In the enumeration tree of MTU1, each node at depth~\(0 \leq d < n\) has~\((c'/w
 In practice, since it follows a depth-first search, MTU1 has no explicit tree, but instead, make changes directly over the current solution, which represents the current branch from the root to a leaf.
 Items are added to and removed from the solution to simulate the tree traversal.
 The exploration order favors the siblings representing higher amounts before lower amounts.
-As the items are sorted by efficiency, this means the first node after the root will represent the maximum amount of copies of the best item, and the path to the first leaf will be the solution given by the classic greedy heuristic which packs the most efficient item that yet fits the knapsack until there is no item that fits the knapsack. So, the first solution found is a classical lower bound for the UKP.
+As the items are sorted by efficiency, this means the first node after the root will represent the maximum amount of copies of the best item, and the path to the first visited leaf will be the solution given by the classic greedy heuristic which packs the most efficient item that yet fits the knapsack until there is no item that fits the knapsack. Consequently, the algorithm already begins with this lower bound.
 The upper bound computed by MTU1 in each node is the continuous relaxation of the problem with the already set variables fixed, which is solved by multiplying the efficiency of the most efficient item not yet fixed by the remaining capacity.
 
 % DP INFO TO ADD: states, stages, recursive function

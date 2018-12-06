@@ -529,7 +529,15 @@ no_problem %>%
 
 The results of the experiments over the realistic random dataset are summarized in \autoref{fig:realistic_random}.
 
-\begin{figure}[H]
+The run times of both step-off algorithms and GFDP become almost identical as the size of the input grows, so the authors chose to present only the results of GFDP.
+As the instance size grow, EDUK run times get a bit worse than GFDP.
+EDUK2 has many run times similar to EDUK but, for some instances in each instance size, its B\&B phase solves the instance or helps to reduce the instance size considerably.
+The B\&B methods (CPLEX, MTU1 and MTU) had similar a similar spreading behaviour, and the authors chose CPLEX as their best representative.
+MTU1 and MTU2 had the best run times for smaller instances but, as the instance size and \(w_{min}\) grew, they had more timeouts than finished runs by \(n = 32768\) and only one finished run for the largest instance size.
+%the shortest run times for the smallest instances but, as the instance size and \, also grow the number of instances in which MTU1 and MTU2 spend orders of magnitude more time to solve than the other algorithms.
+%The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
+
+\begin{figure}[ht]
 \caption{Run times of the algorithms over the 80 instances of the realistic random dataset. The time limit was set to 30 minutes. Runs terminated by timeout are displayed as taking exactly the time limit. Shape and color are used to distinguish between algorithms. The shape size is used to indicate the amount of overlapping points. The horizontal position of the points was adjusted for better visualization.}
 \begin{center}
 <<realistic_random_figure, fig.height = 4>>=
@@ -541,14 +549,6 @@ scale_x_continuous(trans = "log2",
 %\legend{Source: the author.}
 \label{fig:realistic_random}
 \end{figure}
-
-The run times of both step-off algorithms and GFDP become almost identical as the size of the input grows, so the authors chose to present only the results of GFDP.
-As the instance size grow, EDUK run times get a bit worse than GFDP.
-EDUK2 has many run times similar to EDUK but, for some instances in each instance size, its B\&B phase solves the instance or helps to reduce the instance size considerably.
-The B\&B methods (CPLEX, MTU1 and MTU) had similar a similar spreading behaviour, and the authors chose CPLEX as their best representative.
-MTU1 and MTU2 had the best run times for smaller instances but, as the instance size and \(w_{min}\) grew, they had more timeouts than finished runs by \(n = 32768\) and only one finished run for the largest instance size.
-%the shortest run times for the smallest instances but, as the instance size and \, also grow the number of instances in which MTU1 and MTU2 spend orders of magnitude more time to solve than the other algorithms.
-%The pure B\&B algorithms (MTU1 and MTU2) show more variation than any other algorithms.
 
 Despite EDUK2 solving some instances orders of magnitude faster than the other algorithms (especially in the larger instance sizes), the mean run time of EDUK2 (8.51 seconds) is higher than TSO mean run time (5.36 seconds).
 As already observed in \autoref{sec:pya_exp}, EDUK2 often presents a few run times that are one order of magnitude higher than the highest run time of TSO, what considerably increases its mean time.

@@ -606,7 +606,7 @@ In this experiment, the CPLEX version used was 12.5, and the emphasis is the def
 % The TSO, GREENDP, MTU2 (C++ or Fortran), and EDUK/EDUK2 (PYAsUKP) implementations were not used in this experiment.
 Only CPLEX, OSO and MTU1 (C++) were used as pricing problem solvers in this experiment.
 The values of \(n\) and \(c\) in the pricing problems are sufficiently small to exist little difference between GFDP/TSO compared to OSO, or MTU2 compared to MTU1, and therefore GFDP, TSO and MTU2 were removed from the comparison.
-CPLEX was orders of magnitude slower than the other two and its results are presented only in~\autoref{tab:csp} to simplify the analysis.
+CPLEX was orders of magnitude slower than the other two and its results are presented only in the supplementary material to simplify the analysis.
 The authors attribute the CPLEX poor performance to the same difficulties than MTU1 (arisal of `hard' problems) but also to a costly initialization of the solving process (each `easy' problem costed much more to CPLEX than to MTU1).
 The authors did not succeed in integrating the PYAsUKP code (written in OCaml) with the C++/CPLEX code needed by this experiment.
 

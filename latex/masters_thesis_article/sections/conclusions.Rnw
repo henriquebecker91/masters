@@ -1,14 +1,14 @@
 \section{General Discussion and Conclusions}
 \label{sec:discussion}
 
-Except for the BREQ dataset, a revisited version of a DP algorithm from 1966 (Revisited Terminating Step-Off, R-TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2 /PYAsUKP).
+Except for the BREQ dataset, a revisited version of a DP \textcolor{blue}{algorithm} from 1966 (Revisited Terminating Step-Off, R-TSO) had lower mean times than the only known implementation of the current state-of-the-art algorithm (EDUK2 /PYAsUKP).
 Such results bring up two central questions the authors address: Why TSO was not considered in recent comparisons? How R-TSO outperformed the current state-of-the-art after five decades of study of the UKP?
 
-The authors believe TSO was not considered in recent comparisons because: the algorithm was very similar to the naïve DP for the UKP but the authors did not emphasize it was orders of magnitude faster; B\&B algorithms performed better than TSO in uncorrelated and weakly correlated instances with one hundred items.
+The authors believe TSO was not considered in recent comparisons because: the \textcolor{blue}{algorithm} was very similar to the naïve DP for the UKP but the authors did not emphasize it was orders of magnitude faster; B\&B algorithms performed better than TSO in uncorrelated and weakly correlated instances with one hundred items.
 As far as the authors know, the proposal of MTU1 was the last time TSO was included in a comparison~\citep{mtu1}.
 In the experiments presented in~\cite{mtu1}, TSO was about four times slower than MTU1 in the instances with~\(n = 25\); about two or three times slower in the instances with~\(n = 50\); and less than two times slower in instances with~\(n = 100\).
-Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was less than one order of magnitude apart and diminishing.
-This trend hinted the possibility of the times taken by OSO/TSO and MTU1 converging (or even OSO/TSO taking less time than MTU1) for larger instances (e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
+Such instances are now too small to consider, and the relative difference between TSO and MTU1 mean times was less than one order of magnitude apart \textcolor{blue}{and diminishing.
+This trend hinted the possibility of the times taken by OSO/TSO and MTU1 converging (or even OSO/TSO taking less time than MTU1) for larger instances (e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).}
 % Also, the trend observed could indicate that for instances with a greater \(n\) value, OSO/TSO algorithm would have lower times than MTU1, as their relative difference was diminishing. %(e.g., OSO/TSO algorithm could have a costly initialization process but a better average-case complexity).
 
 \subsection{An algorithm is dominated by other in the context of a dataset}
@@ -24,7 +24,7 @@ However, in such experiments, no old competitive algorithm of the same solving a
 
 The purpose of the BREQ item distribution is to further illustrate how artificial datasets that favor one approach over another can be created.
 The BREQ instances are hard to solve by DP algorithms and easy to solve by B\&B algorithms.
-If they were the only instances considered, then MTU2 would be considered the best algorithm (as it can be seen in \autoref{tab:one_table}).
+If they were the only instances considered, then MTU2 would be considered the best algorithm \textcolor{blue}{(as it can be seen in \autoref{tab:one_table}).}
 However, considering all remaining datasets, MTU2 often presents the worst time performance.
 The BREQ instances do not suffer from the same richness of simple, multiple and collective dominated items that led uncorrelated instances to be criticized and abandoned.
 However, threshold dominance is widespread in BREQ instances and, as far the authors know, no real-world instances follow the BREQ distribution.%, so the authors do not suggest their use in future experiments.
@@ -45,6 +45,7 @@ The way such characteristic makes the pricing problems from ANI\&AI instances ha
 %\setlength\tabcolsep{4px}
 
 \begin{adjustbox}{max width=\textwidth, center}
+{\color{blue}
 \begin{tabular}{@{\extracolsep{4pt}}lrrrrrrrr@{}}
 
 & \multicolumn{2}{c}{PYAsUKP\textsuperscript{a}} & \multicolumn{2}{c}{RR} & \multicolumn{2}{c}{BREQ} & \multicolumn{2}{c}{CSP\textsuperscript{b}}\\
@@ -234,15 +235,17 @@ print.xtable(
 @
 \hline
 \end{tabular}
+} % end of color scope
 \end{adjustbox}
 %\caption{Time (in seconds) for the PYAsUKP 4540 Instances (see Section \ref{sec:pya_exp}). Columns \textbf{n} and \(w_{min}\) values must be multiplied by \(10^3\) to obtain their true value. Let \(T\) be the set of run times reported by the R-TSO, GFDP or EDUK2 for the instance dataset described by a row. The meaning of the columns \textbf{avg}, \textbf{sd} and \textbf{max}, is, respectively, the arithmetic mean of \(T\), the standard deviation of \(T\), the maximum value of \(T\). For the subset-sum instances, there are ten instances for each possible combination of: \(w_{min} \in \{10^3, 5\times10^3, 10^4, 5\times10^4, 10^5\}\); \(w_{max} \in \{5\times10^5, 10^6\}\) and \(n \in \{10^3, 2\times10^3, 5\times10^3, 10^4\}\), totaling 400 instances.}
 \caption{
-The number of \textbf{fin}ished runs of a method (row) over a dataset (column), and the \textbf{av}era\textbf{g}e time (in seconds) of the finished runs (dashes mean the respective method was not used to solve the respective dataset).
+\textcolor{blue}{The number of \textbf{fin}ished runs of a method (row) over a dataset (column), and the \textbf{av}era\textbf{g}e time (in seconds) of the finished runs (dashes mean the respective method was not used to solve the respective dataset).
 %The runs not finished are mostly timeouts (all runs had a half hour time limit), but some (as the Gurobi ones) include memory exhaustion and wrong results.
 %The dashes mean the respective method was not executed over the respective dataset.
 \textsuperscript{a} The MTU1, MTU2, CPLEX, and Gurobi were executed only over the 454 instances of the reduced PYAsUKP dataset (not all 4540 instances as the remaining methods).
 \textsuperscript{b} The times reported are for the following variants: R-TSO -- integer profit, sort by efficiency; R-OSO -- integer profit, sort by weight; CPLEX -- custom code reusing the model and only changing the profits (coefficients of the objective function) between the iterations. %In the CSP dataset, the 6192 instances are CSP instances, the run is considered finished if the CSP was solved to proven optimality before the time limit, and the time is the mean time spent by instance solving all their pricing problems with the respective method. Also in the CSP column: the TSO results come from the variant that converts profit to integers and sort items by efficiency; the OSO variant also converts profit to integers but sort by weight; the CPLEX results come from a custom code that reuses the same model and only changes the profits at each iteration. 
-}
+} % textcolor
+} % caption
 \label{tab:one_table}
 \end{table}
 
@@ -271,7 +274,7 @@ ii) the simple, multiple, collective, and threshold dominance relations can be g
 iii) there is evidence that the items distribution of pricing problems can converge to a strongly correlated distribution (which can take exponential time to solve by B\&B);
 iv) there is evidence that converting the profit of pricing problems to large integers do not cause significant loss to the master problem objetive value;
 v) the development of new and tighter periodicity bounds is of little use to the improvement of the state-of-the-art algorithms for UKP;
-vi) CPLEX has better performance than B\&B algorithms for UKP in instances with few items but `hard' to solve by B\&B approach, but it is worse when the instances are large but `easy' (many variables) or too many small instances (costly initialization).
+\textcolor{blue}{vi) CPLEX has better performance than B\&B algorithms for UKP in instances with few items but `hard' to solve by B\&B approach, but it is worse when the instances are large but `easy' (many variables) or too many small instances (costly initialization).}
 
 %While the following quote was written in the context of the 0-1 KP, the author found it relevant to complement what was just said: ``Dynamic programming is one of our best approaches for solving difficult (KP), since this is the only solution method which gives us a worst-case guarantee on the running time, independently on whether the upper bounding tests will work well.''~\cite[p.~13]{where_hard}.
 
@@ -285,7 +288,7 @@ Many questions raised during the development of this paper ended up unanswered:%
 \item If a B\&B phase was added to the terminating step-off (as in EDUK2), and a C++ and array-based implementation of EDUK2 was written, would they have a similar performance?
 %\item What would be the practical performance of an implementation of the algorithm described in~\cite{babayev}?
 %\item How do the traits of the optimal solution for the pricing subproblem affect the master problem? Does always returning an optimal solution with minimal weight has a negative effect? What about adding all patterns that improve the master problem solution, and not only the best pattern (i.e., an optimal solution)? Or, instead, adding all optimal solutions instead of only one? %\item Are the profit values (and, consequently, the items distributions) of the pricing subproblems uniform between similar BPP/CSP instances, or the same BPP/CSP instance, or in both cases? Is it possible that they converge to a specific distribution at each iteration of the column generation?
-\item The difference in performance of MTU1/MTU2 and CPLEX/Gurobi over the PYAsUKP dataset comes from the fact MTU1/MTU2 are depth-first? What would be the performance of a best-bound B\&B made for the UKP?
+\item \textcolor{blue}{The difference in performance of MTU1/MTU2 and CPLEX/Gurobi over the PYAsUKP dataset comes from the fact MTU1/MTU2 are depth-first? What would be the performance of a best-bound B\&B made for the UKP?}
 \end{itemize}
 
 \subsection{Acknowledgements}

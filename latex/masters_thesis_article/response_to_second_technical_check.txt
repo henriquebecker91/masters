@@ -1,0 +1,1 @@
+I am sorry for the confusion. Now every excerpt of the paper that was changed or added since the first submitted version is colored in blue (with exception of the plots, which are sensitive to color change, the changed plots are enumerated in the response to the reviewers and can be also identified by the fact that the surrouding paragraphs interpreting the plot are now in blue).

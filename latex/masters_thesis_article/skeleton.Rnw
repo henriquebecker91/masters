@@ -181,6 +181,10 @@ Combinatorial optimization \sep Unbounded Knapsack Problem \sep Dynamic Programm
 % to make latex see the pdfs created by Sweave
 %\graphicspath{{sections/}}
 
+\textbf{The formal publication of this article can be found in \url{https://doi.org/10.1016/j.ejor.2019.02.011}.}
+
+\copyright 2019. This manuscript version is made available under the CC-BY-NC-ND 4.0 license \url{http://creativecommons.org/licenses/by-nc-nd/4.0/}
+
 \Sexpr{knit_child('sections/introduction.Rnw')}
 \Sexpr{knit_child('sections/methods.Rnw')}
 \Sexpr{knit_child('sections/experiments.Rnw')}
@@ -193,8 +197,8 @@ Combinatorial optimization \sep Unbounded Knapsack Problem \sep Dynamic Programm
 \biboptions{authoryear}
 
 % Commented for paper generation, the appendix is a separate file.
-%\appendix
-%\Sexpr{knit_child('sections/appendix.Rnw')}
+\appendix
+\Sexpr{knit_child('sections/appendix.Rnw')}
 
 \end{document}
 

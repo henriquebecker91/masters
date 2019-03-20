@@ -294,7 +294,7 @@ fast_plot(fast_csv)
 \label{fig:pya_fast}
 \end{figure}
 
-In \autoref{fig:pya_fast}, the instances (x-axis) are sorted by the time EDUK2 spent to solve them.
+In \autoref{fig:pya_fast}, the instances (\(x\)-axis) are sorted by the time EDUK2 spent to solve them.
 EDUK2 B\&B phase allows EDUK2 to solve some instances (distributed between all instance sizes) faster than TSO/GFDP.
 This behavior shows that EDUK2 times for a specific instance cannot be predicted based on the number of items and distribution of the instance.
 Nonetheless, when the B\&B phase has little effect, EDUK2 DP phase (basically EDUK) spend considerably more time than TSO/GFDP to solve the instance.
@@ -407,7 +407,7 @@ The analysis of the individual run times shows that for many instances Fortran M
 For many instances, the run times of the MTU2 implementations differed in more than one order of magnitude.
 The authors believe that this divergence was caused by the difference of sorting algorithms and items ordering (C++ MTU2 order items by nondecreasing weight if they share the same efficiency).
 The subset-sum instances were the ones that exhibited the largest difference.
-The range \([190,221]\) of the \(x\) axis of \autoref{fig:mtu} is composed of subset-sum instances.
+The range \([190,221]\) of the \(x\)-axis of \autoref{fig:mtu} is composed of subset-sum instances.
 C++ MTU2 solved all 40 subset-sum instances with a mean time of \(0.04\) seconds while Fortran MTU2 solved only eight instances with a mean time of \(155\) seconds.
 Disregarding the subset-sum instances, the mean run time of Fortran MTU2 was 56 seconds and the mean run time of C++ MTU2 was 40.5 seconds.
 Only the C++ implementations are used in the rest of the experiments.
@@ -729,8 +729,8 @@ geom_text(data = csp_plot_labels, aes(x = 125, y = 100, label = label, hjust = 0
 \end{figure}
 
 In \autoref{fig:csp_knapsack_time}, it can be seen that, except by two recent datasets (ANI\&AI and GI), the mean time spent solving pricing problems in an instance is below one second.
-Such times are explained by two main factors: i) for completeness, the authors included many classic but old datasets which nowadays are easy to solve; 
-ii) these BPP/CSP datasets were meant to be hard to solve exactly, and solving the linear programming relaxation of the problem takes only a fraction of that time.
+Such times are explained by two main factors: (1) for completeness, the authors included many classic but old datasets which nowadays are easy to solve; 
+(2) these BPP/CSP datasets were meant to be hard to solve exactly, and solving the linear programming relaxation of the problem takes only a fraction of that time.
 In the majority of these easy datasets, the highest times presented are from MTU1, while OSO presented the lowest mean time.
 
 Many instances of the ANI\&AI dataset exceeded the timeout when MTU1 was used to solve the pricing subproblems.
@@ -854,7 +854,7 @@ Consequently, four versions of OSO were used in this experiment, for all combina
 }
 @
 In the experiments with UKP instance datasets, all algorithms agreed on the value of the optimal solution, while sometimes returned different optimal solutions.
-In this experiment, the difference in exactly which optimal solution is returned for a pricing subproblem (because of different tie-breaking or because of floating point inaccuracy) changes the next pricing problem and, consequently, the next optimal solution, in a feedback loop.
+In this experiment, the difference in exactly which optimal solution is returned for a pricing subproblem (because of different tiebreaking or because of floating point inaccuracy) changes the next pricing problem and, consequently, the next optimal solution, in a feedback loop.
 However, between MTU1 and the four OSO variants, for the same BPP/CSP instance, no solution of the linear programming relaxation (number of rolls needed) differed more than a \(2^{-18}\) fraction of a roll.
 Solving pricing problems using the multiplicative factor to work over integer profits seems to be a viable approach. % a numerically stable approach.
 

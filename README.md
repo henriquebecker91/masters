@@ -1,3 +1,8 @@
+By end of Aug 2023, the author of this repository decided to abandon 
+GitHub (Microsoft and 2FA shenaningans) and adopt CodeBerg. While not 
+deleted, there is no guarantee the GitHub repo is updated. Check the 
+official repo at: https://codeberg.org/hbecker/masters
+
 # Intent
 
 This repository was made to preserve the work done on the master's degree of Henrique Becker. Created as a backup and an effort for the sake of [repeatability in computer science](http://reproducibility.cs.arizona.edu/). 
